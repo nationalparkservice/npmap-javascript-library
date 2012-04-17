@@ -1,0 +1,41 @@
+.npmap-navigation-compass-north {
+  background: url(sprite.png) -120px -61px no-repeat;
+  display: block;
+  width: 58px;
+  height: 59px;
+}
+
+.npmap-navigation-compass-north-disabled {
+  background: url(sprite.png) 0px 0px no-repeat;
+  display: block;
+  width: 58px;
+  height: 59px;
+}
+
+.npmap-navigation-compass-north-east-over {
+  background: url(sprite.png) -60px 0px no-repeat;
+  display: block;
+  width: 58px;
+  height: 59px;
+}
+
+.npmap-navigation-compass-north-north-over {
+  background: url(sprite.png) -120px 0px no-repeat;
+  display: block;
+  width: 58px;
+  height: 59px;
+}
+
+.npmap-navigation-compass-north-south-over {
+  background: url(sprite.png) 0px -61px no-repeat;
+  display: block;
+  width: 58px;
+  height: 59px;
+}
+
+.npmap-navigation-compass-north-west-over {
+  background: url(sprite.png) -60px -61px no-repeat;
+  display: block;
+  width: 58px;
+  height: 59px;
+}

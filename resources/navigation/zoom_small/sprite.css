@@ -1,0 +1,41 @@
+.npmap-navigation-small-zoom {
+  background: url(sprite.png) -23px -44px no-repeat;
+  display: block;
+  width: 21px;
+  height: 42px;
+}
+
+.npmap-navigation-small-zoom-disabled {
+  background: url(sprite.png) 0px 0px no-repeat;
+  display: block;
+  width: 21px;
+  height: 42px;
+}
+
+.npmap-navigation-small-zoom-in-disabled {
+  background: url(sprite.png) -23px 0px no-repeat;
+  display: block;
+  width: 21px;
+  height: 42px;
+}
+
+.npmap-navigation-small-zoom-in-over {
+  background: url(sprite.png) -46px 0px no-repeat;
+  display: block;
+  width: 21px;
+  height: 42px;
+}
+
+.npmap-navigation-small-zoom-out-disabled {
+  background: url(sprite.png) -69px 0px no-repeat;
+  display: block;
+  width: 21px;
+  height: 42px;
+}
+
+.npmap-navigation-small-zoom-out-over {
+  background: url(sprite.png) 0px -44px no-repeat;
+  display: block;
+  width: 21px;
+  height: 42px;
+}

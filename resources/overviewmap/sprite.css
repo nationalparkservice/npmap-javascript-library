@@ -1,0 +1,27 @@
+.npmap-overviewmap-close {
+  background: url(sprite.png) -15px 0px no-repeat;
+  display: block;
+  width: 13px;
+  height: 13px;
+}
+
+.npmap-overviewmap-close-over {
+  background: url(sprite.png) 0px 0px no-repeat;
+  display: block;
+  width: 13px;
+  height: 13px;
+}
+
+.npmap-overviewmap-open {
+  background: url(sprite.png) -15px -15px no-repeat;
+  display: block;
+  width: 13px;
+  height: 13px;
+}
+
+.npmap-overviewmap-open-over {
+  background: url(sprite.png) 0px -15px no-repeat;
+  display: block;
+  width: 13px;
+  height: 13px;
+}
