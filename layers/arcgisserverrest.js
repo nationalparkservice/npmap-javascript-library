@@ -328,8 +328,20 @@
       NPMap[NPMap.config.api].layers.ArcGisServerRest.reloadLayer(layer);
     },
     /**
+     * Toggles a layer on or off.
+     * @param {Object} layer The layer config object.
+     * @param {Boolean} on Turn the layer on?
+     */
+    toggleLayer: function(layer, on) {
+      if (on) {
+        NPMap[NPMap.config.api].layers.ArcGisServerRest.showLayer(layer);
+      } else {
+        NPMap[NPMap.config.api].layers.ArcGisServerRest.hideLayer(layer);
+      }
+    },
+    /**
      * Toggles a layer's sublayer on or off.
-     * @param {Object} layer The layerconfig object.
+     * @param {Object} layer The layer config object.
      * @param {Integer} subLayerIndex The index of the sublayer.
      * @param {Boolean} on Toggle this layer on?
      */

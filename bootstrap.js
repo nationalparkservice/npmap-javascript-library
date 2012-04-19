@@ -152,6 +152,8 @@ NPMap.utils = {
     }
   }
 };
+// The version of the library to use.
+NPMap.version = '0.8.0';
 
 if (!NPMap.config) {
   NPMap.utils.throwError('The NPMap.config object does not exist!');
@@ -166,13 +168,11 @@ if (!NPMap.config.api) {
 }
 
 if (typeof(NPMap.config.server) === 'undefined') {
-  NPMap.config.server = 'http://www.nps.gov';
+  NPMap.config.server = 'http://www.nps.gov/npmap/' + NPMap.version;
 }
 
-NPMap.version = '0.7.2';
-
-// TODO: Start using spin.js here: http://fgnass.github.com/spin.js/.
-document.getElementById(NPMap.config.div).innerHTML = '<div id="npmap" style="height:100%;left:0px;position:absolute;top:0px;width:100%;"></div><div id="npmap-mask" style="background-color:#F0F0F0;display:block;height:100%;left:0;overflow:auto;position:absolute;top:0;width:100%;z-index:999999;"><div id="npmap-loading" style="-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-moz-box-shadow:0 0 3px 3px #CA702D;-webkit-box-shadow:0 0 3px 3px #CA702D;box-shadow:0 0 3px 3px #CA702D;background-color:black;border:solid black 2px;height:60px;left:50%;margin-left:-30px;margin-top:-30px;position:absolute;top:50%;width:60px;z-index:999998"><img src="' + NPMap.config.server + '/npmap/' + NPMap.version + '/resources/images/loader.gif" /></div></div>';
+// TODO: Start using spin.js from here: http://fgnass.github.com/spin.js/.
+document.getElementById(NPMap.config.div).innerHTML = '<div id="npmap" style="height:100%;left:0px;position:absolute;top:0px;width:100%;"></div><div id="npmap-mask" style="background-color:#F0F0F0;display:block;height:100%;left:0;overflow:auto;position:absolute;top:0;width:100%;z-index:999999;"><div id="npmap-loading" style="-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-moz-box-shadow:0 0 3px 3px #CA702D;-webkit-box-shadow:0 0 3px 3px #CA702D;box-shadow:0 0 3px 3px #CA702D;background-color:black;border:solid black 2px;height:60px;left:50%;margin-left:-30px;margin-top:-30px;position:absolute;top:50%;width:60px;z-index:999998"><img src="' + NPMap.config.server + '/resources/images/loader.gif" /></div></div>';
 
 NPMap.config.div = 'npmap';
 
@@ -308,7 +308,7 @@ NPMap.Event = (function() {
 })();
 
 // Load NPMap's "base" CSS.
-NPMap.utils.injectCss(NPMap.config.server + '/npmap/' + NPMap.version + '/resources/css/npmap.css');
+NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
 
 (function() {
   // TODO: Take out jQuery dependency. You can do everything you're currently doing without it.
@@ -346,7 +346,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/npmap/' + NPMap.version + '/resour
         NPMap.apiLoaded = function() {
           var callback = function() {
             require([
-              NPMap.config.server + '/npmap/' + NPMap.version + '/' + NPMap.config.api + '/map.js'
+              NPMap.config.server + '/' + NPMap.config.api + '/map.js'
             ], function(map) {
               var interval = setInterval(function() {
                 if (NPMap[NPMap.config.api] && NPMap[NPMap.config.api].map && NPMap[NPMap.config.api].map.isReady === true) {
@@ -373,7 +373,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/npmap/' + NPMap.version + '/resour
                       var layerType = v.toLowerCase();
                       
                       require([
-                        NPMap.config.server + '/npmap/' + NPMap.version + '/' + NPMap.config.api + '/layers/' + layerType + '.js'
+                        NPMap.config.server + '/' + NPMap.config.api + '/layers/' + layerType + '.js'
                       ], function(layerHandler) {
                         $.each(NPMap.config.layers, function(i2, v2) {
                           if (v2.type.toLowerCase() === layerType) {
@@ -388,13 +388,13 @@ NPMap.utils.injectCss(NPMap.config.server + '/npmap/' + NPMap.version + '/resour
                   
                   if (NPMap.connections) {
                     $.each(NPMap.config.modules, function(i, v) {
-                      scripts.push(NPMap.config.server + '/npmap/' + NPMap.version + '/' + NPMap.config.api + '/connections/' + v.name.toLowerCase() + '.js');
+                      scripts.push(NPMap.config.server + '/' + NPMap.config.api + '/connections/' + v.name.toLowerCase() + '.js');
                     });
                   }
   
                   if (NPMap.config.modules) {
                     $.each(NPMap.config.modules, function(i, v) {
-                      scripts.push(NPMap.config.server + '/npmap/' + NPMap.version + '/' + NPMap.config.api + '/modules/' + v.name.toLowerCase() + '.js');
+                      scripts.push(NPMap.config.server + '/' + NPMap.config.api + '/modules/' + v.name.toLowerCase() + '.js');
                     });
                   }
 

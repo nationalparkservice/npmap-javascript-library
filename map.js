@@ -1,5 +1,5 @@
 ﻿define([
-  NPMap.config.server + '/npmap/' + NPMap.version + '/classes/InfoBox/InfoBox.js'
+  NPMap.config.server + '/classes/InfoBox/InfoBox.js'
 ], function(InfoBox) {
   /**
    * Modified version of jQueryToast v0.1 - http://plugins.jquery.com/project/jQueryToast
@@ -483,7 +483,7 @@
           navigation = document.createElement('div'),
           navigationHtml = '',
           notify = document.createElement('div'),
-          npmapLogo = '<a href="http://maps.nps.gov" target="_blank"><img src="' + NPMap.config.server + '/npmap/' + NPMap.version + '/resources/images/npmap-logo-dark.png" alt="NPMap - Web Mapping for the U.S. National Park Service" style="border:0 !important;display:block;" /></a>',
+          npmapLogo = '<a href="http://maps.nps.gov" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmap-logo-dark.png" alt="NPMap - Web Mapping for the U.S. National Park Service" style="border:0 !important;display:block;" /></a>',
           progress = document.createElement('div'),
           switcher = document.createElement('div'),
           switcherMenu = document.createElement('div'),
@@ -539,7 +539,7 @@
       dot.style.width = '1px';
       dot.style.zIndex = '30';
       logos.id = 'npmap-logos';
-      logos.innerHTML = '<table style="height:29px;"><tr>' + (NPMap.config.api === 'modestmaps' ? '' : '<td style="vertical-align:middle;"><div style="margin-right:5px;"><img src="' + NPMap.config.server + '/npmap/' + NPMap.version + '/resources/images/' + NPMap.config.api + 'logo.png" style="display:block;" /></div></td>') + ((NPMap.config && NPMap.config.hideNpmapLogo === true) ? '' : '<td style="vertical-align:middle;">' + npmapLogo + '</td>') + '</tr></table>';
+      logos.innerHTML = '<table style="height:29px;"><tr>' + (NPMap.config.api === 'modestmaps' ? '' : '<td style="vertical-align:middle;"><div style="margin-right:5px;"><img src="' + NPMap.config.server + '/resources/images/' + NPMap.config.api + 'logo.png" style="display:block;" /></div></td>') + ((NPMap.config && NPMap.config.hideNpmapLogo === true) ? '' : '<td style="vertical-align:middle;">' + npmapLogo + '</td>') + '</tr></table>';
       logos.style.bottom = '3px';
       logos.style.left = '3px';
       logos.style.position = 'absolute';
@@ -649,7 +649,7 @@
           }
           
           $.each(NPMap.config.baseLayers, function(i, baseLayer) {
-            var icon = NPMap.config.server + '/npmap/' + NPMap.version + '/resources/switcher/aerial-large.png', // TODO: Specify generic icon url.
+            var icon = NPMap.config.server + '/resources/switcher/aerial-large.png', // TODO: Specify generic icon url.
                 label = baseLayer.code,
                 match = NPMap[NPMap.config.api].map.matchBaseLayer(baseLayer),
                 type = baseLayer.type;
@@ -671,7 +671,7 @@
                     label = 'Aerial View';
                   }
                   
-                  icon = NPMap.config.server + '/npmap/' + NPMap.version + '/resources/switcher/aerial-large.png';
+                  icon = NPMap.config.server + '/resources/switcher/aerial-large.png';
                   
                   break;
                 case 'NPS':
@@ -679,7 +679,7 @@
                     label = 'NPS View';
                   }
                   
-                  icon = NPMap.config.server + '/npmap/' + NPMap.version + '/resources/switcher/nps-large.png';
+                  icon = NPMap.config.server + '/resources/switcher/nps-large.png';
                   
                   break;
                 case 'Street':
@@ -687,7 +687,7 @@
                     label = 'Street View';
                   }
                   
-                  icon = NPMap.config.server + '/npmap/' + NPMap.version + '/resources/switcher/street-large.png';
+                  icon = NPMap.config.server + '/resources/switcher/street-large.png';
                   
                   break;
                 case 'Topo':
@@ -695,7 +695,7 @@
                     label = 'Topo View';
                   }
                   
-                  icon = NPMap.config.server + '/npmap/' + NPMap.version + '/resources/switcher/topo-large.png';
+                  icon = NPMap.config.server + '/resources/switcher/topo-large.png';
                   
                   break;
               };

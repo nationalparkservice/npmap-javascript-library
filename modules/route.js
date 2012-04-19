@@ -447,7 +447,7 @@
     if (rows.length > 0) {
       $.each(rows, function(i, v) {
         var html = '',
-            icon = '<img src="' + NPMap.config.server + '/npmap/' + NPMap.version + '/resources/images/route-';
+            icon = '<img src="' + NPMap.config.server + '/resources/images/route-';
         
         if (i != 0) {
           html += '<img class="cursor" src="' + NPMap.config.server + '/npmap/lib/famfamfam/arrow_up.png" onclick="NPMap.Route.performDestinationAction(this, \'up\');return false;" />&nbsp;';
@@ -1042,7 +1042,7 @@
       var m = NPMap.Map.createMarker(latLng, {
         anchor: new Microsoft.Maps.Point(14, 37),
         height: 37,
-        icon: NPMap.config.server + '/npmap/' + NPMap.version + '/modules/resources/route/images/map_marker_waypoint.png',
+        icon: NPMap.config.server + '/modules/resources/route/images/map_marker_waypoint.png',
         text: letter,
         textOffset: new Microsoft.Maps.Point(-6, 5),
         width: 39
