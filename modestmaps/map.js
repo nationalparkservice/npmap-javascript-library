@@ -1,19 +1,23 @@
-﻿define([
-  '../map.js'
+﻿// TODO: This should be migrated upwards.
+// TODO: You need to re-add support for full screen maps.
+
+define([
+  NPMap.config.server + '/map.js'
 ], function(core) {
-  // TODO: Add support for easey once you upgrade to Modest Maps 1.0alpha
-  // TODO: This should be migrated upwards.
-  // TODO: You need to re-add support for full screen maps.
   var
       // The map div.
       $mapDiv = $('#' + NPMap.config.div).parent(),
       // The attribution string.
       attribution,
+      // The bandwidth detection object.
+      bw,
       // Default center of the map.
       center = {
         lat: 39,
         lng: -98
       },
+      // The fullscreen object.
+      fullscreen = null,
       // An array of grid URLs.
       grids,
       // The initial center of the map.
@@ -22,6 +26,8 @@
       initialZoom,
       // The Wax interaction control.
       interaction = null,
+      // Tracks the fullscreen status of the map.
+      isFullScreen = false,
       // The {com.modestmaps} map object.
       map,
       // Max zoom level of the map.
@@ -50,7 +56,7 @@
           'd'
         ],
         urls = [],
-        urlTemplate = 'http://{sub}.tiles.mapbox.com/v2/{layers}/{z}/{x}/{y}.';
+        urlTemplate = 'http://{sub}.tiles.mapbox.com/v3/{layers}/{z}/{x}/{y}.';
 
     $.each(NPMap.config.layers, function(i, v) {
       if (v.visible) {
@@ -77,81 +83,98 @@
     return urls;
   }
   /**
+   * Helper function for running easey.
+   * @param {Object} latLng
+   * @param {Number} zoom
+   * @param {Number} time (Optional)
+   * @param {Function} callback (Optional)
+   */
+  function runEasey(latLng, zoom, time, callback) {
+    var panned = !NPMap.Map.latLngsAreEqual(NPMap.modestmaps.map.latLngToString(map.getCenter()), NPMap.modestmaps.map.latLngToString(latLng)),
+        zoomed = map.getZoom() !== zoom;
+    
+    time = time || 200;
+    
+    easey().map(map)
+      .to(map.locationCoordinate(latLng)
+        .zoomTo(zoom))
+        .run(time);
+  
+    // TODO: I'm manually calling panned and zoomed events because easey seems to break these.
+    
+    if (panned) {
+       map.dispatchCallback('panned');
+    }
+
+    if (zoomed) {
+       map.dispatchCallback('zoomed');
+    }
+
+    if (callback) {
+      setTimeout(callback, time);
+    }
+  }
+  /**
    * Sets up interaction on the map.
    * @param {Object} tileJson The json config object to use to setup interaction.
    * @return {Object}
    */
   function setupInteraction(tileJson) {
-    return wax.mm.interaction(map, tileJson, {
-      callbacks: {
-        'click': function(data, parentEl, e) {
-          var content,
-              data = (function() {
-                try {
-                  return $.parseJSON(data);
-                } catch (e) {
-                  return data;
-                }
-              })(),
-              eo = wax.util.eventoffset(e),
-              offset = NPMap.utils.getMapDivOffset(),
-              title = 'Results';
+    return wax.mm.interaction().map(map).tilejson(tileJson).on({
+      on: function(args) {
+        var data = args.data,
+            e = args.e,
+            eo = wax.u.eventoffset(e),
+            offset = NPMap.utils.getMapDivOffset(),
+            position = {
+              x: eo.x - offset.left,
+              y: eo.y - offset.top
+            };
+        
+        switch (e.type) {
+          case 'mouseup':
+            var content,
+                title = 'Results';
 
-          NPMap.InfoBox.hide();
-          NPMap.modestmaps.map.positionClickDot({
-            x: eo.x - offset.left,
-            y: eo.y - offset.top
-          });
+            NPMap.InfoBox.hide();
+            NPMap.modestmaps.map.positionClickDot(position);
 
-          // TODO: This should be used in conjunction with "clustering".
-          // TODO: Need to support if content and title configs are strings.
-          if (typeof data === 'object' && _.size(data) === 1) {
-            var layer = NPMap.map.getLayerByName(NPMap.utils.getFirstPropertyOfObject(data));
+            // TODO: This should be used in conjunction with "clustering".
+            // TODO: Need to support if content and title configs are strings.
+            if (typeof data === 'object' && _.size(data) === 1) {
+              var layer = NPMap.map.getLayerByName(NPMap.utils.getFirstPropertyOfObject(data));
 
-            content = layer.identify.content(data);
-            title = layer.identify.title(data);
-          } else if (NPMap.config.identify && NPMap.config.identify.content) {
-            content = NPMap.config.identify.content(data);
-            title = NPMap.config.identify.title(data);
-          }
+              content = layer.identify.content(data);
+              title = layer.identify.title(data);
+            } else if (NPMap.config.identify && NPMap.config.identify.content) {
+              content = NPMap.config.identify.content(data);
+              title = NPMap.config.identify.title(data);
+            }
 
-          NPMap.InfoBox.show(content, title);
-        },
-        'out': function(parentEl) {
-          document.body.style.cursor = 'auto';
+            NPMap.InfoBox.show(content, title);
+            
+            break;
+          case 'mousemove':
+            var content;
 
-          NPMap.Map.hideTip();
-        },
-        'over': function(data, parentEl, e) {
-          var content,
-              data = (function() {
-                try {
-                  return $.parseJSON(data);
-                } catch (e) {
-                  return data;
-                }
-              })(),
-              eo = wax.util.eventoffset(e),
-              offset = NPMap.utils.getMapDivOffset(),
-              position = {
-                x: eo.x - offset.left,
-                y: eo.y - offset.top
-              };
-          
-          document.body.style.cursor = 'pointer';
-          
-          if (typeof NPMap.config.hover !== 'undefined') {
-            content = NPMap.config.hover(data);
-          }
+            document.body.style.cursor = 'pointer';
+            
+            if (typeof NPMap.config.hover !== 'undefined') {
+              content = NPMap.config.hover(data);
+            }
+            
+            if (content) {
+              NPMap.Map.showTip(content, position);
+            }
 
-          if (content) {
-            NPMap.Map.showTip(content, position);
-          }
-        }
+            break;
+        };
       },
-      clickAction: [
-        'teaser'
-      ]
+      off: function() {
+        document.body.style.cursor = 'auto';
+
+        NPMap.Map.hideTip();
+      }
     });
   }
   /**
@@ -219,8 +242,16 @@
     tileJson.tiles = tiles;
   }
 
-  map = new com.modestmaps.Map(NPMap.config.div, new wax.mm.connector(tileJson));
-  
+  map = new com.modestmaps.Map(NPMap.config.div, new wax.mm.connector(tileJson), null, [
+    new easey.DragHandler(),
+    new easey.DoubleClickHandler(),
+    new easey.MouseWheelHandler()
+  ]);
+  bw = wax.mm.bwdetect(map, {
+      auto: true,
+      png: '.png64?'
+  });
+
   if (NPMap.config.restrictZoom) {
     if (NPMap.config.restrictZoom.max) {
       maxZoom = NPMap.config.restrictZoom.max;
@@ -240,7 +271,7 @@
   */
 
   if (tileJson.grids) {
-    var url = 'http://api.tiles.mapbox.com/v2/';
+    var url = 'http://api.tiles.mapbox.com/v3/';
 
     $.each(NPMap.config.layers, function(i, v) {
       if (v.visible) {
@@ -251,18 +282,18 @@
     url = url.slice(0, url.length - 1);
     url += '.jsonp';
 
-    $.ajax({
-      dataType: 'jsonp',
-      jsonpCallback: 'grid',
+    reqwest({
+      jsonpCallbackName: 'grid',
       success: function(data) {
         NPMap.config.formatter = data.formatter;
         tileJson.formatter = data.formatter;
-        interaction = setupInteraction(tileJson);
+        interaction = setupInteraction(data);
       },
+      type: 'jsonp',
       url: url
     });
   }
-    
+  
   initialCenter = new com.modestmaps.Location(center.lat, center.lng);
   initialZoom = oldZoom = zoom;
     
@@ -292,9 +323,10 @@
     }
   });
   map.addCallback('zoomed', function(m) {
+    // TODO: The zoom change check is failing now because of easey. Fix it.
     var z = m.getZoom();
-      
-    if (oldZoom != z) {
+
+    //if (oldZoom != z) {
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.hide();
       }
@@ -302,7 +334,7 @@
       oldZoom = z;
 
       NPMap.Event.trigger('NPMap.Map', 'zoomchanged');
-    }
+    //}
   });
   $.each($('#npmap-infobox').children(), function(i, v) {
     if (v.id != 'npmap-infobox-bottom') {
@@ -319,21 +351,6 @@
   
   return NPMap.modestmaps.map = {
     /**
-     * Centers then zooms the map.
-     * @param latLng {String} (Required) A string in the format of "latitude,longitude" to zoom the map to.
-     * @param zoom {Integer} (Required) The zoom level to zoom the map to.
-     * @param callback {Function} (Optional) A callback function to call after the map has been centered and zoomed.
-     */
-    centerAndZoom: function(latLng, zoom, callback) {
-      latLng = latLng.split(',');
-
-      map.setCenterZoom(new com.modestmaps.Location(parseFloat(latLng[0]), parseFloat(latLng[1])), zoom);
-
-      if (callback) {
-        callback();
-      }
-    },
-    /**
      * Gets the center of the map.
      * @return {Float}
      */
@@ -349,6 +366,12 @@
       return map.pointLocation(new com.modestmaps.Point(position.left, position.top));
     },
     /**
+     * Gets the parent div of the map.
+     */
+    getParentDiv: function() {
+      return map.parent;
+    },
+    /**
      * Gets the zoom level of the map.
      * @return {Float}
      */
@@ -357,11 +380,31 @@
     },
     /**
      * Is called when the map div is resized.
+     * @param {Function} callback (Optional)
      */
-    handleResize: function() {
+    handleResize: function(callback) {
+      var $parent = $(map.parent),
+          height = $parent.actual('height'),
+          width = $parent.actual('width');
+      
       // TODO: Can't you handle this in NPMap.Map?
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.reposition();
+      }
+
+      map.setSize(width, height);
+
+      map.dimensions = new com.modestmaps.Point(width, height);
+      
+      $parent.css({
+        height: height + 'px',
+        width: width + 'px'
+      });
+
+      map.dispatchCallback('resized', map.dimensions);
+
+      if (callback) {
+        callback();
       }
     },
     /**
@@ -380,7 +423,7 @@
             }
           })();
 
-      if (NPMap.utils.isBetween(extent.north, extent.south, latLng.lat) === true && NPMap.utils.isBetween(extent.east, extent.west, latLng.lon) === true) {
+      if (NPMap.utils.isBetween(extent[0].lat, extent[1].lat, latLng.lat) === true && NPMap.utils.isBetween(extent[0].lon, extent[1].lon, latLng.lon) === true) {
         isWithinExtent = true;
       }
 
@@ -407,7 +450,9 @@
      * @param {Object} pixels
      */
     panByPixels: function(pixels) {
-      map.panBy(pixels.x, pixels.y);
+      var center = map.locationPoint(map.getCenter());
+
+      runEasey(map.locationCoordinate(map.pointLocation(new MM.Point(center.x - pixels.x, center.y - pixels.y))), zoom);
     },
     /**
      * Positions the npmap-clickdot div on top of the div that is passed in.
@@ -423,6 +468,15 @@
         left: to.x + 'px',
         top: to.y + 'px'
       });
+    },
+    /**
+     * Sets the center and zoom level of the map.
+     * @param {Object} center
+     * @param {Number} zoom
+     * @param {Function} callback (Optional);
+     */
+    setCenterAndZoom: function(center, zoom, callback) {
+      runEasey(center, zoom, 200, callback);
     },
     /**
      * Converts an NPMap lat/lng string ("latitude,longitude") to a com.modestmaps.Location object.
@@ -455,12 +509,12 @@
       }
 
       if (interaction) {
-        interaction.remove();
+        interaction.off();
         interaction = null;
       }
 
       if (grids.length > 0) {
-        var url = 'http://api.tiles.mapbox.com/v2/';
+        var url = 'http://api.tiles.mapbox.com/v3/';
 
         $.each(NPMap.config.layers, function(i, v) {
           if (v.visible) {
@@ -471,9 +525,8 @@
         url = url.slice(0, url.length - 1);
         url += '.jsonp';
 
-        $.ajax({
-          dataType: 'jsonp',
-          jsonpCallback: 'grid',
+        reqwest({
+          jsonpCallbackName: 'grid',
           success: function(data) {
             NPMap.config.formatter = data.formatter;
             tileJson.formatter = data.formatter;
@@ -485,8 +538,9 @@
 
             map.setLayerAt(0, new wax.mm.connector(tileJson));
 
-            interaction = setupInteraction(tileJson);
+            interaction = setupInteraction(data);
           },
+          type: 'jsonp',
           url: url
         });
       } else {
@@ -498,32 +552,50 @@
       }
     },
     /**
+     * Toggles fullscreen mode.
+     */
+    toggleFullScreen: function() {
+      if (isFullScreen) {
+        fullscreen.original();
+        isFullScreen = false;
+      } else {
+        if (!fullscreen) {
+          fullscreen = wax.mm.fullscreen(map, tileJson);
+        }
+
+        fullscreen.full();
+        isFullScreen = true;
+      }
+    },
+    /**
      * Zooms the map in by one zoom level.
      * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on the location of the #npmap-clickdot div.
      */
     zoomIn: function(toDot) {
-      var zoom = map.getZoom();
+      var latLng,
+          zoom = map.getZoom();
       
       if (toDot) {
-        var position = $('#npmap-clickdot').position(),
-            latLng = map.pointLocation(new com.modestmaps.Point(position.left, position.top));
+        var position = $('#npmap-clickdot').position();
         
-        map.setCenterZoom(latLng, zoom + 1);
+        latLng = map.locationCoordinate(map.pointLocation(new com.modestmaps.Point(position.left, position.top)));
       } else {
-        map.zoomIn();
+        latLng = map.getCenter();
       }
+
+      runEasey(latLng, zoom + 1, 200);
     },
     /**
      * Zooms the map out by one zoom level.
      */
     zoomOut: function() {
-      map.zoomOut();
+      runEasey(map.getCenter(), map.getZoom() - 1, 200);
     },
     /**
      * Zooms the map to its initial extent.
      */
     zoomToInitialExtent: function() {
-      map.setCenterZoom(initialCenter, initialZoom);
+      runEasey(initialCenter, initialZoom, 400);
     }
   };
 });

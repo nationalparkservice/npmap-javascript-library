@@ -5,30 +5,6 @@
       tilingScheme = 'xyz';
   
   /**
-    * Builds the tile URL path.
-    * @param {Object} tile The tile object, with x, y, and z properties.
-    * @return {String}
-    */
-  function getTilePath(tile) {
-    var url;
-
-    if (tilingScheme === 'osm') {
-      tile = xyzToOsm(tile);
-    } else {
-      tile.z = tile.levelOfDetail;
-    }
-
-    url = layer.urls[layer.currentUrlIndex].replace('{x}', tile.x).replace('{y}', tile.y).replace('{z}', tile.z);
-
-    if ((layer.currentUrlIndex + 1) === layer.urls.length) {
-      layer.currentUrlIndex = 0;
-    } else {
-      layer.currentUrlIndex++;
-    }
-
-    return url;
-  }
-  /**
    * Converts an x,y,z tile coordinate into OSM format.
    * @param {Object} tile
    * @return {Object}
@@ -57,6 +33,31 @@
     addLayer: function(layer) {
       var tileLayer;
       
+      /**
+        * Builds the tile URL path.
+        * @param {Object} tile The tile object, with x, y, and z properties.
+        * @return {String}
+        */
+      function getTilePath(tile) {
+        var url;
+
+        if (tilingScheme === 'osm') {
+          tile = xyzToOsm(tile);
+        } else {
+          tile.z = tile.levelOfDetail;
+        };
+
+        url = layer.urls[layer.currentUrlIndex].replace('{x}', tile.x).replace('{y}', tile.y).replace('{z}', tile.z);
+
+        if ((layer.currentUrlIndex + 1) === layer.urls.length) {
+          layer.currentUrlIndex = 0;
+        } else {
+          layer.currentUrlIndex++;
+        }
+
+        return url;
+      }
+
       if (layer.urls[0].indexOf('/v1/') != -1) {
         tilingScheme = 'osm';
       }

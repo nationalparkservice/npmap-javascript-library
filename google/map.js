@@ -1,5 +1,5 @@
 ﻿define([
-  '../map.js'
+  NPMap.config.server + '/map.js'
 ], function(core) {
   var 
       // The initially-active base layer.

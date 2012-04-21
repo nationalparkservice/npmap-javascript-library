@@ -108,8 +108,16 @@
 #npmap-switcher-menu a:hover {background:#F1F1EF;text-decoration:none;}
 #npmap-switcher-menu a:visited {text-decoration:none;}
 
+#npmap-toolbar {background-color:#828070;border-bottom-left-radius:3px;border-bottom-right-radius:3px;height:24px;padding:0 12px;position:absolute;right:15px;top:0;z-index:30;}
+.npmap-toolbar-email {background:url('../toolbar/sprite.png') -15px 0px no-repeat;cursor:pointer;display:block;width:13px;height:9px;}
+.npmap-toolbar-fullscreen {background:url('../toolbar/sprite.png') 0px -14px no-repeat;cursor:pointer;display:block;margin-top:6px;width:13px;height:12px;}
+.npmap-toolbar-print {background:url('../toolbar/sprite.png') -15px -14px no-repeat;cursor:pointer;display:block;width:12px;height:12px;}
+
 /* TODO: This is currently only being used for Modest Maps/Wax maps. It should be used for all base APIs */
 #npmap .zoombox-box {background:rgba(255,255,255,0.25) !important;border:2px solid #9F6D00 !important;display:none;height:0;left:0;position:absolute;top:0;width:0;}
+
+.npmap-fullscreen-body {}
+.npmap-fullscreen-map {background-color:white;bottom:0;height:auto !important;left:0;position:fixed !important;right:0;top:0;width:auto !important;z-index:999999999999;}
 
 @media print {
   #npmap-navigation, #npmap-overviewmap {display:none;}

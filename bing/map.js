@@ -1,5 +1,5 @@
 ﻿define([
-  '../map.js'
+  NPMap.config.server + '/map.js'
 ], function(core) {
   var 
       // The activeBaseLayer object.
@@ -299,7 +299,7 @@
           
         if (zoom > zoomRange.min && zoom < zoomRange.max && zoom != oldZoom) {
           NPMap.InfoBox.hide();
-        } else if (NPMap.bing.map.latLngsAreEqual(map.getCenter(), oldCenter) === false) {
+        } else if (NPMap.Map.latLngsAreEqual(NPMap.bing.map.latLngToString(map.getCenter()), NPMap.bing.map.latLngToString(oldCenter)) === false) {
           if (tiled) {
             NPMap.InfoBox.reposition();
           } else {
@@ -378,10 +378,10 @@
      * @param {Function} callback (Optional) A callback function to call after the map has been centered and zoomed.
      */
     centerAndZoom: function(latLng, zoom, callback) {
-      var currentLatLng = map.getCenter(),
+      var currentLatLng = this.latLngToString(map.getCenter()),
           currentZoom = map.getZoom();
 
-      if (NPMap.bing.map.latLngsAreEqual(currentLatLng, latLng) === true && currentZoom === zoom) {
+      if (NPMap.Map.latLngsAreEqual(currentLatLng, this.latLngToString(latLng)) === true && currentZoom === zoom) {
         if (callback) {
           callback();
         }
@@ -659,21 +659,6 @@
     },
     // Is the map loaded and ready to be interacted with programatically.
     isReady: true,
-    /**
-     * Tests the equivalency of two Microsoft.Maps.Location objects.
-     * @param latLng1 {Microsoft.Maps.Location} (Required) The first Location object.
-     * @param latLng2 {Microsoft.Maps.Location) (Required) The second Location object.
-     * @returns {Boolean}
-     */
-    latLngsAreEqual: function(latLng1, latLng2) {
-      var areEqual = false;
-
-      if ((latLng1.latitude.toFixed(7) === latLng2.latitude.toFixed(7)) && (latLng1.longitude.toFixed(7) === latLng2.longitude.toFixed(7))) {
-        areEqual = true;
-      }
-
-      return areEqual;
-    },
     /**
      * Converts a Bing Maps Location object to the NPMap representation of a latitude/longitude string.
      * @param latLng {Microsoft.Maps.Location} The Location object to convert to a string.

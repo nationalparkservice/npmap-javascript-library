@@ -7,6 +7,8 @@
   (function(b){toasting=!1;toastQueue=[];b.toast=function(a){return new c(a)};var c=function(a){var c={message:"",displayTime:2E3,inTime:300,outTime:200,maxWidth:400};if(window.toasting)window.toastQueue.unshift(a);else{var d=b("#npmap-toast");window.toasting=!0;a=b.extend(c,a);d.html(a.message);d.fadeIn(a.inTime);setTimeout(function(){d.fadeOut(a.outTime,function(){window.toasting=!1;0<window.toastQueue.length&&(next=window.toastQueue.pop(),b.toast(next))})},a.displayTime)}}})(jQuery);
   
   var $mapDiv = $('#npmap'),
+      isFullScreen = false,
+      originalMapDimensions,
       zoomScales = [
         [0, 295829355],
         [1, 147914668],
@@ -582,7 +584,20 @@
         elements.push(navigation);
       }
       
-      
+      if (toolsConfig.fullscreen || toolsConfig.print || toolsConfig.share) {
+        var toolbarHtml = '',
+            toolbar = document.createElement('div');
+
+        if (toolsConfig.fullscreen) {
+          toolbarHtml += '<div id="npmap-toolbar-fullscreen" class="npmap-toolbar-fullscreen"></div>';
+        }
+        
+        toolbar.innerHTML = toolbarHtml;
+        toolbar.id = 'npmap-toolbar';
+
+        elements.push(toolbar);
+      }
+
       notify.id = 'npmap-notify';
 
       elements.push(notify);
@@ -743,6 +758,12 @@
           });
         }
         
+        if (toolsConfig.fullscreen) {
+          hookUpClickEvent('npmap-toolbar-fullscreen', function() {
+            NPMap.Map.toggleFullScreen();
+          });
+        }
+
         if (toolsConfig.pan) {
           hookUpClickEvent('npmap-navigation-compass-east', function() {
             NPMap.Map.panInDirection('east');
@@ -962,6 +983,23 @@
       return NPMap[NPMap.config.api].map.isLatLngWithinMapBounds(latLng);
     },
     /**
+     * Tests the equivalency of two location strings.
+     * @param {String} latLng1 The first latLng string.
+     * @param {String} latLng2 The second latLng string.
+     * @returns {Boolean}
+     */
+    latLngsAreEqual: function(latLng1, latLng2) {
+      var areEqual = false,
+          latLng1 = latLng1.split(','),
+          latLng2 = latLng2.split(',');
+
+      if ((parseFloat(latLng1[0]).toFixed(7) === parseFloat(latLng2[0]).toFixed(7)) && (parseFloat(latLng1[1]).toFixed(7) === parseFloat(latLng2[1]).toFixed(7))) {
+        areEqual = true;
+      }
+
+      return areEqual;
+    },
+    /**
      * Converts a baseApi lat/lng object to a lat/lng string in "latitude/longitude" format.
      * @param {Object} latLng The lat/lng object.
      * @return {String}
@@ -1132,6 +1170,47 @@
      */
     stringToLatLng: function(latLng) {
       return NPMap[NPMap.config.api].map.stringToLatLng(latLng);
+    },
+    /**
+     * Toggles fullscreen mode on or off.
+     */
+    toggleFullScreen: function() {
+      var baseApi = NPMap[NPMap.config.api].map,
+          body = document.body,
+          currentCenter = baseApi.getCenter(),
+          currentZoom = baseApi.getZoom(),
+          parent = baseApi.getParentDiv();
+      
+      if (NPMap.InfoBox.visible) {
+        currentCenter = baseApi.stringToLatLng(NPMap.InfoBox.latLng);
+      }
+      
+      if (isFullScreen) {
+        body.className = body.className.replace(' npmap-fullscreen-view', '');
+        parent.className = parent.className.replace(' npmap-fullscreen-map', '');
+        parent.style.height = originalMapDimensions.height;
+        parent.style.width = originalMapDimensions.width;
+        document.getElementById('npmap-infobox').style.zIndex = '999999';        
+        isFullScreen = false;
+      } else {
+        var $parent = $(parent);
+        
+        originalMapDimensions = {
+          height: parent.offsetHeight + 'px',
+          width: parent.offsetWidth + 'px'
+        };
+
+        body.className += ' npmap-fullscreen-view';
+        parent.className += ' npmap-fullscreen-map';
+        parent.style.height = document.body.offsetHeight + 'px';
+        parent.style.width = document.body.offsetWidth + 'px';
+        isFullScreen = true;
+        document.getElementById('npmap-infobox').style.zIndex = '99999999999999';
+      }
+
+      baseApi.handleResize(function() {
+        baseApi.setCenterAndZoom(currentCenter, currentZoom);
+      });
     },
     /**
      * DEPRECATED: Updates a marker's icon.

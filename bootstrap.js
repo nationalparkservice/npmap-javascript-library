@@ -216,6 +216,13 @@ if(b.isRegExp(a)&&b.isRegExp(c))return a.source===c.source&&a.global===c.global&
 b.template=function(a,c){var d=b.templateSettings;d="var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('"+a.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(d.interpolate,function(a,b){return"',"+b.replace(/\\'/g,"'")+",'"}).replace(d.evaluate||null,function(a,b){return"');"+b.replace(/\\'/g,"'").replace(/[\r\n\t]/g," ")+"__p.push('"}).replace(/\r/g,"\\r").replace(/\n/g,"\\n").replace(/\t/g,"\\t")+"');}return __p.join('');";d=new Function("obj",d);return c?d(c):d};
 var j=function(a){this._wrapped=a};b.prototype=j.prototype;var r=function(a,c){return c?b(a).chain():a},H=function(a,c){j.prototype[a]=function(){var a=f.call(arguments);D.call(a,this._wrapped);return r(c.apply(b,a),this._chain)}};b.mixin(b);h(["pop","push","reverse","shift","sort","splice","unshift"],function(a){var b=i[a];j.prototype[a]=function(){b.apply(this._wrapped,arguments);return r(this._wrapped,this._chain)}});h(["concat","join","slice"],function(a){var b=i[a];j.prototype[a]=function(){return r(b.apply(this._wrapped,
 arguments),this._chain)}});j.prototype.chain=function(){this._chain=!0;return this};j.prototype.value=function(){return this._wrapped}})();
+/*!
+  * Reqwest! A general purpose XHR connection manager
+  * (c) Dustin Diaz 2011
+  * https://github.com/ded/reqwest
+  * license MIT
+  */
+!function(a,b){typeof module!="undefined"?module.exports=b():typeof define=="function"&&define.amd?define(a,b):this[a]=b()}("reqwest",function(){function handleReadyState(a,b,c){return function(){a&&a[readyState]==4&&(twoHundo.test(a.status)?b(a):c(a))}}function setHeaders(a,b){var c=b.headers||{},d;c.Accept=c.Accept||defaultHeaders.accept[b.type]||defaultHeaders.accept["*"],!b.crossOrigin&&!c[requestedWith]&&(c[requestedWith]=defaultHeaders.requestedWith),c[contentType]||(c[contentType]=b.contentType||defaultHeaders.contentType);for(d in c)c.hasOwnProperty(d)&&a.setRequestHeader(d,c[d])}function generalCallback(a){lastValue=a}function urlappend(a,b){return a+(/\?/.test(a)?"&":"?")+b}function handleJsonp(a,b,c,d){var e=uniqid++,f=a.jsonpCallback||"callback",g=a.jsonpCallbackName||"reqwest_"+e,h=new RegExp("((^|\\?|&)"+f+")=([^&]+)"),i=d.match(h),j=doc.createElement("script"),k=0;i?i[3]==="?"?d=d.replace(h,"$1="+g):g=i[3]:d=urlappend(d,f+"="+g),win[g]=generalCallback,j.type="text/javascript",j.src=d,j.async=!0,typeof j.onreadystatechange!="undefined"&&(j.event="onclick",j.htmlFor=j.id="_reqwest_"+e),j.onload=j.onreadystatechange=function(){if(j[readyState]&&j[readyState]!=="complete"&&j[readyState]!=="loaded"||k)return!1;j.onload=j.onreadystatechange=null,j.onclick&&j.onclick(),a.success&&a.success(lastValue),lastValue=undefined,head.removeChild(j),k=1},head.appendChild(j)}function getRequest(a,b,c){var d=(a.method||"GET").toUpperCase(),e=typeof a=="string"?a:a.url,f=a.processData!==!1&&a.data&&typeof a.data!="string"?reqwest.toQueryString(a.data):a.data||null,g;return(a.type=="jsonp"||d=="GET")&&f&&(e=urlappend(e,f),f=null),a.type=="jsonp"?handleJsonp(a,b,c,e):(g=xhr(),g.open(d,e,!0),setHeaders(g,a),g.onreadystatechange=handleReadyState(g,b,c),a.before&&a.before(g),g.send(f),g)}function Reqwest(a,b){this.o=a,this.fn=b,init.apply(this,arguments)}function setType(a){var b=a.match(/\.(json|jsonp|html|xml)(\?|$)/);return b?b[1]:"js"}function init(o,fn){function complete(a){o.timeout&&clearTimeout(self.timeout),self.timeout=null,o.complete&&o.complete(a)}function success(resp){var r=resp.responseText;if(r)switch(type){case"json":try{resp=win.JSON?win.JSON.parse(r):eval("("+r+")")}catch(err){return error(resp,"Could not parse JSON in response",err)}break;case"js":resp=eval(r);break;case"html":resp=r}fn(resp),o.success&&o.success(resp),complete(resp)}function error(a,b,c){o.error&&o.error(a,b,c),complete(a)}this.url=typeof o=="string"?o:o.url,this.timeout=null;var type=o.type||setType(this.url),self=this;fn=fn||function(){},o.timeout&&(this.timeout=setTimeout(function(){self.abort()},o.timeout)),this.request=getRequest(o,success,error)}function reqwest(a,b){return new Reqwest(a,b)}function normalize(a){return a?a.replace(/\r?\n/g,"\r\n"):""}function serial(a,b){var c=a.name,d=a.tagName.toLowerCase(),e=function(a){a&&!a.disabled&&b(c,normalize(a.attributes.value&&a.attributes.value.specified?a.value:a.text))};if(a.disabled||!c)return;switch(d){case"input":if(!/reset|button|image|file/i.test(a.type)){var f=/checkbox/i.test(a.type),g=/radio/i.test(a.type),h=a.value;(!f&&!g||a.checked)&&b(c,normalize(f&&h===""?"on":h))}break;case"textarea":b(c,normalize(a.value));break;case"select":if(a.type.toLowerCase()==="select-one")e(a.selectedIndex>=0?a.options[a.selectedIndex]:null);else for(var i=0;a.length&&i<a.length;i++)a.options[i].selected&&e(a.options[i])}}function eachFormElement(){var a=this,b,c,d,e=function(b,c){for(var e=0;e<c.length;e++){var f=b[byTag](c[e]);for(d=0;d<f.length;d++)serial(f[d],a)}};for(c=0;c<arguments.length;c++)b=arguments[c],/input|select|textarea/i.test(b.tagName)&&serial(b,a),e(b,["input","select","textarea"])}function serializeQueryString(){return reqwest.toQueryString(reqwest.serializeArray.apply(null,arguments))}function serializeHash(){var a={};return eachFormElement.apply(function(b,c){b in a?(a[b]&&!isArray(a[b])&&(a[b]=[a[b]]),a[b].push(c)):a[b]=c},arguments),a}var context=this,win=window,doc=document,old=context.reqwest,twoHundo=/^20\d$/,byTag="getElementsByTagName",readyState="readyState",contentType="Content-Type",requestedWith="X-Requested-With",head=doc[byTag]("head")[0],uniqid=0,lastValue,xmlHttpRequest="XMLHttpRequest",isArray=typeof Array.isArray=="function"?Array.isArray:function(a){return a instanceof Array},defaultHeaders={contentType:"application/x-www-form-urlencoded",accept:{"*":"text/javascript, text/html, application/xml, text/xml, */*",xml:"application/xml, text/xml",html:"text/html",text:"text/plain",json:"application/json, text/javascript",js:"application/javascript, text/javascript"},requestedWith:xmlHttpRequest},xhr=win[xmlHttpRequest]?function(){return new XMLHttpRequest}:function(){return new ActiveXObject("Microsoft.XMLHTTP")};return Reqwest.prototype={abort:function(){this.request.abort()},retry:function(){init.call(this,this.o,this.fn)}},reqwest.serializeArray=function(){var a=[];return eachFormElement.apply(function(b,c){a.push({name:b,value:c})},arguments),a},reqwest.serialize=function(){if(arguments.length===0)return"";var a,b,c=Array.prototype.slice.call(arguments,0);return a=c.pop(),a&&a.nodeType&&c.push(a)&&(a=null),a&&(a=a.type),a=="map"?b=serializeHash:a=="array"?b=reqwest.serializeArray:b=serializeQueryString,b.apply(null,c)},reqwest.toQueryString=function(a){var b="",c,d=encodeURIComponent,e=function(a,c){b+=d(a)+"="+d(c)+"&"};if(isArray(a))for(c=0;a&&c<a.length;c++)e(a[c].name,a[c].value);else for(var f in a){if(!Object.hasOwnProperty.call(a,f))continue;var g=a[f];if(isArray(g))for(c=0;c<g.length;c++)e(f,g[c]);else e(f,a[f])}return b.replace(/&$/,"").replace(/%20/g,"+")},reqwest.compat=function(a,b){return a&&(a.type&&(a.method=a.type)&&delete a.type,a.dataType&&(a.type=a.dataType),a.jsonpCallback&&(a.jsonpCallbackName=a.jsonpCallback)&&delete a.jsonpCallback,a.jsonp&&(a.jsonpCallback=a.jsonp)),new Reqwest(a,b)},reqwest})
 
 /**
  * The NPMap.Event class.
@@ -337,24 +344,28 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
     		if (typeof $ === 'undefined') {
     		  $ = jQuery;
     		}
-		
+
         $(document).ready(function() {
           loadMapping();
         });
       },
       loadMapping = function() {
+        var apiUrl = null,
+            callback = null,
+            preLoaded = false;
+        
         NPMap.apiLoaded = function() {
           var callback = function() {
             require([
               NPMap.config.server + '/' + NPMap.config.api + '/map.js'
             ], function(map) {
               var interval = setInterval(function() {
-                if (NPMap[NPMap.config.api] && NPMap[NPMap.config.api].map && NPMap[NPMap.config.api].map.isReady === true) {
-                  clearInterval(interval);
-  
+                if (map.isReady === true) {
                   var layerHandlers = [],
                       scripts = [];
-  
+
+                  clearInterval(interval);
+                  
                   if (NPMap.config.baseLayers) {
                     $.each(NPMap.config.baseLayers, function(i, v) {
                       if (v.type && $.inArray(v.type, layerHandlers) === -1) {
@@ -391,7 +402,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
                       scripts.push(NPMap.config.server + '/' + NPMap.config.api + '/connections/' + v.name.toLowerCase() + '.js');
                     });
                   }
-  
+
                   if (NPMap.config.modules) {
                     $.each(NPMap.config.modules, function(i, v) {
                       scripts.push(NPMap.config.server + '/' + NPMap.config.api + '/modules/' + v.name.toLowerCase() + '.js');
@@ -411,7 +422,10 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
 
                         if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
                           setTimeout(function() {
-                            $.getJSON('http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?');
+                            reqwest({
+                              type: 'jsonp',
+                              url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?'
+                            });
                           }, 1000);
                         }
                       }, 100);
@@ -437,11 +451,6 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             callback();
           }
         };
-      
-        var apiUrl = null,
-            callback = null,
-            preLoaded = false,
-            s = document.createElement('script');
           
         switch (NPMap.config.api) {
           case 'bing':
@@ -468,10 +477,10 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             };
             break;
           case 'esri':
-            apiUrl = 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.2';
+            apiUrl = 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.8';
             callback = function() {
               var interval = setInterval(function() {
-                if (typeof(esri) != 'undefined') {
+                if (typeof esri !== 'undefined') {
                   clearInterval(interval);
                   NPMap.apiLoaded();
                 }
@@ -483,7 +492,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
               callback = NPMap.apiLoaded();
               preLoaded = true;
             } else {
-              apiUrl = 'http://maps.googleapis.com/maps/api/js?v=3&client=gme-usgovernmentdepartment&channel=nps-npmap&sensor=false&callback=NPMap.apiLoaded';
+              apiUrl = 'http://maps.googleapis.com/maps/api/js?v=3&client=gme-usgovernmentdepartment&channel=nps-npmap&sensor=true&callback=NPMap.apiLoaded';
 
               if (NPMap.config.modules) {
                 for (var i = 0; i < NPMap.config.modules.length; i++) {
@@ -497,7 +506,8 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             
             break;
           case 'modestmaps':
-            apiUrl = 'http://www.nps.gov/npmap/js/libs/modestmaps-wax-5.0.0.min.js';
+            apiUrl = 'http://www.nps.gov/npmap/scripts/libs/modestmaps-1.0.0-alpha-wax-6.0.0-beta5.min.js';
+            //apiUrl = 'http://www.nps.gov/npmap/js/libs/modestmaps-wax-5.0.0.min.js';
             callback = function() {
               var int = setInterval(function() {
                 if (typeof(com) != 'undefined' && typeof(com.modestmaps) != 'undefined' && typeof(com.modestmaps.Map) != 'undefined') {
@@ -508,21 +518,20 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             };
             break;
           default:
-            // Throw an error.
+            NPMap.utils.throwError('Invalid base API specified.');
             break;
         }
-  
+
         if (preLoaded) {
           if (callback) {
             callback();
           }
         } else {
-          s.src = apiUrl;
-          document.body.appendChild(s);
-  
-          if (callback) {
-            callback();
-          }
+          require([apiUrl], function() {
+            if (callback) {
+              callback();
+            }
+          });
         }
       },
       s = document.createElement('script'),

@@ -1,0 +1,20 @@
+.npmap-toolbar-email {
+  background: url(sprite.png) -15px 0px no-repeat;
+  display: block;
+  width: 13px;
+  height: 9px;
+}
+
+.npmap-toolbar-fullscreen {
+  background: url(sprite.png) 0px -14px no-repeat;
+  display: block;
+  width: 13px;
+  height: 12px;
+}
+
+.npmap-toolbar-print {
+  background: url(sprite.png) -15px -14px no-repeat;
+  display: block;
+  width: 12px;
+  height: 12px;
+}
