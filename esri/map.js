@@ -6,41 +6,66 @@
 
   dojo.require('esri.map');
   dojo.addOnLoad(function() {
-      var baseLayers = [],
-          buttons = '',
-          npmapBaseLayers = document.createElement('div'),
-          npmapLogos = document.createElement('div'),
-          npmapNavigation = document.createElement('div'),
-          npmapProgressBar = document.createElement('div');
-        
-      if (NPMap.config) {
-          if (NPMap.config.bbox) {
-              var boundsString = NPMap.config.bbox.slice(1, NPMap.config.bbox.length - 1).split(',');
+    var baseLayer;
 
-              bounds = new esri.geometry.Extent({
-                  xmax: parseFloat(boundsString[2]),
-                  xmin: parseFloat(boundsString[0]),
-                  ymin: parseFloat(boundsString[1]),
-                  ymax: parseFloat(boundsString[3]),
-                  spatialReference: {
-                      wkid: 102100
-                  }
-              });
+    if (NPMap.config.bbox) {
+      var boundsString = NPMap.config.bbox.slice(1, NPMap.config.bbox.length - 1).split(',');
+
+      bounds = new esri.geometry.Extent({
+          xmax: parseFloat(boundsString[2]),
+          xmin: parseFloat(boundsString[0]),
+          ymin: parseFloat(boundsString[1]),
+          ymax: parseFloat(boundsString[3]),
+          spatialReference: {
+              wkid: 102100
           }
-      }
-
-      map = new esri.Map(NPMap.config.div, {
-          extent: bounds,
-          logo: false,
-          nav: false,
-          showInfoWindowOnClick: false,
-          slider: false
       });
+    }
 
-      NPMap.esri.map.Map = map;
-      NPMap.esri.map.isReady = true;
+    /*
+    //Add the topographic layer to the map. View the ArcGIS Online site for services http://arcgisonline/home/search.html?t=content&f=typekeywords:service    
+        var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
+        map.addLayer(basemap);
+*/
 
-      core.init();
+    map = new esri.Map(NPMap.config.div, {
+        extent: bounds,
+        logo: false,
+        nav: false,
+        showInfoWindowOnClick: false,
+        slider: false,
+        wrapAround180: true
+    });
+
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var layer = NPMap.config.baseLayers[i];
+
+      if (layer.visible) {
+        if (layer.type === 'ArcGisServerRest') {
+          // TODO: Add ArcGisServerRest layer via the layer handler.
+          baseLayer = new esri.layers.ArcGISTiledMapServiceLayer(baseLayer.url);
+
+          map.addLayer(baseLayer);
+
+          break;
+        }
+      }
+    }
+
+    if (!baseLayer) {
+      baseLayer = new esri.layers.ArcGISTiledMapServiceLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer');
+
+      map.addLayer(baseLayer);
+    }
+
+    dojo.connect(map, 'onLoad', function() {
+      dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
+    });
+
+    NPMap.esri.map.Map = map;
+    NPMap.esri.map.isReady = true;
+
+    core.init();
   });
 
   NPMap.esri = NPMap.esri || {};
@@ -69,7 +94,9 @@
     },
     isReady: false,
     Map: null,
-    //panByPixels
+    panByPixels: function() {
+
+    },
     panEast: function() {
       map.panRight();
     },
@@ -100,6 +127,12 @@
           break;
         }
       }
+    },
+    zoomIn: function() {
+
+    },
+    zoomOut: function() {
+
     },
     zoomToExtent: function() {
       map.setExtent(bounds);

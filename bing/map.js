@@ -610,6 +610,12 @@
       return min;
     },
     /**
+     *
+     */
+    getParentDiv: function() {
+      return map.getRootElement();
+    },
+    /**
      * Returns a {Microsoft.Maps.Point} object for a given latLng.
      * @param latLng {Microsoft.Maps.Location} (Required)
      */

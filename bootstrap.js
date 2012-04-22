@@ -507,7 +507,6 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             break;
           case 'modestmaps':
             apiUrl = 'http://www.nps.gov/npmap/scripts/libs/modestmaps-1.0.0-alpha-wax-6.0.0-beta5.min.js';
-            //apiUrl = 'http://www.nps.gov/npmap/js/libs/modestmaps-wax-5.0.0.min.js';
             callback = function() {
               var int = setInterval(function() {
                 if (typeof(com) != 'undefined' && typeof(com.modestmaps) != 'undefined' && typeof(com.modestmaps.Map) != 'undefined') {
