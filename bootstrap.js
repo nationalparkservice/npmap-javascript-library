@@ -506,12 +506,15 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             
             break;
           case 'leaflet':
-            apiUrl = 'http://www.nps.gov/npmap/scripts/libs/leaflet.js';
+            apiUrl = 'http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.js';
             callback = function() {
               var interval = setInterval(function() {
                 if (typeof L !== 'undefined') {
                   clearInterval(interval);
                   NPMap.apiLoaded();
+                  NPMap.utils.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.css');
+
+                  // TODO: Load IE CSS if IE is detected.
                 }
               }, 5);
             };

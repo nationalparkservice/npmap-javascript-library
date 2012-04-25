@@ -539,7 +539,11 @@
       dot.style.width = '1px';
       dot.style.zIndex = '30';
       logos.id = 'npmap-logos';
-      logos.innerHTML = '<table style="height:29px;"><tr>' + (NPMap.config.api === 'modestmaps' ? '' : '<td style="vertical-align:middle;"><div style="margin-right:5px;"><img src="' + NPMap.config.server + '/resources/images/' + NPMap.config.api + 'logo.png" style="display:block;" /></div></td>') + ((NPMap.config && NPMap.config.hideNpmapLogo === true) ? '' : '<td style="vertical-align:middle;">' + npmapLogo + '</td>') + '</tr></table>';
+      
+
+
+
+      logos.innerHTML = '<table style="height:29px;"><tr>' + (NPMap.config.api === 'leaflet' || NPMap.config.api === 'modestmaps' ? '' : '<td style="vertical-align:middle;"><div style="margin-right:5px;"><img src="' + NPMap.config.server + '/resources/images/' + NPMap.config.api + 'logo.png" style="display:block;" /></div></td>') + ((NPMap.config && NPMap.config.hideNpmapLogo === true) ? '' : '<td style="vertical-align:middle;">' + npmapLogo + '</td>') + '</tr></table>';
       logos.style.bottom = '3px';
       logos.style.left = '3px';
       logos.style.position = 'absolute';
