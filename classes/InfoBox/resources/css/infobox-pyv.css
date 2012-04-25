@@ -12,20 +12,6 @@
 #npmap-infobox-close {background:url(../images/icons_sprite.png) no-repeat left -1144px;cursor:pointer;display:block;height:21px;position:absolute;right:-6px;top:-10px;width:21px;z-index:1;}
 #npmap-infobox-close:hover {background-position:left -1185px;}
 
-/* TODO: The styles below are really plan your visit-specific, and can be moved to the project stylesheet. */
-/* Title */
-#npmap-infobox-title h2 {font-size: 18px;font-style:normal;font-weight:normal;line-height:22px;padding:10px 15px;}
-
-#npmap-infobox-title .banner {/*background:url(../images/banners/banner.jpg) no-repeat left top;*/background-color:#828171;min-height:61px;padding:0;position:relative;zoom:1;}
-
-#npmap-infobox-title .banner h2 {background:url(../images/header_background.png) repeat left top;bottom:0px;color:#fff;margin:0px;padding:5px 0 6px 17px;position:absolute;width:364px;}
-
-#npmap-infobox-title .banner h2 span {background:url(../images/icons_sprite.png) no-repeat right -1405px;display:block;padding-right:30px;}
-#npmap-infobox-title .banner:hover h2 span {background-position:right -1559px;}
-
-#npmap-infobox-title .banner.open-description h2 span {background-position:right -1328px;display:block;}
-#npmap-infobox-title .banner.open-description:hover h2 span {background-position:right -1482px;}
-
 /* Content */
 #npmap-infobox .sections {border-bottom: 1px solid #e9e9e7;margin-bottom: 23px;}
 #npmap-infobox .section-events .section-content {height:200px;padding:0;}
