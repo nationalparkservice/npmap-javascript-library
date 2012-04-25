@@ -425,7 +425,7 @@
      * @param {Microsoft.Maps.PolylineOptions} options (Optional) Any additional options to apply to the line.
      * @param {Object} data (Optional) An object with key/value pairs of information that need to be stored with the marker. This object will be added to the line.data property.
      * @param {Function} clickHandler (Optional) A function to call when the marker is clicked.
-     * @return {Microsoft.Maps.Pushpin}
+     * @return {Microsoft.Maps.Polyline}
      */
     createLine: function(latLngs, options, data, clickHandler) {
       var line;
@@ -526,13 +526,6 @@
      */
     getClickDotLatLng: function() {
       var position = $('#npmap-clickdot').position();
-      
-      /*
-      $('#npmap-clickdot').hide().css({
-        height: '5px',
-        width: '5px'
-      }).show();
-      */
       
       return map.tryPixelToLocation(new Microsoft.Maps.Point(position.left, position.top), Microsoft.Maps.PixelReference.control);
     },
