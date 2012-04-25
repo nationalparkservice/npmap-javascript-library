@@ -479,11 +479,11 @@
           dot = document.createElement('div'),
           elements = [],
           logos = document.createElement('div'),
+          logosHtml = '',
           me = this,
           navigation = document.createElement('div'),
           navigationHtml = '',
           notify = document.createElement('div'),
-          npmapLogo = '<a href="http://maps.nps.gov" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmap-logo-dark.png" alt="NPMap - Web Mapping for the U.S. National Park Service" style="border:0 !important;display:block;" /></a>',
           progress = document.createElement('div'),
           switcher = document.createElement('div'),
           switcherMenu = document.createElement('div'),
@@ -521,6 +521,14 @@
         
         return $el;
       }
+
+      if (NPMap.config.api !== 'leaflet' && NPMap.config.api !== 'modestmaps') {
+        logosHtml += '<span style="margin-right:8px;"><img src="' + NPMap.config.server + '/resources/images/' + NPMap.config.api + 'logo.png" /></span>';
+      }
+
+      if (!NPMap.config.hideNpmapLogo) {
+        logosHtml += '<span><a href="http://maps.nps.gov" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmap-logo-dark.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+      }
       
       attribution.id = 'npmap-attribution';
       attribution.style.bottom = '0px';
@@ -538,18 +546,20 @@
       dot.style.position = 'absolute';
       dot.style.width = '1px';
       dot.style.zIndex = '30';
-      logos.id = 'npmap-logos';
       
+      elements.push(attribution, dot);
 
+      if (logosHtml.length > 0) {
+        logos.id = 'npmap-logos';
+        logos.innerHTML = logosHtml;
+        logos.style.bottom = '3px';
+        logos.style.height = '29px';
+        logos.style.left = '3px';
+        logos.style.position = 'absolute';
+        logos.style.zIndex = '30';
 
-
-      logos.innerHTML = '<table style="height:29px;"><tr>' + (NPMap.config.api === 'leaflet' || NPMap.config.api === 'modestmaps' ? '' : '<td style="vertical-align:middle;"><div style="margin-right:5px;"><img src="' + NPMap.config.server + '/resources/images/' + NPMap.config.api + 'logo.png" style="display:block;" /></div></td>') + ((NPMap.config && NPMap.config.hideNpmapLogo === true) ? '' : '<td style="vertical-align:middle;">' + npmapLogo + '</td>') + '</tr></table>';
-      logos.style.bottom = '3px';
-      logos.style.left = '3px';
-      logos.style.position = 'absolute';
-      logos.style.zIndex = '30';
-      
-      elements.push(attribution, dot, logos);
+        elements.push(logos);
+      }
       
       navigation.id = 'npmap-navigation';
       
