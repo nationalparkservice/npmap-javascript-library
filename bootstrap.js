@@ -457,7 +457,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             apiUrl = 'http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0&onscriptload=callback';
             callback = function() {
               var interval = setInterval(function() {
-                if (typeof(Microsoft) != 'undefined' && typeof(Microsoft.Maps) != 'undefined' && typeof(Microsoft.Maps.Globals) != 'undefined') {
+                if (typeof Microsoft !== 'undefined' && typeof Microsoft.Maps !== 'undefined' && typeof Microsoft.Maps.Globals !== 'undefined') {
                   clearInterval(interval);
   
                   if ($('head').html().indexOf('veapicore.js') === -1) {
@@ -467,7 +467,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
                   }
                   
                   interval = setInterval(function() {
-                    if (typeof(Microsoft.Maps.Map) != 'undefined') {
+                    if (typeof Microsoft.Maps.Map !== 'undefined') {
                       clearInterval(interval);
                       NPMap.apiLoaded();
                     }
@@ -505,15 +505,26 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             }
             
             break;
+          case 'leaflet':
+            apiUrl = 'http://www.nps.gov/npmap/scripts/libs/leaflet.js';
+            callback = function() {
+              var interval = setInterval(function() {
+                if (typeof L !== 'undefined') {
+                  clearInterval(interval);
+                  NPMap.apiLoaded();
+                }
+              }, 5);
+            };
+            break;
           case 'modestmaps':
             apiUrl = 'http://www.nps.gov/npmap/scripts/libs/modestmaps-1.0.0-alpha-wax-6.0.0-beta5.min.js';
             callback = function() {
-              var int = setInterval(function() {
-                if (typeof(com) != 'undefined' && typeof(com.modestmaps) != 'undefined' && typeof(com.modestmaps.Map) != 'undefined') {
-                  clearInterval(int);
+              var interval = setInterval(function() {
+                if (typeof com  !== 'undefined' && typeof com.modestmaps !== 'undefined' && typeof com.modestmaps.Map !== 'undefined') {
+                  clearInterval(interval);
                   NPMap.apiLoaded();
                 }
-              }, 50);
+              }, 5);
             };
             break;
           default:
