@@ -263,11 +263,11 @@
         }
       }
 
-      if (layer.edit) {
-        var editable = layer.edit.layers.split(','),
-            j = 0;
-        
-        for (j; j < editable.length; j++) {
+      // layer.edit.userRole is a way of restricting the edit UI.
+      if (layer.edit && layer.edit.userRole !== 'Reader') {
+        var editable = layer.edit.layers.split(',');
+
+        for (var j = 0; j < editable.length; j++) {
           if (parseInt(editable[j]) === subLayer.layerId) {
             actions.push({
               group: 'Edit',
@@ -280,8 +280,7 @@
                 });
               },
               text: 'Delete feature'
-            });
-            actions.push({
+            },{
               group: 'Edit',
               handler: function() {
                 layer.edit.handlers.updateAttributes({
@@ -292,8 +291,7 @@
                 });
               },
               text: 'Update feature attributes'
-            });
-            actions.push({
+            },{
               group: 'Edit',
               handler: function() {
                 layer.edit.handlers.updateGeometry({
@@ -334,6 +332,11 @@
      */
     toggleLayer: function(layer, on) {
       if (on) {
+        if (layer.layers) {
+          // TODO: You need to preserve the original layers string somewhere.
+          layer.layers = '';
+        }
+        
         NPMap[NPMap.config.api].layers.ArcGisServerRest.showLayer(layer);
       } else {
         NPMap[NPMap.config.api].layers.ArcGisServerRest.hideLayer(layer);
