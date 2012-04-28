@@ -527,7 +527,7 @@
       }
 
       if (!NPMap.config.hideNpmapLogo) {
-        logosHtml += '<span><a href="http://maps.nps.gov" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmap-logo-dark.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+        logosHtml += '<span><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmap-logo-dark.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
       }
       
       attribution.id = 'npmap-attribution';
