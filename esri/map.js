@@ -67,10 +67,16 @@
       dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
     });
 
-    NPMap.esri.map.Map = map;
-    NPMap.esri.map.isReady = true;
+    var interval = setInterval(function() {
+      if (NPMap.esri && NPMap.esri.map) {
+        clearInterval(interval);
 
-    core.init();
+        NPMap.esri.map.Map = map;
+        NPMap.esri.map.isReady = true;
+
+        core.init();
+      }
+    }, 10);
   });
 
   NPMap.esri = NPMap.esri || {};
@@ -321,7 +327,7 @@
           height = el.offsetHeight,
           width = el.offsetWidth,
           center = esri.geometry.toScreenGeometry(map.extent, width, height, this.getCenter(102100));
-          
+
       map.centerAt(esri.geometry.toMapGeometry(map.extent, width, height, new esri.geometry.Point(center.x - pixels.x, center.y - pixels.y)));
     },
     panEast: function() {
