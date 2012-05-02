@@ -325,10 +325,10 @@ define([
 		}
 		
 		var bounds = p.bounds,
-			defs = p.layerDefinitions,
-			layerOpt = p.layerOption || 'show',
-			params = {},
-			vlayers = p.layerIds;
+			  defs = p.layerDefinitions,
+			  layerOpt = p.layerOption || 'show',
+			  params = {},
+			  vlayers = p.layerIds;
 		
 		params.bbox = bounds.getSouthWest().lng() + ',' + bounds.getSouthWest().lat() + ',' + bounds.getNorthEast().lng() + ',' + bounds.getNorthEast().lat();
 		params.bboxSR = '4326';
@@ -341,11 +341,11 @@ define([
 		params.transparent = (p.transparent === false ? false : true);
 		
 		if (p.imageSR) {
-		  	if (p.imageSR.wkid) {
-		    	params.imageSR = p.imageSR.wkid;
-		  	} else {
-		    	params.imageSR = '{wkt:' + p.imageSR.wkt + '}';
-		  	}
+		  if (p.imageSR.wkid) {
+		  	params.imageSR = p.imageSR.wkid;
+		  } else {
+		   	params.imageSR = '{wkt:' + p.imageSR.wkt + '}';
+		  }
 		}
 		
 		if (defs === undefined) {
@@ -353,37 +353,37 @@ define([
 		}
 		
 		if (vlayers === undefined) {
-		  	vlayers = this.getVisibleLayerIds();
+		 	vlayers = this.getVisibleLayerIds();
 		}
 		
 		if (vlayers.length > 0) {
-		  	params.layers =  layerOpt + ':' + vlayers.join(',');
+		  params.layers =  layerOpt + ':' + vlayers.join(',');
 		} else {
-		  	if (this.loaded && callback) {
-		    	callback({
-		      		href: null
-		    	});
-		    	
-		    	return;
-		  	}
+		  if (this.loaded && callback) {
+		   	callback({
+		   		href: null
+		   	});
+		  	
+        return;
+		  }
 		}
 		
 		if (p.time) {
-		  	params.time = formatTimeString(p.time, p.endTime);
+		  params.time = formatTimeString(p.time, p.endTime);
 		}
 		
 		if (params.f === 'image') {
-		  	return this.url + '/export?' + formatParams(params);
+		  return this.url + '/export?' + formatParams(params);
 		} else {
-		  	$.getJSON(this.url + '/export', params, function(data) {
-		  		if (data.extent) {
-		  			data.bounds = fromEnvelopeToLatLngBounds(data.extent);
-		  			delete data.extent;
-		  			callback(data);
-		  		} else {
-		  			//handleErr(errback, data.error);
-		  		}
-		  	});
+		  $.getJSON(this.url + '/export', params, function(data) {
+		  	if (data.extent) {
+		  		data.bounds = fromEnvelopeToLatLngBounds(data.extent);
+		  		delete data.extent;
+		  		callback(data);
+		  	} else {
+		  		//handleErr(errback, data.error);
+		  	}
+		  });
 		}
 	};
 	MapService.prototype.getLayer = function(nameOrId) {
@@ -545,7 +545,7 @@ define([
 	function MapType(tileLayer, opts) {
 		var layer;
 		
-		opts = opts || {};
+    opts = opts || {};
 		
 		if (opts.opacity) {
 			this.opacity = opts.opacity;
@@ -693,8 +693,9 @@ define([
 		return this.opacity;
 	};
 	TileLayer.prototype.getTileUrl = function(tile, zoom) {
-		var url = '',
-			z = zoom - (this.projection ? this.projection.minZoom : this.minZoom);
+    var layer = this.layer,
+        url = '',
+			  z = zoom - (this.projection ? this.projection.minZoom : this.minZoom);
 
     if (!isNaN(tile.x) && !isNaN(tile.y) && z >= 0 && tile.x >= 0 && tile.y >= 0) {
 			var singleFusedMapCache = this.mapService.singleFusedMapCache,
@@ -704,17 +705,21 @@ define([
       if (typeof singleFusedMapCache === 'undefined' || singleFusedMapCache === false || zoom > this.dynaZoom) {
 				var numOfTiles = 1 << zoom,
 					  params = {
-						  'f': 'image'
+						  f: 'image'
 					  },
 					  prj = Projection.WEB_MERCATOR,
 					  size = prj.tileSize;
 					
-				params.bounds = new G.LatLngBounds(prj.fromPointToLatLng(new G.Point(tile.x * (size.width / numOfTiles), (tile.y + 1) * (size.height / numOfTiles))), prj.fromPointToLatLng(new G.Point((tile.x + 1) * (size.width / numOfTiles), tile.y * (size.height / numOfTiles))));
+				if (layer.layers && layer.layers !== 'all') {
+          params.layerIds = layer.layers.split(',');
+        }
+        
+        params.bounds = new G.LatLngBounds(prj.fromPointToLatLng(new G.Point(tile.x * (size.width / numOfTiles), (tile.y + 1) * (size.height / numOfTiles))), prj.fromPointToLatLng(new G.Point((tile.x + 1) * (size.width / numOfTiles), tile.y * (size.height / numOfTiles))));
 				params.format = 'png32';
 				params.height = size.height;
 				params.imageSR = prj.spatialReference;
 				params.width = size.width;
-				
+
 				url = this.mapService.exportMap(params);
 			} else {
 				url = u + '/tile/' + z + '/' + tile.y + '/' + tile.x;
@@ -767,24 +772,29 @@ define([
      * @param {Object} layer The layer to add to the map.
      */
     addLayer: function(layer) {
+      if (!layer.name) {
+        NPMap.utils.throwError('All "ArcGisServerRest" layers must have a name.');
+      }
+      
       if (!layer.url) {
-        NPMap.utils.throwError('You must specify a url in the layer config for your ArcGisServerRest layer.');
+        NPMap.utils.throwError('All "ArcGisServerRest" layers must have a url.');
       }
 
       if (typeof layer.visible === 'undefined' || layer.visible === true) {
         var ags,
             options = {
+              layer: layer,
               name: layer.name,
               opacity: 0.7
             },
             url = layer.url;
-            
+        
         if (typeof layer.editable !== undefined) {
           options.disableCaching = true;
         }
 
         ags = new MapType(url, options);
-        
+
         NPMap.google.map.Map.mapTypes.set(url, ags);
 			  NPMap.google.map.Map.overlayMapTypes.insertAt(0, ags);
 

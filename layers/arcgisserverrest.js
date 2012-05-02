@@ -71,18 +71,16 @@
       });
 
       titles.sort(function(a, b) {
-        var textA = a.t.toUpperCase(),
-            textB = b.t.toUpperCase();
+        var A = a.t.toUpperCase(),
+            B = b.t.toUpperCase();
             
-        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        return (A < B) ? -1 : (A > B) ? 1 : 0;
       });
 
       $.each(titles, function(i2, t) {
-        html += '<li><a href="javascript:void(0)" onclick="NPMap.layers.ArcGisServerRest.infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, t.r['OBJECTID']) + '\',\'' + layer.layerName + '\',';
-          
-        html += '\'' + t.t + '\');return false;">' + t.t + '</a></li>';
+        html += '<li><a href="javascript:void(0)" onclick="NPMap.layers.ArcGisServerRest.infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, t.r['OBJECTID']) + '\',\'' + layer.layerName + '\',this);return false;">' + t.t + '</a></li>';
       });
-          
+
       if (!layerConfig.identify || !layerConfig.identify.simpleTree) {
         html += '</ul></li>';
       }
@@ -222,9 +220,9 @@
      * Gets more attribution infomation for an individual geometry and displays it in the InfoBox.
      * @param {String} id The id of the geometry.
      * @param {String} name The name of the layer.
-     * @param {String} title The title of the geometry identify.
+     * @param {String} el The HTML element.
      */
-    infoBoxMoreInfo: function(id, name, title) {
+    infoBoxMoreInfo: function(id, name, el) {
       var actions = [{
             handler: NPMap.layers.ArcGisServerRest.infoBoxBack,
             text: 'Back to list'
@@ -235,7 +233,8 @@
           layer = NPMap.Map.getLayerByName(name, NPMap.config.layers),
           me = this,
           results,
-          subLayer;
+          subLayer,
+          title = $(el).html();
       
       for (i; i < identifyResults.length; i++) {
         if (identifyResults[i].layerName === name) {
@@ -263,11 +262,11 @@
         }
       }
 
-      if (layer.edit) {
-        var editable = layer.edit.layers.split(','),
-            j = 0;
-        
-        for (j; j < editable.length; j++) {
+      // layer.edit.userRole is a way of restricting the edit UI.
+      if (layer.edit && layer.edit.userRole !== 'Reader') {
+        var editable = layer.edit.layers.split(',');
+
+        for (var j = 0; j < editable.length; j++) {
           if (parseInt(editable[j]) === subLayer.layerId) {
             actions.push({
               group: 'Edit',
@@ -280,8 +279,7 @@
                 });
               },
               text: 'Delete feature'
-            });
-            actions.push({
+            },{
               group: 'Edit',
               handler: function() {
                 layer.edit.handlers.updateAttributes({
@@ -292,8 +290,7 @@
                 });
               },
               text: 'Update feature attributes'
-            });
-            actions.push({
+            },{
               group: 'Edit',
               handler: function() {
                 layer.edit.handlers.updateGeometry({
@@ -334,6 +331,11 @@
      */
     toggleLayer: function(layer, on) {
       if (on) {
+        if (layer.layers) {
+          // TODO: You need to preserve the original layers string somewhere.
+          layer.layers = '';
+        }
+        
         NPMap[NPMap.config.api].layers.ArcGisServerRest.showLayer(layer);
       } else {
         NPMap[NPMap.config.api].layers.ArcGisServerRest.hideLayer(layer);
