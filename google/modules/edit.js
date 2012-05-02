@@ -10,34 +10,28 @@
           }
         }
       })(),
+      // The {google.maps.Map} object.
       map = NPMap[NPMap.config.api].map.Map,
+      // The DrawingManager.
       manager = new google.maps.drawing.DrawingManager({
-        circleOptions: {
-          //editable: true
-        },
         drawingControl: false,
-        map: map,
-        markerOptions: {
-          //draggable: true
-        },
-        polygonOptions: {
-          //editable: true
-        },
-        polylineOptions: {
-          //editable: true
-        },
-        rectangleOptions: {
-          //editable: true
-        }
+        map: map
       }),
+      // ?
       selected = null;
   
+  /**
+   *
+   */
   function clearSelection() {
     if (selected) {
       selected.setEditable(false);
       selected = null;
     }
   }
+  /**
+   *
+   */
   function selectColor(color) {
     selectedColor = color;
 
@@ -57,6 +51,9 @@
     polygonOptions.fillColor = color;
     manager.set('polygonOptions', polygonOptions);
   }
+  /**
+   *
+   */
   function setSelectedShapeColor(color) {
     if (selected) {
       if (selected.type == google.maps.drawing.OverlayType.POLYLINE) {
@@ -66,6 +63,9 @@
       }
     }
   }
+  /**
+   *
+   */
   function setSelection(shape) {
     clearSelection();
 
