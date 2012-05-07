@@ -92,23 +92,12 @@ define([
   function runEasey(latLng, zoom, time, callback) {
     var panned = !NPMap.Map.latLngsAreEqual(NPMap.modestmaps.map.latLngToString(map.getCenter()), NPMap.modestmaps.map.latLngToString(latLng)),
         zoomed = map.getZoom() !== zoom;
-    
+
     time = time || 200;
     
     easey().map(map)
-      .to(map.locationCoordinate(latLng)
-        .zoomTo(zoom))
-        .run(time);
-  
-    // TODO: I'm manually calling panned and zoomed events because easey seems to break these.
-    
-    if (panned) {
-       map.dispatchCallback('panned');
-    }
-
-    if (zoomed) {
-       map.dispatchCallback('zoomed');
-    }
+      .to(map.locationCoordinate(latLng).zoomTo(zoom))
+      .run(time);
 
     if (callback) {
       setTimeout(callback, time);
@@ -243,9 +232,10 @@ define([
   }
 
   map = new com.modestmaps.Map(NPMap.config.div, new wax.mm.connector(tileJson), null, [
-    new easey.DragHandler(),
-    new easey.DoubleClickHandler(),
-    new easey.MouseWheelHandler()
+    easey.DragHandler(),
+    easey.TouchHandler(),
+    easey.MouseWheelHandler(),
+    easey.DoubleClickHandler()
   ]);
   bw = wax.mm.bwdetect(map, {
       auto: true,
@@ -263,12 +253,6 @@ define([
   }
 
   map.setZoomRange(minZoom, maxZoom);
-
-  /*
-  if (NPMap.config.fullScreen) {
-    wax.mm.fullscreen(map, tileJson).appendTo(map.parent);
-  }
-  */
 
   if (tileJson.grids) {
     var url = 'http://api.tiles.mapbox.com/v3/';
@@ -296,45 +280,25 @@ define([
   
   initialCenter = new com.modestmaps.Location(center.lat, center.lng);
   initialZoom = oldZoom = zoom;
-    
+
   wax.mm.zoombox(map, tileJson);
   map.setCenterZoom(initialCenter, initialZoom);
-  map.addCallback('centered', function(m) {
-    if (NPMap.InfoBox.visible) {
-      if (m.getZoom() === oldZoom) {
-        NPMap.InfoBox.reposition();
-      } else {
-        NPMap.InfoBox.hide();
-      }
-    }
-  });
-  map.addCallback('extentset', function(m) {
-    if (NPMap.InfoBox.visible) {
-      if (m.getZoom() === oldZoom) {
-        NPMap.InfoBox.reposition();
-      } else {
-        NPMap.InfoBox.hide();
-      }
-    }
-  });
-  map.addCallback('panned', function(m) {
-    if (NPMap.InfoBox.visible) {
-      NPMap.InfoBox.reposition();
-    }
-  });
-  map.addCallback('zoomed', function(m) {
-    // TODO: The zoom change check is failing now because of easey. Fix it.
-    var z = m.getZoom();
+  map.addCallback('drawn', function(m) {
+    var z = Math.round(m.getZoom());
 
-    //if (oldZoom != z) {
+    if (oldZoom !== z) {
+      oldZoom = z;
+
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.hide();
       }
-        
-      oldZoom = z;
 
       NPMap.Event.trigger('NPMap.Map', 'zoomchanged');
-    //}
+    }
+    
+    if (NPMap.InfoBox.visible) {
+      NPMap.InfoBox.reposition();
+    }
   });
   $.each($('#npmap-infobox').children(), function(i, v) {
     if (v.id != 'npmap-infobox-bottom') {
@@ -344,7 +308,7 @@ define([
         e.stopPropagation();
       });
     }
-  }); 
+  });
   core.init();
 
   NPMap.modestmaps = NPMap.modestmaps || {};
@@ -452,7 +416,7 @@ define([
     panByPixels: function(pixels) {
       var center = map.locationPoint(map.getCenter());
 
-      runEasey(map.locationCoordinate(map.pointLocation(new MM.Point(center.x - pixels.x, center.y - pixels.y))), zoom);
+      runEasey(map.pointLocation(new MM.Point(center.x - pixels.x, center.y - pixels.y)), map.getZoom());
     },
     /**
      * Positions the npmap-clickdot div on top of the div that is passed in.

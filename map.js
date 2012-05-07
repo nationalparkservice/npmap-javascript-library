@@ -1142,6 +1142,13 @@
       NPMap[NPMap.config.api].map.setMarkerOptions(marker, options);
     },
     /**
+     * Sets the notify target to an HTML element other than the map div. This must be called after NPMap has been initialized.
+     * @param {Object} target
+     */
+    setNotifyTarget: function(target) {
+      $('#npmap-notify').appendTo($(target));
+    },
+    /**
      * Shows the progress bar.
      * @param {Number} value (Optional) The value to start the progress bar at.
      */

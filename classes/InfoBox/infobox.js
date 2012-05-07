@@ -491,7 +491,7 @@ define(function() {
     reposition: function() {
       var me = this,
           to = this.marker || this.latLng;
-
+      
       NPMap[NPMap.config.api].map.positionClickDot(to);
 
       if (NPMap[NPMap.config.api].map.isLatLngWithinMapBounds(NPMap[NPMap.config.api].map.getClickDotLatLng()) === true) {
