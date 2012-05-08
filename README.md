@@ -1,5 +1,5 @@
 # NPMap
 
-NPMap is a JavaScript library developed, maintained, and used by the U.S. National Park Service. It creates an abstraction layer around various web mapping APIs ("Base APIs" in NPMap-speak) that exposes commonly-used functionality through a simple and targeted API. NPMap also provides a number of custom components and a look-and-feel that is specific to the National Park Service.
+NPMap is a JavaScript (astraction) library developed, maintained, and used by the [U.S. National Park Service](http://www.nps.gov). It creates a "wrapper" around various web mapping APIs. This abstraction layer exposes commonly-used functionality through a simple and targeted API. In addition, NPMap provides a number of custom components and a look-and-feel that fits in with the graphic identity of the National Park Service.
 
 For more information, including targeted examples, check out the [support documentation](http://www.nps.gov/npmap/support).

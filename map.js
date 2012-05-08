@@ -1306,6 +1306,13 @@
       });
       
       NPMap[NPMap.config.api].map.zoomToLatLngs(apiLatLngs);
+    },
+    /**
+     * Zooms the map to the extent of an array of marker objects.
+     * @param {Array} markers The array of marker objects.
+     */
+    zoomToMarkers: function(markers) {
+      NPMap[NPMap.config.api].map.zoomToMarkers(markers);
     }
   };
 });

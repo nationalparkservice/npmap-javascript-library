@@ -458,7 +458,7 @@
       if (!options.anchor || !options.height || !options.width) {
         if (options.height && options.width) {
           options.anchor = options.anchor = new Microsoft.Maps.Point(options.width / 2, options.height / 2);
-        } else {
+        } else if (options.icon) {
           var image = new Image(),
               interval;
 
@@ -908,7 +908,7 @@
       */
     },
     /**
-     * Zooms the map to a the extent of an array of {Microsoft.Maps.Location} objects.
+     * Zooms the map to the extent of an array of {Microsoft.Maps.Location} objects.
      * @param {Array} latLngs The array of lat/lng objects.
      */
     zoomToLatLngs: function(latLngs) {
@@ -916,6 +916,20 @@
         bounds: Microsoft.Maps.LocationRect.fromLocations(latLngs),
         padding: 30
       });
+    },
+    /**
+     * Zooms the map to the extent of an array of {Microsoft.Map.Pushpin} objects.
+     * @param {Array} markers The array of marker objects.
+     */
+    zoomToMarkers: function(markers) {
+      var latLngs = [],
+          me = this;
+
+      for (var i = 0; i < markers.length; i++) {
+        latLngs.push(me.getMarkerLatLng(markers[i]));
+      }
+
+      this.zoomToLatLngs(latLngs);
     }
   };
 });
