@@ -35,34 +35,35 @@
     }
 
     map = new esri.Map(NPMap.config.div, {
-        extent: bounds,
-        logo: false,
-        showInfoWindowOnClick: false,
-        slider: false,
-        wrapAround180: true
+      extent: bounds,
+      logo: false,
+      showInfoWindowOnClick: false,
+      slider: false,
+      wrapAround180: true
     });
-
+    
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
       var layer = NPMap.config.baseLayers[i];
-
-      if (layer.visible) {
+      
+      if (typeof layer.visible === 'undefined' || layer.visible) {
         if (layer.type === 'ArcGisServerRest') {
-          // TODO: Add ArcGisServerRest layer via the layer handler.
-          baseLayer = new esri.layers.ArcGISTiledMapServiceLayer(baseLayer.url);
-
-          map.addLayer(baseLayer);
-
+          baseLayer = true;
+          layer.zIndex = 0;
+          NPMap.utils.safeLoad('NPMap.esri.layers.ArcGisServerRest', function() {
+            NPMap.esri.layers.ArcGisServerRest.addLayer(layer);
+          });
+          
           break;
         }
       }
     }
-
+    
     if (!baseLayer) {
       baseLayer = new esri.layers.ArcGISTiledMapServiceLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer');
 
       map.addLayer(baseLayer);
     }
-
+    
     dojo.connect(map, 'onLoad', function() {
       dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
     });
@@ -186,6 +187,21 @@
      */
     getClickDotLatLng: function() {
       
+    },
+    /**
+     *
+     */
+    getExtent: function() {
+      var extent = map.extent
+      
+      console.log(extent.xmax);
+      
+      return {
+        xmax: esri.geometry.webMercatorToGeographic(extent.xmax),
+        xmin: esri.geometry.webMercatorToGeographic(extent.xmin),
+        ymax: esri.geometry.webMercatorToGeographic(extent.ymax),
+        ymin: esri.geometry.webMercatorToGeographic(extent.ymin)
+      };
     },
     /**
      * Gets a {} from a {}.
@@ -327,7 +343,7 @@
           height = el.offsetHeight,
           width = el.offsetWidth,
           center = esri.geometry.toScreenGeometry(map.extent, width, height, this.getCenter(102100));
-
+          
       map.centerAt(esri.geometry.toMapGeometry(map.extent, width, height, new esri.geometry.Point(center.x - pixels.x, center.y - pixels.y)));
     },
     panEast: function() {
@@ -347,7 +363,7 @@
      * @param {esri.geometry.Point} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
      */
     positionClickDot: function(to) {
-      
+      console.log(to);
     },
     /**
      * Removes a shape from the map.
@@ -383,10 +399,25 @@
     },
     /**
      * Switches the base map.
-     * @param {Object} type The base layer to switch to. Currently only the default Bing Maps base maps are supported here.
+     * @param {Object} type The base layer to switch to.
      */
     switchBaseLayer: function(to) {
+      var active;
       
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var baseLayer = NPMap.config.baseLayers[i];
+        
+        if (baseLayer.visible) {
+          active = baseLayer;
+          
+          break;
+        }
+      }
+      
+      if (active.type === 'ArcGisServerRest') {
+        NPMap.esri.layers.ArcGisServerRest.hideLayer(baseLayer);
+        NPMap.esri.layers.ArcGisServerRest.showLayer(to);
+      }
     },
     /**
      * Zooms the map in by one zoom level.
