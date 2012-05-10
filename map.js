@@ -84,10 +84,11 @@
    * Sets the width of the attribution control based on the width of the map and logos and positions it.
    */
   function setAttributionMaxWidthAndPosition() {
-    var max = $mapDiv.width() - $('#npmap-logos').outerWidth() - 40,
+    var divOverviewMap = document.getElementById('npmap-overviewmap'),
+        max = $mapDiv.width() - $('#npmap-logos').outerWidth() - 40,
         right = 0;
     
-    if ($('#npmap-overviewmap')) {
+    if (divOverviewMap) {
       max = max - $('#npmap-overviewmap').outerWidth();
       right = $('#npmap-overviewmap').outerWidth();
     }
