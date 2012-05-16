@@ -7,81 +7,25 @@ define([
   var
       // The map div.
       $mapDiv = $('#' + NPMap.config.div).parent(),
-      // The attribution string.
-      attribution,
-      // The bandwidth detection object.
-      bw,
+      // The base layer to initialize the map with.
+      baseLayer,
       // Default center of the map.
-      center = {
-        lat: 39,
-        lng: -98
-      },
-      // The fullscreen object.
-      fullscreen = null,
-      // An array of grid URLs.
-      grids,
+      center = new MM.Location(39, -98),
       // The initial center of the map.
       initialCenter,
       // The initial zoom level of the map.
       initialZoom,
-      // The Wax interaction control.
-      interaction = null,
-      // Tracks the fullscreen status of the map.
-      isFullScreen = false,
-      // The {com.modestmaps} map object.
+      // The {MM.Map} object.
       map,
       // Max zoom level of the map.
-      maxZoom = 22,
+      max = 17,
       // Min zoom level of the map.
-      minZoom = 0,
+      min = 0,
       // The last zoom level.
       oldZoom,
-      // The TileJSON object.
-      tileJson,
-      // An array of tile URLs.
-      tiles,
       // The current zoom level.
       zoom = 2;
-
-  /**
-   * Builds out an array of URLs for either grids or tiles. Filters out layers that aren't visible.
-   * @param {String} resource Build URLs for either 'grids' or 'tiles'.
-   */
-  function getVisibleLayersUrls(resource) {
-    var layers = '',
-        subs = [
-          'a',
-          'b',
-          'c',
-          'd'
-        ],
-        urls = [],
-        urlTemplate = 'http://{sub}.tiles.mapbox.com/v3/{layers}/{z}/{x}/{y}.';
-
-    $.each(NPMap.config.layers, function(i, v) {
-      if (v.visible) {
-        layers += v.id + ',';
-      }
-    });
-    
-    if (layers.length > 0) {
-      layers = layers.slice(0, layers.length - 1);
-
-      $.each(subs, function(i, v) {
-        var url = urlTemplate.replace('{sub}', v).replace('{layers}', layers);
-
-        if (resource === 'grids') {
-          url += 'grid.json';
-        } else {
-          url += 'png';
-        }
-
-        urls.push(url);
-      });
-    }
-    
-    return urls;
-  }
+      
   /**
    * Helper function for running easey.
    * @param {Object} latLng
@@ -92,7 +36,7 @@ define([
   function runEasey(latLng, zoom, time, callback) {
     var panned = !NPMap.Map.latLngsAreEqual(NPMap.modestmaps.map.latLngToString(map.getCenter()), NPMap.modestmaps.map.latLngToString(latLng)),
         zoomed = map.getZoom() !== zoom;
-
+        
     time = time || 200;
     
     easey().map(map)
@@ -103,95 +47,64 @@ define([
       setTimeout(callback, time);
     }
   }
-  /**
-   * Sets up interaction on the map.
-   * @param {Object} tileJson The json config object to use to setup interaction.
-   * @return {Object}
-   */
-  function setupInteraction(tileJson) {
-    return wax.mm.interaction().map(map).tilejson(tileJson).on({
-      on: function(args) {
-        var data = args.data,
-            e = args.e,
-            eo = wax.u.eventoffset(e),
-            offset = NPMap.utils.getMapDivOffset(),
-            position = {
-              x: eo.x - offset.left,
-              y: eo.y - offset.top
-            };
+  
+  if (NPMap.config.baseLayers) {
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var layer = NPMap.config.baseLayers[i];
+      
+      if (typeof layer.visible === 'undefined' || layer.visible === true) {
+        NPMap.utils.safeLoad('NPMap.modestmaps.layers.' + layer.type, function() {
+          NPMap.modestmaps.layers[layer.type].addLayer(layer);
+        });
         
-        switch (e.type) {
-          case 'mouseup':
-            var content,
-                title = 'Results';
-
-            NPMap.InfoBox.hide();
-            NPMap.modestmaps.map.positionClickDot(position);
-
-            // TODO: This should be used in conjunction with "clustering".
-            // TODO: Need to support if content and title configs are strings.
-            if (typeof data === 'object' && _.size(data) === 1) {
-              var layer = NPMap.map.getLayerByName(NPMap.utils.getFirstPropertyOfObject(data));
-
-              content = layer.identify.content(data);
-              title = layer.identify.title(data);
-            } else if (NPMap.config.identify && NPMap.config.identify.content) {
-              content = NPMap.config.identify.content(data);
-              title = NPMap.config.identify.title(data);
-            }
-
-            NPMap.InfoBox.show(content, title);
-            
-            break;
-          case 'mousemove':
-            var content;
-
-            document.body.style.cursor = 'pointer';
-            
-            if (typeof NPMap.config.hover !== 'undefined') {
-              content = NPMap.config.hover(data);
-            }
-            
-            if (content) {
-              NPMap.Map.showTip(content, position);
-            }
-
-            break;
-        };
-      },
-      off: function() {
-        document.body.style.cursor = 'auto';
-
-        NPMap.Map.hideTip();
+        baseLayer = true;
+        
+        break;
       }
+    }
+  }
+  
+  // TODO: Hook up attribution.
+  map = new MM.Map(NPMap.config.div, [], null, [
+    easey.DragHandler(),
+    easey.TouchHandler(),
+    easey.MouseWheelHandler(),
+    easey.DoubleClickHandler()
+  ]);
+  center = initialCenter = NPMap.config.center ? new MM.Location(NPMap.config.center.lat, NPMap.config.center.lng) : center;
+  zoom = initialZoom = oldZoom = NPMap.config.zoom || zoom;
+  
+  map.setCenterZoom(center, zoom);
+  
+  if (NPMap.config.restrictZoom) {
+    if (NPMap.config.restrictZoom.max) {
+      max = NPMap.config.restrictZoom.max;
+    }
+    
+    if (NPMap.config.restrictZoom.min) {
+      min = NPMap.config.restrictZoom.min;
+    }
+  }
+  
+  map.setZoomRange(min, max);
+  
+  if (!baseLayer) {
+    baseLayer = {
+      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
+      id: 'mapbox.mapbox-streets',
+      name: 'MapBox Streets',
+      type: 'TileStream',
+      visible: true
+    };
+    NPMap.config.baseLayers = NPMap.config.baseLayers || [];
+    
+    NPMap.config.baseLayers.push(baseLayer);
+    NPMap.utils.safeLoad('NPMap.modestmaps.layers.TileStream', function() {
+      NPMap.modestmaps.layers.TileStream.addLayer(baseLayer);
     });
   }
-  /**
-   * Sets up a TileStream layer.
-   * @param {Object} layer
-   * @param {Object} properties
-   */
-  function setupLayer(layer, properties) {
-    if (properties.grids) {
-      layer.grids = properties.grids;
-    }
-
-    if (properties.tiles) {
-      layer.tiles = properties.tiles;
-    }
-
-    if (!layer.attribution && properties.attribution) {
-      layer.attribution = properties.attribution;
-    }
-        
-    layer.bounds = properties.bounds;
-    layer.center = properties.center;
-    layer.download = properties.download;
-    layer.maxzoom = properties.maxzoom;
-    layer.minzoom = properties.minzoom;
-    layer.version = properties.version;
-  }
-
+  
+  /*
   NPMap.config.layers.sort(function(a, b) {
     return a.zIndex - b.zIndex;
   });
@@ -209,83 +122,114 @@ define([
       }
     }
   });
-
-  attribution = NPMap.Map.buildAttributionStringForVisibleLayers();
-  center = NPMap.config.center || center;
-  grids = getVisibleLayersUrls('grids');
-  tileJson = {
-    scheme: 'xyz'
-  };
-  tiles = getVisibleLayersUrls('tiles');
-  zoom = NPMap.config.zoom || zoom;
-
-  if (attribution) {
-    NPMap.Map.setAttribution(attribution);
-  }
-
-  if (grids.length > 0) {
-    tileJson.grids = grids;
-  }
-
-  if (tiles.length > 0) {
-    tileJson.tiles = tiles;
-  }
-
-  map = new com.modestmaps.Map(NPMap.config.div, new wax.mm.connector(tileJson), null, [
-    easey.DragHandler(),
-    easey.TouchHandler(),
-    easey.MouseWheelHandler(),
-    easey.DoubleClickHandler()
-  ]);
-  bw = wax.mm.bwdetect(map, {
-      auto: true,
-      png: '.png64?'
-  });
-
-  if (NPMap.config.restrictZoom) {
-    if (NPMap.config.restrictZoom.max) {
-      maxZoom = NPMap.config.restrictZoom.max;
-    }
-
-    if (NPMap.config.restrictZoom.min) {
-      minZoom = NPMap.config.restrictZoom.min;
-    }
-  }
-
-  map.setZoomRange(minZoom, maxZoom);
-
-  if (tileJson.grids) {
-    var url = 'http://api.tiles.mapbox.com/v3/';
-
-    $.each(NPMap.config.layers, function(i, v) {
-      if (v.visible) {
-        url += v.id + ',';
-      }
-    });
-
-    url = url.slice(0, url.length - 1);
-    url += '.jsonp';
-
-    reqwest({
-      jsonpCallbackName: 'grid',
-      success: function(data) {
-        NPMap.config.formatter = data.formatter;
-        tileJson.formatter = data.formatter;
-        interaction = setupInteraction(data);
-      },
-      type: 'jsonp',
-      url: url
-    });
-  }
+  */
   
-  initialCenter = new com.modestmaps.Location(center.lat, center.lng);
-  initialZoom = oldZoom = zoom;
+  /*
+  bw = wax.mm.bwdetect(map, {
+    auto: true,
+    png: '.png64?'
+  });
+  */
 
-  wax.mm.zoombox(map, tileJson);
+  /*
+  MM.ZoomBox = function(map) {
+    this.map = map;
+
+    var theBox = this;
+
+    this.getMousePoint = function(e) {
+      // start with just the mouse (x, y)
+      var point = new com.modestmaps.Point(e.clientX, e.clientY);
+      
+      // correct for scrolled document
+      point.x += document.body.scrollLeft + document.documentElement.scrollLeft;
+      point.y += document.body.scrollTop + document.documentElement.scrollTop;
+
+      // correct for nested offsets in DOM
+      for(var node = this.map.parent; node; node = node.offsetParent) {
+        point.x -= node.offsetLeft;
+        point.y -= node.offsetTop;
+      }
+      
+      return point;
+    };
+
+    var boxDiv = document.createElement('div');
+    boxDiv.id = map.parent.id+'-zoombox';
+    boxDiv.style.cssText = 'margin:0; padding:0; position:absolute; top:0; left:0;'
+    boxDiv.style.width = map.dimensions.x+'px';
+    boxDiv.style.height = map.dimensions.y+'px';        
+    map.parent.appendChild(boxDiv);    
+
+    var box = document.createElement('div');
+    box.id = map.parent.id+'-zoombox-box';
+    box.style.cssText = 'margin:0; padding:0; border:1px dashed #888; background: rgba(255,255,255,0.25); position: absolute; top: 0; left: 0; width: 0; height: 0; display: none;';
+    boxDiv.appendChild(box);    
+
+    // TODO: respond to resize
+
+    var mouseDownPoint = null;
+    
+    this.mouseDown = function(e) {
+      if (e.shiftKey) {
+        mouseDownPoint = theBox.getMousePoint(e);
+        
+        box.style.left = mouseDownPoint.x + 'px';
+        box.style.top = mouseDownPoint.y + 'px';
+
+        com.modestmaps.addEvent(map.parent, 'mousemove', theBox.mouseMove);
+        com.modestmaps.addEvent(map.parent, 'mouseup', theBox.mouseUp);
+        
+        map.parent.style.cursor = 'crosshair';
+        
+        return com.modestmaps.cancelEvent(e);
+      }
+    };
+
+    this.mouseMove = function(e) {
+      var point = theBox.getMousePoint(e);
+      box.style.display = 'block';
+      if (point.x < mouseDownPoint.x) {
+          box.style.left = point.x + 'px';
+      }
+      else {
+          box.style.left = mouseDownPoint.x + 'px';
+      }
+      box.style.width = Math.abs(point.x - mouseDownPoint.x) + 'px';
+      if (point.y < mouseDownPoint.y) {
+          box.style.top = point.y + 'px';
+      }
+      else {
+          box.style.top = mouseDownPoint.y + 'px';
+      }
+      box.style.height = Math.abs(point.y - mouseDownPoint.y) + 'px';
+      return com.modestmaps.cancelEvent(e);
+    };    
+
+    this.mouseUp = function(e) {
+      var point = theBox.getMousePoint(e);
+      
+      var l1 = map.pointLocation(point);
+      var l2 = map.pointLocation(mouseDownPoint);
+      map.setExtent([l1,l2]);
+  
+      box.style.display = 'none';        
+      com.modestmaps.removeEvent(map.parent, 'mousemove', theBox.mouseMove);
+      com.modestmaps.removeEvent(map.parent, 'mouseup', theBox.mouseUp);        
+
+      map.parent.style.cursor = 'auto';
+      
+      return com.modestmaps.cancelEvent(e);
+    };
+    
+    com.modestmaps.addEvent(boxDiv, 'mousedown', this.mouseDown);
+  }
+  */
+  
   map.setCenterZoom(initialCenter, initialZoom);
   map.addCallback('drawn', function(m) {
     var z = Math.round(m.getZoom());
-
+    
     if (oldZoom !== z) {
       oldZoom = z;
 
@@ -315,6 +259,15 @@ define([
   
   return NPMap.modestmaps.map = {
     /**
+     * Sets the center and zoom level of the map.
+     * @param {Object} center
+     * @param {Number} zoom
+     * @param {Function} callback (Optional);
+     */
+    centerAndZoom: function(center, zoom, callback) {
+      runEasey(center, zoom, 200, callback);
+    },
+    /**
      * Gets the center of the map.
      * @return {Float}
      */
@@ -322,12 +275,12 @@ define([
       return map.getCenter();
     },
     /**
-     * Returns the current com.modestmaps.Location object of the #npmap-clickdot div.
+     * Returns the current MM.Location object of the #npmap-clickdot div.
      */
     getClickDotLatLng: function() {
       var position = $('#npmap-clickdot').position();
-
-      return map.pointLocation(new com.modestmaps.Point(position.left, position.top));
+      
+      return map.pointLocation(new MM.Point(position.left, position.top));
     },
     /**
      * Gets the parent div of the map.
@@ -358,7 +311,7 @@ define([
 
       map.setSize(width, height);
 
-      map.dimensions = new com.modestmaps.Point(width, height);
+      map.dimensions = new MM.Point(width, height);
       
       $parent.css({
         height: height + 'px',
@@ -386,8 +339,8 @@ define([
               return latLng;
             }
           })();
-
-      if (NPMap.utils.isBetween(extent[0].lat, extent[1].lat, latLng.lat) === true && NPMap.utils.isBetween(extent[0].lon, extent[1].lon, latLng.lon) === true) {
+          
+      if (NPMap.utils.isBetween(extent.north, extent.south, latLng.lat) === true && NPMap.utils.isBetween(extent.east, extent.west, latLng.lon) === true) {
         isWithinExtent = true;
       }
 
@@ -398,15 +351,15 @@ define([
      */
     isReady: true,
     /**
-     * Converts a com.modestmaps.Location object to the NPMap representation of a latitude/longitude string.
-     * @param latLng {com.modestmaps.Location} The Location object to convert to a string.
+     * Converts a MM.Location object to the NPMap representation of a latitude/longitude string.
+     * @param latLng {MM.Location} The Location object to convert to a string.
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
     latLngToString: function(latLng) {
       return latLng.lat + ',' + latLng.lon;
     },
     /**
-     * The com.modestmaps.Map object. This reference should be used to access any of the Modest Maps JS functionality that can't be done through NPMap's API.
+     * The MM.Map object. This reference should be used to access any of the Modest Maps JS functionality that can't be done through NPMap's API.
      */
     Map: map,
     /**
@@ -425,111 +378,32 @@ define([
     positionClickDot: function(to) {
       if (typeof(to) === 'string') {
         to = to.split(',');
-        to = map.locationPoint(new com.modestmaps.Location(parseFloat(to[0]), parseFloat(to[1])));
+        to = map.locationPoint(new MM.Location(parseFloat(to[0]), parseFloat(to[1])));
       }
-
+      
       $('#npmap-clickdot').show().css({
         left: to.x + 'px',
         top: to.y + 'px'
       });
     },
     /**
-     * Sets the center and zoom level of the map.
-     * @param {Object} center
-     * @param {Number} zoom
-     * @param {Function} callback (Optional);
-     */
-    setCenterAndZoom: function(center, zoom, callback) {
-      runEasey(center, zoom, 200, callback);
-    },
-    /**
-     * Converts an NPMap lat/lng string ("latitude,longitude") to a com.modestmaps.Location object.
+     * Converts an NPMap lat/lng string ("latitude,longitude") to a MM.Location object.
      * @param latLng {String} (Required) The NPMap lat/lng string to convert.
-     * @return {com.modestmaps.Location}
+     * @return {MM.Location}
      */
     stringToLatLng: function(latLng) {
       latLng = latLng.split(',');
       
-      return new com.modestmaps.Location(parseFloat(latLng[0]), parseFloat(latLng[1]));
+      return new MM.Location(parseFloat(latLng[0]), parseFloat(latLng[1]));
     },
     /**
      * Switches to a new set of layers.
      * @param {String} url The URL of the TileStream layer or layers to switch to.
      */
     switchLayers: function(url) {
-      attribution = NPMap.Map.buildAttributionStringForVisibleLayers();
-      grids = getVisibleLayersUrls('grids');
-      tileJson = {
-        maxzoom: maxZoom,
-        minzoom: minZoom,
-        scheme: 'xyz'
-      };
-      tiles = getVisibleLayersUrls('tiles');
-      
       NPMap.InfoBox.hide();
       
-      if (attribution) {
-        NPMap.Map.setAttribution(attribution);
-      }
-
-      if (interaction) {
-        interaction.off();
-        interaction = null;
-      }
-
-      if (grids.length > 0) {
-        var url = 'http://api.tiles.mapbox.com/v3/';
-
-        $.each(NPMap.config.layers, function(i, v) {
-          if (v.visible) {
-            url += v.id + ',';
-          }
-        });
-
-        url = url.slice(0, url.length - 1);
-        url += '.jsonp';
-
-        reqwest({
-          jsonpCallbackName: 'grid',
-          success: function(data) {
-            NPMap.config.formatter = data.formatter;
-            tileJson.formatter = data.formatter;
-            tileJson.grids = grids;
-
-            if (tiles.length > 0) {
-              tileJson.tiles = tiles;
-            }
-
-            map.setLayerAt(0, new wax.mm.connector(tileJson));
-
-            interaction = setupInteraction(data);
-          },
-          type: 'jsonp',
-          url: url
-        });
-      } else {
-        if (tiles.length > 0) {
-          tileJson.tiles = tiles;
-        }
-
-        map.setLayerAt(0, new wax.mm.connector(tileJson));
-      }
-    },
-    /**
-     * Toggles fullscreen mode.
-     */
-    toggleFullScreen: function() {
-      if (isFullScreen) {
-        fullscreen.original();
-        isFullScreen = false;
-      } else {
-        if (!fullscreen) {
-          fullscreen = wax.mm.fullscreen(map, tileJson);
-        }
-
-        fullscreen.full();
-        isFullScreen = true;
-      }
+      // Now call TileStream resetLayers()
     },
     /**
      * Zooms the map in by one zoom level.
@@ -542,7 +416,7 @@ define([
       if (toDot) {
         var position = $('#npmap-clickdot').position();
         
-        latLng = map.locationCoordinate(map.pointLocation(new com.modestmaps.Point(position.left, position.top)));
+        latLng = map.locationCoordinate(map.pointLocation(new MM.Point(position.left, position.top)));
       } else {
         latLng = map.getCenter();
       }

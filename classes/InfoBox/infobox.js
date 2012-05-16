@@ -492,8 +492,10 @@ define(function() {
       var me = this,
           to = this.marker || this.latLng;
       
+      // to is undefined
+      
       NPMap[NPMap.config.api].map.positionClickDot(to);
-
+      
       if (NPMap[NPMap.config.api].map.isLatLngWithinMapBounds(NPMap[NPMap.config.api].map.getClickDotLatLng()) === true) {
         position();
       } else {

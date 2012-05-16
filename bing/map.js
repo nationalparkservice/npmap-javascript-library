@@ -67,7 +67,7 @@
     var $el = $(map.getRootElement());
     
     $el.attr('style', $el.attr('style').replace(/cursor:[^;]+/g, ''));
-
+    
     document.getElementById(NPMap.config.div).childNodes[0].style.cursor = cursor;
   }
   /**
@@ -108,7 +108,7 @@
 
   if (!activeBaseLayer) {
     activeBaseLayer = {
-      code: 'mercator',
+      code: 'auto',
       visible: true
     };
     

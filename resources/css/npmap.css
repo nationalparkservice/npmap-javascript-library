@@ -68,8 +68,8 @@
 .npmap-navigation-compass-north-west-over {background:url(../navigation/compass_north/sprite.png) -60px -61px no-repeat;display:block;height:59px;width:58px;}
 
 #npmap-navigation-small-zoom {display:block;width:21px;height:42px;}
-#npmap-navigation-small-zoom-in {height:21px;width:21px;}
-#npmap-navigation-small-zoom-out {height:21px;top:21px;width:21px;}
+#npmap-navigation-small-zoom-in {display:block;height:21px;width:21px;}
+#npmap-navigation-small-zoom-out {display:block;height:21px;top:21px;width:21px;}
 
 .npmap-navigation-small-zoom {background:url(../navigation/zoom_small/sprite.png) -23px -44px no-repeat;display:block;width:21px;height:42px;}
 .npmap-navigation-small-zoom-disabled {background:url(../navigation/zoom_small/sprite.png) 0px 0px no-repeat;display:block;width:21px;height:42px;}
@@ -108,6 +108,8 @@
 #npmap-switcher-menu a:hover {background:#F1F1EF;text-decoration:none;}
 #npmap-switcher-menu a:visited {text-decoration:none;}
 
+#npmap-fullscreen-mask {background-color:black;height:100%;left:0;position:fixed;top:0;width:100%;z-index:99999999999;}
+
 #npmap-toolbar {background-color:#828070;border-bottom-left-radius:3px;border-bottom-right-radius:3px;height:24px;padding:0 12px;position:absolute;right:15px;top:0;z-index:30;}
 .npmap-toolbar-email {background:url('../toolbar/sprite.png') -15px 0px no-repeat;cursor:pointer;display:block;width:13px;height:9px;}
 .npmap-toolbar-fullscreen {background:url('../toolbar/sprite.png') 0px -14px no-repeat;cursor:pointer;display:block;margin-top:6px;width:13px;height:12px;}
@@ -116,7 +118,6 @@
 /* TODO: This is currently only being used for Modest Maps/Wax maps. It should be used for all base APIs */
 #npmap .zoombox-box {background:rgba(255,255,255,0.25) !important;border:2px solid #9F6D00 !important;display:none;height:0;left:0;position:absolute;top:0;width:0;}
 
-.npmap-fullscreen-body {}
 .npmap-fullscreen-map {background-color:white;bottom:0;height:auto !important;left:0;position:fixed !important;right:0;top:0;width:auto !important;z-index:999999999999;}
 
 @media print {

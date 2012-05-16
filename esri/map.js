@@ -42,18 +42,20 @@
       wrapAround180: true
     });
     
-    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var layer = NPMap.config.baseLayers[i];
-      
-      if (typeof layer.visible === 'undefined' || layer.visible) {
-        if (layer.type === 'ArcGisServerRest') {
-          baseLayer = true;
-          layer.zIndex = 0;
-          NPMap.utils.safeLoad('NPMap.esri.layers.ArcGisServerRest', function() {
-            NPMap.esri.layers.ArcGisServerRest.addLayer(layer);
-          });
-          
-          break;
+    if (NPMap.config.baseLayers) {
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var layer = NPMap.config.baseLayers[i];
+        
+        if (typeof layer.visible === 'undefined' || layer.visible) {
+          if (layer.type === 'ArcGisServerRest') {
+            baseLayer = true;
+            layer.zIndex = 0;
+            NPMap.utils.safeLoad('NPMap.esri.layers.ArcGisServerRest', function() {
+              NPMap.esri.layers.ArcGisServerRest.addLayer(layer);
+            });
+            
+            break;
+          }
         }
       }
     }

@@ -7,8 +7,8 @@
   (function(b){toasting=!1;toastQueue=[];b.toast=function(a){return new c(a)};var c=function(a){var c={message:"",displayTime:2E3,inTime:300,outTime:200,maxWidth:400};if(window.toasting)window.toastQueue.unshift(a);else{var d=b("#npmap-toast");window.toasting=!0;a=b.extend(c,a);d.html(a.message);d.fadeIn(a.inTime);setTimeout(function(){d.fadeOut(a.outTime,function(){window.toasting=!1;0<window.toastQueue.length&&(next=window.toastQueue.pop(),b.toast(next))})},a.displayTime)}}})(jQuery);
   
   var $mapDiv = $('#npmap'),
+      $mapDivParent = $mapDiv.parent(),
       isFullScreen = false,
-      originalMapDimensions,
       zoomScales = [
         [0, 295829355],
         [1, 147914668],
@@ -49,7 +49,7 @@
     }).bind('mousewheel', function(e) {
       e.stopPropagation();
     });
-        
+    
     return $el;
   }
   /**
@@ -568,10 +568,10 @@
         navigation.style.width = '58px';
         
         compass = toolsConfig.pan;
-        navigationHtml += '<div id="npmap-navigation-compass" class="npmap-navigation-compass-' + compass + '"><div id="npmap-navigation-compass-east" class="pointer"></div><div id="npmap-navigation-compass-north" class="pointer"></div><div id="npmap-navigation-compass-south" class="pointer"></div><div id="npmap-navigation-compass-west" class="pointer"></div>';
+        navigationHtml += '<div id="npmap-navigation-compass" class="npmap-navigation-compass-' + compass + '"><a id="npmap-navigation-compass-east" class="pointer"></a><a id="npmap-navigation-compass-north" class="pointer"></a><a id="npmap-navigation-compass-south" class="pointer"></a><a id="npmap-navigation-compass-west" class="pointer"></a>';
         
         if (compass === 'home') {
-          navigationHtml += '<div id="npmap-navigation-compass-center" class="pointer"></div>';
+          navigationHtml += '<a id="npmap-navigation-compass-center" class="pointer"></a>';
         }
         
         navigationHtml += '</div>';
@@ -584,7 +584,7 @@
           navigationHtml += ' style="margin-left:17px;margin-top:5px;"';
         }
         
-        navigationHtml += '><div id="npmap-navigation-small-zoom-in" class="pointer"></div><div id="npmap-navigation-small-zoom-out" class="pointer"></div></div>';
+        navigationHtml += '><a id="npmap-navigation-small-zoom-in" class="pointer"></a><a id="npmap-navigation-small-zoom-out" class="pointer"></a></div>';
       }
       
       if (navigationHtml.length > 0) {
@@ -607,7 +607,7 @@
         
         toolbar.innerHTML = toolbarHtml;
         toolbar.id = 'npmap-toolbar';
-
+        
         elements.push(toolbar);
       }
 
@@ -661,9 +661,23 @@
       
       this.addElementsToMapDiv(elements, function() {
         var $map;
-
+        
+        function hookUpNavigationControl(id, handler) {
+          var el = document.getElementById(id);
+          
+          bean.add(el, 'mousedown dblclick', function(e) {
+            e.stop();
+          });
+          bean.add(el, 'click', function(e) {
+            e.stop();
+            handler();
+          });
+          
+          return el;
+        }
+        
         $('#npmap-logos').resize(setAttributionMaxWidthAndPosition);
-
+        
         if (NPMap.config.baseLayers && NPMap.config.baseLayers.length > 1) {
           var activeIcon,
               activeLabel,
@@ -778,57 +792,64 @@
         }
 
         if (toolsConfig.pan) {
-          hookUpClickEvent('npmap-navigation-compass-east', function() {
+          var buttons = [];
+          
+          buttons.push(hookUpNavigationControl('npmap-navigation-compass-east', function() {
             NPMap.Map.panInDirection('east');
-          }).mouseover(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass).addClass('npmap-navigation-compass-' + compass + '-east-over');
-          }).mouseout(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass + '-east-over').addClass('npmap-navigation-compass-' + compass);
-          });
-          hookUpClickEvent('npmap-navigation-compass-north', function() {
+          }));
+          buttons.push(hookUpNavigationControl('npmap-navigation-compass-north', function() {
             NPMap.Map.panInDirection('north');
-          }).mouseover(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass).addClass('npmap-navigation-compass-' + compass + '-north-over');
-          }).mouseout(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass + '-north-over').addClass('npmap-navigation-compass-' + compass);
-          });
-          hookUpClickEvent('npmap-navigation-compass-south', function() {
+          }));
+          buttons.push(hookUpNavigationControl('npmap-navigation-compass-south', function() {
             NPMap.Map.panInDirection('south');
-          }).mouseover(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass).addClass('npmap-navigation-compass-' + compass + '-south-over');
-          }).mouseout(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass + '-south-over').addClass('npmap-navigation-compass-' + compass);
-          });
-          hookUpClickEvent('npmap-navigation-compass-west', function() {
+          }));
+          buttons.push(hookUpNavigationControl('npmap-navigation-compass-west', function() {
             NPMap.Map.panInDirection('west');
-          }).mouseover(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass).addClass('npmap-navigation-compass-' + compass + '-west-over');
-          }).mouseout(function(e) {
-            $('#npmap-navigation-compass').removeClass('npmap-navigation-compass-' + compass + '-west-over').addClass('npmap-navigation-compass-' + compass);
-          });
+          }));
           
           if (compass === 'home') {
-            hookUpClickEvent('npmap-navigation-compass-center', function() {
+            hookUpNavigationControl('npmap-navigation-compass-center', function() {
               me.zoomToInitialExtent();
+            });
+          }
+          
+          for (var i = 0; i < buttons.length; i++) {
+            var button = buttons[i],
+                compassEl = document.getElementById('npmap-navigation-compass');
+                
+            button.direction = button.id.split('-')[3];
+            
+            bean.add(button, 'mouseenter', function(e) {
+              compassEl.className = compassEl.className.replace('npmap-navigation-compass-' + compass, ' npmap-navigation-compass-' + compass + '-' + this.direction + '-over');
+            });
+            bean.add(button, 'mouseleave', function(e) {
+              compassEl.className = compassEl.className.replace(' npmap-navigation-compass-' + compass + '-' + this.direction + '-over', 'npmap-navigation-compass-' + compass);
             });
           }
         }
         
         if (toolsConfig.zoom) {
-          hookUpClickEvent('npmap-navigation-small-zoom-in', function() {
+          var buttons = [];
+          
+          buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-in', function() {
             NPMap.Map.zoomIn();
-          }).mouseover(function(e) {
-            $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom').addClass('npmap-navigation-small-zoom-in-over');
-          }).mouseout(function(e) {
-            $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom-in-over').addClass('npmap-navigation-small-zoom');
-          });
-          hookUpClickEvent('npmap-navigation-small-zoom-out', function() {
+          }));
+          buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-out', function() {
             NPMap.Map.zoomOut();
-          }).mouseover(function(e) {
-            $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom').addClass('npmap-navigation-small-zoom-out-over');
-          }).mouseout(function(e) {
-            $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom-out-over').addClass('npmap-navigation-small-zoom');
-          });
+          }));
+          
+          for (var i = 0; i < buttons.length; i++) {
+            var button = buttons[i];
+            
+            button.inOrOut = button.id.split('-')[4];
+            
+            bean.add(button, 'mouseenter', function(e) {
+              $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom').addClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over');
+            });
+            bean.add(button, 'mouseleave', function(e) {
+              $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over').addClass('npmap-navigation-small-zoom');
+            });
+          }
         }
         
         if (NPMap.config.api === 'bing') {
@@ -1195,41 +1216,51 @@
      * Toggles fullscreen mode on or off.
      */
     toggleFullScreen: function() {
-      var baseApi = NPMap[NPMap.config.api].map,
-          body = document.body,
+      var $mask = $('#npmap-fullscreen-mask'),
+          $window = $(window),
+          baseApi = NPMap[NPMap.config.api].map,
           currentCenter = baseApi.getCenter(),
-          currentZoom = baseApi.getZoom(),
-          parent = baseApi.getParentDiv();
+          currentZoom = baseApi.getZoom();
       
       if (NPMap.InfoBox.visible) {
         currentCenter = baseApi.stringToLatLng(NPMap.InfoBox.latLng);
       }
       
       if (isFullScreen) {
-        body.className = body.className.replace(' npmap-fullscreen-view', '');
-        parent.className = parent.className.replace(' npmap-fullscreen-map', '');
-        parent.style.height = originalMapDimensions.height;
-        parent.style.width = originalMapDimensions.width;
-        document.getElementById('npmap-infobox').style.zIndex = '999999';        
-        isFullScreen = false;
-      } else {
-        var $parent = $(parent);
+        $('body').css({
+          overflow: 'visible'
+        });
+        $mapDiv.removeClass('npmap-fullscreen-map').css({
+          height: '100%',
+          width: '100%'
+        }).appendTo($mapDivParent);
+        $mask.hide();
         
-        originalMapDimensions = {
-          height: parent.offsetHeight + 'px',
-          width: parent.offsetWidth + 'px'
-        };
-
-        body.className += ' npmap-fullscreen-view';
-        parent.className += ' npmap-fullscreen-map';
-        parent.style.height = document.body.offsetHeight + 'px';
-        parent.style.width = document.body.offsetWidth + 'px';
-        isFullScreen = true;
+        isFullScreen = false;
+        document.getElementById('npmap-infobox').style.zIndex = '999999';
+      } else {
+        if ($mask.length === 0) {
+          var div = document.createElement('div');
+          div.id = 'npmap-fullscreen-mask';
+          document.body.appendChild(div);
+          $mask = $('#npmap-fullscreen-mask');
+        }
+        
+        $('body').css({
+          overflow: 'hidden'
+        });
+        $mask.show();
+        $mapDiv.addClass('npmap-fullscreen-map').css({
+          height: $window.height() + 'px',
+          width: $window.width() + 'px'
+        }).appendTo($mask);
+        
+        isFullScreen = true;        
         document.getElementById('npmap-infobox').style.zIndex = '99999999999999';
       }
-
+      
       baseApi.handleResize(function() {
-        baseApi.setCenterAndZoom(currentCenter, currentZoom);
+        baseApi.centerAndZoom(currentCenter, currentZoom);
       });
     },
     /**

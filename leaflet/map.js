@@ -1,35 +1,97 @@
-﻿define([
+﻿// TODO: Hook up attribution for all layers.
+define([
   NPMap.config.server + '/map.js'
 ], function(core) {
   var
       // The base layer to initialize the map with.
       baseLayer,
       // The center {L.LatLng} to initialize the map with.
-      center = new L.LatLng(40.78054143186031, -99.931640625),
+      center = NPMap.config.center,
       // The {L.Map} object.
       map,
+      // The map config object.
+      mapConfig = NPMap.config.mapConfig || {},
       // The zoom level to initialize the map with.
-      zoom = 4;
+      zoom = NPMap.config.zoom || 4;
 
-  map = new L.Map(NPMap.config.div, {
-    attributionControl: false,
-    center: center,
-    zoom: zoom,
-    zoomControl: false
+  // Simple projection for "flat" maps.
+  L.Projection.NoWrap = {
+    project: function (latlng) {
+      return new L.Point(latlng.lng, latlng.lat);
+    },
+    unproject: function (point, unbounded) {
+      return new L.LatLng(point.y, point.x, true);
+    }
+  };
+  //
+  L.CRS.Direct = L.Util.extend({}, L.CRS, {
+    code: 'Direct',
+    projection: L.Projection.NoWrap,
+    transformation: new L.Transformation(1, 0, 1, 0)
   });
-
-  baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-streets/{z}/{x}/{y}.png', {
-    attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
-    maxZoom: 17
-  });
-
-  map.addLayer(baseLayer);
+  
+  if (!center) {
+    center = new L.LatLng(40.78054143186031, -99.931640625)
+  } else {
+    center = new L.LatLng(center.lat, center.lng);
+  }
+  
+  mapConfig.attributionControl = false;
+  mapConfig.center = center;
+  mapConfig.zoom = zoom;
+  mapConfig.zoomControl = false;
+  
+  if (NPMap.config.baseLayers) {
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var layer = NPMap.config.baseLayers[i];
+      
+      if (layer.visible) {
+        NPMap.utils.safeLoad('NPMap.leaflet.layers.' + layer.type, function() {
+          NPMap.leaflet.layers[layer.type].addLayer(layer);
+        });
+        
+        baseLayer = true;
+        
+        if (layer.type === 'Zoomify') {
+          mapConfig.crs = L.CRS.Direct;
+          mapConfig.worldCopyJump = false;
+        }
+        
+        break;
+      }
+    }
+  }
+  
+  if (NPMap.config.restrictZoom && (NPMap.config.restrictZoom.max && NPMap.config.restrictZoom.min)) {
+    mapConfig.maxZoom = NPMap.config.restrictZoom.max;
+    mapConfig.minZoom = NPMap.config.restrictZoom.min;
+  }
+  
+  map = new L.Map(NPMap.config.div, mapConfig);
+  
+  if (!baseLayer) {
+    baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-streets/{z}/{x}/{y}.png', {
+      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
+      maxZoom: 17
+    });
+    
+    map.addLayer(baseLayer);
+    NPMap.Map.setAttribution('<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>');
+  }
+  
   core.init();
-  NPMap.Map.setAttribution('<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>');
 
-  NPMap.leaflet = NPMap.leaflet || {};
+  NPMap.leaflet = {};
   
   return NPMap.leaflet.map = {
+    /**
+     * Zooms to the center and zoom provided. If zoom isn't provided, the map will zoom to level 17.
+     * @param {L.LatLng} latLng
+     * @param {Number} zoom
+     */
+    centerAndZoom: function(latLng, zoom) {
+      map.setView(latLng, zoom);
+    },
     /**
      *
      * @return {L.LatLng}
@@ -39,10 +101,26 @@
     },
     /**
      *
+     */
+    getParentDiv: function() {
+      return document.getElementById('npmap');
+    },
+    /**
+     *
      * @return {Number}
      */
     getZoom: function() {
       return map.getZoom();
+    },
+    /**
+     * Handles any necessary sizing and positioning for the map when its div is resized.
+     */
+    handleResize: function(callback) {
+      map.invalidateSize();
+      
+      if (callback) {
+        callback();
+      }
     },
     /**
      * Is the map loaded and ready to be interacted with programatically?
