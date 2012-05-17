@@ -55,8 +55,8 @@
                     w = (x * tileWidth) * 360 / (tileWidth * Math.pow(2, zoom)) - 180,
                     u = url + '/export?dpi=96&transparent=true&format=png8&bbox=' + w + ',' + s + ',' + e + ',' + n + '&bboxSR=4326&imageSR=102100&size=256,256&f=image';
 
-                if (layer.layers && layer.layers !== 'all') {
-                  u += '&layers=show:' + layer.layers;
+                if (layer.layersStatus && layer.layersStatus !== 'all') {
+                  u += '&layers=show:' + layer.layersStatus;
                 }
 
                 return u;
@@ -70,8 +70,9 @@
           });
       
       layer.entity = tileLayer;
+      layer.layersStatus = layer.layersStatus || layer.layers;
 
-      if (typeof layer.identify === undefined || layer.identify !== false) {
+      if (typeof layer.identify === 'undefined' || layer.identify !== false) {
         identifyLayers++;
         layer.identifiable = true;
       } else {

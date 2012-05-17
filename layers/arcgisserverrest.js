@@ -98,24 +98,23 @@
   function constructId(layerName, layerId, objectId) {
     return layerName.replace(' ', '') + '-' + layerId + '-' + objectId;
   }
-  
+
   NPMap.Event.add('NPMap.InfoBox', 'hide', function() {
     NPMap.layers.ArcGisServerRest.identifyResult = null;
   });
-  
-  // TODO: This should be in the NPMap.layers namespace. This applies to all layer handlers.
+
   NPMap.layers = NPMap.layers || {};
   
   return NPMap.layers.ArcGisServerRest = {
     // Holds the current identify result object for this layer. This will be an array if multiple results are returned or an object if a single result is returned.
     identifyResult: null,
     /**
-     * Builds an infobox for an ArcGisServerRest layer. If provided by user, this function uses the identify config information from each layer's config.
+     * Builds an infobox for an ArcGisServerRest layer. If provided by the user, this function uses the identify config information from each layer's config.
      * @param {Object/Array} (Required) data - The data object or array to build the infobox for.
+     * @return {Object}
      */
     buildInfoBox: function(data) {
       // TODO: Enable sorting for simpleTree === true.
-
       var content = '',
           me = this,
           title = '';
@@ -163,11 +162,11 @@
           value = .1;
       
       $.each(NPMap.config.layers, function(i, v) {
-        if (v.type === 'ArcGisServerRest') {
+        if (v.type === 'ArcGisServerRest' && v.visible === true) {
           var url = v.url + '/identify?callback=?&f=json&geometry=' + clickLng + ',' + clickLat + '&geometryType=esriGeometryPoint&imageDisplay=' + divWidth + ',' + divHeight + ',' + '96&mapExtent=' + swLng + ',' + swLat + ',' + neLng + ',' + neLat + '&returnGeometry=false&sr=4326&tolerance=10&layers=visible';
 
-          if (v.layers && v.layers !== 'all') {
-            url += ':' + v.layers;
+          if (v.layersStatus && v.layersStatus !== 'all') {
+            url += ':' + v.layersStatus;
           }
 
           count++;
@@ -184,29 +183,32 @@
           });
         }
       });
-      NPMap.Map.showProgressBar(value);
 
-      var interval = setInterval(function() {
-        value = value + .1;
+      if (count > 0) {
+        NPMap.Map.showProgressBar(value);
 
-        NPMap.Map.updateProgressBar(value);
+        var interval = setInterval(function() {
+          value = value + .1;
 
-        if (value < 100) {
-          if (count === 0) {
-            var infobox = NPMap.layers.ArcGisServerRest.buildInfoBox(results);
+          NPMap.Map.updateProgressBar(value);
+
+          if (value < 100) {
+            if (count === 0) {
+              var infobox = NPMap.layers.ArcGisServerRest.buildInfoBox(results);
             
-            me.identifyResult = results;
+              me.identifyResult = results;
             
+              clearInterval(interval);
+              NPMap.Map.hideProgressBar(value);
+              NPMap.InfoBox.show(infobox.content, infobox.title);
+            }
+          } else {
             clearInterval(interval);
-            NPMap.Map.hideProgressBar(value);
-            NPMap.InfoBox.show(infobox.content, infobox.title);
+            NPMap.Map.hideProgressBar();
+            NPMap.InfoBox.show('The identify operation is taking too long. Zoom in further and try again.', 'Sorry!');
           }
-        } else {
-          clearInterval(interval);
-          NPMap.Map.hideProgressBar();
-          NPMap.InfoBox.show('The identify operation is taking too long. Zoom in further and try again.', 'Sorry!');
-        }
-      }, 5);
+        }, 5);
+      }
     },
     /**
      * Called when the user hits the "<<Back to List" link in an InfoBox.
@@ -331,14 +333,12 @@
      */
     toggleLayer: function(layer, on) {
       if (on) {
-        if (layer.layers) {
-          // TODO: You need to preserve the original layers string somewhere.
-          layer.layers = '';
-        }
-        
+        layer.layersStatus = layer.layers;
         NPMap[NPMap.config.api].layers.ArcGisServerRest.showLayer(layer);
       } else {
+        layer.layersStatus = '';
         NPMap[NPMap.config.api].layers.ArcGisServerRest.hideLayer(layer);
+        NPMap.InfoBox.hide();
       }
     },
     /**
@@ -350,7 +350,7 @@
     toggleSubLayer: function(layer, subLayerIndex, on) {
       var changed = false,
           index = -1,
-          subLayers = layer.layers.split(',');
+          subLayers = layer.layersStatus.split(',');
 
       for (var i = 0; i < subLayers.length; i++) {
         if (parseInt(subLayers[i]) === parseInt(subLayerIndex)) {
@@ -371,17 +371,25 @@
         }
       }
 
-      layer.layers = subLayers.join();
+      layer.layersStatus = subLayers.join();
 
-      if (layer.layers.indexOf(',') === 0) {
-        layer.layers = layer.layers.slice(1, layer.layers.length);
+      if (layer.layersStatus.indexOf(',') === 0) {
+        layer.layersStatus = layer.layersStatus.slice(1, layer.layersStatus.length);
       }
 
       if (changed) {
         if (subLayers.length === 0) {
           NPMap[NPMap.config.api].layers.ArcGisServerRest.removeLayer(layer);
         } else {
-          this.reloadLayer(layer);
+          if (typeof NPMap[NPMap.config.api].layers.ArcGisServerRest.toggleSubLayer !== 'undefined') {
+            NPMap[NPMap.config.api].layers.ArcGisServerRest.toggleSubLayer(layer, subLayerIndex, on);
+          } else {
+            this.reloadLayer(layer);
+          }
+        }
+
+        if (!on) {
+          NPMap.InfoBox.hide();
         }
       }
     }
