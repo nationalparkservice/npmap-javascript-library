@@ -76,17 +76,16 @@ define([
 
   var identifyLayers = 0;
 
+  /**
+   *
+   */
   function getType(layer) {
     var type;
     
     if (layer.tiled) {
       type = 'MapType';
     } else {
-      if (typeof layer.editable !== undefined) {
-        type = 'MapOverlay';
-      } else {
-        type = 'MapType';
-      }
+      type = 'MapOverlay';
     }
 
     return type;
@@ -127,16 +126,16 @@ define([
 
       if (typeof layer.visible === 'undefined' || layer.visible === true) {
         var ags,
+            interval,
+            me = this,
             options = {
-              //layer: layer,
               name: layer.name,
-              opacity: layer.opacity || 1
-            },
-            type = getType(layer),
-            url = layer.url;
-        
+              opacity: layer.opacity || 1.0
+            };
+
+        layer.gType = getType(layer);
         layer.layersStatus = layer.layersStatus || layer.layers;
-        
+
         if (typeof layer.editable !== undefined) {
           options.disableCaching = true;
         }
@@ -148,20 +147,27 @@ define([
           layer.identifiable = false;
         }
 
-        if (layer.tiled) {
-          layer.gType = 'MapType';
-          ags = new gmaps.ags.MapType(url, options);
+        // TODO: Look into ability to pass multiple URLs in here: http://google-maps-utility-library-v3.googlecode.com/svn/trunk/arcgislink/docs/reference.html#MapType
+        if (layer.gType === 'MapType') {
+          ags = new gmaps.ags.MapType(layer.url, options);
 			    NPMap.google.map.Map.overlayMapTypes.insertAt(0, ags);
         } else {
-          if (typeof layer.editable !== undefined) {
-            layer.gType = 'MapOverlay';
-            ags = new gmaps.ags.MapOverlay(layer.url, options);
-            ags.setMap(NPMap.google.map.Map);
-          } else {
-            layer.gType = 'MapType';
-            ags = new gmaps.ags.MapType(url, options);
-			      NPMap.google.map.Map.overlayMapTypes.insertAt(0, ags);
+          if (layer.layersStatus && layer.layersStatus !== 'all') {
+            options.exportOptions = {
+              layerIds: (function() {
+                var ids = [];
+
+                for (var i = 0, status = layer.layersStatus.split(','); i < status.length; i++) {
+                  ids.push(parseInt(status[i]));
+                }
+
+                return ids;
+              })()
+            };
           }
+
+          ags = new gmaps.ags.MapOverlay(layer.url, options);
+          ags.setMap(NPMap.google.map.Map);
         }
 
         layer.ags = ags;
@@ -213,16 +219,9 @@ define([
      * @param {Boolean} allLayers_ Should all layers be toggled on?
      */
     showLayer: function(layer, allLayers_) {
-      allLayers_ = allLayers_ || true;
-
-      // TODO: Toggle off all layers, then toggle one back on. For some reason this is true.
-      console.log(allLayers_);
-
-
-
-
-
-
+      if (typeof allLayers_ === 'undefined') {
+        allLayers_ = true;
+      }
 
       if (allLayers_ === true) {
         var service = layer.ags.getMapService();
