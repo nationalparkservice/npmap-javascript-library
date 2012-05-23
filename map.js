@@ -311,6 +311,37 @@
     // An array of event handler objects that have been added to this class.
     events: [],
     /**
+     * Gets the active layer types for both baseLayers and layers.
+     * @return {Array}
+     */
+    getActiveLayerTypes: function() {
+      var types = [];
+      
+      if (NPMap.config.baseLayers) {
+        for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+          var baseLayer = NPMap.config.baseLayers[i],
+              type = baseLayer.type;
+
+          if ((typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) && types.indexOf(type) === -1) {
+            types.push(type);
+          }
+        }
+      }
+
+      if (NPMap.config.layers) {
+        for (var i = 0; i < NPMap.config.layers.length; i++) {
+          var layer = NPMap.config.layers[i],
+              type = layer.type;
+
+          if ((typeof layer.visible === 'undefined' || layer.visible === true) && types.indexOf(type) === -1) {
+            types.push(type);
+          }
+        }
+      }
+
+      return types;
+    },
+    /**
      * Gets the center of the map.
      * @return {String}
      */
@@ -1225,7 +1256,7 @@
       if (NPMap.InfoBox.visible) {
         currentCenter = baseApi.stringToLatLng(NPMap.InfoBox.latLng);
       }
-      
+
       if (isFullScreen) {
         $('body').css({
           overflow: 'visible'

@@ -93,7 +93,7 @@
       countAdded = 0,
       interaction,
       tileJson;
-      
+
   /**
    * Gets the number of visible TileStream layers.
    * @return {Number}
@@ -128,12 +128,70 @@
     return (layer.type === 'TileStream' && (typeof layer.visible === 'undefined' || layer.visible));
   }
   /**
+   *
+   */
+  function loadLayers() {
+    var url = 'http://api.tiles.mapbox.com/v3/';
+        
+    if (NPMap.config.baseLayers) {
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var baseLayer = NPMap.config.baseLayers[i];
+
+        if (isVisibleAndTileStream(baseLayer)) {
+          url += baseLayer.id + ',';
+        }
+      }
+    }
+
+    if (NPMap.config.layers) {
+      NPMap.config.layers.sort(function(a, b) {
+        if (a.zIndex && b.zIndex) {
+          return a.zIndex > b.zIndex;
+        } else {
+          return null;
+        }
+      });
+
+      for (var i = 0; i < NPMap.config.layers.length; i++) {
+        var layer = NPMap.config.layers[i];
+            
+        if (isVisibleAndTileStream(layer)) {
+          url += layer.id + ',';
+        }
+      }
+    }
+        
+    url = url.slice(0, url.length - 1);
+    url += '.jsonp';
+
+    reqwest({
+      jsonpCallbackName: 'grid',
+      success: function(data) {
+        tileJson = data;
+            
+        // TODO: This index can come from the layer config too.
+        NPMap.modestmaps.map.Map.insertLayerAt(0, new wax.mm.connector(tileJson));
+            
+        if (tileJson.grids) {
+          interaction = setupInteraction(tileJson);
+        }
+      },
+      type: 'jsonp',
+      url: url
+    });
+  }
+  /**
    * Sets up interaction on the map.
    * @param {Object} tileJson The json config object to use to setup interaction.
    * @return {Object}
    */
   function setupInteraction(tileJson) {
     return wax.mm.interaction().map(NPMap.modestmaps.map.Map).tilejson(tileJson).on({
+      off: function() {
+        document.body.style.cursor = 'auto';
+
+        NPMap.Map.hideTip();
+      },
       on: function(args) {
         var data = args.data,
             e = args.e,
@@ -145,6 +203,20 @@
             };
         
         switch (e.type) {
+          case 'mousemove':
+            var content = null;
+
+            document.body.style.cursor = 'pointer';
+            
+            if (typeof NPMap.config.hover !== 'undefined') {
+              content = NPMap.config.hover(data);
+            }
+            
+            if (content) {
+              NPMap.Map.showTip(content, position);
+            }
+
+            break;
           case 'mouseup':
             var content,
                 title = 'Results';
@@ -167,26 +239,7 @@
             NPMap.InfoBox.show(content, title);
             
             break;
-          case 'mousemove':
-            var content;
-
-            document.body.style.cursor = 'pointer';
-            
-            if (typeof NPMap.config.hover !== 'undefined') {
-              content = NPMap.config.hover(data);
-            }
-            
-            if (content) {
-              NPMap.Map.showTip(content, position);
-            }
-
-            break;
         };
-      },
-      off: function() {
-        document.body.style.cursor = 'auto';
-
-        NPMap.Map.hideTip();
       }
     });
   }
@@ -226,110 +279,18 @@
      */
     addLayer: function() {
       countAdded++;
-      
+
       if (count === countAdded) {
-        var url = 'http://api.tiles.mapbox.com/v3/';
-        
-        if (NPMap.config.baseLayers) {
-          for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-            var baseLayer = NPMap.config.baseLayers[i];
-            
-            if (isVisibleAndTileStream(baseLayer)) {
-              url += baseLayer.id + ',';
-            }
-          }
-        }
-        
-        if (NPMap.config.layers) {
-          for (var i = 0; i < NPMap.config.layers.length; i++) {
-            var layer = NPMap.config.layers[i];
-            
-            if (isVisibleAndTileStream(layer)) {
-              url += layer.id + ',';
-            }
-          }
-        }
-        
-        url = url.slice(0, url.length - 1);
-        url += '.jsonp';
-        
-        reqwest({
-          jsonpCallbackName: 'grid',
-          success: function(data) {
-            tileJson = data;
-            
-            // TODO: This index can come from the layer config too.
-            NPMap.modestmaps.map.Map.insertLayerAt(0, new wax.mm.connector(tileJson));
-            
-            if (tileJson.grids) {
-              interaction = setupInteraction(tileJson);
-            }
-          },
-          type: 'jsonp',
-          url: url
-        });
+        loadLayers();
       }
     },
-    resetLayers: function(layers) {
-      /*
-      attribution = NPMap.Map.buildAttributionStringForVisibleLayers();
-      grids = getVisibleLayersUrls('grids');
-      tileJson = {
-        maxzoom: maxZoom,
-        minzoom: minZoom,
-        scheme: 'xyz'
-      };
-      tiles = getVisibleLayersUrls('tiles');
-      
-      
-      
-      if (attribution) {
-        NPMap.Map.setAttribution(attribution);
-      }
-
-      if (interaction) {
-        interaction.off();
-        interaction = null;
-      }
-
-      if (grids.length > 0) {
-        var url = 'http://api.tiles.mapbox.com/v3/';
-
-        $.each(NPMap.config.layers, function(i, v) {
-          if (v.visible) {
-            url += v.id + ',';
-          }
-        });
-
-        url = url.slice(0, url.length - 1);
-        url += '.jsonp';
-
-        reqwest({
-          jsonpCallbackName: 'grid',
-          success: function(data) {
-            NPMap.config.formatter = data.formatter;
-            tileJson.formatter = data.formatter;
-            tileJson.grids = grids;
-
-            if (tiles.length > 0) {
-              tileJson.tiles = tiles;
-            }
-
-            map.setLayerAt(0, new wax.mm.connector(tileJson));
-
-            interaction = setupInteraction(data);
-          },
-          type: 'jsonp',
-          url: url
-        });
-      } else {
-        if (tiles.length > 0) {
-          tileJson.tiles = tiles;
-        }
-
-        map.setLayerAt(0, new wax.mm.connector(tileJson));
-      }
-      */
+    /**
+     * Refreshes all TileStream layers from the baseLayers and layers configs.
+     */
+    refreshLayers: function() {
+      // TODO: The index should not be hardcoded here.
+      NPMap.modestmaps.map.Map.removeLayerAt(0);
+      loadLayers();
     }
   };
 });

@@ -85,7 +85,7 @@ define([
       min = NPMap.config.restrictZoom.min;
     }
   }
-  
+
   map.setZoomRange(min, max);
   
   if (!baseLayer) {
@@ -400,10 +400,20 @@ define([
      * Switches to a new set of layers.
      * @param {String} url The URL of the TileStream layer or layers to switch to.
      */
-    switchLayers: function(url) {
+    refreshLayers: function(url) {
+      var layerTypes = NPMap.Map.getActiveLayerTypes();
+
       NPMap.InfoBox.hide();
-      
-      // Now call TileStream resetLayers()
+
+      for (var i = 0; i < layerTypes.length; i++) {
+        var layerType = layerTypes[i];
+        
+        if (layerType === 'TileStream') {
+          NPMap.layers.TileStream.refreshLayers();
+        } else {
+          // TODO: Support other layer refreshes here.
+        }
+      }
     },
     /**
      * Zooms the map in by one zoom level.
