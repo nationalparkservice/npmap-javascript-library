@@ -32,7 +32,7 @@
       reqwest({
         success: function(js) {
           var $xml = $($.parseXML(js.d));
-
+          
           layer.geometries = [];
 
           $xml.find(layer.element).each(function(i, v) {
@@ -80,6 +80,10 @@
               createMarker(layer, lat, lng, o, d);
             }
           });
+
+          if (layer.geometries.length === 0) {
+            NPMap.Map.notify('No geometries could be found in the XML.', null, 'error', 4000);
+          }
 
           if (layer.events && layer.events.load) {
             layer.events.load(layer);

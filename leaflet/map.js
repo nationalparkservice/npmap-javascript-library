@@ -2,6 +2,9 @@
 define([
   NPMap.config.server + '/map.js'
 ], function(core) {
+  console.log('NPMap.config.center');
+  console.log(NPMap.config.center);
+  
   var
       // The base layer to initialize the map with.
       baseLayer,
@@ -12,7 +15,13 @@ define([
       // The map config object.
       mapConfig = NPMap.config.mapConfig || {},
       // The zoom level to initialize the map with.
-      zoom = NPMap.config.zoom || 4;
+      zoom = (function() {
+        if (typeof NPMap.config.zoom === 'undefined') {
+          return 4;
+        } else {
+          return NPMap.config.zoom;
+        }
+      })();
 
   // Simple projection for "flat" maps.
   L.Projection.NoWrap = {
@@ -33,13 +42,20 @@ define([
   if (!center) {
     center = new L.LatLng(40.78054143186031, -99.931640625)
   } else {
+    console.log('here');
+    console.log(center);
+    
     center = new L.LatLng(center.lat, center.lng);
+    
+    console.log(center);
   }
   
   mapConfig.attributionControl = false;
   mapConfig.center = center;
   mapConfig.zoom = zoom;
   mapConfig.zoomControl = false;
+  
+  
   
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
@@ -62,9 +78,14 @@ define([
     }
   }
   
-  if (NPMap.config.restrictZoom && (NPMap.config.restrictZoom.max && NPMap.config.restrictZoom.min)) {
-    mapConfig.maxZoom = NPMap.config.restrictZoom.max;
-    mapConfig.minZoom = NPMap.config.restrictZoom.min;
+  if (typeof NPMap.config.restrictZoom !== 'undefined') {
+    if (typeof NPMap.config.restrictZoom.max !== 'undefined') {
+      mapConfig.maxZoom = NPMap.config.restrictZoom.max;
+    }
+    
+    if (typeof NPMap.config.restrictZoom.min !== 'undefined') {
+      mapConfig.minZoom = NPMap.config.restrictZoom.min;
+    }
   }
   
   map = new L.Map(NPMap.config.div, mapConfig);
@@ -144,6 +165,12 @@ define([
      */
     panByPixels: function(pixels) {
       map.panBy(new L.Point(-pixels.x, -pixels.y));
+    },
+    /**
+     *
+     */
+    setBounds: function(bounds) {
+      map.fitBounds(bounds);
     },
     /**
      * Zooms the map in by one zoom level.

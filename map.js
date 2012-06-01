@@ -1187,6 +1187,12 @@
       }
     },
     /**
+     *
+     */
+    setBounds: function(bounds) {
+      NPMap[NPMap.config.api].map.setBounds(bounds);
+    },
+    /**
      * Sets a marker's options.
      * @param {Object} marker The baseApi marker object.
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
