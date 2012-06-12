@@ -120,23 +120,20 @@ NPMap.utils = {
    */
   safeLoad: function(module, callback) {
     module = module.replace('NPMap.', '');
-
+    
     var partition = module.split('.'),
-        int = setInterval(function() {
+        interval = setInterval(function() {
           try {
-            var loaded = function() {
-                  clearInterval(int);
-                  callback();
-                },
-                obj = NPMap;
+            var obj = NPMap;
 
             for (var i = 0; i < partition.length; i++) {
               obj = obj[partition[i]];
-
-              if (typeof(obj) === 'undefined') {
+              
+              if (typeof obj === 'undefined') {
                 break;
               } else if ((i + 1) === partition.length) {
-                loaded();
+                clearInterval(interval);
+                callback();
               }
             }
           } catch (e) {
@@ -282,10 +279,10 @@ NPMap.Event = (function() {
      */
     add: function(obj, event, func) {
       var cl = obj.replace('NPMap.', '');
-
+      
       if (NPMap[cl]) {
         NPMap[cl].events = NPMap[cl].events || [];
-
+        
         NPMap[cl].events.push({
           event: event,
           func: func
@@ -308,8 +305,10 @@ NPMap.Event = (function() {
           func: v.func
         });
       });
-
-      delete NPMap.Event.processQueue;
+      
+      if (queue.length === 0) {
+        delete NPMap.Event.processQueue;
+      }
     },
     /**
      * Remove an existing event from an NPMap class.
@@ -319,7 +318,7 @@ NPMap.Event = (function() {
      */
     remove: function(obj, event, func) {
       var cl = obj.replace('NPMap.', '');
-        
+      
       if (NPMap[cl]) {
         var index = -1;
         
@@ -343,16 +342,29 @@ NPMap.Event = (function() {
      */
     trigger: function(obj, event, e) {
       var cl = obj.replace('NPMap.', '');
-
-      $.each(NPMap[cl].events, function(i, v) {
-        if (v.event === event) {
-          if (!e) {
-            v.func();
-          } else {
-            v.func(e);
+      
+      if (this.processQueue) {
+        this.processQueue();
+      }
+      
+      if (typeof NPMap[cl] !== 'undefined') {
+        $.each(NPMap[cl].events, function(i, v) {
+          if (v.event === event) {
+            if (!e) {
+              v.func();
+            } else {
+              v.func(e);
+            }
           }
-        }
-      });
+        });
+      } else {
+        var me = this;
+        
+        console.log('Event ("' + obj + ', ' + event + '") triggered, but class does not exist. Looping...')/
+        setTimeout(function() {
+          me.trigger(obj, event, e);
+        }, 100);
+      }
     }
   };
 })();
@@ -464,7 +476,10 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
   
                         $('#npmap-loading').hide();
                         $('#npmap-mask').fadeOut().remove();
-                        NPMap.Event.processQueue();
+                        
+                        if (NPMap.Event.processQueue) {
+                          NPMap.Event.processQueue();
+                        }
 
                         if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
                           setTimeout(function() {

@@ -71,10 +71,14 @@
             row: 0,
             zoom: 0
           };
-      
+          
       me._url = url;
       
-      for (var c = {column:0,row:0,zoom:0}; c.zoom <= bottomRightInLimit.zoom; c.zoom += 1) {
+      for (var c = {
+        column: 0,
+        row: 0,
+        zoom: 0
+      }; c.zoom <= bottomRightInLimit.zoom; c.zoom += 1) {
         var bri = me._zoomTo(bottomRightInLimit, c.zoom),
             tlo = me._zoomTo(topLeftOutLimit, c.zoom);
             
@@ -90,7 +94,7 @@
             
             i += 1;
           }
-        }   
+        }
       }
       
       this._groups = groups;
@@ -110,6 +114,14 @@
      ** @param {Object} layerConfig The layer config object from the web map config file.
      */
     addLayer: function(layerConfig) {
+      if (!layerConfig.height) {
+        NPMap.utils.throwError('"height" is required.');
+      }
+      
+      if (!layerConfig.width) {
+        NPMap.utils.throwError('"width" is required.');
+      }
+      
       NPMap.leaflet.map.Map.addLayer(new L.TileLayer.Zoomify(layerConfig.url, {
         height: layerConfig.height,
         width: layerConfig.width

@@ -1037,6 +1037,10 @@
           position: 'absolute',
           zIndex: 32
         });
+        
+        NPMap.utils.safeLoad('NPMap.' + NPMap.config.api + '.map.Map', function() {
+          NPMap.Event.trigger('NPMap.Map', 'ready', NPMap[NPMap.config.api].map.Map);
+        })
       });
     },
     /**
@@ -1193,6 +1197,18 @@
       NPMap[NPMap.config.api].map.setBounds(bounds);
     },
     /**
+     *
+     */
+    setInitialCenter: function(center) {
+      NPMap[NPMap.config.api].map.setInitialCenter(this.stringToLatLng(center));
+    },
+    /**
+     *
+     */
+    setInitialZoom: function(zoom) {
+      NPMap[NPMap.config.api].map.setInitialZoom(zoom);
+    },
+    /**
      * Sets a marker's options.
      * @param {Object} marker The baseApi marker object.
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
@@ -1206,6 +1222,12 @@
      */
     setNotifyTarget: function(target) {
       $('#npmap-notify').appendTo($(target));
+    },
+    /**
+     *
+     */
+    setZoomRestrictions: function(restrictions) {
+      NPMap[NPMap.config.api].map.setZoomRestrictions(restrictions);
     },
     /**
      * Shows the progress bar.

@@ -2,9 +2,6 @@
 define([
   NPMap.config.server + '/map.js'
 ], function(core) {
-  console.log('NPMap.config.center');
-  console.log(NPMap.config.center);
-  
   var
       // The base layer to initialize the map with.
       baseLayer,
@@ -22,8 +19,9 @@ define([
           return NPMap.config.zoom;
         }
       })();
-
-  // Simple projection for "flat" maps.
+      
+  // Simple projection for "flat" maps. - https://github.com/CloudMade/Leaflet/issues/210#issuecomment-3344944
+  // TODO: This should be contained in Zoomify layer handler.
   L.Projection.NoWrap = {
     project: function (latlng) {
       return new L.Point(latlng.lng, latlng.lat);
@@ -32,7 +30,6 @@ define([
       return new L.LatLng(point.y, point.x, true);
     }
   };
-  //
   L.CRS.Direct = L.Util.extend({}, L.CRS, {
     code: 'Direct',
     projection: L.Projection.NoWrap,
@@ -42,20 +39,13 @@ define([
   if (!center) {
     center = new L.LatLng(40.78054143186031, -99.931640625)
   } else {
-    console.log('here');
-    console.log(center);
-    
     center = new L.LatLng(center.lat, center.lng);
-    
-    console.log(center);
   }
   
   mapConfig.attributionControl = false;
   mapConfig.center = center;
   mapConfig.zoom = zoom;
   mapConfig.zoomControl = false;
-  
-  
   
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
@@ -68,6 +58,7 @@ define([
         
         baseLayer = true;
         
+        // TODO: This should be contained in Zoomify layer handler.
         if (layer.type === 'Zoomify') {
           mapConfig.crs = L.CRS.Direct;
           mapConfig.worldCopyJump = false;
@@ -171,6 +162,47 @@ define([
      */
     setBounds: function(bounds) {
       map.fitBounds(bounds);
+    },
+    /**
+     *
+     */
+    setInitialCenter: function(c) {
+      center = c;
+      NPMap.config.center = {
+        lat: c.lat,
+        lng: c.lng
+      };
+    },
+    /**
+     *
+     */
+    setInitialZoom: function(zoom) {
+      zoom = NPMap.config.zoom = zoom;
+    },
+    /**
+     *
+     */
+    setZoomRestrictions: function(restrictions) {
+      NPMap.config.restrictZoom = NPMap.config.restrictZoom || {};
+      
+      if (restrictions.max) {
+        NPMap.config.restrictZoom.max = max;
+      }
+      
+      if (restrictions.min) {
+        NPMap.config.restrictZoom.min = min;
+      }
+      
+      // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.
+    },
+    /**
+     * Converts a lat/lng string ("latitude/longitude") to a {Microsoft.Maps.Location} object.
+     * @param {String} latLng The lat/lng string.
+     * @return {Object}
+     */
+    stringToLatLng: function(latLng) {
+      latLng = latLng.split(',');
+      return new L.LatLng(parseFloat(latLng[0]), parseFloat(latLng[1]));
     },
     /**
      * Zooms the map in by one zoom level.
