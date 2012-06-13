@@ -168,7 +168,7 @@
               z: zoom
             };
 
-        NPMap.layers.NativeVectors.loadData(NPMap.config.server + '/clustercache/get', options);
+        NPMap.layers.NativeVectors.loadData('http://maps.nps.gov/clustercache/get', options);
       });
     }
 
@@ -294,7 +294,7 @@
             options.query = (typeof(v.query) === 'function') ? v.query() : v.query;
           }
               
-          NPMap.layers.NativeVectors.loadData(NPMap.config.server + '/clustercache/get', options);
+          NPMap.layers.NativeVectors.loadData('http://maps.nps.gov/clustercache/get', options);
         });
       });
     }
@@ -354,7 +354,7 @@
   return NPMap.bing.layers.NativeVectors = {
     /*
      * Adds a NativeVectors layer to the map. Can also be called if a layer has already been added to the map, but needs to be "lazy-loaded."
-     * @param layer {Object} (Required) The layer config object of the layer that is to be added to the map.
+     * @param {Object} layer The layer config object of the layer that is to be added to the map.
      */
     addLayer: function(layer) {
       layer.active = typeof(layer.active) === 'undefined' ? true : layer.active;

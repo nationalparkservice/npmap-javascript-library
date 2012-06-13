@@ -12,9 +12,16 @@ define([
       // The map config object.
       mapConfig = NPMap.config.mapConfig || {},
       // The zoom level to initialize the map with.
-      zoom = NPMap.config.zoom || 4;
-
-  // Simple projection for "flat" maps.
+      zoom = (function() {
+        if (typeof NPMap.config.zoom === 'undefined') {
+          return 4;
+        } else {
+          return NPMap.config.zoom;
+        }
+      })();
+      
+  // Simple projection for "flat" maps. - https://github.com/CloudMade/Leaflet/issues/210#issuecomment-3344944
+  // TODO: This should be contained in Zoomify layer handler.
   L.Projection.NoWrap = {
     project: function (latlng) {
       return new L.Point(latlng.lng, latlng.lat);
@@ -23,7 +30,6 @@ define([
       return new L.LatLng(point.y, point.x, true);
     }
   };
-  //
   L.CRS.Direct = L.Util.extend({}, L.CRS, {
     code: 'Direct',
     projection: L.Projection.NoWrap,
@@ -52,6 +58,7 @@ define([
         
         baseLayer = true;
         
+        // TODO: This should be contained in Zoomify layer handler.
         if (layer.type === 'Zoomify') {
           mapConfig.crs = L.CRS.Direct;
           mapConfig.worldCopyJump = false;
@@ -62,9 +69,14 @@ define([
     }
   }
   
-  if (NPMap.config.restrictZoom && (NPMap.config.restrictZoom.max && NPMap.config.restrictZoom.min)) {
-    mapConfig.maxZoom = NPMap.config.restrictZoom.max;
-    mapConfig.minZoom = NPMap.config.restrictZoom.min;
+  if (typeof NPMap.config.restrictZoom !== 'undefined') {
+    if (typeof NPMap.config.restrictZoom.max !== 'undefined') {
+      mapConfig.maxZoom = NPMap.config.restrictZoom.max;
+    }
+    
+    if (typeof NPMap.config.restrictZoom.min !== 'undefined') {
+      mapConfig.minZoom = NPMap.config.restrictZoom.min;
+    }
   }
   
   map = new L.Map(NPMap.config.div, mapConfig);
@@ -144,6 +156,53 @@ define([
      */
     panByPixels: function(pixels) {
       map.panBy(new L.Point(-pixels.x, -pixels.y));
+    },
+    /**
+     *
+     */
+    setBounds: function(bounds) {
+      map.fitBounds(bounds);
+    },
+    /**
+     *
+     */
+    setInitialCenter: function(c) {
+      center = c;
+      NPMap.config.center = {
+        lat: c.lat,
+        lng: c.lng
+      };
+    },
+    /**
+     *
+     */
+    setInitialZoom: function(zoom) {
+      zoom = NPMap.config.zoom = zoom;
+    },
+    /**
+     *
+     */
+    setZoomRestrictions: function(restrictions) {
+      NPMap.config.restrictZoom = NPMap.config.restrictZoom || {};
+      
+      if (restrictions.max) {
+        NPMap.config.restrictZoom.max = max;
+      }
+      
+      if (restrictions.min) {
+        NPMap.config.restrictZoom.min = min;
+      }
+      
+      // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.
+    },
+    /**
+     * Converts a lat/lng string ("latitude/longitude") to a {Microsoft.Maps.Location} object.
+     * @param {String} latLng The lat/lng string.
+     * @return {Object}
+     */
+    stringToLatLng: function(latLng) {
+      latLng = latLng.split(',');
+      return new L.LatLng(parseFloat(latLng[0]), parseFloat(latLng[1]));
     },
     /**
      * Zooms the map in by one zoom level.
