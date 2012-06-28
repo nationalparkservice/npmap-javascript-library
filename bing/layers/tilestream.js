@@ -1,9 +1,61 @@
 ﻿define([
   '../../layers/tilestream.js'
 ], function(tilestream) {
-  var // The default tiling scheme.
-      tilingScheme = 'xyz';
+  var 
+      // The number of visible TileStream layers in the NPMap.config.layers array.
+      count = tilestream.getVisibleLayers().length,
+      // The number of TileStream layers that have been added to teh map.
+      countAdded = 0,
+      // The current index for the tile URLs array.
+      currentUrlIndex = 0,
+      // The TileStream layer. Currently, the map can only have one TileStream layer at a time.
+      layer,
+      // The TileJson object returned from TileStream.
+      tileJson;
   
+  /**
+    * Builds the tile URL path.
+    * @param {Object} tile The tile object, with x, y, and z properties.
+    * @return {String}
+    */
+  function getTilePath(tile) {
+    var url;
+    
+    if (typeof tilingScheme !== 'undefined' && tilingScheme === 'osm') {
+      tile = xyzToOsm(tile);
+    } else {
+      tile.z = tile.levelOfDetail;
+    };
+    
+    url = tileJson.tiles[currentUrlIndex].replace('{x}', tile.x).replace('{y}', tile.y).replace('{z}', tile.z);
+    
+    if ((currentUrlIndex + 1) === tileJson.tiles.length) {
+      currentUrlIndex = 0;
+    } else {
+      currentUrlIndex++;
+    }
+
+    return url;
+  }
+  /**
+   *
+   */
+  function load() {
+    tilestream.load(function(data) {
+      layer = new Microsoft.Maps.TileLayer({
+        mercator: new Microsoft.Maps.TileSource({
+          uriConstructor: getTilePath
+        }),
+        // TODO: This should come from config.
+        opacity: 1,
+        // TODO: This index can come from the layer config too.
+        zIndex: 0
+      });
+      tileJson = data;
+      
+      NPMap.bing.map.Map.entities.push(layer);
+    });
+  }
   /**
    * Converts an x,y,z tile coordinate into OSM format.
    * @param {Object} tile
@@ -27,76 +79,32 @@
 
   return NPMap.bing.layers.TileStream = {
     /*
-     * Adds a TileStream layer to the map.
-     * @param layer {Object} (Required) The layer config object of the layer that is to be added to the map.
+     * Add a TileStream layer to the map. No layerConfig parameter is passed in here, as TileStream layers are "aware" of each other, and must be processed together.
      */
-    addLayer: function(layer) {
-      var tileLayer;
+    addLayer: function(layerConfig) {
+      countAdded++;
       
-      /**
-        * Builds the tile URL path.
-        * @param {Object} tile The tile object, with x, y, and z properties.
-        * @return {String}
-        */
-      function getTilePath(tile) {
-        var url;
-
-        if (tilingScheme === 'osm') {
-          tile = xyzToOsm(tile);
-        } else {
-          tile.z = tile.levelOfDetail;
-        };
-
-        url = layer.urls[layer.currentUrlIndex].replace('{x}', tile.x).replace('{y}', tile.y).replace('{z}', tile.z);
-
-        if ((layer.currentUrlIndex + 1) === layer.urls.length) {
-          layer.currentUrlIndex = 0;
-        } else {
-          layer.currentUrlIndex++;
-        }
-
-        return url;
+      if (count === countAdded) {
+        load();
       }
-
-      if (layer.urls[0].indexOf('/v1/') != -1) {
-        tilingScheme = 'osm';
-      }
-      
-      tileLayer = new Microsoft.Maps.TileLayer({
-        mercator: new Microsoft.Maps.TileSource({
-          uriConstructor: getTilePath
-        }),
-        opacity: 1,
-        zIndex: layer.zIndex || null
-      });
-      
-      tileLayer.id = layer.name;
-      layer.active = true;
-      layer.currentUrlIndex = 0;
-      layer.entity = tileLayer;
-      layer.visible = true;
-
-      NPMap.bing.map.Map.entities.push(tileLayer);
     },
     /**
      * Hides the TileStream layer.
      * @param {Object} The layer config object of the layer to hide.
      */
-    hideLayer: function(layer) {
-      NPMap.bing.map.Map.entities.get(NPMap.bing.map.Map.entities.indexOf(layer.entity)).setOptions({
+    hideLayer: function(layerConfig) {
+      NPMap.bing.map.Map.entities.get(NPMap.bing.map.Map.entities.indexOf(layer)).setOptions({
         visible: false
       });
-      layer.visible = false;
     },
     /**
-     * Shows the KML layer.
+     * Shows the TileStream layer.
      * @param {Object} The layer config object of the layer to show.
      */
-    showLayer: function(layer) {
-      NPMap.bing.map.Map.entities.get(NPMap.bing.map.Map.entities.indexOf(layer.entity)).setOptions({
+    showLayer: function(layerConfig) {
+      NPMap.bing.map.Map.entities.get(NPMap.bing.map.Map.entities.indexOf(layer)).setOptions({
         visible: true
       });
-      layer.visible = true;
     }
   };
 });

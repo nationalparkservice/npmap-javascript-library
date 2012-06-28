@@ -196,8 +196,6 @@
     getExtent: function() {
       var extent = map.extent
       
-      console.log(extent.xmax);
-      
       return {
         xmax: esri.geometry.webMercatorToGeographic(extent.xmax),
         xmin: esri.geometry.webMercatorToGeographic(extent.xmin),
@@ -365,7 +363,56 @@
      * @param {esri.geometry.Point} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
      */
     positionClickDot: function(to) {
-      console.log(to);
+      /*
+      
+      var anchorY = 0,
+          me = this,
+          offset = NPMap.utils.getMapDivOffset(),
+          pixel = NPMap.bing.map.Map.tryLocationToPixel((function() {
+            var latLng = null;
+            
+            if (typeof(to) === 'string') {
+              to = to.split(',');
+              latLng = new Microsoft.Maps.Location(parseFloat(to[0]), parseFloat(to[1]));
+            } else {
+              if (to.latitude) {
+                latLng = to;
+              } else {
+                anchorY = me.getMarkerAnchor(to).y;
+                latLng = to.getLocation();
+              }
+            }
+
+            return latLng;
+          })(), Microsoft.Maps.PixelReference.page);
+      
+      $('#npmap-clickdot').hide().css({
+        left: pixel.x - offset.left,
+        top: pixel.y - offset.top - anchorY
+      }).show();
+      
+      */
+      
+      var el = this.getMapDiv(),
+          height = el.offsetHeight,
+          width = el.offsetWidth,
+          point = esri.geometry.toScreenGeometry(map.extent, width, height, to);
+          
+      console.log(el);
+      console.log(height);
+      console.log(map.extent);
+      console.log(width);
+      
+      console.log(point);
+      
+      $('#npmap-clickdot').css({
+        height: '5px',
+        width: '5px',
+        backgroundColor: 'red',
+        
+        left: point.x + 'px',
+        top: point.y + 'px'
+      }).show();
     },
     /**
      * Removes a shape from the map.

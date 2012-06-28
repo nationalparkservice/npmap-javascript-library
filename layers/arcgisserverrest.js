@@ -6,13 +6,18 @@
       backTitle = null,
       // An array of results for the current identify operation.
       identifyResults = [];
-
+      
+  /**
+   * Builds a HTML string for a layer.
+   * @param {Object} layer
+   * @return {String}
+   */
   // TODO: Start using underscore's templating (or mustache.js) to clean this code up.
   function buildHtmlForLayer(layer) {
     var html = '<ul>',
         layerConfig = NPMap.Map.getLayerByName(layer.layerName),
         subLayers = [];
-
+        
     $.each(layer.data.results, function(i, result) {
       var subLayerObject;
 
@@ -76,7 +81,6 @@
             
         return (A < B) ? -1 : (A > B) ? 1 : 0;
       });
-
       $.each(titles, function(i2, t) {
         html += '<li><a href="javascript:void(0)" onclick="NPMap.layers.ArcGisServerRest.infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, t.r['OBJECTID']) + '\',\'' + layer.layerName + '\',this);return false;">' + t.t + '</a></li>';
       });
@@ -98,7 +102,7 @@
   function constructId(layerName, layerId, objectId) {
     return layerName.replace(' ', '') + '-' + layerId + '-' + objectId;
   }
-
+  
   NPMap.Event.add('NPMap.InfoBox', 'hide', function() {
     NPMap.layers.ArcGisServerRest.identifyResult = null;
   });
@@ -118,7 +122,7 @@
       var content = '',
           me = this,
           title = '';
-
+          
       identifyResults = [];
       
       if (!data || data.length === 0) {
@@ -134,11 +138,10 @@
 
         title = 'Results';
       }
-
-      title = '<h2>' + title + '</h2>';
+      
       backContent = content;
-      backTitle = title;
-
+      backTitle = title = '<h2>' + title + '</h2>';
+      
       return {
         content: content,
         title: title
@@ -160,7 +163,7 @@
           me = this,
           results = [],
           value = .1;
-      
+          
       $.each(NPMap.config.layers, function(i, v) {
         if (v.type === 'ArcGisServerRest' && v.visible === true) {
           var url = v.url + '/identify?callback=?&f=json&geometry=' + clickLng + ',' + clickLat + '&geometryType=esriGeometryPoint&imageDisplay=' + divWidth + ',' + divHeight + ',' + '96&mapExtent=' + swLng + ',' + swLat + ',' + neLng + ',' + neLat + '&returnGeometry=false&sr=4326&tolerance=10&layers=visible';
@@ -183,7 +186,7 @@
           });
         }
       });
-
+      
       if (count > 0) {
         NPMap.Map.showProgressBar(value);
 
@@ -191,14 +194,16 @@
           value = value + .1;
 
           NPMap.Map.updateProgressBar(value);
-
+          
           if (value < 100) {
             if (count === 0) {
-              var infobox = NPMap.layers.ArcGisServerRest.buildInfoBox(results);
-            
-              me.identifyResult = results;
-            
+              var infobox;
+              
               clearInterval(interval);
+              
+              infobox = NPMap.layers.ArcGisServerRest.buildInfoBox(results);
+              me.identifyResult = results;
+              
               NPMap.Map.hideProgressBar(value);
               NPMap.InfoBox.show(infobox.content, infobox.title);
             }

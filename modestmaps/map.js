@@ -1,5 +1,6 @@
 ﻿// TODO: This should be migrated upwards.
 // TODO: You need to re-add support for full screen maps.
+// TODO: Hook up attribution.
 
 define([
   NPMap.config.server + '/map.js'
@@ -21,6 +22,20 @@ define([
       max = 17,
       // Min zoom level of the map.
       min = 0,
+      //
+      numberZIndexLayers = (function() {
+        var c = 0;
+        
+        if (NPMap.config.layers) {
+          for (var i = 0; i < NPMap.config.layers.length; i++) {
+            if (typeof NPMap.config.layers[i].zIndex !== 'undefined') {
+              c++;
+            }
+          }
+        }
+        
+        return c;
+      })(),
       // The last zoom level.
       oldZoom,
       // The current zoom level.
@@ -48,6 +63,25 @@ define([
     }
   }
   
+  center = initialCenter = NPMap.config.center ? new MM.Location(NPMap.config.center.lat, NPMap.config.center.lng) : center;
+  map = new MM.Map(NPMap.config.div, [], null, [
+    easey.DragHandler(),
+    easey.TouchHandler(),
+    easey.MouseWheelHandler(),
+    easey.DoubleClickHandler()
+  ]);
+  zoom = initialZoom = oldZoom = NPMap.config.zoom || zoom;
+  
+  if (NPMap.config.restrictZoom) {
+    if (NPMap.config.restrictZoom.max) {
+      max = NPMap.config.restrictZoom.max;
+    }
+    
+    if (NPMap.config.restrictZoom.min) {
+      min = NPMap.config.restrictZoom.min;
+    }
+  }
+  
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
       var layer = NPMap.config.baseLayers[i];
@@ -63,30 +97,6 @@ define([
       }
     }
   }
-  
-  // TODO: Hook up attribution.
-  map = new MM.Map(NPMap.config.div, [], null, [
-    easey.DragHandler(),
-    easey.TouchHandler(),
-    easey.MouseWheelHandler(),
-    easey.DoubleClickHandler()
-  ]);
-  center = initialCenter = NPMap.config.center ? new MM.Location(NPMap.config.center.lat, NPMap.config.center.lng) : center;
-  zoom = initialZoom = oldZoom = NPMap.config.zoom || zoom;
-  
-  map.setCenterZoom(center, zoom);
-  
-  if (NPMap.config.restrictZoom) {
-    if (NPMap.config.restrictZoom.max) {
-      max = NPMap.config.restrictZoom.max;
-    }
-    
-    if (NPMap.config.restrictZoom.min) {
-      min = NPMap.config.restrictZoom.min;
-    }
-  }
-
-  map.setZoomRange(min, max);
   
   if (!baseLayer) {
     baseLayer = {
@@ -104,129 +114,94 @@ define([
     });
   }
   
-  /*
-  NPMap.config.layers.sort(function(a, b) {
-    return a.zIndex - b.zIndex;
-  });
-  $.each(NPMap.config.layers, function(i, v) {
-    if ($.isArray(NPMap.config.tileJson)) {
-      for (var i = 0; i < NPMap.config.tileJson.length; i++) {
-        if (v.id.indexOf(NPMap.config.tileJson[i].id) != -1) {
-          setupLayer(v, NPMap.config.tileJson[i]);
-          break;
-        }
-      }
-    } else {
-      if (v.id.indexOf(NPMap.config.tileJson.id) != -1) {
-        setupLayer(v, NPMap.config.tileJson);
-      }
-    }
-  });
-  */
+  if (NPMap.config.layers && NPMap.config.layers.length === numberZIndexLayers) {
+    NPMap.config.layers.sort(function(a, b) {
+      return a.zIndex - b.zIndex;
+    });
+  }
   
-  /*
-  bw = wax.mm.bwdetect(map, {
-    auto: true,
-    png: '.png64?'
-  });
-  */
-
-  /*
-  MM.ZoomBox = function(map) {
-    this.map = map;
-
-    var theBox = this;
-
-    this.getMousePoint = function(e) {
-      // start with just the mouse (x, y)
+  (function() {
+    var box = document.createElement('div'),
+        mouseDownPoint = null,
+        mousePoint = null;
+    
+    function getMousePoint(e) {
       var point = new com.modestmaps.Point(e.clientX, e.clientY);
       
-      // correct for scrolled document
       point.x += document.body.scrollLeft + document.documentElement.scrollLeft;
       point.y += document.body.scrollTop + document.documentElement.scrollTop;
-
-      // correct for nested offsets in DOM
-      for(var node = this.map.parent; node; node = node.offsetParent) {
+      
+      for (var node = map.parent; node; node = node.offsetParent) {
         point.x -= node.offsetLeft;
         point.y -= node.offsetTop;
       }
       
       return point;
-    };
-
-    var boxDiv = document.createElement('div');
-    boxDiv.id = map.parent.id+'-zoombox';
-    boxDiv.style.cssText = 'margin:0; padding:0; position:absolute; top:0; left:0;'
-    boxDiv.style.width = map.dimensions.x+'px';
-    boxDiv.style.height = map.dimensions.y+'px';        
-    map.parent.appendChild(boxDiv);    
-
-    var box = document.createElement('div');
-    box.id = map.parent.id+'-zoombox-box';
-    box.style.cssText = 'margin:0; padding:0; border:1px dashed #888; background: rgba(255,255,255,0.25); position: absolute; top: 0; left: 0; width: 0; height: 0; display: none;';
-    boxDiv.appendChild(box);    
-
-    // TODO: respond to resize
-
-    var mouseDownPoint = null;
-    
-    this.mouseDown = function(e) {
+    }
+    function mouseDown(e) {
       if (e.shiftKey) {
-        mouseDownPoint = theBox.getMousePoint(e);
-        
+        mouseDownPoint = getMousePoint(e);
         box.style.left = mouseDownPoint.x + 'px';
         box.style.top = mouseDownPoint.y + 'px';
-
-        com.modestmaps.addEvent(map.parent, 'mousemove', theBox.mouseMove);
-        com.modestmaps.addEvent(map.parent, 'mouseup', theBox.mouseUp);
-        
         map.parent.style.cursor = 'crosshair';
+        
+        com.modestmaps.addEvent(map.parent, 'mousemove', mouseMove);
+        com.modestmaps.addEvent(map.parent, 'mouseup', mouseUp);
         
         return com.modestmaps.cancelEvent(e);
       }
-    };
-
-    this.mouseMove = function(e) {
-      var point = theBox.getMousePoint(e);
-      box.style.display = 'block';
-      if (point.x < mouseDownPoint.x) {
-          box.style.left = point.x + 'px';
-      }
-      else {
-          box.style.left = mouseDownPoint.x + 'px';
-      }
-      box.style.width = Math.abs(point.x - mouseDownPoint.x) + 'px';
-      if (point.y < mouseDownPoint.y) {
-          box.style.top = point.y + 'px';
-      }
-      else {
-          box.style.top = mouseDownPoint.y + 'px';
-      }
-      box.style.height = Math.abs(point.y - mouseDownPoint.y) + 'px';
-      return com.modestmaps.cancelEvent(e);
-    };    
-
-    this.mouseUp = function(e) {
-      var point = theBox.getMousePoint(e);
+    }
+    function mouseMove(e) {
+      var point = getMousePoint(e);
       
-      var l1 = map.pointLocation(point);
-      var l2 = map.pointLocation(mouseDownPoint);
-      map.setExtent([l1,l2]);
-  
-      box.style.display = 'none';        
-      com.modestmaps.removeEvent(map.parent, 'mousemove', theBox.mouseMove);
-      com.modestmaps.removeEvent(map.parent, 'mouseup', theBox.mouseUp);        
-
+      box.style.display = 'block';
+      
+      if (point.x < mouseDownPoint.x) {
+        box.style.left = point.x + 'px';
+      } else {
+        box.style.left = mouseDownPoint.x + 'px';
+      }
+      
+      box.style.width = Math.abs(point.x - mouseDownPoint.x) + 'px';
+      
+      if (point.y < mouseDownPoint.y) {
+        box.style.top = point.y + 'px';
+      } else {
+        box.style.top = mouseDownPoint.y + 'px';
+      }
+      
+      box.style.height = Math.abs(point.y - mouseDownPoint.y) + 'px';
+      
+      return com.modestmaps.cancelEvent(e);
+    }
+    function mouseUp(e) {
+      var point = getMousePoint(e),
+          l1 = map.pointLocation(point),
+          l2 = map.pointLocation(mouseDownPoint);
+      
+      map.setExtent([
+        l1,
+        l2
+      ]);
+      
+      box.style.display = 'none';
       map.parent.style.cursor = 'auto';
       
+      com.modestmaps.removeEvent(map.parent, 'mousemove', mouseMove);
+      com.modestmaps.removeEvent(map.parent, 'mouseup', mouseUp);
+      
       return com.modestmaps.cancelEvent(e);
-    };
+    }
     
-    com.modestmaps.addEvent(boxDiv, 'mousedown', this.mouseDown);
-  }
-  */
+    box.id = 'npmap-zoombox';
+    box.style.cssText = 'background:rgba(255,255,255,0.25);border:1px dashed #888;display:none;height:0;left:0;margin:0;padding:0;position:absolute;top:0;width:0;z-index:29;';
+    
+    NPMap.utils.safeLoad('NPMap.Map', function() {
+      NPMap.Map.addElementToMapDiv(box);
+    });
+    com.modestmaps.addEvent(map.parent, 'mousedown', mouseDown);
+  })();
   
-  map.setCenterZoom(initialCenter, initialZoom);
   map.addCallback('drawn', function(m) {
     var z = Math.round(m.getZoom());
     
@@ -244,6 +219,8 @@ define([
       NPMap.InfoBox.reposition();
     }
   });
+  map.setCenterZoom(center, zoom);
+  map.setZoomRange(min, max);
   $.each($('#npmap-infobox').children(), function(i, v) {
     if (v.id != 'npmap-infobox-bottom') {
       $('#' + v.id).dblclick(function(e) {
@@ -253,6 +230,7 @@ define([
       });
     }
   });
+  
   core.init();
 
   NPMap.modestmaps = NPMap.modestmaps || {};
@@ -300,26 +278,6 @@ define([
      * @param {Function} callback (Optional)
      */
     handleResize: function(callback) {
-      var $parent = $(map.parent),
-          height = $parent.actual('height'),
-          width = $parent.actual('width');
-      
-      // TODO: Can't you handle this in NPMap.Map?
-      if (NPMap.InfoBox.visible) {
-        NPMap.InfoBox.reposition();
-      }
-
-      map.setSize(width, height);
-
-      map.dimensions = new MM.Point(width, height);
-      
-      $parent.css({
-        height: height + 'px',
-        width: width + 'px'
-      });
-
-      map.dispatchCallback('resized', map.dimensions);
-
       if (callback) {
         callback();
       }

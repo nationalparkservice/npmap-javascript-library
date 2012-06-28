@@ -522,11 +522,11 @@ define(function() {
       if (target) {
         NPMap.bing.map.positionClickDot(target);
         
-        if (typeof(target) === 'string') {
+        if (typeof target === 'string') {
           NPMap.InfoBox.latLng = target;
         } else {
-          NPMap.InfoBox.marker = target;
           NPMap.InfoBox.latLng = NPMap.Map.getMarkerLatLng(target);
+          NPMap.InfoBox.marker = target;
         }
       }
 
@@ -711,6 +711,11 @@ define(function() {
         }
       }
       
+      /*
+      console.log($('#npmap-infobox-bottom').outerHeight());
+      console.log($('#npmap-infobox-footer').outerHeight());
+      console.log($('#npmap-infobox-title').outerHeight());
+      
       bottomHeight = $('#npmap-infobox-bottom').actual('outerHeight');
 	    footerHeight = (function() {
 	      if (hasFooterContent) {
@@ -720,7 +725,21 @@ define(function() {
 	      }
 	    })();
       
+      console.log(bottomHeight);
+      console.log(footerHeight);
+      
       mH = maxHeight - $('#npmap-infobox-title').actual('outerHeight') - bottomHeight;
+      */
+      
+      bottomHeight = $('#npmap-infobox-bottom').outerHeight();
+      footerHeight = (function() {
+        if (hasFooterContent) {
+          return $('#npmap-infobox-footer').outerHeight();
+        } else {
+          return 0;
+        }
+      })();
+      mH = maxHeight - $('#npmap-infobox-title').outerHeight() - bottomHeight;
       
       if (padding < (bottomHeight + footerHeight)) {
         padding = bottomHeight + footerHeight;

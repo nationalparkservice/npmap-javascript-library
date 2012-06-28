@@ -5,7 +5,7 @@
   
   return NPMap.leaflet.layers.Tiled = {
     /**
-     * Add a Zoomify layer to the map.
+     * Add a Tiled layer to the map.
      ** @param {Object} layerConfig The layer config object from the web map config file.
      */
     addLayer: function(layerConfig) {

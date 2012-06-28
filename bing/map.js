@@ -130,23 +130,19 @@
 
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
   }
-
-  // TODO: Verify that turning on animation and inertia doesn't affect identify operations for NativeVectors layers.
+  
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
-    //animate: (clustered === true || tiled === true) ? false : true,
     bounds: use === 'bbox' ? Microsoft.Maps.LocationRect.fromCorners(new Microsoft.Maps.Location(parseFloat(bounds[0].split(' ')[0]), parseFloat(bounds[0].split(' ')[1])), new Microsoft.Maps.Location(parseFloat(bounds[1].split(' ')[0]), parseFloat(bounds[1].split(' ')[1]))) : null,
     center: use === 'centerAndZoom' ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : null,
-    credentials: 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
+    credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
     disableKeyboardInput: NPMap.config.tools && !NPMap.config.tools.keyboard ? true : false,
     mapTypeId: mapTypeId,
     showCopyright: false,
     showDashboard: false,
     showLogo: false,
     showScalebar: false,
-    //useInertia: (clustered === true || tiled === true) ? false : true,
     zoom: use === 'centerAndZoom' ? NPMap.config.zoom : null
   });
-  
   initialCenter = map.getCenter();
   initialZoom = map.getZoom();
   
@@ -258,40 +254,6 @@
 
     viewChanged = true;
     
-    // TODO: Verify that turning this off doesn't affect identify operations for NativeVectors layers.
-    /*
-    if ((clustered === true || tiled === true) && (nwHemisphere != seHemisphere)) {
-      var center = NPMap.bing.map.Map.getCenter(),
-          plus;
-      
-      if (nwHemisphere === 'eastern' && seHemisphere === 'western') {
-        if (center.longitude < 0) {
-          plus = 180 - nw.longitude;
-
-          try {
-            NPMap.bing.map.Map.setView({
-              animate: false,
-              center: new Microsoft.Maps.Location(center.latitude, center.longitude + plus)
-            });
-          } catch (error) {
-
-          }
-        } else {
-          plus = 180 + se.longitude;
-          
-          try {
-            NPMap.bing.map.Map.setView({
-              animate: false,
-              center: new Microsoft.Maps.Location(center.latitude, center.longitude - plus)
-            });
-          } catch (error) {
-
-          }
-        }
-      }
-    }
-    */
-
     if (NPMap.InfoBox.visible) {
       if (clustered === true || tiled === true) {
         var zoom = map.getZoom(),
@@ -397,7 +359,7 @@
               center: latLng,
               zoom: parseInt(zoom)
             };
-
+            
         if (NPMap.InfoBox && NPMap.InfoBox.visible) {
           var infoBoxLatLng = (function() {
                 if (NPMap.InfoBox.marker) {
@@ -888,6 +850,7 @@
      * Zooms the map to its initial extent.
      */
     zoomToInitialExtent: function() {
+      NPMap.InfoBox.hide();
       map.setView({
         center: initialCenter,
         zoom: initialZoom

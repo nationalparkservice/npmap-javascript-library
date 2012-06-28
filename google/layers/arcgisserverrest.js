@@ -198,7 +198,7 @@ define([
       if (!this.dragging_ && this.overlay_) {
         clearOverlay_(this.overlay_)
       }
-
+      
       this.mapService.exportMap(params, function(json) {
         me.drawing_ = false;
         
@@ -297,7 +297,7 @@ define([
       if (!p || !p.bounds) {
         return;
       }
-
+      
       var bnds = p.bounds,
           defs = p.layerDefinitions || this.getLayerDefs_(),
           layerOpt = p.layerOption || 'show',
@@ -312,7 +312,7 @@ define([
       params.layerDefs = getLayerDefsString_(defs);
       params.size = p.width + ',' + p.height;
       params.transparent = (p.transparent === false ? false : true);
-
+      
       if (p.imageSR) {
         if (p.imageSR.wkid) {
           params.imageSR = p.imageSR.wkid;
@@ -320,9 +320,14 @@ define([
           params.imageSR = '{wkt:' + p.imageSR.wkt + '}';
         }
       }
-
+      
       if (vlayers.length > 0) {
-        params.layers =  layerOpt + ':' + vlayers.join(',');
+        if (vlayers.length > 1) {
+          params.layers =  layerOpt + ':' + vlayers.join(',');
+        } else if (vlayers[0] !== 'all') {
+          params.layers = vlayers[0];
+        }
+        
       } else {
         if (this.loaded_ && callback) {
           callback({
@@ -332,7 +337,7 @@ define([
           return;
         }
       }
-
+      
       if (params.f === 'image') {
         return this.url + '/export?' + formatParams_(params);
       } else {
@@ -346,7 +351,7 @@ define([
 
               callback(json); 
             } else {
-              handleErr_(errback, json.error);  
+              NPMap.utils.throwError(json.error);
             }
           },
           type: 'jsonp',
@@ -486,7 +491,7 @@ define([
 
           agsLayer = new ags.MapOverlay(layer.url, options);
         }
-
+        
         layer.ags = agsLayer;
         layer.visible = true;
       }

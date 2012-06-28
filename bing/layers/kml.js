@@ -102,14 +102,11 @@
       
       NPMap.InfoBox.hide();
       
-      switch (e.targetType) {
-        case 'polygon':
-          to = NPMap.bing.map.latLngToString(NPMap.bing.map.Map.tryPixelToLocation(new Microsoft.Maps.Point(e.pageX, e.pageY), Microsoft.Maps.PixelReference.page));
-          break;
-        case 'pushpin':
-          to = target;
-          break;
-      };
+      if (e.targetType === 'pushpin') {
+        to = target;
+      } else {
+        to = NPMap.bing.map.latLngToString(NPMap.bing.map.Map.tryPixelToLocation(new Microsoft.Maps.Point(e.pageX, e.pageY), Microsoft.Maps.PixelReference.page));
+      }
       
       if (target.data.description) {
         content = target.data.description;
@@ -153,16 +150,16 @@
           if (icon.length > 0) {
             style.icon = $(icon).find('href').text();
           } else {
-            style.icon = 'http://maps.nps.gov/images/mapicons/NpsRound13.png';
+            style.icon = NPMap.config.server + '/resources/markers/nps_round_13.png';
           }
-
+          
           if (line.length > 0) {
             style.line = {
               color: $(line).find('color').text(),
               width: parseInt($(line).find('width').text())
             };
           }
-
+          
           if (poly.length > 0) {
             style.poly = {
               color: $(poly).find('color').text(),
@@ -170,7 +167,7 @@
               outline: parseInt($(poly).find('outline').text())
             };
           }
-
+          
           styles.push(style);
         });
         $(xml).find('Placemark').each(function(i, v) {
@@ -188,12 +185,19 @@
             var me = this,
                 coordinate = $(me).find('Point').find('coordinates').text().split(','),
                 data = buildDataObject(layerConfig, me, extendedData),
-                icon = null,
-                iconHeight = null,
-                iconWidth = null;
+                icon = NPMap.config.server + '/resources/markers/nps_round_13.png',
+                iconHeight = 13,
+                iconWidth = 13;
                   
             function callback() {
               var marker = NPMap.Map.createMarker(coordinate[1] + ',' + coordinate[0], {
+                anchor: (function() {
+                  if (iconHeight > iconWidth) {
+                    return new Microsoft.Maps.Point(iconWidth / 2, 0);
+                  } else {
+                    return new Microsoft.Maps.Point(iconWidth / 2, iconHeight / 2);
+                  }
+                })(),
                 height: iconHeight,
                 icon: icon,
                 width: iconWidth
@@ -209,7 +213,7 @@
               } else {
                 var image = document.createElement('img');
                 
-                if (typeof(layerConfig.icon) === 'string') {
+                if (typeof layerConfig.icon === 'string') {
                   icon = layerConfig.icon;
                 } else {
                   icon = layerConfig.icon(data);
@@ -234,17 +238,86 @@
               };
               image.src = style.icon;
             } else {
-              icon = 'http://maps.nps.gov/images/mapicons/NpsRound13.png';
-              iconHeight = 13;
-              iconWidth = 13;
-              
+              callback();
+            }
+          } else if ($(this).find('LineString').length > 0) {
+            var callback = function() {
+                  var line,
+                      objStyle = {};
+                  
+                  if (strokeColor) {
+                    var colors = hexToRgb(strokeColor);
+                      
+                    objStyle.strokeColor = new Microsoft.Maps.Color(parseInt(strokeOpacity), colors[0], colors[1], colors[2]);
+                  }
+
+                  if (strokeThickness) {
+                    objStyle.strokeThickness = strokeThickness;
+                  }
+                  
+                  line = NPMap.bing.map.createLine(locations, objStyle, buildDataObject(layerConfig, me, extendedData));
+                  
+                  layerConfig.geometries.push(line);
+                  NPMap.Map.addShape(line);
+                },
+                coordinates = $(this).find('LineString').find('coordinates').text(),
+                locations = [],
+                me = this,
+                split = ' ',
+                strokeColor = '#000000',
+                strokeOpacity = 255,
+                strokeThickness = 3;
+
+            if (coordinates.indexOf('\n') >= 0) {
+              split = '\n';
+            }
+            
+            $.each(coordinates.split(split), function(i, v) {
+              var coordinate = v.split(',');
+
+              if (coordinate.length > 1) {
+                locations.push(new Microsoft.Maps.Location(parseFloat(coordinate[1].replace(/ /g,'')), parseFloat(coordinate[0].replace(/ /g,''))));
+              }
+            });
+            
+            if (layerConfig.line) {
+              if (layerConfig.line === 'default') {
+                callback();
+              } else {
+                var line;
+                
+                if (typeof(layerConfig.polygon) === 'function') {
+                  line = layerConfig.line(); // TODO: Pass data in here.
+                } else {
+                  line = layerConfig.line;
+                }
+                
+                strokeColor = line.color || '#000000';
+                strokeOpacity = line.opacity || 255;
+                strokeThickness = line.width || 2;
+                
+                callback();
+              }
+            } else if (style && style.line) {
+              // TODO: Test this.
+              if (style.line.color) {
+                strokeColor = style.line.color;
+              }
+
+              if (style.line.width) {
+                strokeThickness = style.line.width;
+              }
+
+              callback();
+            } else {
               callback();
             }
           } else if ($(this).find('MultiGeometry').length > 0) {
             
           } else if ($(this).find('Polygon').length > 0) {
             var callback = function() {
-                  var objStyle = {};
+                  var objStyle = {},
+                      polygon;
                     
                   if (fillColor) {
                     var colors = hexToRgb(fillColor);
@@ -262,10 +335,10 @@
                     objStyle.strokeThickness = strokeThickness;
                   }
 
-                  var polygon = NPMap.bing.map.createPolygon(locations, objStyle, buildDataObject(layerConfig, me, extendedData));
+                  polygon = NPMap.bing.map.createPolygon(locations, objStyle, buildDataObject(layerConfig, me, extendedData));
                     
                   layerConfig.geometries.push(polygon);
-                  NPMap.bing.map.Map.entities.push(polygon);
+                  NPMap.Map.addShape(polygon);
                 },
                 coordinates = $(this).find('Polygon').find('coordinates').text(),
                 fillColor = null,
