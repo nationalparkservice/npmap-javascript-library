@@ -635,7 +635,7 @@
       }
       
       if (!NPMap.config.hideNpmapLogo) {
-        logosHtml += '<span style="display:block;float:right;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmap-logo-dark.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+        logosHtml += '<span style="display:block;float:right;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
       }
 
       if (logosHtml.length > 0) {
