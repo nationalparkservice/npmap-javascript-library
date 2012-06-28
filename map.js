@@ -6,9 +6,13 @@
    */
   (function(b){toasting=!1;toastQueue=[];b.toast=function(a){return new c(a)};var c=function(a){var c={message:"",displayTime:2E3,inTime:300,outTime:200,maxWidth:400};if(window.toasting)window.toastQueue.unshift(a);else{var d=b("#npmap-toast");window.toasting=!0;a=b.extend(c,a);d.html(a.message);d.fadeIn(a.inTime);setTimeout(function(){d.fadeOut(a.outTime,function(){window.toasting=!1;0<window.toastQueue.length&&(next=window.toastQueue.pop(),b.toast(next))})},a.displayTime)}}})(jQuery);
   
-  var $mapDiv = $('#npmap'),
+  var //
+      $mapDiv = $('#npmap'),
+      //
       $mapDivParent = $mapDiv.parent(),
+      //
       isFullScreen = false,
+      //
       zoomScales = [
         [0, 295829355],
         [1, 147914668],
@@ -1157,20 +1161,21 @@
      * @return {Number}
      */
     metersToZoomLevel: function(meters) {
-      var i = 0,
-          z;
-      
-      for (i; i < zoomScales.length; i++) {
+      var z;
+
+      for (var i = 0; i < zoomScales.length; i++) {
+        var zoom = zoomScales[i][0];
+        
         if (meters >= zoomScales[i][1]) {
           if (zoomScales[i - 1]) {
             if (meters < zoomScales[i - 1][1]) {
-              z = zoomScales[i][0];
+              z = zoomScales[i + 1][0];
             }
           } else {
-            z = zoomScales[i][0];
+            z = zoom;
           }
         } else if (meters < zoomScales[zoomScales.length - 1][1]) {
-          z = zoomScales[i][0];
+          z = zoom;
         }
       }
 
