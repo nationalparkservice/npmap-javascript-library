@@ -9,7 +9,7 @@
 #npmap-infobox.shadow {-moz-box-shadow:2px 2px 3px #BDBBB1;-webkit-box-shadow:2px 2px 3px #BDBBB1;box-shadow:2px 2px 3px #BDBBB1;}
 
 /* Close */
-#npmap-infobox-close {background:url(../images/icons_sprite.png) no-repeat left -1144px;cursor:pointer;display:block;height:21px;position:absolute;right:-6px;top:-10px;width:21px;z-index:1;}
+#npmap-infobox-close {background:url(../img/icons_sprite.png) no-repeat left -1144px;cursor:pointer;display:block;height:21px;position:absolute;right:-6px;top:-10px;width:21px;z-index:1;}
 #npmap-infobox-close:hover {background-position:left -1185px;}
 
 /* Content */
@@ -20,7 +20,7 @@
 #npmap-infobox .section-description .section-content h4 {color:#464646;margin-bottom:10px;}
 #npmap-infobox .section-description .section-content p, #npmap-infobox .section-description .section-content a {font-size:12px;line-height:18px;}
 #npmap-infobox .section-description .section-content p {color:#464646;margin:0 0 5px 0;}
-#npmap-infobox .section-toggle {background:#ede8d7 url(../images/toggle_sprite.png) no-repeat left -40px;border-bottom:1px solid #f6f3e9;border-top:1px solid #e5e4de;color:#464646;cursor:pointer;font-size:11px;line-height:30px;margin:0;padding:0 0 0 33px;text-transform:uppercase;/*width:365px;*/}
+#npmap-infobox .section-toggle {background:#ede8d7 url(../img/toggle_sprite.png) no-repeat left -40px;border-bottom:1px solid #f6f3e9;border-top:1px solid #e5e4de;color:#464646;cursor:pointer;font-size:11px;line-height:30px;margin:0;padding:0 0 0 33px;text-transform:uppercase;/*width:365px;*/}
 #npmap-infobox .section-alerts .section-toggle {background-position:left -120px;color:#b72a0e;}
 #npmap-infobox .section-toggle.section-open {border-bottom:1px solid #e9e9e7;background-position:left top;}
 #npmap-infobox .section-alerts .section-toggle.section-open {color:#b72a0e;background-position:left -80px;}
@@ -42,5 +42,5 @@
 
 /* Footer */
 #npmap-infobox .sq-btn {bottom:24px;font-size:12px;left:15px;padding:8px 12px 6px;padding-top:5px;position:absolute;}
-#npmap-infobox .zoom-in, .zoom-in:hover {background:url(../images/icons_sprite.png) no-repeat left -852px;bottom:28px;color:#918f7e;font-size:11px;font-weight:bold;line-height:18px;padding-left:15px;position:absolute;right:20px;}
+#npmap-infobox .zoom-in, .zoom-in:hover {background:url(../img/icons_sprite.png) no-repeat left -852px;bottom:28px;color:#918f7e;font-size:11px;font-weight:bold;line-height:18px;padding-left:15px;position:absolute;right:20px;}
 #npmap-infobox .zoom-in:hover {text-decoration:underline;}

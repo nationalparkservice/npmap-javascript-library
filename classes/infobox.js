@@ -384,14 +384,14 @@ define(function() {
   }
   
   if (design === 'basic') {
-    NPMap.utils.injectCss(NPMap.config.server + '/classes/InfoBox/resources/css/infobox.css');
+    NPMap.utils.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox.css');
     
-    infobox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/classes/InfoBox/resources/images/hook' + (Modernizr.boxshadow ? '_shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
+    infobox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/classes/infobox/img/hook' + (Modernizr.boxshadow ? '_shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
   } else if (design === 'pyv') {
-    NPMap.utils.injectCss(NPMap.config.server + '/classes/InfoBox/resources/css/infobox-pyv.css');
+    NPMap.utils.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox-pyv.css');
     
     // TODO: Add support for non-shadowed "hook".
-    infobox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/classes/InfoBox/resources/images/hook_pyv.png" /></div>';
+    infobox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/classes/infobox/img/hook_pyv.png" /></div>';
   }
   
   infobox.className = 'shadow';
@@ -711,26 +711,6 @@ define(function() {
         }
       }
       
-      /*
-      console.log($('#npmap-infobox-bottom').outerHeight());
-      console.log($('#npmap-infobox-footer').outerHeight());
-      console.log($('#npmap-infobox-title').outerHeight());
-      
-      bottomHeight = $('#npmap-infobox-bottom').actual('outerHeight');
-	    footerHeight = (function() {
-	      if (hasFooterContent) {
-	        return $('#npmap-infobox-footer').actual('outerHeight');
-	      } else {
-	        return 0;
-	      }
-	    })();
-      
-      console.log(bottomHeight);
-      console.log(footerHeight);
-      
-      mH = maxHeight - $('#npmap-infobox-title').actual('outerHeight') - bottomHeight;
-      */
-      
       bottomHeight = $('#npmap-infobox-bottom').outerHeight();
       footerHeight = (function() {
         if (hasFooterContent) {
@@ -740,7 +720,7 @@ define(function() {
         }
       })();
       mH = maxHeight - $('#npmap-infobox-title').outerHeight() - bottomHeight;
-      
+
       if (padding < (bottomHeight + footerHeight)) {
         padding = bottomHeight + footerHeight;
       }

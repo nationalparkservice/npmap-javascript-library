@@ -11,6 +11,6 @@
 #npmap-infobox-footer {border-top:1px solid #cccccc;padding:8px 16px;text-align:center;}
 #npmap-infobox .details {color:#000000;}
 #npmap-infobox .more {color:#B28000 !important;display:block;margin-top:8px;text-decoration:none;}
-#npmap-infobox-close {background:url("../images/close.png");cursor:pointer;height:10px;position:absolute;right:7px;top:7px;width:10px;}
+#npmap-infobox-close {background:url("../img/close.png");cursor:pointer;height:10px;position:absolute;right:7px;top:7px;width:10px;}
 #npmap-infobox-bottom {height:35px;pointer-events:none;position:absolute;width:100%;}
 #npmap-infobox.shadow {-moz-box-shadow:3px 3px 4px #000000;-webkit-box-shadow:3px 3px 4px #000000;box-shadow:3px 3px 4px #000000;/*-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=135, Color='#000000')";filter: progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=135, Color='#000000');*/}

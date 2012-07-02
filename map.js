@@ -1,18 +1,21 @@
-﻿define([
-  NPMap.config.server + '/classes/InfoBox/InfoBox.js'
+﻿// TODO: Take out jQueryToast
+
+define([
+  NPMap.config.server + '/classes/infobox.js'
 ], function(InfoBox) {
   /**
    * Modified version of jQueryToast v0.1 - http://plugins.jquery.com/project/jQueryToast
    */
   (function(b){toasting=!1;toastQueue=[];b.toast=function(a){return new c(a)};var c=function(a){var c={message:"",displayTime:2E3,inTime:300,outTime:200,maxWidth:400};if(window.toasting)window.toastQueue.unshift(a);else{var d=b("#npmap-toast");window.toasting=!0;a=b.extend(c,a);d.html(a.message);d.fadeIn(a.inTime);setTimeout(function(){d.fadeOut(a.outTime,function(){window.toasting=!1;0<window.toastQueue.length&&(next=window.toastQueue.pop(),b.toast(next))})},a.displayTime)}}})(jQuery);
   
-  var //
-      $mapDiv = $('#npmap'),
-      //
+  var 
+      // The jQuery map div object.
+      $mapDiv = $('#npmap-map'),
+      // The jQuery map div parent object.
       $mapDivParent = $mapDiv.parent(),
-      //
+      // Is the map in fullscreen mode?
       isFullScreen = false,
-      //
+      // The zoom level to scale in meters.
       zoomScales = [
         [0, 295829355],
         [1, 147914668],
@@ -132,29 +135,9 @@
    * The base class for all map objects. No "baseApi" specific code lives here.
    */
   return NPMap.Map = {
-    // The layer handlers that are being used by the map.
-    activeLayerHandlers: (function() {
-      var a = [];
+    // An array of event handler objects that have been added to this class.
+    events: [],
 
-      if (NPMap.config.layers) {
-        $.each(NPMap.config.layers, function(i, v) {
-          var inArray = false;
-          
-          for (var j = 0; j < a.length; j++) {
-            if (a[j] === v.type) {
-              inArray = true;
-              break;
-            }
-          }
-
-          if (!inArray) {
-            a.push(v.type);
-          }
-        });
-      }
-      
-      return a;
-    })(),
     /**
      * Adds an HTML element to the map div.
      * @param {Object} el
@@ -242,7 +225,7 @@
         return null;
       }
     },
-     /**
+    /**
      * Builds an HTML string for a layer's InfoBox element.
      * @param {Object} layer The layer config object.
      * @param {Object} attributes A set of key-value pair attributes.
@@ -274,6 +257,13 @@
       }
 
       return html;
+    },
+    /**
+     * Centers then zooms the map.
+     * @param {String} latLng The latLng string, in "latitude,longitude" format, to center the map on.
+     */
+    center: function(latLng) {
+      NPMap[NPMap.config.api].map.center(NPMap[NPMap.config.api].map.stringToLatLng(latLng));
     },
     /**
      * Centers then zooms the map.
@@ -330,8 +320,6 @@
       
       return NPMap[NPMap.config.api].map.createPolygon(baseApiLatLngs, options);
     },
-    // An array of event handler objects that have been added to this class.
-    events: [],
     /**
      * Gets the active layer types for both baseLayers and layers.
      * @return {Array}
@@ -369,16 +357,6 @@
      */
     getCenter: function() {
       return this.latLngToString(NPMap[NPMap.config.api].map.getCenter());
-    },
-    /**
-     *
-     */
-    getFiltersForLayer: function(layer) {
-      if (layer.legend && layer.legend.filters) {
-        $.each(layer.legend.filters, function(i, v) {
-          
-        });
-      }
     },
     /**
      * Returns the layerConfig object for a layer.
@@ -480,11 +458,14 @@
       hasClustered = false;
       
       if (NPMap.config.layers) {
-        $.each(NPMap.config.layers, function(i, v) {
-          if (v.type === 'NativeVectors' && v.clustered === true) {
+        for (var i = 0; i < NPMap.config.layers.length; i++) {
+          var layer = NPMap.config.layers[i];
+
+          if (layer.type === 'NativeVectors' && layer.clustered === true) {
             hasClustered = true;
+            break;
           }
-        });
+        }
       }
       
       return hasClustered;
@@ -497,11 +478,14 @@
       hasTiled = false;
       
       if (NPMap.config.layers) {
-        $.each(NPMap.config.layers, function(i, v) {
-          if ((v.type === 'NativeVectors' && v.tiled) || (v.type === 'ArcGisServerRest' || v.type === 'TileStream')) {
+        for (var i = 0; i < NPMap.config.layers.length; i++) {
+          var layer = NPMap.config.layers[i];
+
+          if ((layer.type === 'NativeVectors' && layer.tiled) || (layer.type === 'ArcGisServerRest' || layer.type === 'TileStream')) {
             hasTiled = true;
+            break;
           }
-        });
+        }
       }
       
       return hasTiled;
@@ -526,7 +510,7 @@
      * Hides the tip.
      */
     hideTip: function() {
-      $('#npmap-tip').hide();
+      document.getElementById('npmap-tip').style.display = 'none';
     },
     /**
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
@@ -604,7 +588,7 @@
       }
 
       if (NPMap.config.api === 'bing') {
-        $map = $(NPMap.bing.map.getMapDiv());
+        $map = $(document.getElementById('npmap-map').getElementsByTagName('div')[0]);
       } else {
         $map = $('#npmap-map');
       }
@@ -631,11 +615,11 @@
       elements.push(toast);
       
       if (NPMap.config.api !== 'leaflet' && NPMap.config.api !== 'modestmaps') {
-        logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/images/' + NPMap.config.api + 'logo.png" /></span>';
+        logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + NPMap.config.api + 'logo.png" /></span>';
       }
       
       if (!NPMap.config.hideNpmapLogo) {
-        logosHtml += '<span style="display:block;float:right;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/images/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+        logosHtml += '<span style="display:block;float:right;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
       }
 
       if (logosHtml.length > 0) {
@@ -827,12 +811,12 @@
 
             if (nameLower !== 'edit' && nameLower !== 'route') {
               modulesHtml += '<div id="npmap-modules-' + nameLower + '">Test</div>';
-              tabsHtml += '<div id="npmap-module-tab-' + nameLower + '" class="npmap-module-tab" onclick="NPMap.Map.handleModuleTabClick(this);return false;"><img src="' + NPMap.config.server + '/modules/' + nameLower + '/img/tab.png" alt="' + name + '"></div>';
+              tabsHtml += '<div id="npmap-module-tab-' + nameLower + '" class="npmap-module-tab" onclick="NPMap.Map.handleModuleTabClick(this);return false;"><div class="npmap-module-tab-' + nameLower + '"></div></div>';
             }
           }
 
           modules.id = 'npmap-modules';
-          modules.innerHTML = '<div id="npmap-modules-close" class="npmap-module-tab" style="position:absolute;right:-28px;top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';z-index:1;" onclick="NPMap.Map.handleModuleCloseClick();return false;"><img src="' + NPMap.config.server + '/modules/img/close.png" alt="Close Module"></div>';
+          modules.innerHTML = '<div id="npmap-modules-close" class="npmap-module-tab" style="position:absolute;right:-29px;top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';z-index:1;" onclick="NPMap.Map.handleModuleCloseClick();return false;"><div class="npmap-module-tab-close"></div></div>';
           tabs.id = 'npmap-modules-tabs';
           tabs.innerHTML = tabsHtml;
           
@@ -856,8 +840,7 @@
         elements.push(overview);
         callbacks.push(function() {
           var overviewMap = new Microsoft.Maps.Map(document.getElementById('npmap-overviewmap-map'), {
-            animate: false, // TODO: This isn't working.
-            credentials: 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm', // TODO: Hook this up to new credentials config.
+            credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
             disablePanning: true,
             disableZooming: true,
             fixedMapPosition: true,
@@ -867,8 +850,7 @@
             showDashboard: false,
             showLogo: false,
             showMapTypeSelector: false,
-            showScalebar: false,
-            useInertia: false
+            showScalebar: false
           });
 
           function updateOverviewMap() {
@@ -1007,7 +989,7 @@
           }
           
           $.each(NPMap.config.baseLayers, function(i, baseLayer) {
-            var icon = NPMap.config.server + '/resources/switcher/aerial-large.png', // TODO: Specify generic icon url.
+            var icon = NPMap.config.server + '/resources/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
                 label = baseLayer.code,
                 match = NPMap[NPMap.config.api].map.matchBaseLayer(baseLayer),
                 type = baseLayer.type;
@@ -1029,7 +1011,7 @@
                     label = 'Aerial View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/switcher/aerial-large.png';
+                  icon = NPMap.config.server + '/resources/tools/switcher/aerial-large.png';
                   
                   break;
                 case 'NPS':
@@ -1037,7 +1019,7 @@
                     label = 'NPS View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/switcher/nps-large.png';
+                  icon = NPMap.config.server + '/resources/tools/switcher/nps-large.png';
                   
                   break;
                 case 'Street':
@@ -1045,7 +1027,7 @@
                     label = 'Street View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/switcher/street-large.png';
+                  icon = NPMap.config.server + '/resources/tools/switcher/street-large.png';
                   
                   break;
                 case 'Topo':
@@ -1053,7 +1035,7 @@
                     label = 'Topo View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/switcher/topo-large.png';
+                  icon = NPMap.config.server + '/resources/tools/switcher/topo-large.png';
                   
                   break;
               };
@@ -1156,7 +1138,7 @@
       return NPMap[NPMap.config.api].map.latLngToString(latLng);
     },
     /**
-     * Turns meters into a zoom level. This function is not precise, as it is impossible to get precise meter scale values for the entire earth. Only use this in cases where approximate numbers are acceptable.
+     * Turns meters into a zoom level. This function is not precise, as it is impossible to get precise meter scale values for the entire earth reprojected to web mercator. Only use this in cases where approximate numbers are acceptable.
      * @param {Number} meters
      * @return {Number}
      */
@@ -1277,13 +1259,15 @@
       NPMap[NPMap.config.api].map.setBounds(bounds);
     },
     /**
-     *
+     * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
+     * @param {Object} c
      */
     setInitialCenter: function(center) {
       NPMap[NPMap.config.api].map.setInitialCenter(this.stringToLatLng(center));
     },
     /**
-     *
+     * Sets the initial zoom of the map. This initial zoom is stored with the map, and is used by the setInitialExtent method, among other things.
+     * @param {Number} zoom
      */
     setInitialZoom: function(zoom) {
       NPMap[NPMap.config.api].map.setInitialZoom(zoom);
@@ -1297,7 +1281,7 @@
       NPMap[NPMap.config.api].map.setMarkerOptions(marker, options);
     },
     /**
-     * Sets the notify target to an HTML element other than the map div. This must be called after NPMap has been initialized.
+     * Sets the notify target to an HTML element other than the map div. This can only be called after NPMap has been initialized.
      * @param {Object} target
      */
     setNotifyTarget: function(target) {
@@ -1516,6 +1500,13 @@
       $('#npmap-progressbar div').css({
         width: value + '%'
       });
+    },
+    /**
+     * Zooms the map to a zoom level.
+     * @param {Number} zoom
+     */
+    zoom: function(zoom) {
+      NPMap[NPMap.config.api].map.zoom(zoom);
     },
     /**
      * Zooms the map in by one zoom level.

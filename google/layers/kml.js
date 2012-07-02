@@ -3,12 +3,12 @@
  */
 NPMap.google.layers = NPMap.google.layers || {};
 NPMap.google.layers.Kml = (function() {
-    return {
-        addLayer: function(details) {
-            var layer = new google.maps.KmlLayer(details.url, {
-                map: NPMap.google.map.Map,
-                suppressInfoWindows: false
-            });
-        }
-    };
+  return {
+    addLayer: function(details) {
+      var layer = new google.maps.KmlLayer(details.url, {
+        map: NPMap.google.map.Map,
+        suppressInfoWindows: false
+      });
+    }
+  };
 })();

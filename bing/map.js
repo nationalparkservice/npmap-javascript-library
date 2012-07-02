@@ -334,6 +334,14 @@
       map.entities.push(shape);
     },
     /**
+     *
+     */
+    center: function(latLng) {
+      map.setView({
+        center: latLng
+      });
+    },
+    /**
      * Centers then zooms the map.
      * @param {Microsoft.Maps.Location} latLng The latLng to center the map on.
      * @param {Integer} zoom The zoom level to zoom the map to.
@@ -808,6 +816,15 @@
       });
     },
     /**
+     * Zooms the map to a zoom level.
+     * @param {Number} zoom
+     */
+    zoom: function(zoom) {
+      map.setView({
+        zoom: zoom
+      });
+    },
+    /**
      * Zooms the map in by one zoom level.
      * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on the location of the #npmap-clickdot div.
      */
@@ -862,13 +879,6 @@
      */
     zoomToLatLng: function(latLng) {
       this.centerAndZoom(latLng, 16);
-      
-      /*
-      map.setView({
-        center: latLng,
-        zoom: 16
-      });
-      */
     },
     /**
      * Zooms the map to the extent of an array of {Microsoft.Maps.Location} objects.

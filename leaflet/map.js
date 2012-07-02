@@ -164,7 +164,8 @@ define([
       map.fitBounds(bounds);
     },
     /**
-     *
+     * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
+     * @param {Object} c
      */
     setInitialCenter: function(c) {
       center = c;
@@ -174,13 +175,15 @@ define([
       };
     },
     /**
-     *
+     * Sets the initial zoom of the map. This initial zoom is stored with the map, and is used by the setInitialExtent method, among other things.
+     * @param {Number} zoom
      */
     setInitialZoom: function(zoom) {
       zoom = NPMap.config.zoom = zoom;
     },
     /**
-     *
+     * Sets zoom restrictions on the map.
+     * @param {Object} restrictions
      */
     setZoomRestrictions: function(restrictions) {
       NPMap.config.restrictZoom = NPMap.config.restrictZoom || {};
