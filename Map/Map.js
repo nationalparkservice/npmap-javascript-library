@@ -1,14 +1,7 @@
-﻿// TODO: Take out jQueryToast
-
-define([
+﻿define([
   NPMap.config.server + '/classes/infobox.js'
 ], function(InfoBox) {
-  /**
-   * Modified version of jQueryToast v0.1 - http://plugins.jquery.com/project/jQueryToast
-   */
-  (function(b){toasting=!1;toastQueue=[];b.toast=function(a){return new c(a)};var c=function(a){var c={message:"",displayTime:2E3,inTime:300,outTime:200,maxWidth:400};if(window.toasting)window.toastQueue.unshift(a);else{var d=b("#npmap-toast");window.toasting=!0;a=b.extend(c,a);d.html(a.message);d.fadeIn(a.inTime);setTimeout(function(){d.fadeOut(a.outTime,function(){window.toasting=!1;0<window.toastQueue.length&&(next=window.toastQueue.pop(),b.toast(next))})},a.displayTime)}}})(jQuery);
-  
-  var 
+  var
       // The jQuery map div object.
       $mapDiv = $('#npmap-map'),
       // The jQuery map div parent object.
@@ -131,7 +124,7 @@ define([
   
   /**
    * @class NPMap.Map
-   * 
+   *
    * The base class for all map objects. No "baseApi" specific code lives here.
    */
   return NPMap.Map = {
@@ -330,21 +323,21 @@ define([
       if (NPMap.config.baseLayers) {
         for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
           var baseLayer = NPMap.config.baseLayers[i],
-              type = baseLayer.type;
+              baseLayerType = baseLayer.type;
 
-          if ((typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) && types.indexOf(type) === -1) {
-            types.push(type);
+          if ((typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) && _.indexOf(types, baseLayerType) === -1) {
+            types.push(baseLayerType);
           }
         }
       }
 
       if (NPMap.config.layers) {
-        for (var i = 0; i < NPMap.config.layers.length; i++) {
-          var layer = NPMap.config.layers[i],
-              type = layer.type;
+        for (var j = 0; j < NPMap.config.layers.length; j++) {
+          var layer = NPMap.config.layers[j],
+              layerType = layer.type;
 
-          if ((typeof layer.visible === 'undefined' || layer.visible === true) && types.indexOf(type) === -1) {
-            types.push(type);
+          if ((typeof layer.visible === 'undefined' || layer.visible === true) && _.indexOf(types, layerType) === -1) {
+            types.push(layerType);
           }
         }
       }
@@ -357,6 +350,12 @@ define([
      */
     getCenter: function() {
       return this.latLngToString(NPMap[NPMap.config.api].map.getCenter());
+    },
+    /**
+     * Gets the container div.
+     */
+    getContainerDiv: function() {
+      return NPMap[NPMap.config.api].map.getContainerDiv();
     },
     /**
      * Returns the layerConfig object for a layer.
@@ -414,6 +413,20 @@ define([
      */
     getMarkerVisibility: function(marker) {
       return NPMap[NPMap.config.api].map.getMarkerVisibility(marker);
+    },
+    /**
+     * Gets the maximum zoom level for this map.
+     * @return {Number}
+     */
+    getMaxZoom: function() {
+      return NPMap[NPMap.config.api].map.getMaxZoom();
+    },
+    /**
+     * Gets the minimum zoom level for this map.
+     * @return {Number}
+     */
+    getMinZoom: function() {
+      return NPMap[NPMap.config.api].map.getMinZoom();
     },
     /**
      * Builds out an array of visible layers. Can filter out visible layers that have either grids or tiles, if the checkFor parameter is passed in.
@@ -516,7 +529,7 @@ define([
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
      */
     init: function() {
-      var 
+      var
           // The jQuery map div.
           $map,
           // The attribution control div.
@@ -539,8 +552,6 @@ define([
           progress = document.createElement('div'),
           // The tip div.
           tip = document.createElement('div'),
-          // DEPRECATED: The toast div.
-          toast = document.createElement('div'),
           // The config object for NPMap's tools. Supports legacy config information too.
           toolsConfig = (function() {
             if (NPMap.config.tools) {
@@ -609,10 +620,6 @@ define([
       tip.className = 'padded rounded shadowed transparent';
       tip.id = 'npmap-tip';
       elements.push(tip);
-      toast.className = 'toast';
-      toast.id = 'npmap-toast';
-      toast.style.cssText = 'bottom:70px;display:none;left:50%;margin-left:-75px;position:absolute;width:150px;z-index:32;';      
-      elements.push(toast);
       
       if (NPMap.config.api !== 'leaflet' && NPMap.config.api !== 'modestmaps') {
         logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + NPMap.config.api + 'logo.png" /></span>';
@@ -636,7 +643,7 @@ define([
       }
 
       if (toolsConfig.navigation) {
-        var 
+        var
             // The navigation controls div.
             navigation = document.createElement('div'),
             // HTML string for the navigation div.
@@ -675,7 +682,7 @@ define([
             
             if (compass === 'home') {
               hookUpNavigationControl('npmap-navigation-compass-center', function() {
-                me.zoomToInitialExtent();
+                me.toInitialExtent();
               });
             }
             
@@ -804,9 +811,8 @@ define([
               tabs = document.createElement('div'),
               tabsHtml = '';
 
-          for (var i = 0; i < NPMap.config.modules.length; i++) {
-            var module = NPMap.config.modules[i],
-                name = module.name,
+          for (var j = 0; j < NPMap.config.modules.length; j++) {
+            var module = NPMap.config.modules[j],
                 nameLower = module.name.toLowerCase();
 
             if (nameLower !== 'edit' && nameLower !== 'route') {
@@ -1038,7 +1044,7 @@ define([
                   icon = NPMap.config.server + '/resources/tools/switcher/topo-large.png';
                   
                   break;
-              };
+              }
             } else {
               if (baseLayer.icon) {
                 icon = baseLayer.icon;
@@ -1091,7 +1097,7 @@ define([
           }
         }
 
-    		setAttributionMaxWidthAndPosition();
+        setAttributionMaxWidthAndPosition();
         $('#npmap-tip').css({
           display: 'none',
           maxWidth: '200px',
@@ -1101,7 +1107,7 @@ define([
         
         NPMap.utils.safeLoad('NPMap.' + NPMap.config.api + '.map.Map', function() {
           NPMap.Event.trigger('NPMap.Map', 'ready', NPMap[NPMap.config.api].map.Map);
-        })
+        });
       });
     },
     /**
@@ -1119,10 +1125,11 @@ define([
      * @returns {Boolean}
      */
     latLngsAreEqual: function(latLng1, latLng2) {
-      var areEqual = false,
-          latLng1 = latLng1.split(','),
-          latLng2 = latLng2.split(',');
-
+      var areEqual = false;
+          
+      latLng1 = latLng1.split(',');
+      latLng2 = latLng2.split(',');
+      
       if ((parseFloat(latLng1[0]).toFixed(7) === parseFloat(latLng2[0]).toFixed(7)) && (parseFloat(latLng1[1]).toFixed(7) === parseFloat(latLng2[1]).toFixed(7))) {
         areEqual = true;
       }
@@ -1223,7 +1230,7 @@ define([
             y: 0
           });
           break;
-      };
+      }
     },
     /**
      * Removes a shape from the map.
@@ -1378,7 +1385,7 @@ define([
       } else {
         */
         var $mask = $('#npmap-fullscreen-mask'),
-            $window = $(window);   
+            $window = $(window);
         
         if (NPMap.InfoBox.visible) {
           currentCenter = baseApi.stringToLatLng(NPMap.InfoBox.latLng);
@@ -1413,7 +1420,7 @@ define([
             width: $window.width() + 'px'
           }).appendTo($mask);
           
-          isFullScreen = true;        
+          isFullScreen = true;
           document.getElementById('npmap-infobox').style.zIndex = '99999999999999';
         }
       //}
@@ -1424,11 +1431,7 @@ define([
     },
 
 
-
-
-
-
-
+    /*
     handleModuleCloseClick: function() {
       console.log(0);
 
@@ -1437,6 +1440,7 @@ define([
     handleModuleTabClick: function(el) {
       NPMap.Map.toggleModule(el.id.replace('npmap-module-tab-', ''), true);
     },
+    */
 
 
     /**
@@ -1446,7 +1450,7 @@ define([
      */
     toggleModule: function(module, on) {
       console.log(module);
-
+      
       var $module = $('#npmap-modules-' + module),
           $modules = $('#npmap-modules');
 
@@ -1473,6 +1477,12 @@ define([
         $module.hide();
         $('#npmap-modules-tabs').show();
       }
+    },
+    /**
+     * Zooms and/or pans the map to its initial extent.
+     */
+    toInitialExtent: function() {
+      NPMap[NPMap.config.api].map.toInitialExtent();
     },
     /**
      * DEPRECATED: Updates a marker's icon.
@@ -1529,12 +1539,6 @@ define([
         nw: NPMap[NPMap.config.api].map.stringToLatLng(bbox.nw),
         se: NPMap[NPMap.config.api].map.stringToLatLng(bbox.se)
       });
-    },
-    /**
-     * Zooms the map to its initial extent.
-     */
-    zoomToInitialExtent: function() {
-      NPMap[NPMap.config.api].map.zoomToInitialExtent();
     },
     /**
      * Zooms the map to a lat/lng.

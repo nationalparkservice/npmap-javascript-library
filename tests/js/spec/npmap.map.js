@@ -28,15 +28,20 @@ describe("NPMap.Map", function() {
   });
   // getClickDotLatLng
   // getLatLngFromPixel
-  // getMapDiv
+  it('should be able to get the container div', function() {
+    expect(NPMap.Map.getContainerDiv()).toBeDefined();
+  });
   // getMarkerAnchor
   // getMarkerIcon
   // getMarkerLatLng
   // getMarkerOption
   // getMarkerVisibility
-  // getMaxZoom
-  // getMinZoom
-  // getParentDiv
+  it('should be able to get the max zoom', function() {
+    expect(NPMap.Map.getMaxZoom()).toBeNumber();
+  });
+  it('should be able to get the min zoom', function() {
+    expect(NPMap.Map.getMinZoom()).toBeNumber();
+  });
   // getPixelFromLatLng
   it('should be able to get the zoom', function() {
     expect(NPMap.Map.getZoom()).toBeNumber();
@@ -54,6 +59,11 @@ describe("NPMap.Map", function() {
   // showShape
   // stringToLatLng
   // switchBaseLayer
+  it('should be able to zoom and/or pan the map to its initial extent', function() {
+    expect(function() {
+      NPMap.Map.toInitialExtent();
+    }).not.toThrow();
+  });
   // updateMarkerIcon DEPRECATED
   // updateMarkerLabel DEPRECATED
   it('should be able to zoom the map', function() {
@@ -64,7 +74,6 @@ describe("NPMap.Map", function() {
   // zoomIn
   // zoomOut
   // zoomToBoundingBox
-  // zoomToInitialExtent
   // zoomToLatLng
   // zoomToLatLngs
   // zoomToMarkers

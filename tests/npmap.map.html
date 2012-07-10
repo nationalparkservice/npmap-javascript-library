@@ -1,14 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>NPMap Tests - NPMap.Map</title>
-    <link rel="shortcut icon" type="image/png" href="lib/jasmine-1.2.0/jasmine_favicon.png">
-    <link rel="stylesheet" type="text/css" href="lib/jasmine-1.2.0/jasmine.css">
-    <script src="lib/jasmine-1.2.0/jasmine.js"></script>
-    <script src="lib/jasmine-1.2.0/jasmine-html.js"></script>
-    <script src="spec/helpers.js"></script>
-    <script src="spec/npmap.map.js"></script>
-    <style type="text/css">
+    <link rel="shortcut icon" type="image/png" href="js/lib/jasmine-1.2.0/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="js/lib/jasmine-1.2.0/jasmine.css">
+    <script src="js/lib/jasmine-1.2.0/jasmine.js"></script>
+    <script src="js/lib/jasmine-1.2.0/jasmine-html.js"></script>
+    <script src="js/spec/helpers.js"></script>
+    <script src="js/spec/npmap.map.js"></script>
+    <style>
       html, body {
         height: 100%;
         margin: 0;
@@ -24,10 +24,10 @@
     <div id="jasmine" style="bottom:0;left:0;overflow:auto;position:absolute;right:0;top:300px;">
     </div>
     <script>
-      var baseApi,
+      var baseApi = '',
           NPMap = NPMap || {},
-          params = window.location.search.replace('?', '').split('&');
-
+          params = window.location.search.substring(1).split('?');
+          
       for (var i = 0; i < params.length; i++) {
         var param = params[i];
 

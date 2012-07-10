@@ -1,5 +1,4 @@
 ﻿define(function() {
-  // TODO: These three "libraries" will no longer be needed when you switch over all maps to the new routing framework.
   /**
    * Base64
    */
@@ -7,18 +6,11 @@
   "");e<b.length;){c=this._keyStr.indexOf(b.charAt(e++));a=this._keyStr.indexOf(b.charAt(e++));g=this._keyStr.indexOf(b.charAt(e++));h=this._keyStr.indexOf(b.charAt(e++));c=c<<2|a>>4;a=(a&15)<<4|g>>2;f=(g&3)<<6|h;d+=String.fromCharCode(c);if(g!=64)d+=String.fromCharCode(a);if(h!=64)d+=String.fromCharCode(f)}return d=Base64._utf8_decode(d)},_utf8_encode:function(b){b=b.replace(/\r\n/g,"\n");for(var d="",c=0;c<b.length;c++){var a=b.charCodeAt(c);if(a<128)d+=String.fromCharCode(a);else{if(a>127&&a<2048)d+=
   String.fromCharCode(a>>6|192);else{d+=String.fromCharCode(a>>12|224);d+=String.fromCharCode(a>>6&63|128)}d+=String.fromCharCode(a&63|128)}}return d},_utf8_decode:function(b){for(var d="",c=0,a=c1=c2=0;c<b.length;){a=b.charCodeAt(c);if(a<128){d+=String.fromCharCode(a);c++}else if(a>191&&a<224){c2=b.charCodeAt(c+1);d+=String.fromCharCode((a&31)<<6|c2&63);c+=2}else{c2=b.charCodeAt(c+1);c3=b.charCodeAt(c+2);d+=String.fromCharCode((a&15)<<12|(c2&63)<<6|c3&63);c+=3}}return d}};
   /**
-   * Json2
-   */
-  (function(e){e.toJSON=function(a){if(typeof JSON=="object"&&JSON.stringify)return JSON.stringify(a);var b=typeof a;if(a===null)return"null";if(b!="undefined"){if(b=="number"||b=="boolean")return a+"";if(b=="string")return e.quoteString(a);if(b=="object"){if(typeof a.toJSON=="function")return e.toJSON(a.toJSON());if(a.constructor===Date){var c=a.getUTCMonth()+1;if(c<10)c="0"+c;var d=a.getUTCDate();if(d<10)d="0"+d;b=a.getUTCFullYear();var f=a.getUTCHours();if(f<10)f="0"+f;var g=a.getUTCMinutes();if(g<
-  10)g="0"+g;var h=a.getUTCSeconds();if(h<10)h="0"+h;a=a.getUTCMilliseconds();if(a<100)a="0"+a;if(a<10)a="0"+a;return'"'+b+"-"+c+"-"+d+"T"+f+":"+g+":"+h+"."+a+'Z"'}if(a.constructor===Array){c=[];for(d=0;d<a.length;d++)c.push(e.toJSON(a[d])||"null");return"["+c.join(",")+"]"}c=[];for(d in a){b=typeof d;if(b=="number")b='"'+d+'"';else if(b=="string")b=e.quoteString(d);else continue;if(typeof a[d]!="function"){f=e.toJSON(a[d]);c.push(b+":"+f)}}return"{"+c.join(", ")+"}"}}};e.evalJSON=function(a){if(typeof JSON==
-  "object"&&JSON.parse)return JSON.parse(a);return eval("("+a+")")};e.secureEvalJSON=function(a){if(typeof JSON=="object"&&JSON.parse)return JSON.parse(a);var b=a;b=b.replace(/\\["\\\/bfnrtu]/g,"@");b=b.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]");b=b.replace(/(?:^|:|,)(?:\s*\[)+/g,"");if(/^[\],:{}\s]*$/.test(b))return eval("("+a+")");else throw new SyntaxError("Error parsing JSON, source is not valid.");};e.quoteString=function(a){if(a.match(i))return'"'+a.replace(i,
-  function(b){var c=j[b];if(typeof c==="string")return c;c=b.charCodeAt();return"\\u00"+Math.floor(c/16).toString(16)+(c%16).toString(16)})+'"';return'"'+a+'"'};var i=/["\\\x00-\x1f\x7f-\x9f]/g,j={"\u0008":"\\b","\t":"\\t","\n":"\\n","\u000c":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"}})(jQuery);
-  /**
-	 * Watermark v3.1.3 (March 22, 2011) plugin for jQuery
-	 * http://jquery-watermark.googlecode.com/
-	 * Copyright (c) 2009-2011 Todd Northrop
-	 * http://www.speednet.biz/
-	 * Dual licensed under the MIT or GPL Version 2 licenses.
+   * Watermark v3.1.3 (March 22, 2011) plugin for jQuery
+   * http://jquery-watermark.googlecode.com/
+   * Copyright (c) 2009-2011 Todd Northrop
+   * http://www.speednet.biz/
+   * Dual licensed under the MIT or GPL Version 2 licenses.
    */
   (function(a,h,y){var w="function",v="password",j="maxLength",n="type",b="",c=true,u="placeholder",i=false,t="watermark",g=t,f="watermarkClass",q="watermarkFocus",l="watermarkSubmit",o="watermarkMaxLength",e="watermarkPassword",d="watermarkText",k=/\r/g,s="input:data("+g+"),textarea:data("+g+")",m="input:text,input:password,input[type=search],input:not([type]),textarea",p=["Page_ClientValidate"],r=i,x=u in document.createElement("input");a.watermark=a.watermark||{version:"3.1.3",runOnce:c,options:{className:t,useNative:c,hideBeforeUnload:c},hide:function(b){a(b).filter(s).each(function(){a.watermark._hide(a(this))})},_hide:function(a,r){var p=a[0],q=(p.value||b).replace(k,b),l=a.data(d)||b,m=a.data(o)||0,i=a.data(f);if(l.length&&q==l){p.value=b;if(a.data(e))if((a.attr(n)||b)==="text"){var g=a.data(e)||[],c=a.parent()||[];if(g.length&&c.length){c[0].removeChild(a[0]);c[0].appendChild(g[0]);a=g}}if(m){a.attr(j,m);a.removeData(o)}if(r){a.attr("autocomplete","off");h.setTimeout(function(){a.select()},1)}}i&&a.removeClass(i)},show:function(b){a(b).filter(s).each(function(){a.watermark._show(a(this))})},_show:function(g){var p=g[0],u=(p.value||b).replace(k,b),h=g.data(d)||b,s=g.attr(n)||b,t=g.data(f);if((u.length==0||u==h)&&!g.data(q)){r=c;if(g.data(e))if(s===v){var m=g.data(e)||[],l=g.parent()||[];if(m.length&&l.length){l[0].removeChild(g[0]);l[0].appendChild(m[0]);g=m;g.attr(j,h.length);p=g[0]}}if(s==="text"||s==="search"){var i=g.attr(j)||0;if(i>0&&h.length>i){g.data(o,i);g.attr(j,h.length)}}t&&g.addClass(t);p.value=h}else a.watermark._hide(g)},hideAll:function(){if(r){a.watermark.hide(m);r=i}},showAll:function(){a.watermark.show(m)}};a.fn.watermark=a.fn.watermark||function(p,o){var t="string";if(!this.length)return this;var s=i,r=typeof p===t;if(r)p=p.replace(k,b);if(typeof o==="object"){s=typeof o.className===t;o=a.extend({},a.watermark.options,o)}else if(typeof o===t){s=c;o=a.extend({},a.watermark.options,{className:o})}else o=a.watermark.options;if(typeof o.useNative!==w)o.useNative=o.useNative?function(){return c}:function(){return i};return this.each(function(){var B="dragleave",A="dragenter",z=this,i=a(z);if(!i.is(m))return;if(i.data(g)){if(r||s){a.watermark._hide(i);r&&i.data(d,p);s&&i.data(f,o.className)}}else{if(x&&o.useNative.call(z,i)&&(i.attr("tagName")||b)!=="TEXTAREA"){r&&i.attr(u,p);return}i.data(d,r?p:b);i.data(f,o.className);i.data(g,1);if((i.attr(n)||b)===v){var C=i.wrap("<span>").parent(),t=a(C.html().replace(/type=["']?password["']?/i,'type="text"'));t.data(d,i.data(d));t.data(f,i.data(f));t.data(g,1);t.attr(j,p.length);t.focus(function(){a.watermark._hide(t,c)}).bind(A,function(){a.watermark._hide(t)}).bind("dragend",function(){h.setTimeout(function(){t.blur()},1)});i.blur(function(){a.watermark._show(i)}).bind(B,function(){a.watermark._show(i)});t.data(e,i);i.data(e,t)}else i.focus(function(){i.data(q,1);a.watermark._hide(i,c)}).blur(function(){i.data(q,0);a.watermark._show(i)}).bind(A,function(){a.watermark._hide(i)}).bind(B,function(){a.watermark._show(i)}).bind("dragend",function(){h.setTimeout(function(){a.watermark._show(i)},1)}).bind("drop",function(e){var c=i[0],a=e.originalEvent.dataTransfer.getData("Text");if((c.value||b).replace(k,b).replace(a,b)===i.data(d))c.value=a;i.focus()});if(z.form){var w=z.form,y=a(w);if(!y.data(l)){y.submit(a.watermark.hideAll);if(w.submit){y.data(l,w.submit);w.submit=function(c,b){return function(){var d=b.data(l);a.watermark.hideAll();if(d.apply)d.apply(c,Array.prototype.slice.call(arguments));else d()}}(w,y)}else{y.data(l,1);w.submit=function(b){return function(){a.watermark.hideAll();delete b.submit;b.submit()}}(w)}}}}a.watermark._show(i)})};if(a.watermark.runOnce){a.watermark.runOnce=i;a.extend(a.expr[":"],{data:function(c,d,b){return!!a.data(c,b[3])}});(function(c){a.fn.val=function(){var e=this;if(!e.length)return arguments.length?e:y;if(!arguments.length)if(e.data(g)){var f=(e[0].value||b).replace(k,b);return f===(e.data(d)||b)?b:f}else return c.apply(e,arguments);else{c.apply(e,arguments);a.watermark.show(e);return e}}})(a.fn.val);p.length&&a(function(){for(var b,c,d=p.length-1;d>=0;d--){b=p[d];c=h[b];if(typeof c===w)h[b]=function(b){return function(){a.watermark.hideAll();return b.apply(null,Array.prototype.slice.call(arguments))}}(c)}});a(h).bind("beforeunload",function(){a.watermark.options.hideBeforeUnload&&a.watermark.hideAll()})}})(jQuery,window);
 
@@ -75,7 +67,7 @@
     });
 
     url = url.slice(0, url.length - 1) + '&routePathOutput=Points&distanceUnit=mi&jsonp=?&key=AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm';
-
+    
     $.getJSON(url, function(data) {
       if (data && data.resourceSets && data.resourceSets.length > 0 && data.resourceSets[0].resources && data.resourceSets[0].resources.length > 0) {
         var resource = data.resourceSets[0].resources[0],
@@ -728,12 +720,7 @@
               });
               $('#itinerarytable tbody').append(html);
               refreshDestinations();
-              $.toast({
-                message: "Your destination was added to the itinerary!",
-                displayTime: 1500,
-                inTime: 100,
-                outTime: 400
-              });
+              NPMap.Map.notify('Your destination was added to the itinerary!', null, 'success', 1500);
             }
             
             if ($('#itinerary').html().toLowerCase().indexOf('<table') === -1) {
@@ -750,20 +737,10 @@
 
                 add(first.address.formattedAddress, first.point.coordinates.join(','), name);
               } else {
-                $.toast({
-                  message: "Sorry, but that destination could not be found.",
-                  displayTime: 4000,
-                  inTime: 100,
-                  outTime: 400
-                });
+                NPMap.Map.notify('Sorry, but that destination could not be found.', null, 'error', 4000);
               }
             } else {
-              $.toast({
-                message: "Sorry, but there was an error contacting the server.",
-                displayTime: 4000,
-                inTime: 100,
-                outTime: 400
-              });
+              NPMap.Map.notify('Sorry, but there was an error contacting the server.', null, 'error', 4000);
             }
             
             $('#adddestination').removeClass('disabled');
@@ -780,12 +757,7 @@
             });
           }
         } else {
-          $.toast({
-            message: "Sorry, but you cannot add more than 15 destinations to your itinerary.",
-            displayTime: 4000,
-            inTime: 100,
-            outTime: 400
-          });
+          NPMap.Map.notify('You cannot add more than 15 destinations to your itinerary.', null, 'warning', 4000);
         }
       });
     },

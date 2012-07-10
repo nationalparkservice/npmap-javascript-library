@@ -1,5 +1,5 @@
 ﻿define([
-  NPMap.config.server + '/map.js'
+  NPMap.config.server + '/Map/Map.js'
 ], function(core) {
   var bounds,
       map,
@@ -114,13 +114,24 @@
       
     },
     /**
+     * Centers the map.
+     * @param {Object} latLng
+     */
+    center: function(latLng) {
+      map.centerAt(latLng);
+    },
+    /**
      * Centers then zooms the map.
      * @param {} latLng The latLng to center the map on.
      * @param {Integer} zoom The zoom level to zoom the map to.
      * @param {Function} callback (Optional) A callback function to call after the map has been centered and zoomed.
      */
     centerAndZoom: function(latLng, zoom, callback) {
+      map.centerAndZoom(latLng, zoom);
 
+      if (callback) {
+        callback();
+      }
     },
     /**
      * Creates an esri.geometry.Polyline object.
@@ -166,13 +177,13 @@
      * @param {Object} data (Optional) An object with key/value pairs of information that need to be stored with the polygon. This object will be added to the polygon.data property.
      * @return {esri.geometry.Polygon}
      */
-    createPolygon: function(latLngs, options, data) {   
+    createPolygon: function(latLngs, options, data) {
 
     },
     /**
-     * Gets the center {Microsoft.Maps.Location} of the map.
+     * Gets the center of the map.
      * @param {Number} spatialReference (Optional) The spatial reference to use.
-     * @return {Microsoft.Maps.Location}
+     * @return {esri.geometry.Point}
      */
     getCenter: function(spatialReference) {
       var center = map.extent.getCenter();
@@ -191,10 +202,17 @@
       
     },
     /**
+     * Gets the container div.
+     * @return {Object}
+     */
+    getContainerDiv: function() {
+      return map.root;
+    },
+    /**
      *
      */
     getExtent: function() {
-      var extent = map.extent
+      var extent = map.extent;
       
       return {
         xmax: esri.geometry.webMercatorToGeographic(extent.xmax),
@@ -210,13 +228,6 @@
      */
     getLatLngFromPixel: function(point) {
       
-    },
-    /**
-     * Gets the map div.
-     * @return {Object}
-     */
-    getMapDiv: function() {
-      return map.root;
     },
     /**
      * Gets the anchor of a marker.
@@ -272,13 +283,6 @@
       return min;
     },
     /**
-     *
-     */
-    // TODO: Why both getMapDiv and getParentDiv?
-    getParentDiv: function() {
-      return map.root;
-    },
-    /**
      * Returns a {} object for a given latLng.
      * @param {} latLng
      */
@@ -320,7 +324,9 @@
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
     latLngToString: function(latLng) {
-      latLng = esri.geometry.webMercatorToGeographic(latLng);
+      if (latLng.spatialReference.wkid !== 4326) {
+        latLng = esri.geometry.webMercatorToGeographic(latLng);
+      }
 
       return latLng.y + ',' + latLng.x;
     },
@@ -339,7 +345,7 @@
      * @param {Object} pixels
      */
     panByPixels: function(pixels) {
-      var el = this.getMapDiv(),
+      var el = this.getContainerDiv(),
           height = el.offsetHeight,
           width = el.offsetWidth,
           center = esri.geometry.toScreenGeometry(map.extent, width, height, this.getCenter(102100));
@@ -393,7 +399,7 @@
       
       */
       
-      var el = this.getMapDiv(),
+      var el = this.getContainerDiv(),
           height = el.offsetHeight,
           width = el.offsetWidth,
           point = esri.geometry.toScreenGeometry(map.extent, width, height, to);
@@ -423,7 +429,7 @@
     },
     /**
      * Sets a marker's options.
-     * @param {} marker 
+     * @param {Object} marker
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
      */
     setMarkerOptions: function(marker, options) {
@@ -443,8 +449,8 @@
      */
     stringToLatLng: function(latLng) {
       latLng = latLng.split(',');
-      
-      return new esri.geometry.Point(parseFloat(latLng[1]), parseFloat(latLng[0]), 4326);
+
+      return esri.geometry.geographicToWebMercator(new esri.geometry.Point(parseFloat(latLng[1]), parseFloat(latLng[0]), 4326));
     },
     /**
      * Switches the base map.
@@ -458,15 +464,30 @@
         
         if (baseLayer.visible) {
           active = baseLayer;
-          
           break;
         }
       }
       
+      if (to.type === 'ArcGisServerRest') {
+        NPMap.esri.layers.ArcGisServerRest.hideLayer(active);
+      }
+
       if (active.type === 'ArcGisServerRest') {
-        NPMap.esri.layers.ArcGisServerRest.hideLayer(baseLayer);
         NPMap.esri.layers.ArcGisServerRest.showLayer(to);
       }
+    },
+    /**
+     * Zooms and/or pans the map to its initial extent.
+     */
+    toInitialExtent: function() {
+      map.setExtent(bounds);
+    },
+    /**
+     * Zooms the map to a zoom level.
+     * @param {Number} zoom
+     */
+    zoom: function(zoom) {
+      map.setLevel(zoom);
     },
     /**
      * Zooms the map in by one zoom level.
@@ -479,12 +500,6 @@
      */
     zoomOut: function() {
       map.setLevel(map.getLevel() - 1);
-    },
-    /**
-     * Zooms the map to its initial extent.
-     */
-    zoomToInitialExtent: function() {
-      map.setExtent(bounds);
     }
   };
 });

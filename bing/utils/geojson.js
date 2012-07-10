@@ -1,5 +1,10 @@
-﻿ var GeoJSON = function(geojson, options) {
-  var obj;
+﻿var GeoJSON = function(geojson, options) {
+  var i = 0,
+      j = 0,
+      obj,
+      opts = options || {},
+      path,
+      paths = [];
 
   switch (geojson.type) {
     case 'LineString':
@@ -7,12 +12,9 @@
     case 'MultiLineString':
       break;
     case 'MultiPolygon':
-      var opts = options || {},
-          paths = [];
-      
-      for (var i = 0; i < geojson.coordinates.length; i++) {
-        for (var j = 0; j < geojson.coordinates[i].length; j++) {
-          var path = [];
+      for (i; i < geojson.coordinates.length; i++) {
+        for (j; j < geojson.coordinates[i].length; j++) {
+          path = [];
           
           for (var k = 0; k < geojson.coordinates[i][j].length; k++) {
             path.push(new Microsoft.Maps.Location(geojson.coordinates[i][j][k][1], geojson.coordinates[i][j][k][0]));
@@ -27,13 +29,10 @@
     case 'Point':
       break;
     case 'Polygon':
-      var opts = options || {},
-          paths = [];
-          
-      for (var i = 0; i < geojson.coordinates.length; i++){
-        var path = [];
+      for (i = 0; i < geojson.coordinates.length; i++){
+        path = [];
         
-        for (var j = 0; j < geojson.coordinates[i].length; j++) {
+        for (j = 0; j < geojson.coordinates[i].length; j++) {
           path.push(new Microsoft.Maps.Location(geojson.coordinates[i][j][1], geojson.coordinates[i][j][0]));
         }
         
@@ -42,7 +41,7 @@
       
       obj = new Microsoft.Maps.Polygon(paths, opts);
       break;
-  };
+  }
 
   return obj;
 };

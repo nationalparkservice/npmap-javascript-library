@@ -1,18 +1,7 @@
 // The version of the library to use.
 NPMap.version = '0.8.0';
 
-// TODO: Take these out and start using Underscore.js for Array manipulation.
-if (!Array.prototype.indexOf) {
-  Array.prototype.indexOf = function(needle) {
-    for(var i = 0; i < this.length; i++) {
-      if (this[i] === needle) {
-        return i;
-      }
-    }
-    
-    return -1;
-  };
-}
+// TODO: Switch all Array.remove() calls over to splice.
 Array.prototype.remove = function(from, to) {
   var rest = this.slice((to || from) + 1 || this.length);
   this.length = from < 0 ? this.length + from : from;
@@ -53,6 +42,7 @@ NPMap.utils = {
       }
     }
   },
+  // TODO: Rename to getContainerDivOffset.
   /**
    * Gets the offset, in pixels, of the map div in the page.
    * @return {Object}
@@ -101,7 +91,7 @@ NPMap.utils = {
    * @return {Boolean}
    */
   isInt: function(n) {
-   return n % 1 == 0;
+    return n % 1 == 0;
   },
   /**
    * Replaces "bad characters" that have been inserted by NPMap into strings.
@@ -170,8 +160,29 @@ if (!NPMap.config.div) {
   NPMap.utils.throwError('The NPMap.config.div string does not exist!');
 }
 
-if (!NPMap.config.api) {
-  NPMap.config.api = 'bing';
+if (NPMap.config.api) {
+  switch (NPMap.config.api.toLowerCase()) {
+    case 'bing':
+      NPMap.config.api = 'Bing';
+      break;
+    case 'esri':
+      NPMap.config.api = 'Esri';
+      break;
+    case 'google':
+      NPMap.config.api = 'Google';
+      break;
+    case 'leaflet':
+      NPMap.config.api = 'Leaflet';
+      break;
+    case 'modestmaps':
+      NPMap.config.api = 'ModestMaps';
+      break;
+    default:
+      NPMap.utils.throwError('The NPMap.config.api config is invalid!');
+      break;
+  }
+} else {
+  NPMap.config.api = 'Bing';
 }
 
 if (typeof NPMap.config.server === 'undefined') {
@@ -383,7 +394,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
     NPMap.apiLoaded = function() {
       var callback = function() {
         require([
-          NPMap.config.server + '/' + NPMap.config.api + '/map.js'
+          NPMap.config.server + '/Map/Map.' + NPMap.config.api + '.js'
         ], function(map) {
           var interval = setInterval(function() {
             if (map.isReady === true) {
@@ -416,8 +427,18 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
                 var layerType = layerHandlers[i].toLowerCase();
                 
                 require([
-                  NPMap.config.server + '/' + NPMap.config.api + '/layers/' + layerType + '.js'
+                  NPMap.config.server + '/Layer/Layer.' + layerType +  '.' + NPMap.config.api + '.js'
                 ], function(layerHandler) {
+                  /*
+                  if (NPMap.config.baseLayers) {
+                    for (var j = 0; j < NPMap.config.layers.length; j++) {
+                      if (NPMap.config.layers[j].type.toLowerCase() === layerType) {
+                        layerHandler.addLayer(NPMap.config.layers[j]);
+                      }
+                    }
+                  }
+                  */
+
                   if (NPMap.config.layers) {
                     for (var j = 0; j < NPMap.config.layers.length; j++) {
                       if (NPMap.config.layers[j].type.toLowerCase() === layerType) {
@@ -433,7 +454,9 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
                   var name = NPMap.config.modules[i].name.toLowerCase();
 
                   if (name === 'edit' || name === 'route') {
-                    scripts.push(NPMap.config.server + '/' + NPMap.config.api + '/modules/' + module.name.toLowerCase() + '.js');
+                    scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
+                  } else {
+                    NPMap.utils.throwError('Invalid module name: "' + name + '".');
                   }
                 }
               }
@@ -484,7 +507,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
     };
       
     switch (NPMap.config.api) {
-      case 'bing':
+      case 'Bing':
         apiUrl = 'http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0&onscriptload=callback';
         callback = function() {
           var interval = setInterval(function() {
@@ -507,8 +530,8 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
           }, 5);
         };
         break;
-      case 'esri':
-        apiUrl = 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.8';
+      case 'Esri':
+        apiUrl = 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0compact';
         callback = function() {
           var interval = setInterval(function() {
             if (typeof esri !== 'undefined') {
@@ -518,7 +541,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
           }, 5);
         };
         break;
-      case 'google':
+      case 'Google':
         if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
           callback = NPMap.apiLoaded();
           preLoaded = true;
@@ -544,7 +567,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
         }
         
         break;
-      case 'leaflet':
+      case 'Leaflet':
         apiUrl = 'http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.js';
         callback = function() {
           var interval = setInterval(function() {
@@ -560,7 +583,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
           }, 5);
         };
         break;
-      case 'modestmaps':
+      case 'ModestMaps':
         apiUrl = 'http://www.nps.gov/npmap/scripts/libs/modestmaps-2.0.1.min.js';
         callback = function() {
           var interval = setInterval(function() {
@@ -581,19 +604,39 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
         callback();
       }
     } else {
-      require([apiUrl], function() {
-        if (callback) {
-          callback();
-        }
-      });
+      s = document.createElement('script');
+      s.src = apiUrl;
+
+      if (window.attachEvent && document.all) {
+        s.onreadystatechange = function() {
+          if (this.readyState === 'complete' || this.readyState === 'loaded') {
+            if (callback) {
+              callback();
+            }
+          }
+        };
+      } else {
+        s.onload = function() {
+          if (callback) {
+            callback();
+          }
+        };
+      }
+      
+      document.body.appendChild(s);
     }
   }
 
-  if (typeof window.jQuery  === 'undefined') {
-    u += '-jquery';
+  // Esri (starting with v3) now loads require.js.
+  if (NPMap.config.api === 'esri') {
+    s.src = 'http://www.nps.gov/npmap/scripts/libs/jquery-1.7.1.min.js';
+  } else {
+    if (typeof window.jQuery  === 'undefined') {
+      u += '-jquery';
+    }
+    
+    s.src = u + '-1.0.7.min.js';
   }
-  
-  s.src = u + '-1.0.7.min.js';
   
   if (window.attachEvent && document.all) {
     s.onreadystatechange = function() {

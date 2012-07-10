@@ -1,7 +1,7 @@
 ﻿define([
-  NPMap.config.server + '/map.js'
+  NPMap.config.server + '/Map/Map.js'
 ], function(core) {
-  var 
+  var
       // The activeBaseLayer object.
       activeBaseLayer,
       // The bounds to initialize the map with.
@@ -334,7 +334,8 @@
       map.entities.push(shape);
     },
     /**
-     *
+     * Centers the map.
+     * @param {Object} latLng
      */
     center: function(latLng) {
       map.setView({
@@ -365,7 +366,7 @@
             }, 200),
             o = {
               center: latLng,
-              zoom: parseInt(zoom)
+              zoom: parseInt(zoom, 0)
             };
             
         if (NPMap.InfoBox && NPMap.InfoBox.visible) {
@@ -474,7 +475,7 @@
      * @param data {Object} (Optional) An object with key/value pairs of information that need to be stored with the polygon. This object will be added to the polygon.data property.
      * @return {Microsoft.Maps.Polygon}
      */
-    createPolygon: function(latLngs, options, data) {   
+    createPolygon: function(latLngs, options, data) {
       var polygon = new Microsoft.Maps.Polygon(latLngs, options);
       
       data = data || {};
@@ -500,18 +501,18 @@
       return map.tryPixelToLocation(new Microsoft.Maps.Point(position.left, position.top), Microsoft.Maps.PixelReference.control);
     },
     /**
+     * Gets the container div.
+     */
+    getContainerDiv: function() {
+      return map.getRootElement();
+    },
+    /**
      * Gets a {Microsoft.Maps.Location} from a {Microsoft.Maps.Point}.
      * @param {Microsoft.Maps.Point} point
      * @return {Microsoft.Maps.Location}
      */
     getLatLngFromPixel: function(point) {
       
-    },
-    /**
-     * Gets the map div.
-     */
-    getMapDiv: function() {
-      return map.getRootElement();
     },
     /**
      * Gets the anchor of a marker.
@@ -546,9 +547,10 @@
      * @param {String} option The option to get. Currently the valid options are: 'icon'.
      */
     getMarkerOption: function(marker, option) {
-      switch (option) {
-        case 'icon':
-          return marker.getIcon();
+      if (option === 'icon') {
+        return marker.getIcon();
+      } else {
+        return null;
       }
     },
     /**
@@ -559,24 +561,18 @@
       return marker.getVisible();
     },
     /**
-     * Returns the maximum zoom level for this map.
+     * Gets the maximum zoom level for this map.
      * @return {Number}
      */
     getMaxZoom: function() {
       return max;
     },
     /**
-     * Returns the minimum zoom level for this map.
+     * Gets the minimum zoom level for this map.
      * @return {Number}
      */
     getMinZoom: function() {
       return min;
-    },
-    /**
-     *
-     */
-    getParentDiv: function() {
-      return map.getRootElement();
     },
     /**
      * Returns a {Microsoft.Maps.Point} object for a given latLng.
@@ -716,7 +712,7 @@
     },
     /**
      * Sets a marker's options.
-     * @param {Microsoft.Maps.Pushpin} marker 
+     * @param {Microsoft.Maps.Pushpin} marker
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
      */
     setMarkerOptions: function(marker, options) {
@@ -791,9 +787,19 @@
           mapTypeId = Microsoft.Maps.MapTypeId.mercator;
           // TODO: Now need to load tiled layer.
           break;
-      };
+      }
       
       map.setMapType(mapTypeId);
+    },
+    /**
+     * Zooms and/or pans the map to its initial extent.
+     */
+    toInitialExtent: function() {
+      NPMap.InfoBox.hide();
+      map.setView({
+        center: initialCenter,
+        zoom: initialZoom
+      });
     },
     /**
      * DEPRECATED: Updates a marker's icon.
@@ -861,16 +867,6 @@
       map.setView({
         bounds: Microsoft.Maps.LocationRect.fromCorners(bbox.nw, bbox.se),
         padding: 30
-      });
-    },
-    /**
-     * Zooms the map to its initial extent.
-     */
-    zoomToInitialExtent: function() {
-      NPMap.InfoBox.hide();
-      map.setView({
-        center: initialCenter,
-        zoom: initialZoom
       });
     },
     /**

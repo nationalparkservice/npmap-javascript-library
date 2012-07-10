@@ -3,7 +3,7 @@
 // TODO: Hook up attribution.
 
 define([
-  NPMap.config.server + '/map.js'
+  NPMap.config.server + '/Map/Map.js'
 ], function(core) {
   var
       // The map div.
@@ -261,10 +261,24 @@ define([
       return map.pointLocation(new MM.Point(position.left, position.top));
     },
     /**
-     * Gets the parent div of the map.
+     * Gets the container div.
      */
-    getParentDiv: function() {
+    getContainerDiv: function() {
       return map.parent;
+    },
+    /**
+     * Returns the maximum zoom level for this map.
+     * @return {Number}
+     */
+    getMaxZoom: function() {
+      return max;
+    },
+    /**
+     * Returns the minimum zoom level for this map.
+     * @return {Number}
+     */
+    getMinZoom: function() {
+      return min;
     },
     /**
      * Gets the zoom level of the map.
@@ -289,14 +303,15 @@ define([
      */
     isLatLngWithinMapBounds: function(latLng) {
       var extent = map.getExtent(),
-          isWithinExtent = false
-          latLng = (function() {
-            if (typeof(latLng) === 'string') {
-              return this.stringToLatLng(latLng);
-            } else {
-              return latLng;
-            }
-          })();
+          isWithinExtent = false;
+
+      latLng = (function() {
+        if (typeof(latLng) === 'string') {
+          return this.stringToLatLng(latLng);
+        } else {
+          return latLng;
+        }
+      })();
           
       if (NPMap.utils.isBetween(extent.north, extent.south, latLng.lat) === true && NPMap.utils.isBetween(extent.east, extent.west, latLng.lon) === true) {
         isWithinExtent = true;
@@ -374,6 +389,12 @@ define([
       }
     },
     /**
+     * Zooms and/or pans the map to its initial extent.
+     */
+    toInitialExtent: function() {
+      runEasey(initialCenter, initialZoom, 400);
+    },
+    /**
      * Zooms the map in by one zoom level.
      * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on the location of the #npmap-clickdot div.
      */
@@ -396,12 +417,6 @@ define([
      */
     zoomOut: function() {
       runEasey(map.getCenter(), map.getZoom() - 1, 200);
-    },
-    /**
-     * Zooms the map to its initial extent.
-     */
-    zoomToInitialExtent: function() {
-      runEasey(initialCenter, initialZoom, 400);
     }
   };
 });

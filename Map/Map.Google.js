@@ -1,5 +1,5 @@
 ﻿define([
-  NPMap.config.server + '/map.js'
+  NPMap.config.server + '/Map/Map.js'
 ], function(core) {
   var 
       // The initially-active base layer.
@@ -489,6 +489,12 @@
       return this.getLatLngFromPixel(new google.maps.Point(position.left, position.top));
     },
     /**
+     * Gets the container div.
+     */
+    getContainerDiv: function() {
+      return map.getDiv();
+    },
+    /**
      * Gets a {google.maps.LatLng} from a {google.maps.Point}.
      * @param {google.maps.Point} point
      * @return {google.maps.LatLng}
@@ -519,14 +525,14 @@
       
     },
     /**
-     * Returns the maximum zoom level for this map.
+     * Gets the maximum zoom level for this map.
      * @return {Number}
      */
     getMaxZoom: function() {
       return max;
     },
     /**
-     * Returns the minimum zoom level for this map.
+     * Gets the minimum zoom level for this map.
      * @return {Number}
      */
     getMinZoom: function() {
@@ -673,6 +679,12 @@
       NPMap.google.map.Map.setMapTypeId(google.maps.MapTypeId[baseLayer.code.toUpperCase()]);
     },
     /**
+     * Zooms and/or pans the map to its initial extent.
+     */
+    toInitialExtent: function() {
+      this.centerAndZoom(initialCenter, initialZoom);
+    },
+    /**
      * Zooms the map in by one zoom level.
      * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on #npmap-clickdot location.
      */
@@ -698,12 +710,6 @@
     zoomToExtent: function() {
       map.setCenter(NPMap.google.map.initialCenter);
       map.setZoom(NPMap.google.map.initialZoom);
-    },
-    /**
-     * Zooms the map to its initial extent.
-     */
-    zoomToInitialExtent: function() {
-      this.centerAndZoom(initialCenter, initialZoom);
     },
     /**
      * Zooms the map to a lat/lng.

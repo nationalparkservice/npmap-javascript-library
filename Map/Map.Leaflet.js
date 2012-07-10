@@ -1,6 +1,6 @@
 ﻿// TODO: Hook up attribution for all layers.
 define([
-  NPMap.config.server + '/map.js'
+  NPMap.config.server + '/Map/Map.js'
 ], function(core) {
   var
       // The base layer to initialize the map with.
@@ -37,7 +37,7 @@ define([
   });
   
   if (!center) {
-    center = new L.LatLng(40.78054143186031, -99.931640625)
+    center = new L.LatLng(40.78054143186031, -99.931640625);
   } else {
     center = new L.LatLng(center.lat, center.lng);
   }
@@ -77,6 +77,9 @@ define([
     if (typeof NPMap.config.restrictZoom.min !== 'undefined') {
       mapConfig.minZoom = NPMap.config.restrictZoom.min;
     }
+  } else {
+    mapConfig.maxZoom = 17;
+    mapConfig.minZoom = 0;
   }
   
   map = new L.Map(NPMap.config.div, mapConfig);
@@ -112,10 +115,24 @@ define([
       return map.getCenter();
     },
     /**
-     *
+     * Gets the container div.
      */
-    getParentDiv: function() {
+    getContainerDiv: function() {
       return document.getElementById('npmap');
+    },
+    /**
+     * Gets the maximum zoom level for this map.
+     * @return {Number}
+     */
+    getMaxZoom: function() {
+      return mapConfig.maxZoom;
+    },
+    /**
+     * Gets the minimum zoom level for this map.
+     * @return {Number}
+     */
+    getMinZoom: function() {
+      return mapConfig.minZoom;
     },
     /**
      *
@@ -208,6 +225,12 @@ define([
       return new L.LatLng(parseFloat(latLng[0]), parseFloat(latLng[1]));
     },
     /**
+     * Zooms and/or pans the map to its initial extent.
+     */
+    toInitialExtent: function() {
+      map.setView(center, zoom);
+    },
+    /**
      * Zooms the map in by one zoom level.
      */
     zoomIn: function() {
@@ -218,13 +241,6 @@ define([
      */
     zoomOut: function() {
       map.zoomOut();
-    },
-    /**
-     * Zooms the map to its initial extent.
-     */
-    // TODO: Renamed to "toInitialExtent".
-    zoomToInitialExtent: function() {
-      map.setView(center, zoom);
     }
   };
 });
