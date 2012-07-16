@@ -1,5 +1,5 @@
 ﻿define([
-  NPMap.config.server + '/classes/infobox.js'
+  'InfoBox'
 ], function(InfoBox) {
   var
       // The jQuery map div object.
@@ -129,406 +129,11 @@
    */
   return NPMap.Map = {
     // An array of event handler objects that have been added to this class.
-    events: [],
-
-    /**
-     * Adds an HTML element to the map div.
-     * @param {Object} el
-     * @param {Function} callback (Optional)
-     */
-    addElementToMapDiv: function(el, callback) {
-      if (NPMap.config.api === 'bing') {
-        NPMap.bing.map.addElementToMapDiv(el);
-      } else {
-        document.getElementById(NPMap.config.div).appendChild(el);
-      }
-      
-      cancelMouseEvents($(el));
-
-      if (callback) {
-        callback();
-      }
-    },
-    /**
-     * Adds an HTML element to the map div.
-     * @param {Array} els
-     * @param {Function} callback (Optional)
-     */
-    addElementsToMapDiv: function(els, callback) {
-      var me = this;
-      
-      if (NPMap.config.api === 'bing') {
-        NPMap.utils.safeLoad('NPMap.bing', function() {
-          $.each(els, function(i, el) {
-            me.addElementToMapDiv(el);
-          });
-          
-          if (callback) {
-            callback();
-          }
-        });
-      } else {
-        $.each(els, function(i, el) {
-          me.addElementToMapDiv(el);
-        });
-        
-        if (callback) {
-         callback();
-        }
-      }
-    },
-    /**
-     * Adds a shape to the map.
-     * @param {Object} shape The shape to add to the map. This can be a marker, line, or polygon object for the active baseApi.
-     */
-    addShape: function(shape) {
-      NPMap[NPMap.config.api].map.addShape(shape);
-    },
-    /**
-     * Builds the attribution string for the visible layers.
-     * @param {String} attribution An attribution string to add to the visible layer attribution.
-     * @return {String}
-     */
-    buildAttributionStringForVisibleLayers: function(attribution) {
-      var attr = [],
-          me = this;
-      
-      if (attribution) {
-        $.each(attribution.split('|'), function(i, v) {
-          attr.push(v);
-        });
-      }
-      
-      $.each(me.getVisibleLayers(), function(i, v) {
-        if (v.attribution) {
-          $.each(v.attribution.split('|'), function(i2, v2) {
-            var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
-
-            if ($.inArray(credit, attr) === -1) {
-              attr.push(credit);
-            }
-          });
-        }
-      });
-
-      if (attr.length > 0) {
-        attr.sort();
-        return attr.join(' | ');
-      } else {
-        return null;
-      }
-    },
-    /**
-     * Builds an HTML string for a layer's InfoBox element.
-     * @param {Object} layer The layer config object.
-     * @param {Object} attributes A set of key-value pair attributes.
-     * @param {String} element The identify element to build the HTML string for.
-     * @return {String}
-     */
-    buildInfoBoxHtmlString: function(layer, attributes, element) {
-      var html = null;
-      
-      if (layer.identify && layer.identify[element]) {
-        if (typeof(layer.identify[element]) === 'function') {
-          html = layer.identify[element](attributes);
-        } else {
-          html = layer.identify[element];
-        
-          $.each(attributes, function(i, v) {
-            // TODO: Use {mustache} here.
-            html = html.replace('{' + i + '}', v);
-          });
-        }
-      }
-      
-      if (!html) {
-        if (element === 'content') {
-          html = 'There is no description available for this location.';
-        } else if (element === 'title') {
-          html = 'No Title';
-        }
-      }
-
-      return html;
-    },
-    /**
-     * Centers then zooms the map.
-     * @param {String} latLng The latLng string, in "latitude,longitude" format, to center the map on.
-     */
-    center: function(latLng) {
-      NPMap[NPMap.config.api].map.center(NPMap[NPMap.config.api].map.stringToLatLng(latLng));
-    },
-    /**
-     * Centers then zooms the map.
-     * @param {String} latLng The latLng string, in "latitude,longitude" format, to center the map on.
-     * @param {Integer} zoom The zoom level to zoom the map to.
-     * @param {Function} callback (Optional) A callback function to call after the map has been centered and zoomed.
-     */
-    centerAndZoom: function(latLng, zoom, callback) {
-      NPMap[NPMap.config.api].map.centerAndZoom(NPMap[NPMap.config.api].map.stringToLatLng(latLng), zoom, callback);
-    },
-    /**
-     * Creates a line using the baseApi's line class, if it exists.
-     * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
-     * @param {Object} options (Optional) baseApi-specific line options.
-     * @param {Object} data (Optional)
-     * @param {Function} clickHandler (Optional)
-     */
-    createLine: function(latLngs, options, data, clickHandler) {
-      var apiLatLngs = [],
-          me = this;
-      
-      $.each(latLngs, function(i, v) {
-        apiLatLngs.push(me.stringToLatLng(v));
-      });
-      
-      return NPMap[NPMap.config.api].map.createLine(apiLatLngs, options, data, clickHandler);
-    },
-    /**
-     * Creates a marker using the baseApi's marker class, if it exists.
-     * @param {String} latLng The latitude/longitude string, in "latitude,longitude" format, to use to create the marker.
-     * @param {Object} options (Optional) baseApi-specific marker options.
-     * @param {Object} data (Optional)
-     * @param {Function} clickHandler (Optional)
-     */
-    createMarker: function(latLng, options, data, clickHandler) {
-      return NPMap[NPMap.config.api].map.createMarker(this.stringToLatLng(latLng), options, data, clickHandler);
-    },
-    /**
-     * Creates a polygon using the baseApi's marker class, if it exists.
-     * @param {Array} latLngs An array of latitude/longitude strings, in "latitude,longitude" format, to use to create the polygon.
-     * @param {Object} options (Optional) baseApi-specific polygon options.
-     * @param {Object} data (Optional)
-     * @param {Function} clickHandler (Optional)
-     * @return {Object}
-     */
-    createPolygon: function(latLngs, options, data, clickHandler) {
-      // TODO: Add support for data and clickHandler configs.
-      var baseApiLatLngs = [],
-          me = this;
-
-      $.each(latLngs, function(i, v) {
-        baseApiLatLngs.push(me.stringToLatLng(v));
-      });
-      
-      return NPMap[NPMap.config.api].map.createPolygon(baseApiLatLngs, options);
-    },
-    /**
-     * Gets the active layer types for both baseLayers and layers.
-     * @return {Array}
-     */
-    getActiveLayerTypes: function() {
-      var types = [];
-      
-      if (NPMap.config.baseLayers) {
-        for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-          var baseLayer = NPMap.config.baseLayers[i],
-              baseLayerType = baseLayer.type;
-
-          if ((typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) && _.indexOf(types, baseLayerType) === -1) {
-            types.push(baseLayerType);
-          }
-        }
-      }
-
-      if (NPMap.config.layers) {
-        for (var j = 0; j < NPMap.config.layers.length; j++) {
-          var layer = NPMap.config.layers[j],
-              layerType = layer.type;
-
-          if ((typeof layer.visible === 'undefined' || layer.visible === true) && _.indexOf(types, layerType) === -1) {
-            types.push(layerType);
-          }
-        }
-      }
-
-      return types;
-    },
-    /**
-     * Gets the center of the map.
-     * @return {String}
-     */
-    getCenter: function() {
-      return this.latLngToString(NPMap[NPMap.config.api].map.getCenter());
-    },
-    /**
-     * Gets the container div.
-     */
-    getContainerDiv: function() {
-      return NPMap[NPMap.config.api].map.getContainerDiv();
-    },
-    /**
-     * Returns the layerConfig object for a layer.
-     * @param {String} layerId The id of the layer to search for.
-     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
-     * @returns {Object}
-     */
-    getLayerById: function(layerId, layers) {
-      if (!layers) {
-        layers = NPMap.config.layers;
-      }
-      
-      for (var i = 0; i < layers.length; i++) {
-        if (layers[i].id === layerId) {
-          return layers[i];
-        }
-      }
-    },
-    /**
-     * Returns the layerConfig object for a layer.
-     * @param {String} layerName The name of the layer to search for.
-     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
-     * @return {Object}
-     */
-    getLayerByName: function(layerName, layers) {
-      if (!layers) {
-        layers = NPMap.config.layers;
-      }
-      
-      for (var i = 0; i < layers.length; i++) {
-        if (layers[i].name === layerName) {
-          return layers[i];
-        }
-      }
-    },
-    /**
-     * Get the marker latitude and longitude, in "latitude,longitude" format.
-     * @param {Object} marker
-     * @return {String}
-     */
-    getMarkerLatLng: function(marker) {
-      return this.latLngToString(NPMap[NPMap.config.api].map.getMarkerLatLng(marker));
-    },
-    /**
-     * Gets a marker option.
-     * @param {Object} marker The baseApi marker object.
-     * @param {String} option The option to get. Currently the valid options are: 'icon'.
-     */
-    getMarkerOption: function(marker, option) {
-      return NPMap[NPMap.config.api].map.getMarkerOption(marker, option);
-    },
-    /**
-     * Gets the visibility property of a marker.
-     * @param {Object} marker The marker to check the visibility for.
-     */
-    getMarkerVisibility: function(marker) {
-      return NPMap[NPMap.config.api].map.getMarkerVisibility(marker);
-    },
-    /**
-     * Gets the maximum zoom level for this map.
-     * @return {Number}
-     */
-    getMaxZoom: function() {
-      return NPMap[NPMap.config.api].map.getMaxZoom();
-    },
-    /**
-     * Gets the minimum zoom level for this map.
-     * @return {Number}
-     */
-    getMinZoom: function() {
-      return NPMap[NPMap.config.api].map.getMinZoom();
-    },
-    /**
-     * Builds out an array of visible layers. Can filter out visible layers that have either grids or tiles, if the checkFor parameter is passed in.
-     */
-    getVisibleLayers: function() {
-      var layers = [];
-
-      if (NPMap.config.layers && $.isArray(NPMap.config.layers)) {
-        $.each(NPMap.config.layers, function(i, v) {
-          if (v.visible) {
-            layers.push(v);
-          }
-        });
-      }
-    
-      return layers;
-    },
-    /**
-     * Gets the zoom level of the map.
-     * @return {Number}
-     */
-    getZoom: function() {
-      return NPMap[NPMap.config.api].map.getZoom();
-    },
-    /**
-     * Handles any necessary sizing and positioning for the map when its div is resized.
-     */
-    handleResize: function() {
-      if (typeof NPMap[NPMap.config.api].map.handleResize !== 'undefined') {
-        NPMap[NPMap.config.api].map.handleResize();
-      }
-      
-      if (NPMap.InfoBox.visible) {
-        NPMap.InfoBox.reposition();
-      }
-    },
-    /**
-     * Checks to see if a clustered layer has been added to the map.
-     * @return {Boolean}
-     */
-    hasClusteredLayer: function() {
-      hasClustered = false;
-      
-      if (NPMap.config.layers) {
-        for (var i = 0; i < NPMap.config.layers.length; i++) {
-          var layer = NPMap.config.layers[i];
-
-          if (layer.type === 'NativeVectors' && layer.clustered === true) {
-            hasClustered = true;
-            break;
-          }
-        }
-      }
-      
-      return hasClustered;
-    },
-    /**
-     * Checks to see if a tiled layer has been added to the map.
-     * @return {Boolean}
-     */
-    hasTiledLayer: function() {
-      hasTiled = false;
-      
-      if (NPMap.config.layers) {
-        for (var i = 0; i < NPMap.config.layers.length; i++) {
-          var layer = NPMap.config.layers[i];
-
-          if ((layer.type === 'NativeVectors' && layer.tiled) || (layer.type === 'ArcGisServerRest' || layer.type === 'TileStream')) {
-            hasTiled = true;
-            break;
-          }
-        }
-      }
-      
-      return hasTiled;
-    },
-    /**
-     * Hides the progress bar.
-     */
-    hideProgressBar: function() {
-      $('#npmap-progressbar div').css({
-        width: '100%'
-      });
-      $('#npmap-progressbar').fadeOut();
-    },
-    /**
-     * Hides a shape.
-     * @param {Object} shape The shape to hide.
-     */
-    hideShape: function(shape) {
-      NPMap[NPMap.config.api].map.hideShape(shape);
-    },
-    /**
-     * Hides the tip.
-     */
-    hideTip: function() {
-      document.getElementById('npmap-tip').style.display = 'none';
-    },
+    _events: [],
     /**
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
      */
-    init: function() {
+    _init: function() {
       var
           // The jQuery map div.
           $map,
@@ -997,7 +602,7 @@
           $.each(NPMap.config.baseLayers, function(i, baseLayer) {
             var icon = NPMap.config.server + '/resources/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
                 label = baseLayer.code,
-                match = NPMap[NPMap.config.api].map.matchBaseLayer(baseLayer),
+                match = NPMap.Map[NPMap.config.api].matchBaseLayer(baseLayer),
                 type = baseLayer.type;
             
             if (match) {
@@ -1085,7 +690,7 @@
             e.preventDefault();
             setIcon(data.icon.replace('large', 'small'));
             setLabel(data.label);
-            NPMap[NPMap.config.api].map.switchBaseLayer(data.baseLayer);
+            NPMap.Map[NPMap.config.api].switchBaseLayer(data.baseLayer);
           });
         });
       }
@@ -1105,10 +710,423 @@
           zIndex: 32
         });
         
-        NPMap.utils.safeLoad('NPMap.' + NPMap.config.api + '.map.Map', function() {
-          NPMap.Event.trigger('NPMap.Map', 'ready', NPMap[NPMap.config.api].map.Map);
+        NPMap.Util.safeLoad('NPMap.' + NPMap.config.api + '.map.Map', function() {
+          NPMap.Event.trigger('NPMap.Map', 'ready', NPMap.Map[NPMap.config.api].Map);
         });
       });
+    },
+    /**
+     * Adds an HTML element to the map div.
+     * @param {Object} el
+     * @param {Function} callback (Optional)
+     */
+    addElementToMapDiv: function(el, callback) {
+      if (NPMap.config.api === 'bing') {
+        NPMap.Map.Bing.addElementToMapDiv(el);
+      } else {
+        document.getElementById(NPMap.config.div).appendChild(el);
+      }
+      
+      cancelMouseEvents($(el));
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * Adds an HTML element to the map div.
+     * @param {Array} els
+     * @param {Function} callback (Optional)
+     */
+    addElementsToMapDiv: function(els, callback) {
+      var me = this;
+      
+      if (NPMap.config.api === 'bing') {
+        NPMap.Util.safeLoad('NPMap.bing', function() {
+          $.each(els, function(i, el) {
+            me.addElementToMapDiv(el);
+          });
+          
+          if (callback) {
+            callback();
+          }
+        });
+      } else {
+        $.each(els, function(i, el) {
+          me.addElementToMapDiv(el);
+        });
+        
+        if (callback) {
+         callback();
+        }
+      }
+    },
+    /**
+     * Adds a shape to the map.
+     * @param {Object} shape The shape to add to the map. This can be a marker, line, or polygon object for the active baseApi.
+     */
+    addShape: function(shape) {
+      NPMap.Map[NPMap.config.api].addShape(shape);
+    },
+    /**
+     * Adds a tile layer to the map.
+     * @param {Object} layer
+     */
+    addTileLayer: function(layer) {
+      NPMap.Map[NPMap.config.api].addTileLayer(layer);
+    },
+    /**
+     * Converts an API bounds to a NPMap bounds.
+     * @param {Object} bounds
+     * @return {Object}
+     */
+    boundsFromApi: function(bounds) {
+      return NPMap.Map[NPMap.config.api].boundsFromApi(bounds);
+    },
+    /**
+     * Converts a NPMap bounds to an API bounds.
+     * @param {Object}
+     * @return {Object}
+     */
+    boundsToApi: function(bounds) {
+      return NPMap.Map[NPMap.config.api].boundsToApi(bounds);
+    },
+    /**
+     * Builds the attribution string for the visible layers.
+     * @param {String} attribution An attribution string to add to the visible layer attribution.
+     * @return {String}
+     */
+    buildAttributionStringForVisibleLayers: function(attribution) {
+      var attr = [],
+          me = this;
+      
+      if (attribution) {
+        $.each(attribution.split('|'), function(i, v) {
+          attr.push(v);
+        });
+      }
+      
+      $.each(me.getVisibleLayers(), function(i, v) {
+        if (v.attribution) {
+          $.each(v.attribution.split('|'), function(i2, v2) {
+            var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
+
+            if ($.inArray(credit, attr) === -1) {
+              attr.push(credit);
+            }
+          });
+        }
+      });
+
+      if (attr.length > 0) {
+        attr.sort();
+        return attr.join(' | ');
+      } else {
+        return null;
+      }
+    },
+    /**
+     * Centers then zooms the map.
+     * @param {String} latLng The latLng string, in "latitude,longitude" format, to center the map on.
+     */
+    center: function(latLng) {
+      NPMap.Map[NPMap.config.api].center(NPMap.Map[NPMap.config.api].latLngToApi(latLng));
+    },
+    /**
+     * Centers then zooms the map.
+     * @param {String} latLng The latLng string, in "latitude,longitude" format, to center the map on.
+     * @param {Integer} zoom The zoom level to zoom the map to.
+     * @param {Function} callback (Optional) A callback function to call after the map has been centered and zoomed.
+     */
+    centerAndZoom: function(latLng, zoom, callback) {
+      NPMap.Map[NPMap.config.api].centerAndZoom(NPMap.Map[NPMap.config.api].latLngToApi(latLng), zoom, callback);
+    },
+    /**
+     * Creates a line using the baseApi's line class, if it exists.
+     * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
+     * @param {Object} options (Optional) baseApi-specific line options.
+     * @param {Object} data (Optional)
+     * @param {Function} clickHandler (Optional)
+     */
+    createLine: function(latLngs, options, data, clickHandler) {
+      var apiLatLngs = [],
+          me = this;
+      
+      $.each(latLngs, function(i, v) {
+        apiLatLngs.push(me.latLngToApi(v));
+      });
+      
+      return NPMap.Map[NPMap.config.api].createLine(apiLatLngs, options, data, clickHandler);
+    },
+    /**
+     * Creates a marker using the baseApi's marker class, if it exists.
+     * @param {String} latLng The latitude/longitude string, in "latitude,longitude" format, to use to create the marker.
+     * @param {Object} options (Optional) baseApi-specific marker options.
+     * @param {Object} data (Optional)
+     * @param {Function} clickHandler (Optional)
+     */
+    createMarker: function(latLng, options, data, clickHandler) {
+      options = (function() {
+        // Current valid NPMap options: height (Bing), icon (Bing/Google), and width (Bing).
+        var o;
+
+        if (options) {
+          if (!options.icon) {
+            options.height = 13;
+            options.icon = NPMap.config.server + '/resources/markers/nps_round_13.png';
+            options.width = 13;
+          }
+
+          o = NPMap.Map[NPMap.config.api].convertMarkerOptions(options);
+        } else {
+          o = NPMap.Map[NPMap.config.api].convertMarkerOptions({
+            height: 13,
+            icon: NPMap.config.server + '/resources/markers/nps_round_13.png',
+            width: 13
+          });
+        }
+
+        return o;
+      })();
+
+      return NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), options, data, clickHandler);
+    },
+    /**
+     * Creates a polygon using the baseApi's marker class, if it exists.
+     * @param {Array} latLngs An array of latitude/longitude strings, in "latitude,longitude" format, to use to create the polygon.
+     * @param {Object} options (Optional) baseApi-specific polygon options.
+     * @param {Object} data (Optional)
+     * @param {Function} clickHandler (Optional)
+     * @return {Object}
+     */
+    createPolygon: function(latLngs, options, data, clickHandler) {
+      // TODO: Add support for data and clickHandler configs.
+      var apiLatLngs = [],
+          me = this;
+
+      for (var i = 0; i < latLngs.length; i++) {
+        apiLatLngs.push(me.latLngToApi(latLngs[i]));
+      }
+      
+      return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
+    },
+    /**
+     * Gets the active layer types for both baseLayers and layers.
+     * @return {Array}
+     */
+    getActiveLayerTypes: function() {
+      var types = [];
+      
+      if (NPMap.config.baseLayers) {
+        for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+          var baseLayer = NPMap.config.baseLayers[i],
+              baseLayerType = baseLayer.type;
+
+          if ((typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) && _.indexOf(types, baseLayerType) === -1) {
+            types.push(baseLayerType);
+          }
+        }
+      }
+
+      if (NPMap.config.layers) {
+        for (var j = 0; j < NPMap.config.layers.length; j++) {
+          var layer = NPMap.config.layers[j],
+              layerType = layer.type;
+
+          if ((typeof layer.visible === 'undefined' || layer.visible === true) && _.indexOf(types, layerType) === -1) {
+            types.push(layerType);
+          }
+        }
+      }
+
+      return types;
+    },
+    /**
+     *
+     */
+    getBounds: function() {
+      return this.boundsFromApi(NPMap.Map[NPMap.config.api].getBounds());
+    },
+    /**
+     * Gets the center of the map.
+     * @return {String}
+     */
+    getCenter: function() {
+      return this.latLngFromApi(NPMap.Map[NPMap.config.api].getCenter());
+    },
+    /**
+     * Gets the container div.
+     */
+    getContainerDiv: function() {
+      return NPMap.Map[NPMap.config.api].getContainerDiv();
+    },
+    /**
+     * Returns the layerConfig object for a layer.
+     * @param {String} layerId The id of the layer to search for.
+     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
+     * @returns {Object}
+     */
+    getLayerById: function(layerId, layers) {
+      if (!layers) {
+        layers = NPMap.config.layers;
+      }
+      
+      for (var i = 0; i < layers.length; i++) {
+        if (layers[i].id === layerId) {
+          return layers[i];
+        }
+      }
+    },
+    /**
+     * Returns the layerConfig object for a layer.
+     * @param {String} layerName The name of the layer to search for.
+     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
+     * @return {Object}
+     */
+    getLayerByName: function(layerName, layers) {
+      if (!layers) {
+        layers = NPMap.config.layers;
+      }
+      
+      for (var i = 0; i < layers.length; i++) {
+        if (layers[i].name === layerName) {
+          return layers[i];
+        }
+      }
+    },
+    /**
+     * Get the marker latitude and longitude, in "latitude,longitude" format.
+     * @param {Object} marker
+     * @return {String}
+     */
+    getMarkerLatLng: function(marker) {
+      return this.latLngFromApi(NPMap.Map[NPMap.config.api].getMarkerLatLng(marker));
+    },
+    /**
+     * Gets a marker option.
+     * @param {Object} marker The baseApi marker object.
+     * @param {String} option The option to get. Currently the valid options are: 'icon'.
+     */
+    getMarkerOption: function(marker, option) {
+      return NPMap.Map[NPMap.config.api].getMarkerOption(marker, option);
+    },
+    /**
+     * Gets the visibility property of a marker.
+     * @param {Object} marker The marker to check the visibility for.
+     */
+    getMarkerVisibility: function(marker) {
+      return NPMap.Map[NPMap.config.api].getMarkerVisibility(marker);
+    },
+    /**
+     * Gets the maximum zoom level for this map.
+     * @return {Number}
+     */
+    getMaxZoom: function() {
+      return NPMap.Map[NPMap.config.api].getMaxZoom();
+    },
+    /**
+     * Gets the minimum zoom level for this map.
+     * @return {Number}
+     */
+    getMinZoom: function() {
+      return NPMap.Map[NPMap.config.api].getMinZoom();
+    },
+    /**
+     * Builds out an array of visible layers. Can filter out visible layers that have either grids or tiles, if the checkFor parameter is passed in.
+     */
+    getVisibleLayers: function() {
+      var layers = [];
+
+      if (NPMap.config.layers && $.isArray(NPMap.config.layers)) {
+        $.each(NPMap.config.layers, function(i, v) {
+          if (v.visible) {
+            layers.push(v);
+          }
+        });
+      }
+    
+      return layers;
+    },
+    /**
+     * Gets the zoom level of the map.
+     * @return {Number}
+     */
+    getZoom: function() {
+      return NPMap.Map[NPMap.config.api].getZoom();
+    },
+    /**
+     * Handles any necessary sizing and positioning for the map when its div is resized.
+     */
+    handleResize: function() {
+      if (typeof NPMap.Map[NPMap.config.api] !== 'undefined') {
+        NPMap.Map[NPMap.config.api].handleResize();
+      }
+      
+      if (NPMap.InfoBox.visible) {
+        NPMap.InfoBox.reposition();
+      }
+    },
+    /**
+     * Checks to see if a clustered layer has been added to the map.
+     * @return {Boolean}
+     */
+    hasClusteredLayer: function() {
+      hasClustered = false;
+      
+      if (NPMap.config.layers) {
+        for (var i = 0; i < NPMap.config.layers.length; i++) {
+          var layer = NPMap.config.layers[i];
+
+          if (layer.type === 'NativeVectors' && layer.clustered === true) {
+            hasClustered = true;
+            break;
+          }
+        }
+      }
+      
+      return hasClustered;
+    },
+    /**
+     * Checks to see if a tiled layer has been added to the map.
+     * @return {Boolean}
+     */
+    hasTiledLayer: function() {
+      hasTiled = false;
+      
+      if (NPMap.config.layers) {
+        for (var i = 0; i < NPMap.config.layers.length; i++) {
+          var layer = NPMap.config.layers[i];
+
+          if ((layer.type === 'NativeVectors' && layer.tiled) || (layer.type === 'ArcGisServerRest' || layer.type === 'TileStream')) {
+            hasTiled = true;
+            break;
+          }
+        }
+      }
+      
+      return hasTiled;
+    },
+    /**
+     * Hides the progress bar.
+     */
+    hideProgressBar: function() {
+      $('#npmap-progressbar div').css({
+        width: '100%'
+      });
+      $('#npmap-progressbar').fadeOut();
+    },
+    /**
+     * Hides a shape.
+     * @param {Object} shape The shape to hide.
+     */
+    hideShape: function(shape) {
+      NPMap.Map[NPMap.config.api].hideShape(shape);
+    },
+    /**
+     * Hides the tip.
+     */
+    hideTip: function() {
+      document.getElementById('npmap-tip').style.display = 'none';
     },
     /**
      * Tests to see if a latLng is within the map's current bounds.
@@ -1116,7 +1134,7 @@
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
-      return NPMap[NPMap.config.api].map.isLatLngWithinMapBounds(latLng);
+      return NPMap.Map[NPMap.config.api].isLatLngWithinMapBounds(latLng);
     },
     /**
      * Tests the equivalency of two location strings.
@@ -1141,8 +1159,16 @@
      * @param {Object} latLng The lat/lng object.
      * @return {String}
      */
-    latLngToString: function(latLng) {
-      return NPMap[NPMap.config.api].map.latLngToString(latLng);
+    latLngFromApi: function(latLng) {
+      return NPMap.Map[NPMap.config.api].latLngFromApi(latLng);
+    },
+    /**
+     * Converts a lat/lng string ("latitude/longitude") to a baseApi's latLng object.
+     * @param {String} latLng The lat/lng string.
+     * @return {Object}
+     */
+    latLngToApi: function(latLng) {
+      return NPMap.Map[NPMap.config.api].latLngToApi(latLng);
     },
     /**
      * Turns meters into a zoom level. This function is not precise, as it is impossible to get precise meter scale values for the entire earth reprojected to web mercator. Only use this in cases where approximate numbers are acceptable.
@@ -1194,7 +1220,7 @@
      * @param {Object} pixels
      */
     panByPixels: function(pixels) {
-      NPMap[NPMap.config.api].map.panByPixels(pixels);
+      NPMap.Map[NPMap.config.api].panByPixels(pixels);
     },
     /**
      * Pans the map in a direction by a quarter of the current map viewport.
@@ -1237,7 +1263,7 @@
      * @param {Object} shape The shape to remove from the map.
      */
     removeShape: function(shape) {
-      NPMap[NPMap.config.api].map.removeShape(shape);
+      NPMap.Map[NPMap.config.api].removeShape(shape);
     },
     /**
      * Sets the attribution string for the map.
@@ -1263,21 +1289,21 @@
      *
      */
     setBounds: function(bounds) {
-      NPMap[NPMap.config.api].map.setBounds(bounds);
+      NPMap.Map[NPMap.config.api].setBounds(bounds);
     },
     /**
      * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
      * @param {Object} c
      */
     setInitialCenter: function(center) {
-      NPMap[NPMap.config.api].map.setInitialCenter(this.stringToLatLng(center));
+      NPMap.Map[NPMap.config.api].setInitialCenter(this.latLngToApi(center));
     },
     /**
      * Sets the initial zoom of the map. This initial zoom is stored with the map, and is used by the setInitialExtent method, among other things.
      * @param {Number} zoom
      */
     setInitialZoom: function(zoom) {
-      NPMap[NPMap.config.api].map.setInitialZoom(zoom);
+      NPMap.Map[NPMap.config.api].setInitialZoom(zoom);
     },
     /**
      * Sets a marker's options.
@@ -1285,7 +1311,7 @@
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
      */
     setMarkerOptions: function(marker, options) {
-      NPMap[NPMap.config.api].map.setMarkerOptions(marker, options);
+      NPMap.Map[NPMap.config.api].setMarkerOptions(marker, options);
     },
     /**
      * Sets the notify target to an HTML element other than the map div. This can only be called after NPMap has been initialized.
@@ -1298,7 +1324,7 @@
      *
      */
     setZoomRestrictions: function(restrictions) {
-      NPMap[NPMap.config.api].map.setZoomRestrictions(restrictions);
+      NPMap.Map[NPMap.config.api].setZoomRestrictions(restrictions);
     },
     /**
      * Shows the progress bar.
@@ -1321,7 +1347,7 @@
      * @param {Object} shape The shape to show.
      */
     showShape: function(shape) {
-      NPMap[NPMap.config.api].map.showShape(shape);
+      NPMap.Map[NPMap.config.api].showShape(shape);
     },
     /**
      * Shows the tip.
@@ -1335,18 +1361,10 @@
       }).show();
     },
     /**
-     * Converts a lat/lng string ("latitude/longitude") to a baseApi's latLng object.
-     * @param {String} latLng The lat/lng string.
-     * @return {Object}
-     */
-    stringToLatLng: function(latLng) {
-      return NPMap[NPMap.config.api].map.stringToLatLng(latLng);
-    },
-    /**
      * Toggles fullscreen mode on or off.
      */
     toggleFullScreen: function() {
-      var baseApi = NPMap[NPMap.config.api].map,
+      var baseApi = NPMap.Map[NPMap.config.api],
           currentCenter = baseApi.getCenter(),
           currentZoom = baseApi.getZoom(),
           el = document.getElementById('npmap');
@@ -1388,7 +1406,7 @@
             $window = $(window);
         
         if (NPMap.InfoBox.visible) {
-          currentCenter = baseApi.stringToLatLng(NPMap.InfoBox.latLng);
+          currentCenter = baseApi.latLngToApi(NPMap.InfoBox.latLng);
         }
 
         if (isFullScreen) {
@@ -1482,7 +1500,7 @@
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
-      NPMap[NPMap.config.api].map.toInitialExtent();
+      NPMap.Map[NPMap.config.api].toInitialExtent();
     },
     /**
      * DEPRECATED: Updates a marker's icon.
@@ -1490,7 +1508,7 @@
      * @param {String} icon The url of the new icon.
      */
     updateMarkerIcon: function(marker, icon) {
-      NPMap[NPMap.config.api].map.updateMarkerIcon(marker, icon);
+      NPMap.Map[NPMap.config.api].updateMarkerIcon(marker, icon);
     },
     /**
      * DEPRECATED: Updates a marker's label.
@@ -1498,7 +1516,7 @@
      * @param {String} label The new label string.
      */
     updateMarkerLabel: function(marker, label) {
-      NPMap[NPMap.config.api].map.updateMarkerLabel(marker, label);
+      NPMap.Map[NPMap.config.api].updateMarkerLabel(marker, label);
     },
     /**
      * Updates the progress bar value.
@@ -1516,28 +1534,28 @@
      * @param {Number} zoom
      */
     zoom: function(zoom) {
-      NPMap[NPMap.config.api].map.zoom(zoom);
+      NPMap.Map[NPMap.config.api].zoom(zoom);
     },
     /**
      * Zooms the map in by one zoom level.
      */
     zoomIn: function() {
-      NPMap[NPMap.config.api].map.zoomIn();
+      NPMap.Map[NPMap.config.api].zoomIn();
     },
     /**
      * Zooms the map out by one zoom level.
      */
     zoomOut: function() {
-      NPMap[NPMap.config.api].map.zoomOut();
+      NPMap.Map[NPMap.config.api].zoomOut();
     },
     /**
      * Zooms the map to a bounding box.
      * @param {Object} bbox A bbox object with nw and se lat/lng strings.
      */
     zoomToBoundingBox: function(bbox) {
-      NPMap[NPMap.config.api].map.zoomToBoundingBox({
-        nw: NPMap[NPMap.config.api].map.stringToLatLng(bbox.nw),
-        se: NPMap[NPMap.config.api].map.stringToLatLng(bbox.se)
+      NPMap.Map[NPMap.config.api].zoomToBoundingBox({
+        nw: NPMap.Map[NPMap.config.api].latLngToApi(bbox.nw),
+        se: NPMap.Map[NPMap.config.api].latLngToApi(bbox.se)
       });
     },
     /**
@@ -1545,7 +1563,7 @@
      * @param {String} latLng The lat/lng string, in "latitude,longitude" format, to zoom the map to.
      */
     zoomToLatLng: function(latLng) {
-      NPMap[NPMap.config.api].map.zoomToLatLng(this.stringToLatLng(latLng));
+      NPMap.Map[NPMap.config.api].zoomToLatLng(this.latLngToApi(latLng));
     },
     /**
      * Zooms the map to the extent of an array of lat/lng strings.
@@ -1556,17 +1574,17 @@
           me = this;
       
       $.each(latLngs, function(i, latLng) {
-        apiLatLngs.push(me.stringToLatLng(latLng));
+        apiLatLngs.push(me.latLngToApi(latLng));
       });
       
-      NPMap[NPMap.config.api].map.zoomToLatLngs(apiLatLngs);
+      NPMap.Map[NPMap.config.api].zoomToLatLngs(apiLatLngs);
     },
     /**
      * Zooms the map to the extent of an array of marker objects.
      * @param {Array} markers The array of marker objects.
      */
     zoomToMarkers: function(markers) {
-      NPMap[NPMap.config.api].map.zoomToMarkers(markers);
+      NPMap.Map[NPMap.config.api].zoomToMarkers(markers);
     }
   };
 });

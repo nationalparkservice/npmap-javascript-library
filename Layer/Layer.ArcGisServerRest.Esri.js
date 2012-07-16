@@ -23,7 +23,7 @@ define([
   return NPMap.esri.layers.ArcGisServerRest = {
     addLayer: function(layer) {
       if (!layer.url) {
-        NPMap.utils.throwError('The layer does not have a URL defined!');
+        throw new Error('The layer does not have a URL defined!');
       }
       
       if (typeof layer.visible === 'undefined' || layer.visible) {

@@ -1,7 +1,7 @@
 ﻿// TODO: Hook up attribution for all layers.
 define([
-  NPMap.config.server + '/Map/Map.js'
-], function(core) {
+  'Map/Map'
+], function(Map) {
   var
       // The base layer to initialize the map with.
       baseLayer,
@@ -52,7 +52,7 @@ define([
       var layer = NPMap.config.baseLayers[i];
       
       if (layer.visible) {
-        NPMap.utils.safeLoad('NPMap.leaflet.layers.' + layer.type, function() {
+        NPMap.Util.safeLoad('NPMap.leaflet.layers.' + layer.type, function() {
           NPMap.leaflet.layers[layer.type].addLayer(layer);
         });
         
@@ -94,11 +94,13 @@ define([
     NPMap.Map.setAttribution('<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>');
   }
   
-  core.init();
-
-  NPMap.leaflet = {};
+  Map._init();
   
-  return NPMap.leaflet.map = {
+  return NPMap.Map.Leaflet = {
+    // Is the map loaded and ready to be interacted with programatically?
+    _isReady: true,
+    // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
+    map: map,
     /**
      * Zooms to the center and zoom provided. If zoom isn't provided, the map will zoom to level 17.
      * @param {L.LatLng} latLng
@@ -152,21 +154,13 @@ define([
       }
     },
     /**
-     * Is the map loaded and ready to be interacted with programatically?
-     */
-    isReady: true,
-    /**
      * Converts a {L.LatLng} to the NPMap representation of a latitude/longitude string.
      * @param latLng {L.LatLng} The object to convert to a string.
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
-    latLngToString: function(latLng) {
+    latLngFromApi: function(latLng) {
       return latLng.lat + ',' + latLng.lng;
     },
-    /**
-     * The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
-     */
-    Map: map,
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
@@ -220,7 +214,7 @@ define([
      * @param {String} latLng The lat/lng string.
      * @return {Object}
      */
-    stringToLatLng: function(latLng) {
+    latLngToApi: function(latLng) {
       latLng = latLng.split(',');
       return new L.LatLng(parseFloat(latLng[0]), parseFloat(latLng[1]));
     },

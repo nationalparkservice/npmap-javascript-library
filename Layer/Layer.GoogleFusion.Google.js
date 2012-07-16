@@ -7,7 +7,7 @@ NPMap.google.layers.GoogleFusion = (function() {
       }
       
       var options = {
-        map: NPMap.google.map.Map,
+        map: NPMap.Map.Google.Map,
         suppressInfoWindows: true
       };
       
@@ -25,7 +25,7 @@ NPMap.google.layers.GoogleFusion = (function() {
         if (e && typeof(e.latLng) != 'undefined') {
           var activeLayerObject,
               layerId,
-              pixelOffset = NPMap.google.map.getPixelFromLatLng(e.latLng);
+              pixelOffset = NPMap.Map.Google.getPixelFromLatLng(e.latLng);
           
           $('#npmap-clickdot').css({
             backgroundColor: 'transparent',

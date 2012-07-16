@@ -105,7 +105,7 @@
         var data = args.data,
             e = args.e,
             eo = wax.u.eventoffset(e),
-            offset = NPMap.utils.getMapDivOffset(),
+            offset = NPMap.Util.getMapDivOffset(),
             position = {
               x: eo.x - offset.left,
               y: eo.y - offset.top
@@ -122,7 +122,7 @@
             // TODO: This should be used in conjunction with "clustering".
             // TODO: Need to support if content and title configs are strings.
             if (typeof data === 'object' && _.size(data) === 1) {
-              var layer = NPMap.map.getLayerByName(NPMap.utils.getFirstPropertyOfObject(data));
+              var layer = NPMap.map.getLayerByName(NPMap.Util.getFirstPropertyOfObject(data));
 
               content = layer.identify.content(data);
               title = layer.identify.title(data);

@@ -49,7 +49,7 @@ describe("NPMap.Map", function() {
   // handleResize
   // hideShape
   // isLatLngWithinMapBounds
-  // latLngToString
+  // latLngFromApi
   // matchBaseLayer
   // panByPixels
   // positionClickDot
@@ -57,7 +57,7 @@ describe("NPMap.Map", function() {
   // setMarkerIcon
   // setMarkerOptions
   // showShape
-  // stringToLatLng
+  // latLngToApi
   // switchBaseLayer
   it('should be able to zoom and/or pan the map to its initial extent', function() {
     expect(function() {

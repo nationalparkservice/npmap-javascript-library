@@ -87,19 +87,19 @@
         type = 'polygon';
         break;
       case 'marker':
-        latLngsNpmap.push(NPMap.google.map.latLngToString(event.overlay.getPosition()));
+        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(event.overlay.getPosition()));
         type = 'point';
         break;
       case 'polygon':
         type = 'polygon';
 
         event.overlay.getPath().forEach(function(latLng, i) {
-          latLngsNpmap.push(NPMap.google.map.latLngToString(latLng));
+          latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(latLng));
         });
         break;
       case 'polyline':
         event.overlay.getPath().forEach(function(latLng, i) {
-          latLngsNpmap.push(NPMap.google.map.latLngToString(latLng));
+          latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(latLng));
         });
         type = 'line';
         break;
@@ -110,10 +110,10 @@
         
         type = 'polygon';
 
-        latLngsNpmap.push(NPMap.google.map.latLngToString(ne));
-        latLngsNpmap.push(NPMap.google.map.latLngToString(new google.maps.LatLng(ne.lat(), sw.lng())));
-        latLngsNpmap.push(NPMap.google.map.latLngToString(sw));
-        latLngsNpmap.push(NPMap.google.map.latLngToString(new google.maps.LatLng(sw.lat(), ne.lng())));
+        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(ne));
+        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(new google.maps.LatLng(ne.lat(), sw.lng())));
+        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(sw));
+        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(new google.maps.LatLng(sw.lat(), ne.lng())));
         break;
     }
     

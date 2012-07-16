@@ -1,0 +1,121 @@
+define([
+  'Event',
+  'Map/Map'
+], function(Event, Map) {
+  var
+      // Information about all of NPMap's layer handlers.
+      LAYER_HANDLERS = {
+        ArcGisServerRest: {
+          clickable: true,
+          type: 'raster'
+        },
+        GeoJson: {
+          clickable: true,
+          type: 'vector'
+        },
+        GoogleFusion: {
+          clickable: true,
+          type: 'raster'
+        },
+        Json: {
+          clickable: true,
+          type: 'vector'
+        },
+        Kml: {
+          clickable: true,
+          type: 'vector'
+        },
+        NativeVectors: {
+          clickable: true,
+          type: 'vector'
+        },
+        Tiled: {
+          clickable: true,
+          type: 'raster'
+        },
+        TileStream: {
+          clickable: true,
+          type: 'raster'
+        },
+        Xml: {
+          clickable: true,
+          type: 'vector'
+        },
+        Zoomify: {
+          clickable: false,
+          type: 'raster'
+        }
+      },
+      // The layer names that have already been added to the map.
+      usedNames = [];
+
+  Event.add('NPMap.Layer', 'added', function(config) {
+    usedNames.push(config.name);
+  });
+  /*
+  Event.add('NPMap.Layer', 'beforeadd', function(config) {
+    // Validate required parameters.
+  });
+  */
+  Event.add('NPMap.Layer', 'removed', function(config) {
+    usedNames.splice(_.indexOf(usedNames, config.name), 1);
+  });
+  Event.add('NPMap.Map', 'click', function(e) {
+    for (var i = 0; i < NPMap.config.layers.length; i++) {
+      var layerType = NPMap.config.layers[i].type,
+          meta = LAYER_HANDLERS[layerType];
+
+      if (meta.type === 'raster' && meta.clickable === true) {
+        NPMap.Layer[layerType]._handleClick(e);
+      }
+    }
+  });
+  Event.add('NPMap.Map', 'shapeclick', function(e) {
+    for (var j = 0; j < NPMap.config.layers.length; j++) {
+      var layerType = NPMap.config.layers[j].type,
+          meta = LAYER_HANDLERS[layerType];
+
+      if (meta.type === 'vector' && meta.clickable === true) {
+        NPMap.Layer[layerType]._handleClick(e);
+      }
+    }
+  });
+
+  return NPMap.Layer = {
+    // Events that have been added to this class.
+    _events: [],
+    /**
+     * Gets the layer name.
+     * @param {Object} config
+     */
+    getName: function(config) {
+      return config.name;
+    },
+    /**
+     * Gets the layer type.
+     * @param {Object} config
+     */
+    getType: function(config) {
+      return config.type;
+    },
+    /**
+     * Checks a layer config object to make sure it has the required properties and they are valid.
+     * @param {Object} config
+     */
+    hasRequiredProperties: function(config) {
+      if (!config.name) {
+        throw new Error('All layers must have a "name".');
+      }
+
+      if (_.indexOf(usedNames, config.name) === -1) {
+        usedNames.push(config.name);
+      } else {
+        throw new Error('All layer names must be unique. "' + config.name + '" is used more than once.');
+      }
+
+      if (!config.type) {
+        throw new Error('All layers must have a "type".');
+      }
+    }
+  };
+});

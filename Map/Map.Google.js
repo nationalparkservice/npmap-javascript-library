@@ -1,13 +1,13 @@
 ﻿define([
-  NPMap.config.server + '/Map/Map.js'
-], function(core) {
-  var 
+  'Map/Map'
+], function(Map) {
+  var
       // The initially-active base layer.
       activeBaseLayer,
       // The current bounds of the map.
       bounds,
       // An array of the default base layers for the Google baseAPI.
-      defaultBaseLayers = [{
+      DEFAULT_BASE_LAYERS = [{
         code: 'HYBRID',
         type: 'Aerial'
       },{
@@ -15,7 +15,7 @@
         type: 'Street'
       },{
         code: 'SATELLITE',
-        type: 'Aerial',
+        type: 'Aerial'
       },{
         code: 'TERRAIN',
         type: 'Topo'
@@ -90,14 +90,14 @@
   mapConfig = {
     disableDefaultUI: true,
     draggable: (function() {
-      if (NPMap.utils.doesPropertyExist(NPMap, 'NPMap.config.tools.mouse.draggable')) {
+      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.mouse.draggable')) {
         return NPMap.config.tools.mouse.draggable;
       } else {
         return true;
       }
     })(),
     keyboardShortcuts: (function() {
-      if (NPMap.utils.doesPropertyExist(NPMap, 'NPMap.config.tools.keyboard')) {
+      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.keyboard')) {
         return NPMap.config.tools.keyboard;
       } else {
         return true;
@@ -108,7 +108,7 @@
     noClear: true,
     panControl: false,
     scaleControl: (function() {
-      if (NPMap.utils.doesPropertyExist(NPMap, 'NPMap.config.tools.controls.scaleBar')) {
+      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.controls.scaleBar')) {
         if (NPMap.config.tools.controls.scaleBar === true) {
           mapConfig.scaleControlOptions = {
             position: google.maps.ControlPosition.RIGHT_BOTTOM,
@@ -122,7 +122,7 @@
       }
     })(),
     scrollWheel: (function() {
-      if (NPMap.utils.doesPropertyExist(NPMap, 'NPMap.config.tools.mouse.scrollWheel')) {
+      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.mouse.scrollWheel')) {
         return NPMap.config.tools.mouse.scrollWheel;
       } else {
         return true;
@@ -137,10 +137,8 @@
     map = new google.maps.Map(document.getElementById(NPMap.config.div), mapConfig);
     map.fitBounds(initialBounds);
   } else {
-    initialCenter = new google.maps.LatLng(NPMap.config.center.lat, NPMap.config.center.lng);
-    initialZoom = NPMap.config.zoom;
-    mapConfig.center = initialCenter;
-    mapConfig.zoom = initialZoom;
+    mapConfig.center = initialCenter = new google.maps.LatLng(NPMap.config.center.lat, NPMap.config.center.lng);
+    mapConfig.zoom = initialZoom = NPMap.config.zoom;
     map = new google.maps.Map(document.getElementById('npmap'), mapConfig);
   }
   
@@ -268,22 +266,22 @@
           min = NPMap.config.restrictZoom.min;
         }
         
-        google.maps.event.addListener(NPMap.google.map.Map, 'zoom_changed', function() {
-          var currentZoom = NPMap.google.map.Map.getZoom();
+        google.maps.event.addListener(NPMap.Map.Google.Map, 'zoom_changed', function() {
+          var currentZoom = NPMap.Map.Google.Map.getZoom();
           
           if (currentZoom < min) {
-            NPMap.google.map.Map.setZoom(min);
+            NPMap.Map.Google.Map.setZoom(min);
           } else if (currentZoom > max) {
-            NPMap.google.map.Map.setZoom(max);
+            NPMap.Map.Google.Map.setZoom(max);
           }
         });
       }
       */
       
       /*
-      google.maps.event.addListener(NPMap.google.map.Map, 'center_changed', function() {
-        var bounds = NPMap.google.map.Map.getBounds(),
-            center = NPMap.google.map.Map.getCenter(),
+      google.maps.event.addListener(NPMap.Map.Google.Map, 'center_changed', function() {
+        var bounds = NPMap.Map.Google.Map.getBounds(),
+            center = NPMap.Map.Google.Map.getCenter(),
             ne = bounds.getNorthEast(),
             sw = bounds.getSouthWest(),
             neHemisphere = inEasternOrWesternHemisphere(ne.lng()),
@@ -300,7 +298,7 @@
           
           plus++;
           
-          NPMap.google.map.Map.setCenter(new google.maps.LatLng(center.lat(), center.lng() + plus));
+          NPMap.Map.Google.Map.setCenter(new google.maps.LatLng(center.lat(), center.lng() + plus));
         }
       });
       */
@@ -377,7 +375,7 @@
                   setAttribution(a);
                   attribution = a;
                 }
-              }, 500)
+              }, 500);
             }
           }, 500),
           intOverlay = setInterval(function() {
@@ -394,22 +392,24 @@
             }
           }, 100);
       
-      core.init();
+      Map._init();
       
-      NPMap.google.map.isReady = true;
+      NPMap.Map.Google._isReady = true;
     }
   }, 5);
-  
-  NPMap.google = NPMap.google || {};
 
-  return NPMap.google.map = {
+  return NPMap.Map.Google = {
+    // Is the map loaded and ready to be interacted with programatically?
+    _isReady: false,
+    // The google.maps.Map object.
+    map: map,
     /**
      * Adds a base layer to the map.
      * @param baseLayer An object with code, name, and visible properties.
      */
     addBaseLayer: function(baseLayer) {
       if (baseLayer.visible) {
-        NPMap.google.map.switchBaseLayer(baseLayer.code);
+        this.switchBaseLayer(baseLayer.code);
       }
       
       return baseLayer;
@@ -434,6 +434,19 @@
       }
       
       map.setCenter(latLng);
+    },
+    /**
+     *
+     */
+    convertMarkerOptions: function(options) {
+      // Valid Google Maps options: animation, clickable, cursor, draggable, flat, icon, map, optimized, position, raiseOnDrag, shadow, shape, title, visible, zIndex
+      var o = {};
+
+      if (options.icon) {
+        o.icon = options.icon;
+      }
+
+      return o;
     },
     /**
      * Creates a Microsoft.Maps.Polyline object.
@@ -566,7 +579,6 @@
     isLatLngWithinMapBounds: function(latLng) {
       return map.getBounds().contains(latLng);
     },
-    isReady: false,
     /**
      * Tests the equivalency of two {google.maps.LatLng} objects.
      * @param latLng1 {google.maps.LatLng} (Required) The first Location object.
@@ -581,19 +593,18 @@
      * @param latLng {google.maps.LatLng} The object to convert to a string.
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
-    latLngToString: function(latLng) {
+    latLngFromApi: function(latLng) {
       return latLng.lat() + ',' + latLng.lng();
     },
-    Map: map,
     /**
      * Iterates through the default base layers and returns a match if it exists.
      * @param {Object} baseLayer The baseLayer object.
      * @return {Object}
      */
     matchBaseLayer: function(baseLayer) {
-      for (var i = 0; i < defaultBaseLayers.length; i++) {
-        if (defaultBaseLayers[i].code === baseLayer.code) {
-          return defaultBaseLayers[i];
+      for (var i = 0; i < DEFAULT_BASE_LAYERS.length; i++) {
+        if (DEFAULT_BASE_LAYERS[i].code === baseLayer.code) {
+          return DEFAULT_BASE_LAYERS[i];
         }
       }
       
@@ -619,7 +630,7 @@
      * @param {google.maps.Marker} OR {google.maps.LatLng} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
      */
     positionClickDot: function(to) {
-      var offset = NPMap.utils.getMapDivOffset(),
+      var offset = NPMap.Util.getMapDivOffset(),
           pixel = this.getPixelFromLatLng((function() {
             var latLng = null;
 
@@ -639,7 +650,7 @@
 
       $('#npmap-clickdot').hide().css({
         left: pixel.x,
-        top: pixel.y,
+        top: pixel.y
       }).show();
     },
     /**
@@ -666,7 +677,7 @@
      * @param {String} latLng The lat/lng string.
      * @return {Object}
      */
-    stringToLatLng: function(latLng) {
+    latLngToApi: function(latLng) {
       var split = latLng.split(',');
       
       return new google.maps.LatLng(parseFloat(split[0]), parseFloat(split[1]));
@@ -676,7 +687,7 @@
      * @param {Object} type The base layer to switch to. Currently only the default Google Maps base maps are supported here.
      */
     switchBaseLayer: function(baseLayer) {
-      NPMap.google.map.Map.setMapTypeId(google.maps.MapTypeId[baseLayer.code.toUpperCase()]);
+      map.setMapTypeId(google.maps.MapTypeId[baseLayer.code.toUpperCase()]);
     },
     /**
      * Zooms and/or pans the map to its initial extent.
@@ -691,9 +702,9 @@
     zoomIn: function(toDot) {
       if (toDot) {
         var position = $('#npmap-clickdot').position(),
-            latLng = NPMap.google.map.projection.fromContainerPixelToLatLng(new google.maps.Point(position.left, position.top));
+            latLng = this.projection.fromContainerPixelToLatLng(new google.maps.Point(position.left, position.top));
         
-        NPMap.google.map.centerAndZoom(latLng.lat() + ',' + latLng.lng(), map.getZoom() + 1);
+        this.centerAndZoom(latLng.lat() + ',' + latLng.lng(), map.getZoom() + 1);
       } else {
         map.setZoom(map.getZoom() + 1);
       }
@@ -705,11 +716,11 @@
       map.setZoom(map.getZoom() - 1);
     },
     /**
-     * Set the center and then zoom level of the map back to the initial extent. The initial extent is automatically set when the map loads, but NPMap.google.map.initialCenter and NPMap.google.map.initialZoom can be overriden at anytime.
+     * Set the center and then zoom level of the map back to the initial extent. The initial extent is automatically set when the map loads, but NPMap.Map.Google.initialCenter and NPMap.Map.Google.initialZoom can be overriden at anytime.
      */
     zoomToExtent: function() {
-      map.setCenter(NPMap.google.map.initialCenter);
-      map.setZoom(NPMap.google.map.initialZoom);
+      map.setCenter(this.initialCenter);
+      map.setZoom(this.initialZoom);
     },
     /**
      * Zooms the map to a lat/lng.

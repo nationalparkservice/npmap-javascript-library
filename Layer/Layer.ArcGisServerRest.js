@@ -1,9 +1,16 @@
-﻿define(function() {
-  var 
+﻿// TODO: Start using underscore's templating (or mustache.js) to clean this code up.
+
+define([
+  'Layer/Layer',
+  'Util/Util.ArcGisServerRest'
+], function(Layer, utilArcGisServerRest) {
+  var
       // The preserved HTML string from the #npmap-infobox-content div.
       backContent = null,
       // The preserved HTML string from the #npmap-infobox-title div.
       backTitle = null,
+      // The number of identifiable layers that are visible.
+      identifyLayers = 0,
       // An array of results for the current identify operation.
       identifyResults = [];
       
@@ -12,7 +19,6 @@
    * @param {Object} layer
    * @return {String}
    */
-  // TODO: Start using underscore's templating (or mustache.js) to clean this code up.
   function buildHtmlForLayer(layer) {
     var html = '<ul>',
         layerConfig = NPMap.Map.getLayerByName(layer.layerName),
@@ -58,7 +64,7 @@
         var t;
 
         if (layerConfig.identify && layerConfig.identify.title) {
-          t = NPMap.Map.buildInfoBoxHtmlString(layerConfig, result, 'title');
+          t = NPMap.InfoBox._build(layerConfig, result, 'title');
               
           if (!t) {
             t = result[subLayer.displayFieldName];
@@ -67,7 +73,7 @@
           t = result[subLayer.displayFieldName];
         }
             
-        t = NPMap.utils.stripHtmlFromString(t);
+        t = NPMap.Util.stripHtmlFromString(t);
             
         titles.push({
           r: result,
@@ -82,7 +88,7 @@
         return (A < B) ? -1 : (A > B) ? 1 : 0;
       });
       $.each(titles, function(i2, t) {
-        html += '<li><a href="javascript:void(0)" onclick="NPMap.layers.ArcGisServerRest.infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, t.r['OBJECTID']) + '\',\'' + layer.layerName + '\',this);return false;">' + t.t + '</a></li>';
+        html += '<li><a href="javascript:void(0)" onclick="NPMap.Layer.ArcGisServerRest._infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, t.r['OBJECTID']) + '\',\'' + layer.layerName + '\',this);return false;">' + t.t + '</a></li>';
       });
 
       if (!layerConfig.identify || !layerConfig.identify.simpleTree) {
@@ -104,20 +110,18 @@
   }
   
   NPMap.Event.add('NPMap.InfoBox', 'hide', function() {
-    NPMap.layers.ArcGisServerRest.identifyResult = null;
+    NPMap.Layer.ArcGisServerRest._identifyResult = null;
   });
 
-  NPMap.layers = NPMap.layers || {};
-  
-  return NPMap.layers.ArcGisServerRest = {
+  return NPMap.Layer.ArcGisServerRest = {
     // Holds the current identify result object for this layer. This will be an array if multiple results are returned or an object if a single result is returned.
-    identifyResult: null,
+    _identifyResult: null,
     /**
      * Builds an infobox for an ArcGisServerRest layer. If provided by the user, this function uses the identify config information from each layer's config.
      * @param {Object/Array} (Required) data - The data object or array to build the infobox for.
      * @return {Object}
      */
-    buildInfoBox: function(data) {
+    _buildInfoBox: function(data) {
       // TODO: Enable sorting for simpleTree === true.
       var content = '',
           me = this,
@@ -158,40 +162,51 @@
      * @param {Number} swLat
      * @param {Number} swLng
      */
-    doIdentify: function(clickLat, clickLng, divHeight, divWidth, neLat, neLng, swLat, swLng) {
+    _doIdentify: function(clickLat, clickLng, divHeight, divWidth, neLat, neLng, swLat, swLng) {
       var count = 0,
           me = this,
           results = [],
-          value = .1;
-          
-      $.each(NPMap.config.layers, function(i, v) {
-        if (v.type === 'ArcGisServerRest' && v.visible === true) {
-          var url = v.url + '/identify?callback=?&f=json&geometry=' + clickLng + ',' + clickLat + '&geometryType=esriGeometryPoint&imageDisplay=' + divWidth + ',' + divHeight + ',' + '96&mapExtent=' + swLng + ',' + swLat + ',' + neLng + ',' + neLat + '&returnGeometry=false&sr=4326&tolerance=10&layers=visible';
+          value = 0.1;
 
-          if (v.layersStatus && v.layersStatus !== 'all') {
-            url += ':' + v.layersStatus;
-          }
-
+      for (var i = 0; i < NPMap.config.layers.length; i++) {
+        var layer = NPMap.config.layers[i];
+        
+        if (layer.type === 'ArcGisServerRest' && layer.visible === true) {
           count++;
 
-          $.getJSON(url, function(data) {
-            if (data.results && data.results.length > 0) {
-              results.push({
-                data: data,
-                layerName: v.name
-              });
-            }
+          reqwest({
+            data: {
+              f: 'json',
+              geometry: clickLng + ',' + clickLat,
+              geometryType: 'esriGeometryPoint',
+              imageDisplay: divWidth + ',' + divHeight + ',' + 96,
+              layers: 'visible' + (layer.layersStatus && layer.layersStatus !== 'all' ? ':' + layer.layersStatus : ''),
+              mapExtent: swLng + ',' + swLat + ',' + neLng + ',' + neLat,
+              returnGeometry: false,
+              sr: 4326,
+              tolerance: 10
+            },
+            success: function(response) {
+              if (response.results && response.results.length > 0) {
+                results.push({
+                  data: response,
+                  layerName: layer.name
+                });
+              }
 
-            count--;
+              count--;
+            },
+            type: 'jsonp',
+            url: layer.url + '/identify?callback=?'
           });
         }
-      });
+      }
       
       if (count > 0) {
         NPMap.Map.showProgressBar(value);
 
         var interval = setInterval(function() {
-          value = value + .1;
+          value = value + 0.1;
 
           NPMap.Map.updateProgressBar(value);
           
@@ -201,8 +216,8 @@
               
               clearInterval(interval);
               
-              infobox = NPMap.layers.ArcGisServerRest.buildInfoBox(results);
-              me.identifyResult = results;
+              infobox = me._buildInfoBox(results);
+              me._identifyResult = results;
               
               NPMap.Map.hideProgressBar(value);
               NPMap.InfoBox.show(infobox.content, infobox.title);
@@ -216,12 +231,28 @@
       }
     },
     /**
+     * Handles the click operation for ArcGisServerRest layers.
+     * @param {Object} e
+     */
+    _handleClick: function(e) {
+      if (identifyLayers > 0) {
+        var bounds = NPMap.Map.getBounds(),
+            el = document.getElementById('npmap-map'),
+            latLng = NPMap.Map[NPMap.config.api].eventGetLatLng(e);
+
+        NPMap.InfoBox.hide();
+        NPMap.InfoBox.latLng = NPMap.Map.latLngFromApi(latLng);
+        NPMap.Map[NPMap.config.api].positionClickDot(latLng);
+        this._doIdentify(latLng.latitude, latLng.longitude, el.offsetHeight, el.offsetWidth, bounds.n, bounds.e, bounds.s, bounds.w);
+      }
+    },
+    /**
      * Called when the user hits the "<<Back to List" link in an InfoBox.
      */
-    infoBoxBack: function() {
+    _infoBoxBack: function() {
       NPMap.InfoBox.show(backContent, backTitle);
 
-      this.identifyResult = identifyResults;
+      this._identifyResult = identifyResults;
     },
     /**
      * Gets more attribution infomation for an individual geometry and displays it in the InfoBox.
@@ -229,13 +260,12 @@
      * @param {String} name The name of the layer.
      * @param {String} el The HTML element.
      */
-    infoBoxMoreInfo: function(id, name, el) {
+    _infoBoxMoreInfo: function(id, name, el) {
       var actions = [{
-            handler: NPMap.layers.ArcGisServerRest.infoBoxBack,
+            handler: this._infoBoxBack,
             text: 'Back to list'
           }],
           attributes,
-          i = 0,
           ids = id.split('-'),
           layer = NPMap.Map.getLayerByName(name, NPMap.config.layers),
           me = this,
@@ -243,28 +273,24 @@
           subLayer,
           title = $(el).html();
       
-      for (i; i < identifyResults.length; i++) {
+      for (var i = 0; i < identifyResults.length; i++) {
         if (identifyResults[i].layerName === name) {
           results = identifyResults[i].results;
           break;
         }
       }
 
-      i = 0;
-
-      for (i; i < results.length; i++) {
-        if (results[i].layerId === parseInt(ids[1])) {
-          subLayer = results[i];
-          results = results[i].results;
+      for (var j = 0; j < results.length; j++) {
+        if (results[j].layerId === parseInt(ids[1], 0)) {
+          subLayer = results[j];
+          results = results[j].results;
           break;
         }
       }
 
-      i = 0;
-
-      for (i; i < results.length; i++) {
-        if (results[i].OBJECTID === ids[2]) {
-          attributes = results[i];
+      for (var k = 0; k < results.length; k++) {
+        if (results[k].OBJECTID === ids[2]) {
+          attributes = results[k];
           break;
         }
       }
@@ -273,8 +299,8 @@
       if (layer.edit && layer.edit.userRole !== 'Reader') {
         var editable = layer.edit.layers.split(',');
 
-        for (var j = 0; j < editable.length; j++) {
-          if (parseInt(editable[j]) === subLayer.layerId) {
+        for (var l = 0; l < editable.length; l++) {
+          if (parseInt(editable[l], 0) === subLayer.layerId) {
             actions.push({
               group: 'Edit',
               handler: function() {
@@ -315,50 +341,131 @@
         }
       }
 
-      me.identifyResult = attributes;
+      me._identifyResult = attributes;
 
       if (layer.skipActions) {
         actions = [];
       }
 
-      NPMap.InfoBox.show(NPMap.Map.buildInfoBoxHtmlString(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
+      NPMap.InfoBox.show(NPMap.InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
     },
     /**
-     * Reloads an ArcGisServerRest layer. Can be used after an edit operation or after a subLayer has been toggled on or off.
-     * @param {Object} layer The layer to reload.
+     * Creates a GeoJson layer.
+     * @param {Object} config
      */
-    reloadLayer: function(layer) {
-      NPMap.InfoBox.hide();
-      NPMap[NPMap.config.api].layers.ArcGisServerRest.reloadLayer(layer);
-    },
-    /**
-     * Toggles a layer on or off.
-     * @param {Object} layer The layer config object.
-     * @param {Boolean} on Turn the layer on?
-     */
-    toggleLayer: function(layer, on) {
-      if (on) {
-        layer.layersStatus = layer.layers;
-        NPMap[NPMap.config.api].layers.ArcGisServerRest.showLayer(layer);
-      } else {
-        layer.layersStatus = '';
-        NPMap[NPMap.config.api].layers.ArcGisServerRest.hideLayer(layer);
-        NPMap.InfoBox.hide();
+    create: function(config) {
+      Layer.hasRequiredProperties(config);
+
+      var tileLayer,
+          uriConstructor = config.url + '/tile/{z}/{y}/{x}';
+          
+      if (!config.tiled) {
+        uriConstructor = function(x, y, z, url) {
+          var heightWidth = 256,
+              e = ((x + 1) * heightWidth) * 360 / (heightWidth * Math.pow(2, z)) - 180,
+              n = Math.asin((Math.exp((0.5 - (y * heightWidth) / (heightWidth) / Math.pow(2, z)) * 4 * Math.PI) - 1) / (Math.exp((0.5 - (y * heightWidth) / 256 / Math.pow(2, z)) * 4 * Math.PI) + 1)) * 180 / Math.PI,
+              s = Math.asin((Math.exp((0.5 - ((y + 1) * heightWidth) / (heightWidth) / Math.pow(2, z)) * 4 * Math.PI) - 1) / (Math.exp((0.5 - ((y + 1) * heightWidth) / 256 / Math.pow(2, z)) * 4 * Math.PI) + 1)) * 180 / Math.PI,
+              w = (x * heightWidth) * 360 / (heightWidth * Math.pow(2, z)) - 180,
+              u = url + '/export?dpi=96&transparent=true&format=png8&bbox=' + w + ',' + s + ',' + e + ',' + n + '&bboxSR=4326&imageSR=102100&size=256,256&f=image';
+
+          if (config.layersStatus && config.layersStatus !== 'all') {
+            u += '&layers=show:' + config.layersStatus;
+          }
+
+          return u;
+        };
       }
+
+      if (typeof config.identify === 'undefined' || config.identify !== false) {
+        identifyLayers++;
+        config.identifiable = true;
+      } else {
+        config.identifiable = false;
+      }
+
+      config.layersStatus = config.layersStatus || config.layers;
+      tileLayer = NPMap.Map[NPMap.config.api].createTileLayer(config, uriConstructor);
+      config.api = tileLayer;
+      tileLayer.npmap = {
+        layerName: config.name,
+        layerType: config.type
+      };
+
+      NPMap.Map.addTileLayer(tileLayer);
+    },
+    /**
+     * Hides the layer.
+     * @param {Object} config
+     */
+    hide: function(config) {
+      NPMap.InfoBox.hide();
+      NPMap.Map[NPMap.config.api].hideTileLayer(config);
+
+      if (config.identifiable === true) {
+        identifyLayers--;
+      }
+
+      config.layersStatus = '';
+      config.visible = false;
+    },
+    /**
+     * Reloads the layer. Can be used after an edit operation or after a subLayer has been toggled on or off.
+     * @param {Object} config
+     */
+    reload: function(config) {
+      NPMap.InfoBox.hide();
+      this.remove(config);
+
+      config.visible = true;
+
+      this.create(config);
+    },
+    /**
+     *
+     */
+    remove: function(config) {
+      NPMap.InfoBox.hide();
+      NPMap.Map[NPMap.config.api].removeTileLayer(config);
+
+      if (config.identifiable === true) {
+        identifyLayers--;
+      }
+
+      config.visible = false;
+      
+      delete config.api;
+      delete config.identifiable;
+
+      NPMap.Event.trigger('NPMap.Layer', 'removed', config);
+    },
+    /**
+     * Shows the layer.
+     * @param {Object} config
+     */
+    show: function(config) {
+      NPMap.InfoBox.hide();
+      NPMap.Map[NPMap.config.api].showTileLayer(config);
+
+      if (config.identifiable === true) {
+        identifyLayers++;
+      }
+
+      config.layersStatus = config.layers;
+      config.visible = true;
     },
     /**
      * Toggles a layer's sublayer on or off.
-     * @param {Object} layer The layer config object.
+     * @param {Object} config The layer config object.
      * @param {Integer} subLayerIndex The index of the sublayer.
      * @param {Boolean} on Toggle this layer on?
      */
-    toggleSubLayer: function(layer, subLayerIndex, on) {
+    toggleSubLayer: function(config, subLayerIndex, on) {
       var changed = false,
           index = -1,
-          subLayers = layer.layersStatus.split(',');
+          subLayers = config.layersStatus.split(',');
 
       for (var i = 0; i < subLayers.length; i++) {
-        if (parseInt(subLayers[i]) === parseInt(subLayerIndex)) {
+        if (parseInt(subLayers[i], 0) === parseInt(subLayerIndex, 0)) {
           index = i;
           break;
         }
@@ -376,21 +483,17 @@
         }
       }
 
-      layer.layersStatus = subLayers.join();
+      config.layersStatus = subLayers.join();
 
-      if (layer.layersStatus.indexOf(',') === 0) {
-        layer.layersStatus = layer.layersStatus.slice(1, layer.layersStatus.length);
+      if (config.layersStatus.indexOf(',') === 0) {
+        config.layersStatus = config.layersStatus.slice(1, config.layersStatus.length);
       }
 
       if (changed) {
         if (subLayers.length === 0) {
-          NPMap[NPMap.config.api].layers.ArcGisServerRest.removeLayer(layer);
+          this.remove(config);
         } else {
-          if (typeof NPMap[NPMap.config.api].layers.ArcGisServerRest.toggleSubLayer !== 'undefined') {
-            NPMap[NPMap.config.api].layers.ArcGisServerRest.toggleSubLayer(layer, subLayerIndex, on);
-          } else {
-            this.reloadLayer(layer);
-          }
+          this.reload(config);
         }
 
         if (!on) {

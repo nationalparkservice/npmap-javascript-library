@@ -115,11 +115,11 @@
      */
     addLayer: function(layerConfig) {
       if (!layerConfig.height) {
-        NPMap.utils.throwError('"height" is required.');
+        throw new Error('"height" is required.');
       }
       
       if (!layerConfig.width) {
-        NPMap.utils.throwError('"width" is required.');
+        throw new Error('"width" is required.');
       }
       
       NPMap.leaflet.map.Map.addLayer(new L.TileLayer.Zoomify(layerConfig.url, {

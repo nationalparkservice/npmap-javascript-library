@@ -341,7 +341,7 @@
       if (layer.identify) {
         NPMap.InfoBox.hide();
 
-        NPMap.InfoBox.latLng = NPMap.bing.map.latLngToString(target.getLocation());
+        NPMap.InfoBox.latLng = NPMap.bing.map.latLngFromApi(target.getLocation());
 	      NPMap.InfoBox.marker = target;
 	      NPMap.bing.map.positionClickDot(target);
 	      NPMap.layers.NativeVectors.getInfoBoxData(target, layer);

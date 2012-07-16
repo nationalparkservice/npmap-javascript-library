@@ -29,7 +29,7 @@
           showInfoBox(result.content, result.title, result.footer, to);
         });
       } else {
-        showInfoBox(NPMap.Map.buildInfoBoxHtmlString(layer, target.data, 'content'), NPMap.Map.buildInfoBoxHtmlString(layer, target.data, 'title'), NPMap.Map.buildInfoBoxHtmlString(layer, target.data, 'footer'), to);
+        showInfoBox(NPMap.InfoBox._build(layer, target.data, 'content'), NPMap.InfoBox._build(layer, target.data, 'title'), NPMap.InfoBox._build(layer, target.data, 'footer'), to);
       }
     }
   });

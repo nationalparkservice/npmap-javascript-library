@@ -1,163 +1,11 @@
-// The version of the library to use.
 NPMap.version = '0.8.0';
 
-// TODO: Switch all Array.remove() calls over to splice.
-Array.prototype.remove = function(from, to) {
-  var rest = this.slice((to || from) + 1 || this.length);
-  this.length = from < 0 ? this.length + from : from;
-  return this.push.apply(this, rest);
-};
-
-/**
- * Utility functions for use throughout NPMap.
- */
-NPMap.utils = {
-  /**
-   * Given an object, does a property exist.
-   * @param {Object} obj The object to test.
-   * @param {String} prop The property to look for. Ex: 'NPMap.config.tools.keyboard'.
-   */
-  doesPropertyExist: function(obj, prop) {
-    var parts = prop.split('.');
-    
-    for (var i = 0, l = parts.length; i < l; i++) {
-      var part = parts[i];
-      
-      if (obj !== null && typeof obj === "object" && part in obj) {
-        obj = obj[part];
-      } else {
-        return false;
-      }
-    }
-    return true;
-  },
-  /**
-   * Gets the first property of an object.
-   * @param {Object} obj The object to get the first property of.
-   */
-  getFirstPropertyOfObject: function(obj) {
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        return obj[key];
-      }
-    }
-  },
-  // TODO: Rename to getContainerDivOffset.
-  /**
-   * Gets the offset, in pixels, of the map div in the page.
-   * @return {Object}
-   */
-  getMapDivOffset: function() {
-    var offset = $('#' + NPMap.config.div).offset();
-    
-    return {
-      left: offset.left,
-      top: offset.top
-    };
-  },
-  /**
-   * Injects a CSS stylesheet into the page.
-   * @param {String} location The path to the CSS stylesheet.
-   */
-  injectCss: function(location) {
-    if (document.createStyleSheet) {
-      document.createStyleSheet(location);
-    } else {
-      var c = document.createElement('link');
-      c.type = 'text/css';
-      c.rel = 'stylesheet';
-      c.href = location;
-      c.media = 'screen';
-      document.getElementsByTagName("head")[0].appendChild(c);
-    }
-  },
-  /**
-   * Returns true if the test number falls between the start and end numbers.
-   * @param {Number} start
-   * @param {Number} end
-   * @param {Number} test
-   * @return {Boolean}
-   */
-  isBetween: function(start, end, test) {
-    if ((test <= start && test >= end) || (test >= start && test <= end)) {
-      return true;
-    } else {
-      return false;
-    }
-  },
-  /**
-   * Returns true if the number passed in is an integer.
-   * @param {Number} int The number to test.
-   * @return {Boolean}
-   */
-  isInt: function(n) {
-    return n % 1 == 0;
-  },
-  /**
-   * Replaces "bad characters" that have been inserted by NPMap into strings.
-   * @param {String} html The HTML string to perform the replace operation on.
-   * @return {String}
-   */
-  replaceBadCharacters: function(html) {
-    return html.replace(/{singlequote}/g, '\'');
-  },
-  /**
-   * Checks to make sure a module has been loaded before calling callback function. This function assumes that the module resides in the NPMap namespace.
-   * @param module {String} (Required) The full name of the module, including namespace, that must be loaded before callback is called.
-   * @param callback {Function} (Required) The callback function to call once the module has been loaded.
-   */
-  safeLoad: function(module, callback) {
-    module = module.replace('NPMap.', '');
-    
-    var partition = module.split('.'),
-        interval = setInterval(function() {
-          try {
-            var obj = NPMap;
-
-            for (var i = 0; i < partition.length; i++) {
-              obj = obj[partition[i]];
-              
-              if (typeof obj === 'undefined') {
-                break;
-              } else if ((i + 1) === partition.length) {
-                clearInterval(interval);
-                callback();
-              }
-            }
-          } catch (e) {
-
-          }
-        }, 100);
-  },
-  /**
-   * Strips HTML elements from a string.
-   * @param {String} html The string to strip HTML from.
-   * @return {String}
-   */
-  stripHtmlFromString: function(html) {
-    var div = document.createElement("div");
-    div.innerHTML = html;
-    return div.textContent || div.innerText || "";
-  },
-  /**
-   * Throws an error and stops execution.
-   * @param {String} error The error to throw.
-   */
-  throwError: function(error) {
-    try {
-      throw error;
-    } catch(e) {
-      throw(e);
-    }
-  }
-};
-
 if (!NPMap.config) {
-  NPMap.utils.throwError('The NPMap.config object does not exist!');
+  throw new Error('The NPMap.config object does not exist!');
 }
 
 if (!NPMap.config.div) {
-  NPMap.utils.throwError('The NPMap.config.div string does not exist!');
+  throw new Error('The NPMap.config.div string does not exist!');
 }
 
 if (NPMap.config.api) {
@@ -178,8 +26,7 @@ if (NPMap.config.api) {
       NPMap.config.api = 'ModestMaps';
       break;
     default:
-      NPMap.utils.throwError('The NPMap.config.api config is invalid!');
-      break;
+      throw new Error('The NPMap.config.api config is invalid!');
   }
 } else {
   NPMap.config.api = 'Bing';
@@ -192,6 +39,8 @@ if (typeof NPMap.config.server === 'undefined') {
 document.getElementById(NPMap.config.div).innerHTML = '<div id="npmap" style="height:100%;left:0;position:absolute;top:0;width:100%;"><div id="npmap-map"></div></div><div id="npmap-mask" style="background-color:#F0F0F0;display:block;height:100%;left:0;position:absolute;top:0;width:100%;z-index:999999;"><div id="npmap-loading" style="-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-moz-box-shadow:0 0 3px 3px #CA702D;-webkit-box-shadow:0 0 3px 3px #CA702D;box-shadow:0 0 3px 3px #CA702D;background-color:black;border:solid black 2px;height:60px;left:50%;margin-left:-30px;margin-top:-30px;position:absolute;top:50%;width:60px;z-index:999998"><img src="' + NPMap.config.server + '/resources/img/loader.gif" /></div></div>';
 
 NPMap.config.div = 'npmap-map';
+
+// TODO: Move all of these depencies out of bootstrap.js.
 
 if (typeof JSON === 'undefined') {
   /**
@@ -206,7 +55,7 @@ if (typeof JSON === 'undefined') {
 window.log=function(){log.history=log.history||[];log.history.push(arguments);if(this.console){console.log(Array.prototype.slice.call(arguments))}};(function(b){function c(){}for(var d="assert,count,debug,dir,dirxml,error,exception,group,groupCollapsed,groupEnd,info,log,timeStamp,profile,profileEnd,time,timeEnd,trace,warn".split(","),a;a=d.pop();){b[a]=b[a]||c}})((function(){try {console.log();return window.console;}catch(err){return window.console={};}})());
 
 if (!window.Modernizr) {
-  /** 
+  /**
    * Modernizr 2.0.6 (Custom Build) | MIT & BSD
    * Contains: boxshadow | opacity | iepp | cssclasses | testprop | testallprops | prefixes | domprefixes | load
    */
@@ -248,127 +97,19 @@ if (typeof bean === 'undefined') {
   !function(a,b,c){typeof module!="undefined"?module.exports=c(a,b):typeof define=="function"&&typeof define.amd=="object"?define(c):b[a]=c(a,b)}("bean",this,function(a,b){var c=window,d=b[a],e=/over|out/,f=/[^\.]*(?=\..*)\.|.*/,g=/\..*/,h="addEventListener",i="attachEvent",j="removeEventListener",k="detachEvent",l="ownerDocument",m="target",n="querySelectorAll",o=document||{},p=o.documentElement||{},q=p[h],r=q?h:i,s=Array.prototype.slice,t=/click|mouse(?!(.*wheel|scroll))|menu|drag|drop/i,u=/mouse.*(wheel|scroll)/i,v=/^text/i,w=/^touch|^gesture/i,x={},y=function(a,b,c){for(c=0;c<b.length;c++)a[b[c]]=1;return a}({},("click dblclick mouseup mousedown contextmenu mousewheel mousemultiwheel DOMMouseScroll mouseover mouseout mousemove selectstart selectend keydown keypress keyup orientationchange focus blur change reset select submit load unload beforeunload resize move DOMContentLoaded readystatechange message error abort scroll "+(q?"show input invalid touchstart touchmove touchend touchcancel gesturestart gesturechange gestureend readystatechange pageshow pagehide popstate hashchange offline online afterprint beforeprint dragstart dragenter dragover dragleave drag drop dragend loadstart progress suspend emptied stalled loadmetadata loadeddata canplay canplaythrough playing waiting seeking seeked ended durationchange timeupdate play pause ratechange volumechange cuechange checking noupdate downloading cached updateready obsolete ":"")).split(" ")),z=function(){function c(a){var c=a.relatedTarget;return c?c!==this&&c.prefix!=="xul"&&!/document/.test(this.toString())&&!b(c,this):c===null}var a="compareDocumentPosition",b=a in p?function(b,c){return c[a]&&(c[a](b)&16)===16}:"contains"in p?function(a,b){return b=b.nodeType===9||b===window?p:b,b!==a&&b.contains(a)}:function(a,b){while(a=a.parentNode)if(a===b)return 1;return 0};return{mouseenter:{base:"mouseover",condition:c},mouseleave:{base:"mouseout",condition:c},mousewheel:{base:/Firefox/.test(navigator.userAgent)?"DOMMouseScroll":"mousewheel"}}}(),A=function(){var a="altKey attrChange attrName bubbles cancelable ctrlKey currentTarget detail eventPhase getModifierState isTrusted metaKey relatedNode relatedTarget shiftKey srcElement target timeStamp type view which".split(" "),b=a.concat("button buttons clientX clientY dataTransfer fromElement offsetX offsetY pageX pageY screenX screenY toElement".split(" ")),c=b.concat("wheelDelta wheelDeltaX wheelDeltaY wheelDeltaZ axis".split(" ")),d=a.concat("char charCode key keyCode keyIdentifier keyLocation".split(" ")),f=a.concat(["data"]),g=a.concat("touches targetTouches changedTouches scale rotation".split(" ")),h=a.concat(["data","origin","source"]),i="preventDefault",j=function(a){return function(){a[i]?a[i]():a.returnValue=!1}},k="stopPropagation",l=function(a){return function(){a[k]?a[k]():a.cancelBubble=!0}},n=function(a){return function(){a[i](),a[k](),a.stopped=!0}},q=function(a,b,c){var d,e;for(d=c.length;d--;)e=c[d],!(e in b)&&e in a&&(b[e]=a[e])};return function(r,s){var x={originalEvent:r,isNative:s};if(!r)return x;var y,z=r.type,A=r[m]||r.srcElement;x[i]=j(r),x[k]=l(r),x.stop=n(x),x[m]=A&&A.nodeType===3?A.parentNode:A;if(s){if(z.indexOf("key")!==-1)y=d,x.keyCode=r.keyCode||r.which;else if(t.test(z)){y=b,x.rightClick=r.which===3||r.button===2,x.pos={x:0,y:0};if(r.pageX||r.pageY)x.clientX=r.pageX,x.clientY=r.pageY;else if(r.clientX||r.clientY)x.clientX=r.clientX+o.body.scrollLeft+p.scrollLeft,x.clientY=r.clientY+o.body.scrollTop+p.scrollTop;e.test(z)&&(x.relatedTarget=r.relatedTarget||r[(z==="mouseover"?"from":"to")+"Element"])}else w.test(z)?y=g:u.test(z)?y=c:v.test(z)?y=f:z==="message"&&(y=h);q(r,x,y||a)}return x}}(),B=function(a,b){return!q&&!b&&(a===o||a===c)?p:a},C=function(){function a(a,b,c,d,e){var f=this.isNative=y[b]&&a[r];this.element=a,this.type=b,this.handler=c,this.original=d,this.namespaces=e,this.custom=z[b],this.eventType=q||f?b:"propertychange",this.customType=!q&&!f&&b,this[m]=B(a,f),this[r]=this[m][r]}return a.prototype={inNamespaces:function(a){var b,c;if(!a)return!0;if(!this.namespaces)return!1;for(b=a.length;b--;)for(c=this.namespaces.length;c--;)if(a[b]===this.namespaces[c])return!0;return!1},matches:function(a,b,c){return this.element===a&&(!b||this.original===b)&&(!c||this.handler===c)}},a}(),D=function(){var a={},b=function(c,d,e,f,g){if(!d||d==="*")for(var h in a)h.charAt(0)==="$"&&b(c,h.substr(1),e,f,g);else{var i=0,j,k=a["$"+d],l=c==="*";if(!k)return;for(j=k.length;i<j;i++)if(l||k[i].matches(c,e,f))if(!g(k[i],k,i,d))return}},c=function(b,c,d){var e,f=a["$"+c];if(f)for(e=f.length;e--;)if(f[e].matches(b,d,null))return!0;return!1},d=function(a,c,d){var e=[];return b(a,c,d,null,function(a){return e.push(a)}),e},e=function(b){return(a["$"+b.type]||(a["$"+b.type]=[])).push(b),b},f=function(c){b(c.element,c.type,null,c.handler,function(b,c,d){return c.splice(d,1),c.length===0&&delete a["$"+b.type],!1})},g=function(){var b,c=[];for(b in a)b.charAt(0)==="$"&&(c=c.concat(a[b]));return c};return{has:c,get:d,put:e,del:f,entries:g}}(),E=o[n]?function(a,b){return b[n](a)}:function(){throw new Error("Bean: No selector engine installed")},F=function(a){E=a},G=q?function(a,b,c,d){a[d?h:j](b,c,!1)}:function(a,b,c,d,e){e&&d&&a["_on"+e]===null&&(a["_on"+e]=0),a[d?i:k]("on"+b,c)},H=function(a,b,d){var e=b.__beanDel,f=function(f){return f=A(f||((this[l]||this.document||this).parentWindow||c).event,!0),e&&(f.currentTarget=e.ft(f[m],a)),b.apply(a,[f].concat(d))};return f.__beanDel=e,f},I=function(a,b,d,e,f,g){var h=b.__beanDel,i=function(i){var j=h?h.ft(i[m],a):this;if(e?e.apply(j,arguments):q?!0:i&&i.propertyName==="_on"+d||!i)i&&(i=A(i||((this[l]||this.document||this).parentWindow||c).event,g),i.currentTarget=j),b.apply(a,i&&(!f||f.length===0)?arguments:s.call(arguments,i?0:1).concat(f))};return i.__beanDel=h,i},J=function(a,b,c,d,e){return function(){a(b,c,e),d.apply(this,arguments)}},K=function(a,b,c,d){var e,f,h,i=b&&b.replace(g,""),j=D.get(a,i,c);for(e=0,f=j.length;e<f;e++)j[e].inNamespaces(d)&&((h=j[e])[r]&&G(h[m],h.eventType,h.handler,!1,h.type),D.del(h))},L=function(a,b,c,d,e){var h,i=b.replace(g,""),j=b.replace(f,"").split(".");if(D.has(a,i,c))return a;i==="unload"&&(c=J(K,a,i,c,d)),z[i]&&(z[i].condition&&(c=I(a,c,i,z[i].condition,e,!0)),i=z[i].base||i),h=D.put(new C(a,i,c,d,j[0]&&j)),h.handler=h.isNative?H(a,h.handler,e):I(a,h.handler,i,!1,e,!1),h[r]&&G(h[m],h.eventType,h.handler,!0,h.customType)},M=function(a,b,c){var d=function(b,d){var e,f=typeof a=="string"?c(a,d):a;for(;b&&b!==d;b=b.parentNode)for(e=f.length;e--;)if(f[e]===b)return b},e=function(a){var c=d(a[m],this);c&&b.apply(c,arguments)};return e.__beanDel={ft:d,selector:a,$:c},e},N=function(a,b,c){var d,e,h,i,j=K,k=b&&typeof b=="string";if(k&&b.indexOf(" ")>0){b=b.split(" ");for(i=b.length;i--;)N(a,b[i],c);return a}e=k&&b.replace(g,""),e&&z[e]&&(e=z[e].type);if(!b||k){if(h=k&&b.replace(f,""))h=h.split(".");j(a,e,c,h)}else if(typeof b=="function")j(a,null,b);else for(d in b)b.hasOwnProperty(d)&&N(a,d,b[d]);return a},O=function(a,b,c,d,e){var f,g,h,i,j=c,k=c&&typeof c=="string";if(b&&!c&&typeof b=="object")for(f in b)b.hasOwnProperty(f)&&O.apply(this,[a,f,b[f]]);else{i=arguments.length>3?s.call(arguments,3):[],g=(k?c:b).split(" "),k&&(c=M(b,j=d,e||E))&&(i=s.call(i,1)),this===x&&(c=J(N,a,b,c,j));for(h=g.length;h--;)L(a,g[h],c,j,i)}return a},P=function(){return O.apply(x,arguments)},Q=q?function(a,b,d){var e=o.createEvent(a?"HTMLEvents":"UIEvents");e[a?"initEvent":"initUIEvent"](b,!0,!0,c,1),d.dispatchEvent(e)}:function(a,b,c){c=B(c,a),a?c.fireEvent("on"+b,o.createEventObject()):c["_on"+b]++},R=function(a,b,c){var d,e,h,i,j,k=b.split(" ");for(d=k.length;d--;){b=k[d].replace(g,"");if(i=k[d].replace(f,""))i=i.split(".");if(!i&&!c&&a[r])Q(y[b],b,a);else{j=D.get(a,b),c=[!1].concat(c);for(e=0,h=j.length;e<h;e++)j[e].inNamespaces(i)&&j[e].handler.apply(a,c)}}return a},S=function(a,b,c){var d=0,e=D.get(b,c),f=e.length,g,h;for(;d<f;d++)e[d].original&&(h=e[d].handler.__beanDel,h?g=[a,h.selector,e[d].type,e[d].original,h.$]:g=[a,e[d].type,e[d].original],O.apply(null,g));return a},T={add:O,one:P,remove:N,clone:S,fire:R,setSelectorEngine:F,noConflict:function(){return b[a]=d,this}};if(c[i]){var U=function(){var a,b=D.entries();for(a in b)b[a].type&&b[a].type!=="unload"&&N(b[a].element,b[a].type);c[k]("onunload",U),c.CollectGarbage&&c.CollectGarbage()};c[i]("onunload",U)}return T})
 }
 
-/**
- * The NPMap.Event class.
- */
-NPMap.Event = (function() {
-  var queue = [];
-  
-  return {
-    /**
-     * Add an event to an NPMap class.
-     * @param {String} obj The name of the nested class, in "NPMap.ObjectName" format, to add the event to.
-     * @param {String} event The name of the event to add to the class.
-     * @param {Function} func The function to call when the event is fired.
-     */
-    add: function(obj, event, func) {
-      var cl = obj.replace('NPMap.', '');
-      
-      if (NPMap[cl]) {
-        NPMap[cl].events = NPMap[cl].events || [];
-        
-        NPMap[cl].events.push({
-          event: event,
-          func: func
-        });
-      } else {
-        queue.push({
-          cl: cl,
-          event: event,
-          func: func
-        });
-      }
-    },
-    /**
-     * Processes the NPMap.Event queue.
-     */
-    processQueue: function() {
-      $.each(queue, function(i, v) {
-        NPMap[v.cl].events.push({
-          event: v.event,
-          func: v.func
-        });
-      });
-      
-      if (queue.length === 0) {
-        delete NPMap.Event.processQueue;
-      }
-    },
-    /**
-     * Remove an existing event from an NPMap class.
-     * @param {String} obj The name of the nested class, in "NPMap.ObjectName" format, to remove the event from.
-     * @param {String} event The name of the event to remove to the class.
-     * @param {Function} func The function to remove.
-     */
-    remove: function(obj, event, func) {
-      var cl = obj.replace('NPMap.', '');
-      
-      if (NPMap[cl]) {
-        var index = -1;
-        
-        for (var i = 0; i < NPMap[cl].handlers; i++) {
-          if (NPMap[cl].handlers[i].event = event) {
-            index = i;
-            break;
-          }
-        }
-
-        if (index != -1) {
-          NPMap[cl].handlers.slice(index, 1);
-        }
-      }
-    },
-    /**
-     * Triggers an event.
-     * @param {String} obj The name of the nested class, in "NPMap.ObjectName" format, to trigger the event for.
-     * @param {String} event The name of the event to trigger.
-     * @param {Object} e (Optional) The event object to pass to the event handler function.
-     */
-    trigger: function(obj, event, e) {
-      var cl = obj.replace('NPMap.', '');
-      
-      if (this.processQueue) {
-        this.processQueue();
-      }
-      
-      if (typeof NPMap[cl] !== 'undefined') {
-        $.each(NPMap[cl].events, function(i, v) {
-          if (v.event === event) {
-            if (!e) {
-              v.func();
-            } else {
-              v.func(e);
-            }
-          }
-        });
-      } else {
-        var me = this;
-        
-        console.log('Event ("' + obj + ', ' + event + '") triggered, but class does not exist. Looping at 100...')/
-        setTimeout(function() {
-          me.trigger(obj, event, e);
-        }, 100);
-      }
-    }
-  };
-})();
-
-// Load NPMap's "base" CSS.
-NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
 
 (function() {
-  // TODO: Take out jQuery dependency. You can do everything you're currently doing without it.
   var s = document.createElement('script'),
       u = 'http://www.nps.gov/npmap/js/libs/require';
       
   /**
-   *
+   * Called after jQuery has been loaded.
    */
   function jqueryLoaded() {
     /**
      * jQuery resize event - v1.1 - 3/14/2010
      * http://benalman.com/projects/jquery-resize-plugin/
-     * 
+     *
      * Copyright (c) 2010 "Cowboy" Ben Alman
      * Dual licensed under the MIT and GPL licenses.
      * http://benalman.com/about/license/
@@ -380,11 +121,20 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
     }
 
     $(document).ready(function() {
-      loadMapping();
+      require.config({
+        baseUrl: NPMap.config.server
+      });
+      require([
+        'Event',
+        'Util/Util'
+      ], function() {
+        NPMap.Util.injectCss(NPMap.config.server + '/resources/css/npmap.css');
+        loadMapping();
+      });
     });
   }
   /**
-   *
+   * Loads the mapping API.
    */
   function loadMapping() {
     var apiUrl = null,
@@ -397,52 +147,73 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
           NPMap.config.server + '/Map/Map.' + NPMap.config.api + '.js'
         ], function(map) {
           var interval = setInterval(function() {
-            if (map.isReady === true) {
-              var layerHandlers = [],
+            if (map._isReady === true) {
+              var LAYER_TYPES = {
+                    arcgisserverrest: 'ArcGisServerRest',
+                    geojson: 'GeoJson',
+                    googlefusion: 'GoogleFusion',
+                    json: 'Json',
+                    kml: 'Kml',
+                    nativetiled: 'NativeTiled',
+                    nativevectors: 'NativeVectors',
+                    tilestream: 'TileStream',
+                    xml: 'Xml',
+                    zoomify: 'Zoomify'
+                  },
+                  layerHandlers = [],
                   scripts = [];
 
               clearInterval(interval);
               
               if (NPMap.config.baseLayers) {
                 for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-                  var type = NPMap.config.baseLayers[i].type;
+                  var baseLayerType = NPMap.config.baseLayers[i].type;
 
-                  if (type && $.inArray(type, layerHandlers) === -1) {
-                    layerHandlers.push(type);
+                  if (baseLayerType && _.indexOf(layerHandlers, baseLayerType) === -1) {
+                    layerHandlers.push(baseLayerType);
                   }
                 }
               }
               
               if (NPMap.config.layers) {
-                for (var i = 0; i < NPMap.config.layers.length; i++) {
-                  var type = NPMap.config.layers[i].type;
+                for (var j = 0; j < NPMap.config.layers.length; j++) {
+                  var layerType = NPMap.config.layers[j].type;
 
-                  if (type && $.inArray(type, layerHandlers) === -1) {
-                    layerHandlers.push(type);
+                  if (layerType && _.indexOf(layerHandlers, layerType) === -1) {
+                    layerHandlers.push(layerType);
                   }
-                };
+                }
               }
               
-              for (var i = 0; i < layerHandlers.length; i++) {
-                var layerType = layerHandlers[i].toLowerCase();
+              for (var k = 0; k < layerHandlers.length; k++) {
+                var layerHandlerType = layerHandlers[k].toLowerCase();
                 
                 require([
-                  NPMap.config.server + '/Layer/Layer.' + layerType +  '.' + NPMap.config.api + '.js'
+                  NPMap.config.server + '/Layer/Layer.' + LAYER_TYPES[layerHandlerType] + '.js'
                 ], function(layerHandler) {
+                  // TODO: Need to migrate baseLayer loads out of Map classes to here. Or migrate both baseLayer and layer loads into NPMap.Map.
                   /*
                   if (NPMap.config.baseLayers) {
-                    for (var j = 0; j < NPMap.config.layers.length; j++) {
-                      if (NPMap.config.layers[j].type.toLowerCase() === layerType) {
-                        layerHandler.addLayer(NPMap.config.layers[j]);
+                    for (var j = 0; j < NPMap.config.baseLayers.length; j++) {
+                      if (NPMap.config.baseLayers[j].type.toLowerCase() === layerType) {
+                        layerHandler.setBaseLayer(NPMap.config.baseLayers[j]);
                       }
                     }
                   }
                   */
 
                   if (NPMap.config.layers) {
-                    for (var j = 0; j < NPMap.config.layers.length; j++) {
-                      if (NPMap.config.layers[j].type.toLowerCase() === layerType) {
-                        layerHandler.addLayer(NPMap.config.layers[j]);
+                    for (var l = 0; l < NPMap.config.layers.length; l++) {
+                      var layer = NPMap.config.layers[l];
+
+                      if (layer.type.toLowerCase() === layerHandlerType) {
+                        layer.type = LAYER_TYPES[layerHandlerType];
+
+                        if (typeof layer.visible === 'undefined' || layer.visible === true) {
+                          layer.visible = true;
+
+                          layerHandler.create(NPMap.config.layers[l]);
+                        }
                       }
                     }
                   }
@@ -450,13 +221,13 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
               }
 
               if (NPMap.config.modules) {
-                for (var i = 0; i < NPMap.config.modules.length; i++) {
-                  var name = NPMap.config.modules[i].name.toLowerCase();
+                for (var m = 0; m < NPMap.config.modules.length; m++) {
+                  var name = NPMap.config.modules[m].name.toLowerCase();
 
                   if (name === 'edit' || name === 'route') {
                     scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
                   } else {
-                    NPMap.utils.throwError('Invalid module name: "' + name + '".');
+                    throw new Error('Invalid module name: "' + name + '".');
                   }
                 }
               }
@@ -470,10 +241,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
 
                     $('#npmap-loading').hide();
                     $('#npmap-mask').fadeOut().remove();
-                    
-                    if (NPMap.Event.processQueue) {
-                      NPMap.Event.processQueue();
-                    }
+                    NPMap.Event.processQueue();
 
                     if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
                       setTimeout(function() {
@@ -574,10 +342,10 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
             if (typeof L !== 'undefined') {
               clearInterval(interval);
               NPMap.apiLoaded();
-              NPMap.utils.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.css');
+              NPMap.Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.css');
               
               if ($.browser.msie && $.browser.version.substr(0, 1) < 8) {
-                NPMap.utils.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.ie.css');
+                NPMap.Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.ie.css');
               }
             }
           }, 5);
@@ -595,8 +363,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
         };
         break;
       default:
-        NPMap.utils.throwError('Invalid base API specified.');
-        break;
+        throw new Error('Invalid base API specified.');
     }
 
     if (preLoaded) {
@@ -627,8 +394,7 @@ NPMap.utils.injectCss(NPMap.config.server + '/resources/css/npmap.css');
     }
   }
 
-  // Esri (starting with v3) now loads require.js.
-  if (NPMap.config.api === 'esri') {
+  if (NPMap.config.api === 'Esri') {
     s.src = 'http://www.nps.gov/npmap/scripts/libs/jquery-1.7.1.min.js';
   } else {
     if (typeof window.jQuery  === 'undefined') {

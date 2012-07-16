@@ -1,18 +1,9 @@
 ﻿define([
-  NPMap.config.server + '/Map/Map.js'
-], function(core) {
+  'Map/Map'
+], function(Map) {
   var
-      // The activeBaseLayer object.
-      activeBaseLayer,
-      // The bounds to initialize the map with.
-      bounds = [
-        '29.713 -111',
-        '46.82 -79'
-      ],
-      // Is there at least one clustered layer in the map?
-      clustered = NPMap.Map.hasClusteredLayer(),
       // An array of the default base layers for the Bing baseAPI.
-      defaultBaseLayers = [{
+      DEFAULT_BASE_LAYERS = [{
         code: 'aerial',
         type: 'Aerial'
       },{
@@ -28,6 +19,15 @@
         code: 'road',
         type: 'Street'
       }],
+      // The activeBaseLayer object.
+      activeBaseLayer,
+      // The bounds to initialize the map with.
+      bounds = [
+        '29.713 -111',
+        '46.82 -79'
+      ],
+      // Is there at least one clustered layer in the map?
+      clustered = NPMap.Map.hasClusteredLayer(),
       // Has the map been double-clicked?
       doubleClicked = false,
       // The initial center lat/lng of the map.
@@ -42,6 +42,8 @@
       max = 20,
       // The min zoom level to initialize the map with.
       min = 0,
+      // Is the left mouse button currently being pressed?
+      mouseDown = false,
       // The old center latLng of the map.
       oldCenter,
       // The old cursor.
@@ -64,9 +66,9 @@
    * @param {String} cursor
    */
   function changeMapCursor(cursor) {
-    var $el = $(map.getRootElement());
-    
-    $el.attr('style', $el.attr('style').replace(/cursor:[^;]+/g, ''));
+    if (map.getRootElement().style.cursor) {
+      map.getRootElement().style.cursor.replace(/cursor:[^;]+/g, '');
+    }
     
     document.getElementById(NPMap.config.div).childNodes[0].style.cursor = cursor;
   }
@@ -124,7 +126,8 @@
       activeBaseLayer.zIndex = 0;
     }
 
-    NPMap.utils.safeLoad('NPMap.bing.layers.' + activeBaseLayer.type, function() {
+    // TODO: You'll need to fix this.
+    NPMap.Util.safeLoad('NPMap.bing.layers.' + activeBaseLayer.type, function() {
       NPMap.bing.layers[activeBaseLayer.type].addLayer(activeBaseLayer);
     });
 
@@ -189,7 +192,7 @@
             e.target.clickHandler(e.target);
           }
           
-          NPMap.Event.trigger('NPMap.Map', 'layerclick', e);
+          NPMap.Event.trigger('NPMap.Map', 'shapeclick', e);
         }
       }
     }, 350);
@@ -200,46 +203,53 @@
     doubleClicked = true;
   });
   Microsoft.Maps.Events.addHandler(map, 'mousedown', function(e) {
-    changeMapCursor(oldCursor);
+    changeMapCursor('move');
     
+    mouseDown = true;
     viewChanged = false;
   });
   Microsoft.Maps.Events.addHandler(map, 'mousemove', function(e) {
-    changeMapCursor('move');
+    if (mouseDown) {
+      changeMapCursor('move');
+    } else {
+      changeMapCursor('default');
     
-    if (oldIcon && oldTarget) {
-      oldTarget.setOptions({
-        icon: oldIcon
-      });
-      
-      oldIcon = null;
-      oldTarget = null;
-    }
+      if (oldIcon && oldTarget) {
+        oldTarget.setOptions({
+          icon: oldIcon
+        });
+        
+        oldIcon = null;
+        oldTarget = null;
+      }
 
-    if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
-      changeMapCursor('pointer');
-      
-      if (e.target.data && e.target.data.overIcon) {
-        oldIcon = e.target.getIcon();
-        oldTarget = e.target;
+      if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
+        changeMapCursor('pointer');
+        
+        if (e.target.data && e.target.data.overIcon) {
+          oldIcon = e.target.getIcon();
+          oldTarget = e.target;
 
-        if (oldIcon !== e.target.data.overIcon) {
-          e.target.setOptions({
-            icon: e.target.data.overIcon
-          });
+          if (oldIcon !== e.target.data.overIcon) {
+            e.target.setOptions({
+              icon: e.target.data.overIcon
+            });
+          }
         }
       }
-    }
 
-    oldCursor = map.getRootElement().style.cursor;
+      oldCursor = map.getRootElement().style.cursor;
+    }
 
     return false;
   });
   Microsoft.Maps.Events.addHandler(map, 'mouseup', function(e) {
     changeMapCursor(oldCursor);
+
+    mouseDown = false;
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchange', function() {
-    var bounds = NPMap.bing.map.Map.getBounds(),
+    var bounds =  map.getBounds(),
         inEasternOrWesternHemisphere = function(lng) {
           if (lng < 0) {
             return 'western';
@@ -261,7 +271,7 @@
           
         if (zoom > zoomRange.min && zoom < zoomRange.max && zoom != oldZoom) {
           NPMap.InfoBox.hide();
-        } else if (NPMap.Map.latLngsAreEqual(NPMap.bing.map.latLngToString(map.getCenter()), NPMap.bing.map.latLngToString(oldCenter)) === false) {
+        } else if (NPMap.Map.latLngsAreEqual(NPMap.Map.Bing.latLngFromApi(map.getCenter()), NPMap.Map.Bing.latLngFromApi(oldCenter)) === false) {
           if (tiled) {
             NPMap.InfoBox.reposition();
           } else {
@@ -306,19 +316,14 @@
     checkMaxMinZoom();
   });
   
-  core.init();
-  changeMapCursor('move');
+  Map._init();
+  changeMapCursor('default');
 
-  NPMap.bing = NPMap.bing || {};
-
-  return NPMap.bing.map = {
-    /**
-     * Adds a base layer to the map.
-     * @param baseLayer An object with code, name, and visible properties.
-     */
-    addBaseLayer: function(baseLayer) {
-      
-    },
+  return NPMap.Map.Bing = {
+    // Is the map loaded and ready to be interacted with programatically.
+    _isReady: true,
+    // The Microsoft.Maps.Map object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.
+    map: map,
     /**
      * Adds an HTML element to the map div.
      * @param {Object} el
@@ -332,6 +337,34 @@
      */
     addShape: function(shape) {
       map.entities.push(shape);
+    },
+    /**
+     * Adds a tile layer to the map.
+     * @param {Object} layer
+     */
+    addTileLayer: function(layer) {
+      map.entities.push(layer);
+    },
+    /**
+     * Converts an API bounds to a NPMap bounds.
+     * @param {Object} bounds
+     * @return {Object}
+     */
+    boundsFromApi: function(bounds) {
+      return {
+        e: bounds.getEast(),
+        n: bounds.getNorth(),
+        s: bounds.getSouth(),
+        w: bounds.getWest()
+      };
+    },
+    /**
+     * Converts a NPMap bounds to an API bounds.
+     * @param {Object}
+     * @return {Object}
+     */
+    boundsToApi: function(bounds) {
+      return Microsoft.Maps.LocationRect.fromEdges(bounds.n, bounds.w, bounds.s, bounds.e);
     },
     /**
      * Centers the map.
@@ -349,10 +382,10 @@
      * @param {Function} callback (Optional) A callback function to call after the map has been centered and zoomed.
      */
     centerAndZoom: function(latLng, zoom, callback) {
-      var currentLatLng = this.latLngToString(map.getCenter()),
+      var currentLatLng = this.latLngFromApi(map.getCenter()),
           currentZoom = map.getZoom();
 
-      if (NPMap.Map.latLngsAreEqual(currentLatLng, this.latLngToString(latLng)) === true && currentZoom === zoom) {
+      if (NPMap.Map.latLngsAreEqual(currentLatLng, this.latLngFromApi(latLng)) === true && currentZoom === zoom) {
         if (callback) {
           callback();
         }
@@ -374,7 +407,7 @@
                 if (NPMap.InfoBox.marker) {
                   return NPMap.InfoBox.marker.getLocation();
                 } else if (NPMap.InfoBox.latLng) {
-                  return NPMap.bing.map.stringToLatLng(NPMap.InfoBox.latLng);
+                  return NPMap.bing.map.latLngToApi(NPMap.InfoBox.latLng);
                 } else {
                   return null;
                 }
@@ -389,6 +422,27 @@
         
         map.setView(o);
       }
+    },
+    /**
+     *
+     */
+    convertMarkerOptions: function(options) {
+      // Valid Bing Maps options: anchor, draggable, height, icon, infobox, text, textOffset, typeName, visible, width, zIndex
+      var o = {};
+
+      if (options.height) {
+        o.height = options.height;
+      }
+
+      if (options.icon) {
+        o.icon = options.icon;
+      }
+
+      if (options.width) {
+        o.width = options.width;
+      }
+
+      return o;
     },
     /**
      * Creates a Microsoft.Maps.Polyline object.
@@ -483,6 +537,54 @@
       polygon.data = data;
 
       return polygon;
+    },
+    /**
+     * Creates a tile layer.
+     * @param {Object} config
+     * @param {String/Function} constructor
+     */
+    createTileLayer: function(config, constructor) {
+      var uriConstructor;
+
+      if (typeof constructor === 'string') {
+        uriConstructor = function(tile) {
+          return constructor.replace('{x}', tile.x).replace('{y}', tile.y).replace('{z}', tile.levelOfDetail);
+        };
+      } else {
+        uriConstructor = function(tile) {
+          return constructor(tile.x, tile.y, tile.levelOfDetail, config.url);
+        };
+      }
+
+      return new Microsoft.Maps.TileLayer({
+        mercator: new Microsoft.Maps.TileSource({
+          uriConstructor: uriConstructor
+        }),
+        opacity: config.opacity || 1
+      });
+    },
+    /**
+     * Gets a latLng from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetLatLng: function(e) {
+      return map.tryPixelToLocation(new Microsoft.Maps.Point(e.getX(), e.getY()));
+    },
+    /**
+     * Gets a shape from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetShape: function(e) {
+      return e.target;
+    },
+    /**
+     * Gets the current bounds of the map.
+     * @return {Object}
+     */
+    getBounds: function() {
+      return map.getBounds();
     },
     /**
      * Gets the center {Microsoft.Maps.Location} of the map.
@@ -611,38 +713,62 @@
       }
     },
     /**
+     *
+     */
+    hideTileLayer: function(config) {
+      map.entities.get(map.entities.indexOf(config.api)).setOptions({
+        visible: false
+      });
+    },
+    /**
      * Tests to see if a marker is within the map's current bounds.
      * @param latLng {Object/String} {Required} The latitude/longitude, either a Microsoft.Maps.Location object or a string in "latitude,longitude" format, to test.
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
       if (typeof(latLng) === 'string') {
-        latLng = NPMap.bing.map.stringToLatLng(latLng);
+        latLng = NPMap.bing.map.latLngToApi(latLng);
       }
       
       return map.getBounds().contains(latLng);
     },
-    // Is the map loaded and ready to be interacted with programatically.
-    isReady: true,
     /**
      * Converts a Bing Maps Location object to the NPMap representation of a latitude/longitude string.
      * @param latLng {Microsoft.Maps.Location} The Location object to convert to a string.
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
-    latLngToString: function(latLng) {
+    latLngFromApi: function(latLng) {
       return latLng.latitude + ',' + latLng.longitude;
     },
-    // The Microsoft.Maps.Map object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through NPMap's methods.
-    Map: map,
+    /**
+     * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to a {Microsoft.Maps.Location} object.
+     * @param {String} latLng The lat/lng string.
+     * @return {Object}
+     */
+    latLngToApi: function(latLng) {
+      var lat,
+          lng;
+
+      if (typeof latLng === 'string') {
+        latLng = latLng.split(',');
+        lat = latLng[0];
+        lng = latLng[1];
+      } else {
+        lat = latLng.y;
+        lng = latLng.x;
+      }
+
+      return new Microsoft.Maps.Location(parseFloat(lat), parseFloat(lng));
+    },
     /**
      * Iterates through the default base layers and returns a match if it exists.
      * @param {Object} baseLayer The baseLayer object.
      * @return {Object}
      */
     matchBaseLayer: function(baseLayer) {
-      for (var i = 0; i < defaultBaseLayers.length; i++) {
-        if (defaultBaseLayers[i].code === baseLayer.code) {
-          return defaultBaseLayers[i];
+      for (var i = 0; i < DEFAULT_BASE_LAYERS.length; i++) {
+        if (DEFAULT_BASE_LAYERS[i].code === baseLayer.code) {
+          return DEFAULT_BASE_LAYERS[i];
         }
       }
       
@@ -665,8 +791,8 @@
     positionClickDot: function(to) {
       var anchorY = 0,
           me = this,
-          offset = NPMap.utils.getMapDivOffset(),
-          pixel = NPMap.bing.map.Map.tryLocationToPixel((function() {
+          offset = NPMap.Util.getMapDivOffset(),
+          pixel = map.tryLocationToPixel((function() {
             var latLng = null;
             
             if (typeof(to) === 'string') {
@@ -689,12 +815,29 @@
         top: pixel.y - offset.top - anchorY
       }).show();
     },
+    // TODO: Not implemented yet, as this is handled by Layer.ArcGisServerRest. Will be needed when you handle another layer type.
+    reloadTileLayer: function(config) {
+
+    },
     /**
      * Removes a shape from the map.
      * @param {Object} shape
      */
     removeShape: function(shape) {
       map.entities.removeAt(map.entities.indexOf(shape));
+    },
+    /**
+     *
+     */
+    removeTileLayer: function(config) {
+      map.entities.removeAt(map.entities.indexOf(config.api));
+    },
+    /**
+     * Sets the map's baseLayer.
+     * @param baseLayer An object with code, name, and visible properties.
+     */
+    setBaseLayer: function(baseLayer) {
+      
     },
     /**
      * DEPRECATED: Sets the marker's icon.
@@ -752,13 +895,12 @@
       }
     },
     /**
-     * Converts a lat/lng string ("latitude/longitude") to a {Microsoft.Maps.Location} object.
-     * @param {String} latLng The lat/lng string.
-     * @return {Object}
+     *
      */
-    stringToLatLng: function(latLng) {
-      latLng = latLng.split(',');
-      return new Microsoft.Maps.Location(parseFloat(latLng[0]), parseFloat(latLng[1]));
+    showTileLayer: function(config) {
+      map.entities.get(map.entities.indexOf(config.api)).setOptions({
+        visible: true
+      });
     },
     /**
      * Switches the base map.

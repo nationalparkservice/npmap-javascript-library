@@ -146,7 +146,7 @@
 
         $.each(printData, function(i, v) {
           if (typeof locations[i].name !== 'undefined') {
-            v.n = NPMap.utils.replaceBadCharacters(locations[i].name);
+            v.n = NPMap.Util.replaceBadCharacters(locations[i].name);
           }
         });
         $.each(legs, function(i, v) {
@@ -289,11 +289,11 @@
     var html = '';
     
     if (location.name) {
-      html += NPMap.utils.replaceBadCharacters(location.name) + '<br>';
+      html += NPMap.Util.replaceBadCharacters(location.name) + '<br>';
     }
     
     if (location.address) {
-      html += NPMap.utils.replaceBadCharacters(location.address);
+      html += NPMap.Util.replaceBadCharacters(location.address);
     } else {
       html += '@' + location.latLng;
     }
@@ -312,16 +312,16 @@
     var html = 'Directions to: ';
     
     if (location.name) {
-      html += NPMap.utils.replaceBadCharacters(location.name) + '<br>';
+      html += NPMap.Util.replaceBadCharacters(location.name) + '<br>';
 
       if (location.address) {
-        html += 'Address: ' + NPMap.utils.replaceBadCharacters(location.address);
+        html += 'Address: ' + NPMap.Util.replaceBadCharacters(location.address);
       } else {
         html += '@' + location.latLng;
       }
     } else {
       if (location.address) {
-        html += NPMap.utils.replaceBadCharacters(location.address);
+        html += NPMap.Util.replaceBadCharacters(location.address);
       } else {
         html += '@' + location.latLng;
       }
@@ -670,9 +670,9 @@
     addDestinationFrom: function(address, lat, lng, name) {
       showRoutePanel(function() {
         if (address) {
-          $('#routefrom').val(NPMap.utils.replaceBadCharacters(address));
+          $('#routefrom').val(NPMap.Util.replaceBadCharacters(address));
         } else if (name) {
-          $('#routefrom').val(NPMap.utils.replaceBadCharacters(name) + ' @' + lat + ',' + lng);
+          $('#routefrom').val(NPMap.Util.replaceBadCharacters(name) + ' @' + lat + ',' + lng);
         } else if (lat && lng) {
           $('#routefrom').val('@' + lat + ',' + lng);
         }
@@ -688,9 +688,9 @@
     addDestinationTo: function(address, lat, lng, name) {
       showRoutePanel(function() {
         if (address) {
-          $('#routeto').val(NPMap.utils.replaceBadCharacters(address));
+          $('#routeto').val(NPMap.Util.replaceBadCharacters(address));
         } else if (name) {
-          $('#routeto').val(NPMap.utils.replaceBadCharacters(name) + ' @' + lat + ',' + lng);
+          $('#routeto').val(NPMap.Util.replaceBadCharacters(name) + ' @' + lat + ',' + lng);
         } else if (lat && lng) {
           $('#routeto').val('@' + lat + ',' + lng);
         }
@@ -710,7 +710,7 @@
         if (me.destinations.length < 16) {
           var callback = function(result) {
             function add(a, ll, n) {
-              var html = '<tr><td style="padding:5px;" valign="top"></td><td style="padding:5px 0;" valign="top">' + (n ? NPMap.utils.replaceBadCharacters(n) + '<br>' : '') + (a ? NPMap.utils.replaceBadCharacters(a) : '@' + ll) + '</td><td style="padding:5px;text-align:right;" valign="top"></td></tr>';
+              var html = '<tr><td style="padding:5px;" valign="top"></td><td style="padding:5px 0;" valign="top">' + (n ? NPMap.Util.replaceBadCharacters(n) + '<br>' : '') + (a ? NPMap.Util.replaceBadCharacters(a) : '@' + ll) + '</td><td style="padding:5px;text-align:right;" valign="top"></td></tr>';
               
               $('#routeadd').val('');
               me.destinations.push({
@@ -964,7 +964,7 @@
         } else if (v.latLng) {
           destination = v.latLng;
         } else {
-          NPMap.utils.throwError('Destination does not have an address or latLng.');
+          throw new Error('Destination does not have an address or latLng.');
         }
         
         url += 'waypoint.' + (i + 1) + '=' + destination + '&';

@@ -105,24 +105,24 @@
       if (e.targetType === 'pushpin') {
         to = target;
       } else {
-        to = NPMap.bing.map.latLngToString(NPMap.bing.map.Map.tryPixelToLocation(new Microsoft.Maps.Point(e.pageX, e.pageY), Microsoft.Maps.PixelReference.page));
+        to = NPMap.bing.map.latLngFromApi(NPMap.bing.map.Map.tryPixelToLocation(new Microsoft.Maps.Point(e.pageX, e.pageY), Microsoft.Maps.PixelReference.page));
       }
       
       if (target.data.description) {
         content = target.data.description;
       } else {
-        content = NPMap.Map.buildInfoBoxHtmlString(layer, target.data, 'content');
+        content = NPMap.InfoBox._build(layer, target.data, 'content');
       }
       
       if (target.data.title) {
         title = target.data.title;
       } else {
-        title = NPMap.Map.buildInfoBoxHtmlString(layer, target.data, 'title');
+        title = NPMap.InfoBox._build(layer, target.data, 'title');
       }
       
       // TODO: If identify.title exists, you should use it first. Next you should check for target.data.title and use it if it exists.
       
-      NPMap.InfoBox.show(content, title, NPMap.Map.buildInfoBoxHtmlString(layer, target.data, 'footer'), [
+      NPMap.InfoBox.show(content, title, NPMap.InfoBox._build(layer, target.data, 'footer'), [
         'zoomable'
       ], null, to);
     }

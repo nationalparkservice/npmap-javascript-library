@@ -3,8 +3,8 @@
 // TODO: Hook up attribution.
 
 define([
-  NPMap.config.server + '/Map/Map.js'
-], function(core) {
+  'Map/Map'
+], function(Map) {
   var
       // The map div.
       $mapDiv = $('#' + NPMap.config.div).parent(),
@@ -49,7 +49,7 @@ define([
    * @param {Function} callback (Optional)
    */
   function runEasey(latLng, zoom, time, callback) {
-    var panned = !NPMap.Map.latLngsAreEqual(NPMap.modestmaps.map.latLngToString(map.getCenter()), NPMap.modestmaps.map.latLngToString(latLng)),
+    var panned = !NPMap.Map.latLngsAreEqual(NPMap.modestmaps.map.latLngFromApi(map.getCenter()), NPMap.modestmaps.map.latLngFromApi(latLng)),
         zoomed = map.getZoom() !== zoom;
         
     time = time || 200;
@@ -87,7 +87,7 @@ define([
       var layer = NPMap.config.baseLayers[i];
       
       if (typeof layer.visible === 'undefined' || layer.visible === true) {
-        NPMap.utils.safeLoad('NPMap.modestmaps.layers.' + layer.type, function() {
+        NPMap.Util.safeLoad('NPMap.modestmaps.layers.' + layer.type, function() {
           NPMap.modestmaps.layers[layer.type].addLayer(layer);
         });
         
@@ -109,7 +109,7 @@ define([
     NPMap.config.baseLayers = NPMap.config.baseLayers || [];
     
     NPMap.config.baseLayers.push(baseLayer);
-    NPMap.utils.safeLoad('NPMap.modestmaps.layers.TileStream', function() {
+    NPMap.Util.safeLoad('NPMap.modestmaps.layers.TileStream', function() {
       NPMap.modestmaps.layers.TileStream.addLayer(baseLayer);
     });
   }
@@ -196,7 +196,7 @@ define([
     box.id = 'npmap-zoombox';
     box.style.cssText = 'background:rgba(255,255,255,0.25);border:1px dashed #888;display:none;height:0;left:0;margin:0;padding:0;position:absolute;top:0;width:0;z-index:29;';
     
-    NPMap.utils.safeLoad('NPMap.Map', function() {
+    NPMap.Util.safeLoad('NPMap.Map', function() {
       NPMap.Map.addElementToMapDiv(box);
     });
     com.modestmaps.addEvent(map.parent, 'mousedown', mouseDown);
@@ -231,11 +231,13 @@ define([
     }
   });
   
-  core.init();
-
-  NPMap.modestmaps = NPMap.modestmaps || {};
+  Map._init();
   
-  return NPMap.modestmaps.map = {
+  return NPMap.Map.ModestMaps = {
+    // Is the map loaded and ready to be interacted with programatically?
+    _isReady: true,
+    // The MM.Map object. This reference should be used to access any of the Modest Maps JS functionality that can't be done through NPMap's API.
+    map: map,
     /**
      * Sets the center and zoom level of the map.
      * @param {Object} center
@@ -307,34 +309,26 @@ define([
 
       latLng = (function() {
         if (typeof(latLng) === 'string') {
-          return this.stringToLatLng(latLng);
+          return this.latLngToApi(latLng);
         } else {
           return latLng;
         }
       })();
           
-      if (NPMap.utils.isBetween(extent.north, extent.south, latLng.lat) === true && NPMap.utils.isBetween(extent.east, extent.west, latLng.lon) === true) {
+      if (NPMap.Util.isBetween(extent.north, extent.south, latLng.lat) === true && NPMap.Util.isBetween(extent.east, extent.west, latLng.lon) === true) {
         isWithinExtent = true;
       }
 
       return isWithinExtent;
     },
     /**
-     * Is the map loaded and ready to be interacted with programatically?
-     */
-    isReady: true,
-    /**
      * Converts a MM.Location object to the NPMap representation of a latitude/longitude string.
      * @param latLng {MM.Location} The Location object to convert to a string.
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
-    latLngToString: function(latLng) {
+    latLngFromApi: function(latLng) {
       return latLng.lat + ',' + latLng.lon;
     },
-    /**
-     * The MM.Map object. This reference should be used to access any of the Modest Maps JS functionality that can't be done through NPMap's API.
-     */
-    Map: map,
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
@@ -364,7 +358,7 @@ define([
      * @param latLng {String} (Required) The NPMap lat/lng string to convert.
      * @return {MM.Location}
      */
-    stringToLatLng: function(latLng) {
+    latLngToApi: function(latLng) {
       latLng = latLng.split(',');
       
       return new MM.Location(parseFloat(latLng[0]), parseFloat(latLng[1]));

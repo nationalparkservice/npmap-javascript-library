@@ -1,6 +1,7 @@
+// TODO: underscore.js is a requirement. Make sure it is loaded properly.
 // TODO: You need to support panning if the InfoBox falls within the "padding" set around the edge of the map.
 define(function() {
-  var 
+  var
       // The parent map div of the NPMap div.
       $mapDiv = $('#' + NPMap.config.div).parent(),
       // The InfoBox config object from the NPMap.config object.
@@ -25,14 +26,14 @@ define(function() {
       // This variable holds the user-defined maxWidth for the #npmapinfobox div.
       maxWidth = null,
       // The offset of the map div element (NPMap.config.div).
-      offset = NPMap.utils.getMapDivOffset(),
+      offset = NPMap.Util.getMapDivOffset(),
       // The left offset of the map div element, in pixels.
       offsetLeft = offset.left,
       // The top offset of the map div element, in pixels.
       offsetTop = offset.top,
       // The amount of padding, in pixels, to preserve between the edge of the InfoBox and the edge of the map.
       padding = config.padding || 20,
-      // 
+      //
       paddingSetting = padding,
       // The pan configuration.
       pan = config.pan || 'none',
@@ -70,7 +71,7 @@ define(function() {
 
       if (pan === 'center') {
         var h = ($mapDiv.outerHeight() - $me.outerHeight()) / 2,
-            o = NPMap.utils.getMapDivOffset(),
+            o = NPMap.Util.getMapDivOffset(),
             w = ($mapDiv.outerWidth() - $me.outerWidth()) / 2;
 
         if (parent === 'map') {
@@ -105,10 +106,10 @@ define(function() {
                     r.h = mapPosition.east - (p.left + $me.outerWidth()) - paddingHalved;
                   }
                 } else if (pan === 'page') {
-                  var o = (p.left + $me.outerWidth()) - $(document.body).width();
+                  var n = (p.left + $me.outerWidth()) - $(document.body).width();
                   
-                  if (o > 0) {
-                    r.h = -o - paddingHalved;
+                  if (n > 0) {
+                    r.h = -n - paddingHalved;
                   }
                 }
               }
@@ -165,7 +166,7 @@ define(function() {
         });
       }
     }
-  }  
+  }
   /**
    * Positions the InfoBox.
    * @param {Function} callback (Optional)
@@ -243,7 +244,7 @@ define(function() {
    * Refreshes the map div offsets and width.
    */
   function refreshOffsetsAndWidth() {
-    offset = NPMap.utils.getMapDivOffset();
+    offset = NPMap.Util.getMapDivOffset();
     offsetLeft = offset.left;
     offsetTop = offset.top;
     windowWidth = $(window).width();
@@ -382,13 +383,18 @@ define(function() {
     refreshDimensions();
     refreshOffsetsAndWidth();
   }
+
+  // Setup underscorejs to do mustache.js style templating.
+  _.templateSettings = {
+    interpolate : /\{\{(.+?)\}\}/g
+  };
   
   if (design === 'basic') {
-    NPMap.utils.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox.css');
+    NPMap.Util.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox.css');
     
     infobox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/classes/infobox/img/hook' + (Modernizr.boxshadow ? '_shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
   } else if (design === 'pyv') {
-    NPMap.utils.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox-pyv.css');
+    NPMap.Util.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox-pyv.css');
     
     // TODO: Add support for non-shadowed "hook".
     infobox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/classes/infobox/img/hook_pyv.png" /></div>';
@@ -402,7 +408,7 @@ define(function() {
   if (parent === 'map') {
     infobox.style.zIndex = 29;
     
-    NPMap.utils.safeLoad('NPMap.Map', function() {
+    NPMap.Util.safeLoad('NPMap.Map', function() {
       NPMap.Map.addElementToMapDiv(infobox);
       setupInfoBox();
     });
@@ -413,45 +419,58 @@ define(function() {
     setupInfoBox();
   }
   
-  /**
-   * @class NPMap.InfoBox
-   * 
-   * The InfoBox displays attribute information for geospatial data.
-   */
   return NPMap.InfoBox = {
-    /** 
-     * An array of action objects associated with the current identify operation. This is null if the InfoBox is hidden.
+    // An array of event handler objects that have been added to this class.
+    _events: [],
+    /**
+     * Builds a HTML string for the InfoBox.
+     * @param {Object} config The layer config object.
+     * @param {Object} attributes A set of key-value pair attributes.
+     * @param {String} element The identify element to build the HTML string for.
+     * @return {String}
      */
+    _build: function(config, attributes, element) {
+      var html = null;
+
+      if (typeof config.identify !== 'undefined' && typeof config.identify[element] !== 'undefined') {
+        if (typeof config.identify[element] === 'function') {
+          html = config.identify[element](attributes);
+        } else {
+          var template = _.template(config.identify[element]);
+
+          html = template(attributes);
+        }
+      }
+      
+      if (!html) {
+        if (element === 'content') {
+          html = 'There is no description available for this location.';
+        } else if (element === 'title') {
+          html = 'No Title';
+        }
+      }
+
+      return html;
+    },
+    // An array of action objects associated with the current identify operation. This is null if the InfoBox is hidden.
     actions: [],
-    /*
-     * An array of result objects for the current identify operation. This is null if the InfoBox is hidden.
-     */
+    // An array of result objects for the current identify operation. This is null if the InfoBox is hidden.
     results: [],
-    /**
-     * An array of event handler objects that have been added to this class.
-     */
-    events: [],
-    /**
-     * The current latitude/longitude, in "latitude,longitude" format, of the InfoBox (or is it the InfoBox's anchor?). If the InfoBox is hidden, this will be null.
-     */
+    // The current latitude/longitude, in "latitude,longitude" format, of the InfoBox (or is it the InfoBox's anchor?). If the InfoBox is hidden, this will be null.
     latLng: null,
-    /**
-     * The current marker, if a marker is present. This is null if the InfoBox is displaying without a marker or if the InfoBox is hidden.
-     */
+    // The current marker, if a marker is present. This is null if the InfoBox is displaying without a marker or if the InfoBox is hidden.
     marker: null,
-    /**
-     * Is the InfoBox currently visible?
-     */
+    // Is the InfoBox currently visible?
     visible: false,
     /**
      * Hides the InfoBox.
      */
     hide: function() {
       if (this.visible) {
-        $('#npmap-infobox').hide()
+        $('#npmap-infobox').hide();
         
         if (this.marker && this.marker.oldIconUrl) {
-          NPMap[NPMap.config.api].map.setMarkerIcon(this.marker, this.marker.oldIconUrl);
+          NPMap.Map[NPMap.config.api].setMarkerIcon(this.marker, this.marker.oldIconUrl);
           delete this.marker.oldIconUrl;
         }
 
@@ -477,8 +496,8 @@ define(function() {
      */
     removeAction: function(el) {
       $(el).remove();
+      
       actions--;
-
       skipBoundsCheck = true;
 
       if (actions === 0) {
@@ -491,12 +510,10 @@ define(function() {
     reposition: function() {
       var me = this,
           to = this.marker || this.latLng;
+
+      NPMap.Map[NPMap.config.api].positionClickDot(to);
       
-      // to is undefined
-      
-      NPMap[NPMap.config.api].map.positionClickDot(to);
-      
-      if (NPMap[NPMap.config.api].map.isLatLngWithinMapBounds(NPMap[NPMap.config.api].map.getClickDotLatLng()) === true) {
+      if (NPMap.Map[NPMap.config.api].isLatLngWithinMapBounds(NPMap.Map[NPMap.config.api].getClickDotLatLng()) === true) {
         position();
       } else {
         // TODO: This should only hide if 'parent' is 'page'. Right now, however, the baseApi code doesn't support negative positioning of #npmap-clickdot.
@@ -520,7 +537,7 @@ define(function() {
           mH;
       
       if (target) {
-        NPMap.bing.map.positionClickDot(target);
+        NPMap.Map[NPMap.config.api].positionClickDot(target);
         
         if (typeof target === 'string') {
           NPMap.InfoBox.latLng = target;
@@ -554,9 +571,9 @@ define(function() {
               switch (v) {
                 case 'zoomable':
                   if (NPMap.config.api != 'modestmaps') {
-                    var max = NPMap[NPMap.config.api].map.getMaxZoom();
+                    var max = NPMap.Map[NPMap.config.api].getMaxZoom();
   
-                    if (NPMap[NPMap.config.api].map.getZoom() < max) {
+                    if (NPMap.Map[NPMap.config.api].getZoom() < max) {
                       add.push({
                         handler: function() {
                           //NPMap.InfoBox.removeAction(this);
@@ -570,7 +587,7 @@ define(function() {
                   remove.push(i);
   
                   break;
-              };
+              }
             }
           });
           $.each(remove, function(i, v) {
@@ -586,49 +603,49 @@ define(function() {
             switch (v.name) {
               case 'route':
                 var address = null,
-	                config = v,
-	                latLngSplit = me.latLng.split(','),
-	                lat = parseFloat(latLngSplit[0]).toFixed(5),
-	                lng = parseFloat(latLngSplit[1]).toFixed(5),
-	                titleNoHtml = ($.trim(NPMap.utils.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
-	              
-	            if (this.marker && this.marker.data) {
-	              if (this.marker.data['address']) {
-	                address = this.marker.data['address'];
-	              } else if (this.marker.data['Address']) {
-	                address = this.marker.data['Address'];
-	              } else if (config.addressAttribute && this.marker.data[config.addressAttribute]) {
-	                address = this.marker.data[config.addressAttribute];
-	              }
-	            }
-	            
-	            address = address || null;
-	            
-	            if (config.mode === 'multi') {
-	              actions.push({
-	                handler: function() {
-	                  NPMap.Route.addDestinationToItinerary(address, lat, lng, titleNoHtml);
-	                },
-	                text: 'Add destination to itinerary'
-	              });
-	            } else {
-	              actions.push({
-	                group: 'Route',
-	                handler: function() {
-	                  NPMap.Route.addDestinationFrom(address, lat, lng, titleNoHtml);
-	                },
-	                text: 'Directions from here'
-	              });
-	              actions.push({
-	                group: 'Route',
-	                handler: function() {
-	                  NPMap.Route.addDestinationTo(address, lat, lng, titleNoHtml);
-	                },
-	                text: 'Directions to here'
-	              });
-	            }
+                  config = v,
+                  latLngSplit = me.latLng.split(','),
+                  lat = parseFloat(latLngSplit[0]).toFixed(5),
+                  lng = parseFloat(latLngSplit[1]).toFixed(5),
+                  titleNoHtml = ($.trim(NPMap.Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
                 
-                break;
+              if (this.marker && this.marker.data) {
+                if (this.marker.data['address']) {
+                  address = this.marker.data['address'];
+                } else if (this.marker.data['Address']) {
+                  address = this.marker.data['Address'];
+                } else if (config.addressAttribute && this.marker.data[config.addressAttribute]) {
+                  address = this.marker.data[config.addressAttribute];
+                }
+              }
+              
+              address = address || null;
+              
+              if (config.mode === 'multi') {
+                actions.push({
+                  handler: function() {
+                    NPMap.Route.addDestinationToItinerary(address, lat, lng, titleNoHtml);
+                  },
+                  text: 'Add destination to itinerary'
+                });
+              } else {
+                actions.push({
+                  group: 'Route',
+                  handler: function() {
+                    NPMap.Route.addDestinationFrom(address, lat, lng, titleNoHtml);
+                  },
+                  text: 'Directions from here'
+                });
+                actions.push({
+                  group: 'Route',
+                  handler: function() {
+                    NPMap.Route.addDestinationTo(address, lat, lng, titleNoHtml);
+                  },
+                  text: 'Directions to here'
+                });
+              }
+                
+              break;
             }
           });
         }
@@ -675,11 +692,11 @@ define(function() {
         this.latLng = NPMap.Map.getMarkerLatLng(this.marker);
         
         if (this.marker.highlightIconUrl) {
-          this.marker.oldIconUrl = NPMap[NPMap.config.api].map.getMarkerIcon(this.marker);
-          NPMap[NPMap.config.api].map.setMarkerIcon(this.marker, this.marker.highlightIconUrl);
+          this.marker.oldIconUrl = NPMap.Map[NPMap.config.api].getMarkerIcon(this.marker);
+          NPMap.Map[NPMap.config.api].setMarkerIcon(this.marker, this.marker.highlightIconUrl);
         }
       } else if (!this.latLng) {
-        this.latLng = NPMap[NPMap.config.api].map.latLngToString(NPMap[NPMap.config.api].map.getClickDotLatLng());
+        this.latLng = NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].getClickDotLatLng());
       }
       
       if (footer) {

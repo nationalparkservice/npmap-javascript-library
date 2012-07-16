@@ -6,7 +6,7 @@ NPMap.google.layers.Kml = (function() {
   return {
     addLayer: function(details) {
       var layer = new google.maps.KmlLayer(details.url, {
-        map: NPMap.google.map.Map,
+        map: NPMap.Map.Google.Map,
         suppressInfoWindows: false
       });
     }

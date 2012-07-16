@@ -7,7 +7,7 @@ define([
         // A {google.maps.MVCArray} of the current overlays.
         agsOverlays = new google.maps.MVCArray(),
         // A local reference to the map.
-        map = NPMap.google.map.Map;
+        map = NPMap.Map.Google.Map;
 
     /**
      * @private
@@ -349,9 +349,9 @@ define([
 
               delete json.extent;
 
-              callback(json); 
+              callback(json);
             } else {
-              NPMap.utils.throwError(json.error);
+              throw new Error(json.error);
             }
           },
           type: 'jsonp',
@@ -382,7 +382,7 @@ define([
      */
     MapService.prototype.init_ = function(json) {
       if (json.error) {
-        NPMap.utils.throwError(json.error.message);
+        throw new Error(json.error.message);
       }
 
       _.extend(this, json);
@@ -424,18 +424,18 @@ define([
   
   NPMap.Event.add('NPMap.Map', 'click', function(e) {
     if (identifyLayers > 0) {
-      var map = NPMap.google.map.Map,
+      var map = NPMap.Map.Google.Map,
           bounds = map.getBounds(),
           ne = bounds.getNorthEast(),
           sw = bounds.getSouthWest();
         
       NPMap.InfoBox.hide();
-      NPMap.InfoBox.latLng = NPMap.google.map.latLngToString(e.latLng);
-      NPMap.google.map.positionClickDot(e.latLng);
+      NPMap.InfoBox.latLng = NPMap.Map.Google.latLngFromApi(e.latLng);
+      NPMap.Map.Google.positionClickDot(e.latLng);
       NPMap.layers.ArcGisServerRest.doIdentify(e.latLng.lat(), e.latLng.lng(), map.getDiv().offsetHeight, map.getDiv().offsetWidth, ne.lat(), ne.lng(), sw.lat(), sw.lng());
     }
   });
-  NPMap.google.map.Map.setOptions({
+  NPMap.Map.Google.Map.setOptions({
     draggableCursor: 'pointer'
   });
 
@@ -448,11 +448,11 @@ define([
      */
     addLayer: function(layer) {
       if (!layer.name) {
-        NPMap.utils.throwError('All "ArcGisServerRest" layers must have a name.');
+        throw new Error('All "ArcGisServerRest" layers must have a name.');
       }
       
       if (!layer.url) {
-        NPMap.utils.throwError('All "ArcGisServerRest" layers must have a url.');
+        throw new Error('All "ArcGisServerRest" layers must have a url.');
       }
 
       if (typeof layer.visible === 'undefined' || layer.visible === true) {
@@ -480,7 +480,7 @@ define([
 
         if (layer.gType === 'MapType') {
           agsLayer = new gmaps.ags.MapType(layer.url, options);
-			    NPMap.google.map.Map.overlayMapTypes.insertAt(0, ags);
+          NPMap.Map.Google.Map.overlayMapTypes.insertAt(0, ags);
         } else {
           var interval,
               service;
@@ -504,7 +504,7 @@ define([
       var service = layer.ags.mapService;
       
       if (layer.gType === 'MapType') {
-        NPMap.google.map.Map.overlayMapTypes.removeAt(0);
+        NPMap.Map.Google.Map.overlayMapTypes.removeAt(0);
       } else {
         layer.ags.setMap(null);
       }
@@ -550,7 +550,7 @@ define([
       if (layer.gType === 'MapType') {
         NPMap.google.layers.ArcGisServerRest.addLayer(layer);
       } else {
-        layer.ags.setMap(NPMap.google.map.Map);
+        layer.ags.setMap(NPMap.Map.Google.Map);
       }
 
       if (layer.identifiable === true) {

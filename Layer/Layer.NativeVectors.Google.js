@@ -76,7 +76,7 @@ NPMap.google.layers.NativeVectors = (function() {
             // Need to check individual layer that was passed in OR all NativeVector layers to see which are tiled and which aren't.
             // Then go through the process of loading the tiles and overall bounding box.
 
-            var bounds = NPMap.google.map.Map.getBounds(),
+            var bounds = NPMap.Map.Google.Map.getBounds(),
                 boundsNeLatLng = bounds.getNorthEast(),
                 boundsSwLatLng = bounds.getSouthWest(),
                 nonTiledLayers = [],
@@ -122,12 +122,12 @@ NPMap.google.layers.NativeVectors = (function() {
                 if (layer) {
                     var parameter = layer.parameter || null;
 
-                    NPMap.layers.TiledVectors.loadData(sw.lat(), ne.lng(), layer.name, ne.lat(), sw.lng(), NPMap.google.map.Map.getZoom(), parameter);
+                    NPMap.layers.TiledVectors.loadData(sw.lat(), ne.lng(), layer.name, ne.lat(), sw.lng(), NPMap.Map.Google.Map.getZoom(), parameter);
                 } else {
                     $.each(nonTiledLayers, function(i, v) {
                         var parameter = v.parameter || null;
                         
-                        NPMap.layers.TiledVectors.loadData(sw.lat(), ne.lng(), v.name, ne.lat(), sw.lng(), NPMap.google.map.Map.getZoom(), parameter);
+                        NPMap.layers.TiledVectors.loadData(sw.lat(), ne.lng(), v.name, ne.lat(), sw.lng(), NPMap.Map.Google.Map.getZoom(), parameter);
                     });
                 }
             }
@@ -138,7 +138,7 @@ NPMap.google.layers.NativeVectors = (function() {
                     boundsSeLatLng = new google.maps.LatLng(boundsSwLatLng.lat(), boundsNeLatLng.lng()),
                     groupLayers = [],
                     newTiles = [],
-                    zoom = NPMap.google.map.Map.getZoom(),
+                    zoom = NPMap.Map.Google.Map.getZoom(),
                     zfactor = Math.pow(2, zoom);
                   
                 // TODO: You should really do a better job of this. You need to calculate all of this tile stuff on the server.  
@@ -242,13 +242,13 @@ NPMap.google.layers.NativeVectors = (function() {
                     v.name = v.name.slice(0, v.name.length - 1);
                     
                     $.each(boundingBoxes, function(i2, v2) {
-                        NPMap.layers.NativeVectors.loadData(v2.sw.lat(), v2.sw.lng(), v.name, v2.ne.lat(), v2.ne.lng(), NPMap.google.map.Map.getZoom(), v.parameter, v2.tileId, v.query);
+                        NPMap.layers.NativeVectors.loadData(v2.sw.lat(), v2.sw.lng(), v.name, v2.ne.lat(), v2.ne.lng(), NPMap.Map.Google.Map.getZoom(), v.parameter, v2.tileId, v.query);
                     });
                 });
             }
         },
         oldTiles = [],
-        oldZoom = NPMap.google.map.Map.getZoom(),
+        oldZoom = NPMap.Map.Google.Map.getZoom(),
         pointToTile = function(latLng, z){
             var worldCoordinate = projection.fromLatLngToPoint(latLng);
             var pixelCoordinate = new google.maps.Point(worldCoordinate.x * Math.pow(2, z), worldCoordinate.y * Math.pow(2, z));
@@ -257,21 +257,21 @@ NPMap.google.layers.NativeVectors = (function() {
         },
         projection = new MercatorProjection();
     
-    google.maps.event.addListener(NPMap.google.map.Map, 'bounds_changed', function() {
+    google.maps.event.addListener(NPMap.Map.Google.Map, 'bounds_changed', function() {
         NPMap.InfoBox.hide();
     });
-    google.maps.event.addListener(NPMap.google.map.Map, 'center_changed', function() {
+    google.maps.event.addListener(NPMap.Map.Google.Map, 'center_changed', function() {
         NPMap.InfoBox.hide();
     });
-    google.maps.event.addListener(NPMap.google.map.Map, 'click', function() {
+    google.maps.event.addListener(NPMap.Map.Google.Map, 'click', function() {
         NPMap.InfoBox.hide();
     });
-    google.maps.event.addListener(NPMap.google.map.Map, 'dragstart', function() {
+    google.maps.event.addListener(NPMap.Map.Google.Map, 'dragstart', function() {
         NPMap.InfoBox.hide();
     });
-    google.maps.event.addListener(NPMap.google.map.Map, 'idle', loadData);
-    google.maps.event.addListener(NPMap.google.map.Map, 'zoom_changed', function() {
-        var currentZoom = NPMap.google.map.Map.getZoom();
+    google.maps.event.addListener(NPMap.Map.Google.Map, 'idle', loadData);
+    google.maps.event.addListener(NPMap.Map.Google.Map, 'zoom_changed', function() {
+        var currentZoom = NPMap.Map.Google.Map.getZoom();
 
         if (currentZoom != oldZoom) {
             clearAllTiles();
@@ -333,7 +333,7 @@ NPMap.google.layers.NativeVectors = (function() {
                         $.each(data[v.name], function(i2, v2) {
                             var geometry = new google.maps.Marker({
                                 icon: new google.maps.MarkerImage(NPMap.layers.NativeVectors.buildIconUrl(v.iconUrl, v2.numberPins)),
-                                map: NPMap.google.map.Map,
+                                map: NPMap.Map.Google.Map,
                                 position: new google.maps.LatLng(v2.lat, v2.lng)
                             });
 
@@ -347,7 +347,7 @@ NPMap.google.layers.NativeVectors = (function() {
 
                                 var overlay = new google.maps.OverlayView();
                                 overlay.draw = function() {};
-                                overlay.setMap(NPMap.google.map.Map);
+                                overlay.setMap(NPMap.Map.Google.Map);
 
                                 pixelOffset = overlay.getProjection().fromLatLngToContainerPixel(geometry.getPosition());
 

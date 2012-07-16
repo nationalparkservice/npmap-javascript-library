@@ -1,6 +1,6 @@
 ﻿define([
-  NPMap.config.server + '/Map/Map.js'
-], function(core) {
+  'Map/Map'
+], function(Map) {
   var bounds,
       map,
       max = 19,
@@ -50,7 +50,7 @@
           if (layer.type === 'ArcGisServerRest') {
             baseLayer = true;
             layer.zIndex = 0;
-            NPMap.utils.safeLoad('NPMap.esri.layers.ArcGisServerRest', function() {
+            NPMap.Util.safeLoad('NPMap.esri.layers.ArcGisServerRest', function() {
               NPMap.esri.layers.ArcGisServerRest.addLayer(layer);
             });
             
@@ -71,20 +71,22 @@
     });
 
     var interval = setInterval(function() {
-      if (NPMap.esri && NPMap.esri.map) {
+      if (NPMap.Map.Esri) {
         clearInterval(interval);
 
-        NPMap.esri.map.Map = map;
-        NPMap.esri.map.isReady = true;
+        NPMap.Map.Esri.map = map;
+        NPMap.Map.Esri._isReady = true;
 
-        core.init();
+        Map._init();
       }
     }, 10);
   });
 
-  NPMap.esri = NPMap.esri || {};
-  
-  return NPMap.esri.map = {
+  return NPMap.Map.Esri = {
+    // Is the map loaded and ready to be interacted with programatically?
+    _isReady: false,
+    // The esri.Map object. This reference should be used to access any of the ArcGIS API for JavaScript functionality that can't be done through the NPMap.Map methods.
+    map: null,
     /**
      * Adds a base layer to the map.
      * @param baseLayer An object with id, tiled, url, and visible properties.
@@ -102,7 +104,7 @@
         layer = new esri.layers.ArcGISDynamicMapServiceLayer(baseLayer.url, options);
       }
       
-      NPMap.esri.map.Map.addLayer(layer);
+      map.addLayer(layer);
       
       return layer;
     },
@@ -317,21 +319,18 @@
     isLatLngWithinMapBounds: function(latLng) {
       
     },
-    isReady: false,
     /**
      * Converts an {esri.geometry.Point} object to the NPMap representation of a latitude/longitude string.
      * @param latLng {esri.geometry.Point} The Point object to convert to a string.
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
-    latLngToString: function(latLng) {
+    latLngFromApi: function(latLng) {
       if (latLng.spatialReference.wkid !== 4326) {
         latLng = esri.geometry.webMercatorToGeographic(latLng);
       }
 
       return latLng.y + ',' + latLng.x;
     },
-    // The esri.Map object. This reference should be used to access any of the ArcGIS API for JavaScript functionality that can't be done through NPMap's methods.
-    Map: null,
     /**
      * Iterates through the default base layers and returns a match if it exists.
      * @param {Object} baseLayer The baseLayer object.
@@ -373,7 +372,7 @@
       
       var anchorY = 0,
           me = this,
-          offset = NPMap.utils.getMapDivOffset(),
+          offset = NPMap.Util.getMapDivOffset(),
           pixel = NPMap.bing.map.Map.tryLocationToPixel((function() {
             var latLng = null;
             
@@ -447,7 +446,7 @@
      * @param {String} latLng The lat/lng string.
      * @return {esri.geometry.Point}
      */
-    stringToLatLng: function(latLng) {
+    latLngToApi: function(latLng) {
       latLng = latLng.split(',');
 
       return esri.geometry.geographicToWebMercator(new esri.geometry.Point(parseFloat(latLng[1]), parseFloat(latLng[0]), 4326));

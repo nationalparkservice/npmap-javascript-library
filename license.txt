@@ -1,4 +1,4 @@
 NPMap Copyright
 
-Copyright (c) 2010, National Park Service <http://www.nps.gov>
+Copyright (c) 2012, National Park Service <http://www.nps.gov>
 All rights reserved.
