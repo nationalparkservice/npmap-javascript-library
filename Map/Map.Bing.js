@@ -94,6 +94,21 @@
       });
     }
   }
+  /**
+   * Converts a HEX color to RGB.
+   * @param {String} hex The HEX string to convert.
+   * @returns {String}
+   */
+  function hexToRgb(hex) {
+    var i = 3,
+        rgb = hex.replace('#', '').match(/(.{2})/g);
+        
+    while (i--) {
+      rgb[i] = parseInt(rgb[i], 16);
+    }
+    
+    return rgb;
+  }
   
   if (NPMap.config.center && NPMap.config.zoom) {
     use = 'centerAndZoom';
@@ -426,6 +441,12 @@
     /**
      *
      */
+    convertLineOptions: function(options) {
+
+    },
+    /**
+     *
+     */
     convertMarkerOptions: function(options) {
       // Valid Bing Maps options: anchor, draggable, height, icon, infobox, text, textOffset, typeName, visible, width, zIndex
       var o = {};
@@ -445,44 +466,55 @@
       return o;
     },
     /**
+     *
+     */
+    convertPolygonOptions: function(options) {
+      // Valid Bing Maps options: fillColor (a (opacity), r, g, b), infobox, strokeColor (a (opacity), r, g, b), strokeDashArray, strokeThickness, visible
+      var o = {};
+
+      if (options.fillColor) {
+        var fillColor = hexToRgb(options.fillColor),
+            fillOpacity = options.fillOpacity || 255;
+
+        o.fillColor = new Microsoft.Maps.Color(fillOpacity, fillColor[0], fillColor[1], fillColor[2]);
+      }
+
+      if (options.strokeColor) {
+        var strokeColor = hexToRgb(options.strokeColor),
+            strokeOpacity = options.strokeOpacity || 255;
+
+        o.strokeColor = new Microsoft.Maps.Color(strokeOpacity, strokeColor[0], strokeColor[1], strokeColor[2]);
+      }
+      
+      if (options.strokeWidth) {
+        o.strokeThickness = options.strokeWidth;
+      }
+      
+      return o;
+    },
+    /**
      * Creates a Microsoft.Maps.Polyline object.
      * @param {Array} latLngs An array of {Microsoft.Maps.Location} objects.
      * @param {Microsoft.Maps.PolylineOptions} options (Optional) Any additional options to apply to the line.
-     * @param {Object} data (Optional) An object with key/value pairs of information that need to be stored with the marker. This object will be added to the line.data property.
-     * @param {Function} clickHandler (Optional) A function to call when the marker is clicked.
      * @return {Microsoft.Maps.Polyline}
      */
-    createLine: function(latLngs, options, data, clickHandler) {
-      var line;
-      
+    createLine: function(latLngs, options) {
       options = options || {};
-      
-      line = new Microsoft.Maps.Polyline(latLngs, options);
-      
-      line.data = data || {};
-      
-      if (clickHandler) {
-        line.clickHandler = clickHandler;
-      }
-      
-      return line;
+
+      return new Microsoft.Maps.Polyline(latLngs, options);
     },
     /**
      * Creates a Microsoft.Maps.Pushpin object.
      * @param latLng {Microsoft.Maps.Location} (Required) Where to place the marker.
      * @param options {Microsoft.Maps.PushpinOptions} (Optional) Any additional options to apply to the marker.
-     * @param data {Object} (Optional) An object with key/value pairs of information that need to be stored with the marker. This object will be added to the marker.data property.
-     * @param {Function} clickHandler (Optional) A function to call when the marker is clicked.
      * @return {Microsoft.Maps.Pushpin}
      */
-    createMarker: function(latLng, options, data, clickHandler) {
-      var marker = null;
-
+    createMarker: function(latLng, options) {
       options = options || {};
 
       if (!options.anchor || !options.height || !options.width) {
         if (options.height && options.width) {
-          options.anchor = options.anchor = new Microsoft.Maps.Point(options.width / 2, options.height / 2);
+          options.anchor = new Microsoft.Maps.Point(options.width / 2, options.height / 2);
         } else if (options.icon) {
           var image = new Image(),
               interval;
@@ -512,31 +544,18 @@
         }
       }
 
-      marker = new Microsoft.Maps.Pushpin(latLng, options);
-
-      marker.data = data || {};
-      
-      if (clickHandler) {
-        marker.clickHandler = clickHandler;
-      }
-
-      return marker;
+      return new Microsoft.Maps.Pushpin(latLng, options);
     },
     /**
      * Creates a Microsoft.Maps.Polygon object.
      * @param latLngs {Array} (Required) An array of Microsoft.Maps.Location objects.
      * @param options {Microsoft.Maps.PolygonOptions} (Optional) Any additional options to apply to the polygon.
-     * @param data {Object} (Optional) An object with key/value pairs of information that need to be stored with the polygon. This object will be added to the polygon.data property.
      * @return {Microsoft.Maps.Polygon}
      */
-    createPolygon: function(latLngs, options, data) {
-      var polygon = new Microsoft.Maps.Polygon(latLngs, options);
-      
-      data = data || {};
+    createPolygon: function(latLngs, options) {
+      options = options || {};
 
-      polygon.data = data;
-
-      return polygon;
+      return new Microsoft.Maps.Polygon(latLngs, options);
     },
     /**
      * Creates a tile layer.
@@ -742,7 +761,7 @@
     },
     /**
      * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to a {Microsoft.Maps.Location} object.
-     * @param {String} latLng The lat/lng string.
+     * @param {String/Object} latLng
      * @return {Object}
      */
     latLngToApi: function(latLng) {

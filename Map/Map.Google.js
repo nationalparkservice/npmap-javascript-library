@@ -51,6 +51,24 @@
       // What should NPMap use to set the initial center and zoom level?
       use = 'bbox';
   
+  /**
+   * Converts a 0-255 opacity to 0-1.0.
+   * @param {Number} opacity
+   */
+  function convertOpacity(opacity) {
+    return (opacity / 25.5) * 0.1;
+  }
+  /**
+   * Hooks up a google.maps.event click handler to a shape.
+   * @param {Object} shape
+   */
+  function hookUpShapeClickHandler(shape) {
+    google.maps.event.addListener(shape, 'click', function(e) {
+      e.shape = shape;
+      NPMap.Event.trigger('NPMap.Map', 'shapeclick', e);
+    });
+  }
+
   if (NPMap.config.center && NPMap.config.zoom) {
     use = 'centerAndZoom';
   }
@@ -71,7 +89,7 @@
   
   if (activeBaseLayer) {
     if (activeBaseLayer.code === 'roadmap' || activeBaseLayer.code === 'satellite' || activeBaseLayer.code === 'terrain') {
-      mapTypeId = google.maps.MapTypeId[activeBaseLayer.code.toUpperCase()]; 
+      mapTypeId = google.maps.MapTypeId[activeBaseLayer.code.toUpperCase()];
     } else {
       mapTypeId = activeBaseLayer.code;
     }
@@ -102,7 +120,7 @@
       } else {
         return true;
       }
-    })(), 
+    })(),
     mapTypeControl: false,
     mapTypeId: mapTypeId,
     noClear: true,
@@ -438,14 +456,47 @@
     /**
      *
      */
+    convertLineOptions: function(options) {
+
+    },
+    /**
+     * Valid Google Maps options: animation, clickable, cursor, draggable, flat, icon, map, optimized, position, raiseOnDrag, shadow, shape, title, visible, zIndex
+     */
     convertMarkerOptions: function(options) {
-      // Valid Google Maps options: animation, clickable, cursor, draggable, flat, icon, map, optimized, position, raiseOnDrag, shadow, shape, title, visible, zIndex
       var o = {};
 
       if (options.icon) {
         o.icon = options.icon;
       }
 
+      return o;
+    },
+    /**
+     * Valid Google Maps options: clickable, editable, fillColor, fillOpacity, geodesic, map, paths, strokeColor, strokeOpacity, strokeWeight, visible, zIndex
+     */
+    convertPolygonOptions: function(options) {
+      var o = {};
+
+      if (options.fillColor) {
+        o.fillColor = options.fillColor;
+      }
+
+      if (options.fillOpacity) {
+        o.fillOpacity = convertOpacity(options.fillOpacity);
+      }
+
+      if (options.strokeColor) {
+        o.strokeColor = options.strokeColor;
+      }
+
+      if (options.strokeOpacity) {
+        o.strokeOpacity = convertOpacity(options.strokeOpacity);
+      }
+      
+      if (options.strokeWidth) {
+        o.strokeWeight = options.strokeWidth;
+      }
+      
       return o;
     },
     /**
@@ -458,32 +509,47 @@
      * Creates a google.maps.Marker object.
      * @param latLng {google.maps.LatLng} (Required) Where to place the marker.
      * @param options {google.maps.MarkerOptions} (Optional) Any additional options to apply to the marker.
-     * @param data {Object} (Optional) An object with key/value pairs of information that need to be stored with the marker. This object will be added to the marker.data property.
-     * @param {Function} clickHandler (Optional) A function to call when the marker is clicked.
      * @return {Microsoft.Maps.Pushpin}
      */
-    createMarker: function(latLng, options, data, clickHandler) {
-      options = options || {};
-      
-      options.position = latLng;
+    createMarker: function(latLng, options) {
+      var marker;
 
-      return new google.maps.Marker(options);
+      options = options || {};
+      options.position = latLng;
+      marker = new google.maps.Marker(options);
+
+      hookUpShapeClickHandler(marker);
+
+      return marker;
     },
     /**
      * Creates a google.maps.Polygon object.
      * @param latLngs {Array} (Required) An array of google.maps.LatLng objects.
      * @param options {google.maps.PolygonOptions} (Optional) Any additional options to apply to the polygon.
-     * @param data {Object} (Optional) An object with key/value pairs of information that need to be stored with the polygon. This object will be added to the polygon.data property.
-     * @param {Function} clickHandler (Optional) A function to call when the marker is clicked.
      * @return {google.maps.Polygon}
      */
-    createPolygon: function(latLngs, options, data, clickHandler) {
-      // TODO: Hookup clickHandler config.
+    createPolygon: function(latLngs, options) {
+      var polygon;
+
       options = options || {};
-
       options.paths = latLngs;
+      polygon = new google.maps.Polygon(options);
 
-      return new google.maps.Polygon(options);
+      hookUpShapeClickHandler(polygon);
+
+      return polygon;
+    },
+    /**
+     *
+     */
+    eventGetShape: function(e) {
+      return e.shape;
+    },
+    /**
+     *
+     */
+    eventGetLatLng: function(e) {
+      return e.latLng;
     },
     /**
      * Gets the center {google.maps.LatLng} of the map.
@@ -535,7 +601,7 @@
      * @return {Object}
      */
     getMarkerLatLng: function(marker) {
-      
+      return marker.getPosition();
     },
     /**
      * Gets the maximum zoom level for this map.
@@ -594,7 +660,10 @@
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
     latLngFromApi: function(latLng) {
-      return latLng.lat() + ',' + latLng.lng();
+      return {
+        x: latLng.lng(),
+        y: latLng.lat()
+      };
     },
     /**
      * Iterates through the default base layers and returns a match if it exists.
@@ -638,9 +707,21 @@
               to = to.split(',');
               latLng = new google.maps.LatLng(parseFloat(to[0]), parseFloat(to[1]));
             } else {
-              if (to.lat()) {
+              if (typeof to.lat === 'function') {
                 latLng = to;
               } else {
+
+
+
+
+
+
+
+
+
+
+
+
                 latLng = to.getPosition();
               }
             }
@@ -673,14 +754,24 @@
       
     },
     /**
-     * Converts a lat/lng string ("latitude/longitude") to a {google.maps.LatLng} object.
-     * @param {String} latLng The lat/lng string.
+     * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to a {google.maps.LatLng} object.
+     * @param {String/Object} latLng
      * @return {Object}
      */
     latLngToApi: function(latLng) {
-      var split = latLng.split(',');
+      var lat,
+          lng;
+
+      if (typeof latLng === 'string') {
+        latLng = latLng.split(',');
+        lat = latLng[0];
+        lng = latLng[1];
+      } else {
+        lat = latLng.y;
+        lng = latLng.x;
+      }
       
-      return new google.maps.LatLng(parseFloat(split[0]), parseFloat(split[1]));
+      return new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
     },
     /**
      * Switches the base map.

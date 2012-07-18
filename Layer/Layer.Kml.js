@@ -1,4 +1,6 @@
-﻿define([
+﻿// TODO: Add support for "extent" to layer.
+// TODO: Add support for all types: http://www.nps.gov/npmap/support/examples/data/kml-samples.kml
+define([
   'Layer/Layer',
   'Util/Util.Xml',
   'Util/Util.Xml.Kml'
@@ -50,7 +52,7 @@
      * @param {Object} config
      */
     create: function(config) {
-      Layer.hasRequiredProperties(config);
+      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       var layerName = config.name,
           layerType = config.type;
@@ -62,17 +64,23 @@
 
         for (var i = 0; i < features.length; i++) {
           var feature = features[i],
-              shape;
-        
-          switch (feature.shapeType) {
+              shape,
+              shapeType = feature.shapeType,
+              style = null;
+
+          if (typeof config.style !== 'undefined' && config.style[shapeType.toLowerCase()] !== 'undefined') {
+            style = config.style[shapeType.toLowerCase()];
+          }
+
+          switch (shapeType) {
             case 'Line':
-              //shape = NPMap.Map.createLine();
+              //shape = NPMap.Map.createLine(feature.ll, style);
               break;
             case 'Marker':
-              shape = NPMap.Map.createMarker(feature.ll.y + ',' + feature.ll.x);
+              shape = NPMap.Map._createMarker(feature.ll.y + ',' + feature.ll.x, style);
               break;
             case 'Polygon':
-              shape = NPMap.Map.createPolygon(feature.ll);
+              shape = NPMap.Map._createPolygon(feature.ll, style);
               break;
           }
 
@@ -86,6 +94,8 @@
           config.shapes.push(shape);
           NPMap.Map.addShape(shape);
         }
+
+        NPMap.Event.trigger('NPMap.Layer', 'added', config);
       });
     },
     /**
@@ -96,17 +106,11 @@
 
     },
     /**
-     * Reloads the layer. Can be used after an edit operation or after a subLayer has been toggled on or off.
-     * @param {Object} config
-     */
-    reload: function(config) {
-      
-    },
-    /**
      *
      */
     remove: function(config) {
-      
+      NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
+      NPMap.Event.trigger('NPMap.Layer', 'removed', config);
     },
     /**
      * Shows the layer.

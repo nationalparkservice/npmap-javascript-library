@@ -1,3 +1,10 @@
+/**
+ * @class NPMap.Layer
+ * @event 'added'
+ * @event 'beforeadd'
+ * @event 'beforeremove'
+ * @event 'removed'
+ */
 define([
   'Event',
   'Map/Map'
@@ -52,11 +59,60 @@ define([
   Event.add('NPMap.Layer', 'added', function(config) {
     usedNames.push(config.name);
   });
-  /*
   Event.add('NPMap.Layer', 'beforeadd', function(config) {
-    // Validate required parameters.
+    if (!config.name) {
+      throw new Error('All layers must have a "name".');
+    }
+
+    if (_.indexOf(usedNames, config.name) === -1) {
+      usedNames.push(config.name);
+    } else {
+      throw new Error('All layer names must be unique. "' + config.name + '" is used more than once.');
+    }
+
+    if (!config.type) {
+      throw new Error('All layers must have a "type".');
+    }
+
+    var meta = LAYER_HANDLERS[config.type];
+
+    if (meta.type === 'vector') {
+      var lineStyle = {};
+          markerStyle = {
+            height: 13,
+            icon: NPMap.config.server + '/resources/img/markers/brown-circle-13x13.png',
+            width: 13
+          },
+          polygonStyle = {
+            fillColor: '5e7630',
+            fillOpacity: 174,
+            strokeColor: '5e7630',
+            strokeOpacity: 200,
+            strokeWidth: 1
+          },
+          style = config.style;
+
+      if (style) {
+        if (style.line) {
+
+        }
+
+        if (style.marker && style.marker.url) {
+          markerStyle = style.marker;
+        }
+
+        if (style.polygon) {
+          polygonStyle = config.style.polygon;
+        }
+      } else {
+        config.style = {};
+      }
+
+      config.style.line = NPMap.Map[NPMap.config.api].convertLineOptions(lineStyle);
+      config.style.marker = NPMap.Map[NPMap.config.api].convertMarkerOptions(markerStyle);
+      config.style.polygon = NPMap.Map[NPMap.config.api].convertPolygonOptions(polygonStyle);
+    }
   });
-  */
   Event.add('NPMap.Layer', 'removed', function(config) {
     usedNames.splice(_.indexOf(usedNames, config.name), 1);
   });
@@ -80,7 +136,7 @@ define([
       }
     }
   });
-
+  
   return NPMap.Layer = {
     // Events that have been added to this class.
     _events: [],
@@ -97,25 +153,6 @@ define([
      */
     getType: function(config) {
       return config.type;
-    },
-    /**
-     * Checks a layer config object to make sure it has the required properties and they are valid.
-     * @param {Object} config
-     */
-    hasRequiredProperties: function(config) {
-      if (!config.name) {
-        throw new Error('All layers must have a "name".');
-      }
-
-      if (_.indexOf(usedNames, config.name) === -1) {
-        usedNames.push(config.name);
-      } else {
-        throw new Error('All layer names must be unique. "' + config.name + '" is used more than once.');
-      }
-
-      if (!config.type) {
-        throw new Error('All layers must have a "type".');
-      }
     }
   };
 });

@@ -131,6 +131,45 @@
     // An array of event handler objects that have been added to this class.
     _events: [],
     /**
+     * Creates a line using the baseApi's line class, if it exists.
+     * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
+     * @param {Object} options (Optional) Line options.
+     */
+    _createLine: function(latLngs, options) {
+      var apiLatLngs = [],
+          me = this;
+      
+      $.each(latLngs, function(i, v) {
+        apiLatLngs.push(me.latLngToApi(v));
+      });
+      
+      return NPMap.Map[NPMap.config.api].createLine(apiLatLngs, options);
+    },
+    /**
+     * Creates a marker using the baseApi's marker class, if it exists.
+     * @param {String} latLng The latitude/longitude string, in "latitude,longitude" format, to use to create the marker.
+     * @param {Object} options (Optional) Marker options.
+     */
+    _createMarker: function(latLng, options) {
+      return NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), options);
+    },
+    /**
+     * Creates a polygon using the baseApi's marker class, if it exists.
+     * @param {Array} latLngs An array of latitude/longitude strings, in "latitude,longitude" format, to use to create the polygon.
+     * @param {Object} options (Optional) Polygon options.
+     * @return {Object}
+     */
+    _createPolygon: function(latLngs, options) {
+      var apiLatLngs = [],
+          me = this;
+
+      for (var i = 0; i < latLngs.length; i++) {
+        apiLatLngs.push(me.latLngToApi(latLngs[i]));
+      }
+      
+      return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
+    },
+    /**
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
      */
     _init: function() {
@@ -600,7 +639,7 @@
           }
           
           $.each(NPMap.config.baseLayers, function(i, baseLayer) {
-            var icon = NPMap.config.server + '/resources/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
+            var icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
                 label = baseLayer.code,
                 match = NPMap.Map[NPMap.config.api].matchBaseLayer(baseLayer),
                 type = baseLayer.type;
@@ -622,7 +661,7 @@
                     label = 'Aerial View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/tools/switcher/aerial-large.png';
+                  icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png';
                   
                   break;
                 case 'NPS':
@@ -630,7 +669,7 @@
                     label = 'NPS View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/tools/switcher/nps-large.png';
+                  icon = NPMap.config.server + '/resources/img/tools/switcher/nps-large.png';
                   
                   break;
                 case 'Street':
@@ -638,7 +677,7 @@
                     label = 'Street View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/tools/switcher/street-large.png';
+                  icon = NPMap.config.server + '/resources/img/tools/switcher/street-large.png';
                   
                   break;
                 case 'Topo':
@@ -646,7 +685,7 @@
                     label = 'Topo View';
                   }
                   
-                  icon = NPMap.config.server + '/resources/tools/switcher/topo-large.png';
+                  icon = NPMap.config.server + '/resources/img/tools/switcher/topo-large.png';
                   
                   break;
               }
@@ -844,11 +883,9 @@
     /**
      * Creates a line using the baseApi's line class, if it exists.
      * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
-     * @param {Object} options (Optional) baseApi-specific line options.
-     * @param {Object} data (Optional)
-     * @param {Function} clickHandler (Optional)
+     * @param {Object} options (Optional) Line options.
      */
-    createLine: function(latLngs, options, data, clickHandler) {
+    createLine: function(latLngs, options) {
       var apiLatLngs = [],
           me = this;
       
@@ -856,51 +893,25 @@
         apiLatLngs.push(me.latLngToApi(v));
       });
       
-      return NPMap.Map[NPMap.config.api].createLine(apiLatLngs, options, data, clickHandler);
+      return NPMap.Map[NPMap.config.api].createLine(apiLatLngs, NPMap.Map[NPMap.config.api].convertLineOptions(options));
     },
     /**
      * Creates a marker using the baseApi's marker class, if it exists.
      * @param {String} latLng The latitude/longitude string, in "latitude,longitude" format, to use to create the marker.
-     * @param {Object} options (Optional) baseApi-specific marker options.
-     * @param {Object} data (Optional)
-     * @param {Function} clickHandler (Optional)
+     * @param {Object} options (Optional) Marker options.
      */
-    createMarker: function(latLng, options, data, clickHandler) {
-      options = (function() {
-        // Current valid NPMap options: height (Bing), icon (Bing/Google), and width (Bing).
-        var o;
+    createMarker: function(latLng, options) {
+      //return this._createMarker(latLng, )
 
-        if (options) {
-          if (!options.icon) {
-            options.height = 13;
-            options.icon = NPMap.config.server + '/resources/markers/nps_round_13.png';
-            options.width = 13;
-          }
-
-          o = NPMap.Map[NPMap.config.api].convertMarkerOptions(options);
-        } else {
-          o = NPMap.Map[NPMap.config.api].convertMarkerOptions({
-            height: 13,
-            icon: NPMap.config.server + '/resources/markers/nps_round_13.png',
-            width: 13
-          });
-        }
-
-        return o;
-      })();
-
-      return NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), options, data, clickHandler);
+      return NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), NPMap.Map[NPMap.config.api].convertMarkerOptions(options));
     },
     /**
      * Creates a polygon using the baseApi's marker class, if it exists.
      * @param {Array} latLngs An array of latitude/longitude strings, in "latitude,longitude" format, to use to create the polygon.
-     * @param {Object} options (Optional) baseApi-specific polygon options.
-     * @param {Object} data (Optional)
-     * @param {Function} clickHandler (Optional)
+     * @param {Object} options (Optional) Polygon options.
      * @return {Object}
      */
-    createPolygon: function(latLngs, options, data, clickHandler) {
-      // TODO: Add support for data and clickHandler configs.
+    createPolygon: function(latLngs, options) {
       var apiLatLngs = [],
           me = this;
 
@@ -908,7 +919,7 @@
         apiLatLngs.push(me.latLngToApi(latLngs[i]));
       }
       
-      return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
+      return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, NPMap.Map[NPMap.config.api].convertPolygonOptions(options));
     },
     /**
      * Gets the active layer types for both baseLayers and layers.

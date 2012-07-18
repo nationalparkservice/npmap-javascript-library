@@ -179,7 +179,7 @@ define(function() {
       if (design === 'basic') {
         bottom = bottom + 30;
         right = right - 69;
-      } else if (design === 'pyv') {
+      } else if (design === 'nps' || design === 'pyv') {
         bottom = bottom + 24;
         right = right - ($('#npmap-infobox').outerWidth() / 2) - 8;
       }
@@ -194,7 +194,7 @@ define(function() {
           bottom: ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px',
           right: (windowWidth - $('#npmap-clickdot').position().left - offsetLeft - 69) + 'px'
         });
-      } else if (design === 'pyv') {
+      } else if (design === 'nps' || design === 'pyv') {
         // TODO: You need to test this. You'll have to adjust it.
         $('#npmap-infobox').css({
           bottom: ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px',
@@ -390,14 +390,14 @@ define(function() {
   };
   
   if (design === 'basic') {
-    NPMap.Util.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox.css');
+    NPMap.Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/basic.css');
     
-    infobox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/classes/infobox/img/hook' + (Modernizr.boxshadow ? '_shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
-  } else if (design === 'pyv') {
-    NPMap.Util.injectCss(NPMap.config.server + '/resources/classes/infobox/css/infobox-pyv.css');
+    infobox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook' + (Modernizr.boxshadow ? '-shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
+  } else if (design === 'nps' || design === 'pyv') {
+    NPMap.Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/nps.css');
     
     // TODO: Add support for non-shadowed "hook".
-    infobox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/classes/infobox/img/hook_pyv.png" /></div>';
+    infobox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook-nps.png" /></div>';
   }
   
   infobox.className = 'shadow';

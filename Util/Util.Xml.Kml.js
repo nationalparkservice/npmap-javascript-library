@@ -1,3 +1,4 @@
+// TODO: Implement "Line" and "MultiGeometry".
 define([
   'Util/Util.Xml'
 ], function(Util) {
@@ -26,21 +27,20 @@ define([
             shape = {
               data: buildData(placemark)
             };
-            
+
         if (placemark.hasOwnProperty('linestring')) {
-
+          shape.shapeType = 'Line';
         } else if (placemark.hasOwnProperty('multigeometry')) {
-
+          // TODO: Not yet implemented.
         } else if (placemark.hasOwnProperty('point')) {
           coordinates = placemark.point.coordinates.keyValue.split(',');
-
           shape.ll = {
             x: parseFloat(coordinates[0]),
             y: parseFloat(coordinates[1])
           };
           shape.shapeType = 'Marker';
         } else if (placemark.hasOwnProperty('polygon')) {
-          // TODO: Figure out what the best way to parse KML coordinate strings.
+          // TODO: Figure out what the best way to parse KML coordinate strings. http://code.google.com/p/geoxml-v3/
           coordinates = placemark.polygon.outerboundaryis.linearring.coordinates.keyValue.split('\n');
           shape.ll = [];
           shape.shapeType = 'Polygon';
@@ -55,7 +55,9 @@ define([
           }
         }
 
-        features.push(shape);
+        if (shape.ll) {
+          features.push(shape);
+        }
       }
 
       return features;

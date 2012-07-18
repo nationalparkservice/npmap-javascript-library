@@ -1,4 +1,5 @@
-﻿define([
+﻿// TODO: Add support for "extent" to layer.
+define([
   'Layer/Layer',
   'Util/Util.Json',
   'Util/Util.Json.GeoJson'
@@ -51,9 +52,10 @@
      * @param {Object} config
      */
     create: function(config) {
-      // TODO: Need to add support for style object {icon:'',line:{},polygon:{}} and extent. You can offload some of this up to NPMap.Layer.
+      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+
       var layerName = config.name,
-          layerType = config.type;
+          layerType = config.type,
           maxZoom = config.maxZoom || 22,
           minZoom = config.minZoom || 0;
 
@@ -64,17 +66,23 @@
 
         for (var i = 0; i < features.length; i++) {
           var feature = features[i],
-              shape;
+              shape,
+              shapeType = feature.shapeType,
+              style = null;
 
-          switch (feature.shapeType) {
+          if (typeof config.style !== 'undefined' && config.style[shapeType.toLowerCase()] !== 'undefined') {
+            style = config.style[shapeType.toLowerCase()];
+          }
+
+          switch (shapeType) {
             case 'Line':
-              //shape = NPMap.Map.createLine();
+              //shape = NPMap.Map._createLine();
               break;
             case 'Marker':
-              shape = NPMap.Map.createMarker(feature.ll.y + ',' + feature.ll.x);
+              shape = NPMap.Map._createMarker(feature.ll.y + ',' + feature.ll.x);
               break;
             case 'Polygon':
-              //shape = NPMap.Map.createPolygon();
+              //shape = NPMap.Map._createPolygon();
               break;
           }
 
@@ -91,7 +99,30 @@
             NPMap.Map.addShape(shape);
           }
         }
+
+        NPMap.Event.trigger('NPMap.Layer', 'added', config);
       });
+    },
+    /**
+     * Hides the layer.
+     * @param {Object} config
+     */
+    hide: function(config) {
+
+    },
+    /**
+     *
+     */
+    remove: function(config) {
+      NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
+      NPMap.Event.trigger('NPMap.Layer', 'removed', config);
+    },
+    /**
+     * Shows the layer.
+     * @param {Object} config
+     */
+    show: function(config) {
+      
     }
   };
 });

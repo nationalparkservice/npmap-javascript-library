@@ -128,7 +128,7 @@ if (typeof bean === 'undefined') {
         'Event',
         'Util/Util'
       ], function() {
-        NPMap.Util.injectCss(NPMap.config.server + '/resources/css/npmap.css');
+        NPMap.Util.injectCss(NPMap.config.server + '/resources/css/base.css');
         loadMapping();
       });
     });
