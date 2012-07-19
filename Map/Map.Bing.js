@@ -455,8 +455,8 @@
         o.height = options.height;
       }
 
-      if (options.icon) {
-        o.icon = options.icon;
+      if (options.url) {
+        o.icon = options.url;
       }
 
       if (options.width) {
@@ -757,7 +757,10 @@
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
     latLngFromApi: function(latLng) {
-      return latLng.latitude + ',' + latLng.longitude;
+      return {
+        lat: latLng.latitude,
+        lng: latLng.longitude
+      };
     },
     /**
      * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to a {Microsoft.Maps.Location} object.
@@ -773,8 +776,8 @@
         lat = latLng[0];
         lng = latLng[1];
       } else {
-        lat = latLng.y;
-        lng = latLng.x;
+        lat = latLng.lat;
+        lng = latLng.lng;
       }
 
       return new Microsoft.Maps.Location(parseFloat(lat), parseFloat(lng));
@@ -818,7 +821,9 @@
               to = to.split(',');
               latLng = new Microsoft.Maps.Location(parseFloat(to[0]), parseFloat(to[1]));
             } else {
-              if (to.latitude) {
+              if (to.lat) {
+                latLng = new Microsoft.Maps.Location(to.lat, to.lng);
+              } else if (to.latitude) {
                 latLng = to;
               } else {
                 anchorY = me.getMarkerAnchor(to).y;
@@ -829,10 +834,10 @@
             return latLng;
           })(), Microsoft.Maps.PixelReference.page);
       
-      $('#npmap-clickdot').hide().css({
+      $('#npmap-clickdot').css({
         left: pixel.x - offset.left,
         top: pixel.y - offset.top - anchorY
-      }).show();
+      });
     },
     // TODO: Not implemented yet, as this is handled by Layer.ArcGisServerRest. Will be needed when you handle another layer type.
     reloadTileLayer: function(config) {

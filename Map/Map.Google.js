@@ -465,8 +465,20 @@
     convertMarkerOptions: function(options) {
       var o = {};
 
-      if (options.icon) {
-        o.icon = options.icon;
+      if (options.url) {
+        var anchor = options.anchor,
+            height = options.height,
+            width = options.width;
+
+        if (!anchor) {
+          anchor = {
+            x: width / 2,
+            y: 0
+          };
+        }
+
+        // TODO: If you don't have the height/width here, you need to load image and calculate height/width before moving on.
+        o.icon = new google.maps.MarkerImage(options.url, new google.maps.Size(width, height), null, new google.maps.Point(anchor.x, anchor.y));
       }
 
       return o;
@@ -500,16 +512,22 @@
       return o;
     },
     /**
-     * Creates a Microsoft.Maps.Polyline object.
+     * Creates a google.maps.Polyline object.
+     * @param {Array} latLngs An array of google.maps.LatLng objects.
+     * @param {Object} options (Optional) Any additional options to apply to the polygon.
+     * @return {google.maps.Polygon}
      */
-    createLine: function() {
-    
+    createLine: function(latLngs, options) {
+      var line;
+
+      options = options || {};
+      options.path = latLngs;
     },
     /**
      * Creates a google.maps.Marker object.
-     * @param latLng {google.maps.LatLng} (Required) Where to place the marker.
-     * @param options {google.maps.MarkerOptions} (Optional) Any additional options to apply to the marker.
-     * @return {Microsoft.Maps.Pushpin}
+     * @param {Object} latLng Where to place the marker.
+     * @param {Object} options (Optional) Any additional options to apply to the marker.
+     * @return {google.maps.Marker}
      */
     createMarker: function(latLng, options) {
       var marker;
@@ -524,8 +542,8 @@
     },
     /**
      * Creates a google.maps.Polygon object.
-     * @param latLngs {Array} (Required) An array of google.maps.LatLng objects.
-     * @param options {google.maps.PolygonOptions} (Optional) Any additional options to apply to the polygon.
+     * @param {Array} latLngs An array of google.maps.LatLng objects.
+     * @param {Object} options Any additional options to apply to the polygon.
      * @return {google.maps.Polygon}
      */
     createPolygon: function(latLngs, options) {
@@ -540,13 +558,15 @@
       return polygon;
     },
     /**
-     *
+     * Gets a shape from an event object.
+     * @param {Object} e
      */
     eventGetShape: function(e) {
       return e.shape;
     },
     /**
-     *
+     * Gets a latLng from an event object.
+     * @param {Object} e
      */
     eventGetLatLng: function(e) {
       return e.latLng;
@@ -647,23 +667,43 @@
     },
     /**
      * Tests the equivalency of two {google.maps.LatLng} objects.
-     * @param latLng1 {google.maps.LatLng} (Required) The first Location object.
-     * @param latLng2 {google.maps.LatLng) (Required) The second Location object.
+     * @param latLng1 {google.maps.LatLng} The first Location object.
+     * @param latLng2 {google.maps.LatLng) The second Location object.
      * @returns {Boolean}
      */
     latLngsAreEqual: function(latLng1, latLng2) {
       
     },
     /**
-     * Converts a {google.maps.LatLng} object to the NPMap representation of a latitude/longitude string.
-     * @param latLng {google.maps.LatLng} The object to convert to a string.
-     * @return {String} A latitude/longitude string in "latitude,longitude" format.
+     * Converts an API latLng object to an NPMap latLng object.
+     * @param latLng {google.maps.LatLng} The object to convert.
+     * @return {Object}
      */
     latLngFromApi: function(latLng) {
       return {
-        x: latLng.lng(),
-        y: latLng.lat()
+        lat: latLng.lat(),
+        lng: latLng.lng()
       };
+    },
+    /**
+     * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to an API latLng object.
+     * @param {String/Object} latLng
+     * @return {Object}
+     */
+    latLngToApi: function(latLng) {
+      var lat,
+          lng;
+
+      if (typeof latLng === 'string') {
+        latLng = latLng.split(',');
+        lat = latLng[0];
+        lng = latLng[1];
+      } else {
+        lat = latLng.lat;
+        lng = latLng.lng;
+      }
+      
+      return new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
     },
     /**
      * Iterates through the default base layers and returns a match if it exists.
@@ -707,21 +747,11 @@
               to = to.split(',');
               latLng = new google.maps.LatLng(parseFloat(to[0]), parseFloat(to[1]));
             } else {
-              if (typeof to.lat === 'function') {
+              if (typeof to.lat === 'number') {
+                latLng = new google.maps.LatLng(to.lat, to.lng);
+              } else if (typeof to.lat === 'function') {
                 latLng = to;
               } else {
-
-
-
-
-
-
-
-
-
-
-
-
                 latLng = to.getPosition();
               }
             }
@@ -729,10 +759,10 @@
             return latLng;
           })());
 
-      $('#npmap-clickdot').hide().css({
+      $('#npmap-clickdot').css({
         left: pixel.x,
         top: pixel.y
-      }).show();
+      });
     },
     /**
      * A google.maps.MapCanvasProjection object.
@@ -752,26 +782,6 @@
      */
     setMarkerIcon: function(marker, url) {
       
-    },
-    /**
-     * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to a {google.maps.LatLng} object.
-     * @param {String/Object} latLng
-     * @return {Object}
-     */
-    latLngToApi: function(latLng) {
-      var lat,
-          lng;
-
-      if (typeof latLng === 'string') {
-        latLng = latLng.split(',');
-        lat = latLng[0];
-        lng = latLng[1];
-      } else {
-        lat = latLng.y;
-        lng = latLng.x;
-      }
-      
-      return new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
     },
     /**
      * Switches the base map.

@@ -61,13 +61,19 @@
     }
     
     if (!baseLayer) {
-      baseLayer = new esri.layers.ArcGISTiledMapServiceLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer');
-
-      map.addLayer(baseLayer);
+      map.addLayer(new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer"));
     }
     
+    dojo.connect(map, 'onClick', function(e) {
+      NPMap.Event.trigger('NPMap.Map', 'click', e);
+    });
     dojo.connect(map, 'onLoad', function() {
       dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
+    });
+    dojo.connect(map, 'onPan', function(extent, delta) {
+      if (NPMap.InfoBox.visible) {
+        NPMap.InfoBox.reposition();
+      }
     });
 
     var interval = setInterval(function() {
@@ -80,6 +86,130 @@
         Map._init();
       }
     }, 10);
+  });
+  dojo.ready(function() {
+    dojo.declare('esri.layers.WebTileLayer', [esri.layers.TiledMapServiceLayer], {
+      constructor: function(urlTemplate, options) {
+        var extent = new esri.geometry.Extent({
+          xmin: -22041259,
+          ymin: -33265069,
+          xmax: 22041259,
+          ymax: 33265069,
+          spatialReference: {
+            wkid: 102100
+          }
+        });
+
+        options = options || {};
+        
+        this.initialExtent = this.fullExtent = extent;
+        this.spatialReference = new esri.SpatialReference({
+          wkid: 102100
+        });
+        this.tileInfo = new esri.layers.TileInfo({
+          rows: 256,
+          cols: 256,
+          origin: {
+            x: -20037508.342787,
+            y: 20037508.342787
+          },
+          spatialReference: {
+            wkid: 102100
+          },
+          lods: [{
+            level: 0,
+            resolution: 156543.033928,
+            scale: 591657527.591555
+          },{
+            level: 1,
+            resolution: 78271.5169639999,
+            scale: 295828763.795777
+          },{
+            level: 2,
+            resolution: 39135.7584820001,
+            scale: 147914381.897889
+          },{
+            level: 3,
+            resolution: 19567.8792409999,
+            scale: 73957190.948944
+          },{
+            level: 4,
+            resolution: 9783.93962049996,
+            scale: 36978595.474472
+          },{
+            level: 5,
+            resolution: 4891.96981024998,
+            scale: 18489297.737236
+          },{
+            level: 6,
+            resolution: 2445.98490512499,
+            scale: 9244648.868618
+          },{
+            level: 7,
+            resolution: 1222.99245256249,
+            scale: 4622324.434309
+          },{
+            level: 8,
+            resolution: 611.49622628138,
+            scale: 2311162.217155
+          },{
+            level: 9,
+            resolution: 305.748113140558,
+            scale: 1155581.108577
+          },{
+            level: 10,
+            resolution: 152.874056570411,
+            scale: 577790.554289
+          },{
+            level: 11,
+            resolution: 76.4370282850732,
+            scale: 288895.277144
+          },{
+            level: 12,
+            resolution: 38.2185141425366,
+            scale: 144447.638572
+          },{
+            level: 13,
+            resolution: 19.1092570712683,
+            scale: 72223.819286
+          },{
+            level: 14,
+            resolution: 9.55462853563415,
+            scale: 36111.909643
+          },{
+            level: 15,
+            resolution: 4.77731426794937,
+            scale: 18055.954822
+          },{
+            level: 16,
+            resolution: 2.38865713397468,
+            scale: 9027.977411
+          },{
+            level: 17,
+            resolution: 1.19432856685505,
+            scale: 4513.988705
+          },{
+            level: 18,
+            resolution: 0.597164283559817,
+            scale: 2256.994353
+          },{
+            level: 19,
+            resolution: 0.298582141647617,
+            scale: 1128.497176
+          }]
+        });
+
+        this.copyright = options.attribution || '';
+        this.loaded = true;
+        this.tileServers = options.tileServers || [];
+        this.urlTemplate = urlTemplate;
+
+        this.onLoad(this);
+      },
+      getTileUrl: function(level, row, col) {
+        return this.urlTemplate(level, row, col);
+      }
+    });
   });
 
   return NPMap.Map.Esri = {
@@ -114,6 +244,36 @@
      */
     addShape: function(shape) {
       
+    },
+    /**
+     * Adds a tile layer to the map.
+     * @param {Object} layer
+     */
+    addTileLayer: function(layer) {
+      map.addLayer(layer);
+    },
+    /**
+     * Converts an API bounds to a NPMap bounds.
+     * @param {Object} bounds
+     * @return {Object}
+     */
+    boundsFromApi: function(bounds) {
+      return {
+        e: bounds.xmax,
+        n: bounds.ymax,
+        s: bounds.ymin,
+        w: bounds.xmin
+      };
+    },
+    /**
+     * Converts a NPMap bounds to an API bounds.
+     * @param {Object}
+     * @return {Object}
+     */
+    boundsToApi: function(bounds) {
+      return new esri.geometryExtent(bounds.w, bounds.s, bounds.e, bounds.n, new esri.SpatialReference({
+        wkid: 102100
+      }));
     },
     /**
      * Centers the map.
@@ -181,6 +341,49 @@
      */
     createPolygon: function(latLngs, options, data) {
 
+    },
+    /**
+     * Creates a tile layer.
+     * @param {Object} config
+     * @param {String/Function} constructor
+     */
+    createTileLayer: function(config, constructor) {
+      var uriConstructor;
+
+      if (typeof constructor === 'string') {
+        uriConstructor = function(level, row, column) {
+          return constructor.replace('{x}', column).replace('{y}', row).replace('{z}', level);
+        };
+      } else {
+        uriConstructor = function(level, row, column) {
+          return constructor(column, row, level, config.url);
+        };
+      }
+
+      return new esri.layers.WebTileLayer(uriConstructor);
+    },
+    /**
+     * Gets a latLng from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetLatLng: function(e) {
+      return e.mapPoint;
+    },
+    /**
+     * Gets a shape from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetShape: function(e) {
+      
+    },
+    /**
+     * Gets the current bounds of the map.
+     * @return {Object}
+     */
+    getBounds: function() {
+      return map.extent;
     },
     /**
      * Gets the center of the map.
@@ -329,7 +532,32 @@
         latLng = esri.geometry.webMercatorToGeographic(latLng);
       }
 
-      return latLng.y + ',' + latLng.x;
+      return {
+        lat: latLng.y,
+        lng: latLng.x
+      };
+    },
+    /**
+     * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to a {esri.geometry.Point} object.
+     * @param {String/Object} latLng
+     * @return {Object}
+     */
+    latLngToApi: function(latLng) {
+      var lat,
+          lng;
+
+      if (typeof latLng === 'string') {
+        latLng = latLng.split(',');
+        lat = latLng[0];
+        lng = latLng[1];
+      } else {
+        lat = latLng.lat;
+        lng = latLng.lng;
+      }
+      
+      return esri.geometry.geographicToWebMercator(new esri.geometry.Point(lng, lat, new esri.SpatialReference({
+        wkid: 4326
+      })));
     },
     /**
      * Iterates through the default base layers and returns a match if it exists.
@@ -344,12 +572,12 @@
      * @param {Object} pixels
      */
     panByPixels: function(pixels) {
-      var el = this.getContainerDiv(),
-          height = el.offsetHeight,
-          width = el.offsetWidth,
-          center = esri.geometry.toScreenGeometry(map.extent, width, height, this.getCenter(102100));
+      var extent = map.extent,
+          height = map.height,
+          width = map.width,
+          center = esri.geometry.toScreenGeometry(extent, width, height, this.getCenter(102100));
           
-      map.centerAt(esri.geometry.toMapGeometry(map.extent, width, height, new esri.geometry.Point(center.x - pixels.x, center.y - pixels.y)));
+      map.centerAt(esri.geometry.toMapGeometry(extent, width, height, new esri.geometry.Point(center.x - pixels.x, center.y - pixels.y)));
     },
     panEast: function() {
       map.panRight();
@@ -368,56 +596,11 @@
      * @param {esri.geometry.Point} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
      */
     positionClickDot: function(to) {
-      /*
-      
-      var anchorY = 0,
-          me = this,
-          offset = NPMap.Util.getMapDivOffset(),
-          pixel = NPMap.bing.map.Map.tryLocationToPixel((function() {
-            var latLng = null;
-            
-            if (typeof(to) === 'string') {
-              to = to.split(',');
-              latLng = new Microsoft.Maps.Location(parseFloat(to[0]), parseFloat(to[1]));
-            } else {
-              if (to.latitude) {
-                latLng = to;
-              } else {
-                anchorY = me.getMarkerAnchor(to).y;
-                latLng = to.getLocation();
-              }
-            }
+      var divClickDot = document.getElementById('npmap-clickdot'),
+          point = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, to);
 
-            return latLng;
-          })(), Microsoft.Maps.PixelReference.page);
-      
-      $('#npmap-clickdot').hide().css({
-        left: pixel.x - offset.left,
-        top: pixel.y - offset.top - anchorY
-      }).show();
-      
-      */
-      
-      var el = this.getContainerDiv(),
-          height = el.offsetHeight,
-          width = el.offsetWidth,
-          point = esri.geometry.toScreenGeometry(map.extent, width, height, to);
-          
-      console.log(el);
-      console.log(height);
-      console.log(map.extent);
-      console.log(width);
-      
-      console.log(point);
-      
-      $('#npmap-clickdot').css({
-        height: '5px',
-        width: '5px',
-        backgroundColor: 'red',
-        
-        left: point.x + 'px',
-        top: point.y + 'px'
-      }).show();
+      divClickDot.style.left = point.x + 'px';
+      divClickDot.style.top = point.y + 'px';
     },
     /**
      * Removes a shape from the map.
@@ -440,16 +623,6 @@
      */
     showShape: function(shape) {
       
-    },
-    /**
-     * Converts a lat/lng string ("latitude/longitude") to a {esri.geometry.Point} object.
-     * @param {String} latLng The lat/lng string.
-     * @return {esri.geometry.Point}
-     */
-    latLngToApi: function(latLng) {
-      latLng = latLng.split(',');
-
-      return esri.geometry.geographicToWebMercator(new esri.geometry.Point(parseFloat(latLng[1]), parseFloat(latLng[0]), 4326));
     },
     /**
      * Switches the base map.

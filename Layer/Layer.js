@@ -79,8 +79,12 @@ define([
     if (meta.type === 'vector') {
       var lineStyle = {};
           markerStyle = {
+            anchor: {
+              x: 6.5,
+              y: 0
+            },
             height: 13,
-            icon: NPMap.config.server + '/resources/img/markers/brown-circle-13x13.png',
+            url: NPMap.config.server + '/resources/img/markers/brown-circle-13x13.png',
             width: 13
           },
           polygonStyle = {
@@ -98,7 +102,18 @@ define([
         }
 
         if (style.marker && style.marker.url) {
-          markerStyle = style.marker;
+          if (style.marker.height && style.marker.width) {
+            if (!style.marker.anchor) {
+              style.marker.anchor = {
+                x: style.marker.width / 2,
+                y: 0
+              };
+            }
+
+            markerStyle = style.marker;
+          } else {
+            // TODO: You need to load the image and calculate the height, width, and anchor here.
+          }
         }
 
         if (style.polygon) {

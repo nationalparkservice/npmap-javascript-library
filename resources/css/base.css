@@ -46,7 +46,7 @@
 
 /* Controls */
 #npmap-attribution {-moz-box-shadow:0 0 15px #888;-webkit-box-shadow:0 0 15px #888;bottom:0;box-shadow:0 0 15px #888;background-color:white;background-color:rgba(255, 255, 255, 0.7);color:#333;font-size:11px;line-height:13px;margin:0;max-width:400px;padding:0 5px;position:absolute;right:0;text-align:right;z-index:30;}
-#npmap-clickdot {background-color:transparent;display:none;height:1px;position:absolute;width:1px;z-index:30;}
+#npmap-clickdot {background-color:transparent;display:block;height:1px;position:absolute;width:1px;z-index:30;}
 #npmap-modules-tabs {left:0;position:absolute;top:15px;width:28px;z-index:31;}
 #npmap .npmap-module {height:100%;margin:0;padding:0;position:absolute;width:100%;}
 #npmap .npmap-module-tab {background-color:#7A796D;border-radius:0 2px 2px 0 / 0 4px 4px 0;cursor:pointer;height:18px;padding:5px 6px 5px 5px;width:18px;}

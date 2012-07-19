@@ -10,7 +10,22 @@ define([
 
     for (var prop in placemark) {
       if (placemark.hasOwnProperty(prop) && (prop !== 'linestring' && prop !== 'multigeometry' && prop !== 'point' && prop !== 'polygon') && (prop !== 'keyValue')) {
-        data[prop] = placemark[prop].keyValue;
+        if (prop === 'extendeddata') {
+          var simpleData = placemark.extendeddata.schemadata.simpledata;
+
+          // TODO: This shouldn't be necessary. Something funky is going on here.
+          try {
+            for (var i = 0; simpleData.length; i++) {
+              var sd = simpleData[i];
+
+              data[sd.keyAttributes.name] = sd.keyValue;
+            }
+          } catch (e) {
+
+          }
+        } else {
+          data[prop] = placemark[prop].keyValue;
+        }
       }
     }
 
@@ -19,11 +34,12 @@ define([
 
   return NPMap.Util.Xml.Kml = {
     parse: function(xml) {
-      var features = [];
+      var root = typeof xml.folder === 'undefined' ? xml : xml.folder,
+          features = [];
 
-      for (var i = 0; i < xml.placemark.length; i++) {
+      for (var i = 0; i < root.placemark.length; i++) {
         var coordinates,
-            placemark = xml.placemark[i],
+            placemark = root.placemark[i],
             shape = {
               data: buildData(placemark)
             };
@@ -35,8 +51,8 @@ define([
         } else if (placemark.hasOwnProperty('point')) {
           coordinates = placemark.point.coordinates.keyValue.split(',');
           shape.ll = {
-            x: parseFloat(coordinates[0]),
-            y: parseFloat(coordinates[1])
+            lat: parseFloat(coordinates[1]),
+            lng: parseFloat(coordinates[0])
           };
           shape.shapeType = 'Marker';
         } else if (placemark.hasOwnProperty('polygon')) {
@@ -49,8 +65,8 @@ define([
             var coordinate = coordinates[j].split(',');
 
             shape.ll.push({
-              x: parseFloat(coordinate[0]),
-              y: parseFloat(coordinate[1])
+              lat: parseFloat(coordinate[1]),
+              lng: parseFloat(coordinate[0])
             });
           }
         }

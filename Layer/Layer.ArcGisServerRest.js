@@ -1,5 +1,4 @@
 ﻿// TODO: Start using underscore's templating (or mustache.js) to clean this code up.
-
 define([
   'Layer/Layer',
   'Util/Util.ArcGisServerRest'
@@ -153,16 +152,12 @@ define([
     },
     /**
      * Performs an identify operation.
-     * @param {Number} clickLat
-     * @param {Number} clickLng
+     * @param {Object} latLng
      * @param {Number} divHeight
      * @param {Number} divWidth
-     * @param {Number} neLat
-     * @param {Number} neLng
-     * @param {Number} swLat
-     * @param {Number} swLng
+     * @param {Object} bounds
      */
-    _doIdentify: function(clickLat, clickLng, divHeight, divWidth, neLat, neLng, swLat, swLng) {
+    _doIdentify: function(latLng, divHeight, divWidth, bounds) {
       var count = 0,
           me = this,
           results = [],
@@ -177,11 +172,11 @@ define([
           reqwest({
             data: {
               f: 'json',
-              geometry: clickLng + ',' + clickLat,
+              geometry: latLng.lng + ',' + latLng.lat,
               geometryType: 'esriGeometryPoint',
               imageDisplay: divWidth + ',' + divHeight + ',' + 96,
               layers: 'visible' + (layer.layersStatus && layer.layersStatus !== 'all' ? ':' + layer.layersStatus : ''),
-              mapExtent: swLng + ',' + swLat + ',' + neLng + ',' + neLat,
+              mapExtent: bounds.w + ',' + bounds.s + ',' + bounds.e + ',' + bounds.n,
               returnGeometry: false,
               sr: 4326,
               tolerance: 10
@@ -236,14 +231,14 @@ define([
      */
     _handleClick: function(e) {
       if (identifyLayers > 0) {
-        var bounds = NPMap.Map.getBounds(),
-            el = document.getElementById('npmap-map'),
-            latLng = NPMap.Map[NPMap.config.api].eventGetLatLng(e);
+        var el = document.getElementById('npmap-map'),
+            latLngApi = NPMap.Map[NPMap.config.api].eventGetLatLng(e),
+            latLng = NPMap.Map.latLngFromApi(latLngApi);
 
         NPMap.InfoBox.hide();
-        NPMap.InfoBox.latLng = NPMap.Map.latLngFromApi(latLng);
-        NPMap.Map[NPMap.config.api].positionClickDot(latLng);
-        this._doIdentify(latLng.latitude, latLng.longitude, el.offsetHeight, el.offsetWidth, bounds.n, bounds.e, bounds.s, bounds.w);
+        NPMap.InfoBox.latLng = latLng;
+        NPMap.Map[NPMap.config.api].positionClickDot(latLngApi);
+        this._doIdentify(latLng, el.offsetHeight, el.offsetWidth, NPMap.Map.getBounds());
       }
     },
     /**
@@ -354,8 +349,6 @@ define([
      * @param {Object} config
      */
     create: function(config) {
-      Layer.hasRequiredProperties(config);
-
       var tileLayer,
           uriConstructor = config.url + '/tile/{z}/{y}/{x}';
           

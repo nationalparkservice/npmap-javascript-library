@@ -166,7 +166,7 @@
       for (var i = 0; i < latLngs.length; i++) {
         apiLatLngs.push(me.latLngToApi(latLngs[i]));
       }
-      
+
       return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
     },
     /**
@@ -760,6 +760,10 @@
      * @param {Function} callback (Optional)
      */
     addElementToMapDiv: function(el, callback) {
+      if (el.style.cssText.indexOf('z-index') === -1) {
+        el.style.zIndex = '30';
+      }
+
       if (NPMap.config.api === 'bing') {
         NPMap.Map.Bing.addElementToMapDiv(el);
       } else {
@@ -886,14 +890,7 @@
      * @param {Object} options (Optional) Line options.
      */
     createLine: function(latLngs, options) {
-      var apiLatLngs = [],
-          me = this;
-      
-      $.each(latLngs, function(i, v) {
-        apiLatLngs.push(me.latLngToApi(v));
-      });
-      
-      return NPMap.Map[NPMap.config.api].createLine(apiLatLngs, NPMap.Map[NPMap.config.api].convertLineOptions(options));
+      return NPMap.Map[NPMap.config.api].createLine(latLngs, NPMap.Map[NPMap.config.api].convertLineOptions(options));
     },
     /**
      * Creates a marker using the baseApi's marker class, if it exists.
@@ -901,9 +898,7 @@
      * @param {Object} options (Optional) Marker options.
      */
     createMarker: function(latLng, options) {
-      //return this._createMarker(latLng, )
-
-      return NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), NPMap.Map[NPMap.config.api].convertMarkerOptions(options));
+      return this._createMarker(latLng, NPMap.Map[NPMap.config.api].convertMarkerOptions(options));
     },
     /**
      * Creates a polygon using the baseApi's marker class, if it exists.
@@ -912,14 +907,7 @@
      * @return {Object}
      */
     createPolygon: function(latLngs, options) {
-      var apiLatLngs = [],
-          me = this;
-
-      for (var i = 0; i < latLngs.length; i++) {
-        apiLatLngs.push(me.latLngToApi(latLngs[i]));
-      }
-      
-      return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, NPMap.Map[NPMap.config.api].convertPolygonOptions(options));
+      return NPMap.Map[NPMap.config.api].createPolygon(latLngs, NPMap.Map[NPMap.config.api].convertPolygonOptions(options));
     },
     /**
      * Gets the active layer types for both baseLayers and layers.
@@ -1155,11 +1143,8 @@
      */
     latLngsAreEqual: function(latLng1, latLng2) {
       var areEqual = false;
-          
-      latLng1 = latLng1.split(',');
-      latLng2 = latLng2.split(',');
-      
-      if ((parseFloat(latLng1[0]).toFixed(7) === parseFloat(latLng2[0]).toFixed(7)) && (parseFloat(latLng1[1]).toFixed(7) === parseFloat(latLng2[1]).toFixed(7))) {
+
+      if ((latLng1.lat.toFixed(7) === latLng2.lat.toFixed(7)) && (latLng1.lng.toFixed(7) === latLng2.lng.toFixed(7))) {
         areEqual = true;
       }
 

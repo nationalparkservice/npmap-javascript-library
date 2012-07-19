@@ -348,7 +348,7 @@ define([
         to = map.locationPoint(new MM.Location(parseFloat(to[0]), parseFloat(to[1])));
       }
       
-      $('#npmap-clickdot').show().css({
+      $('#npmap-clickdot').css({
         left: to.x + 'px',
         top: to.y + 'px'
       });

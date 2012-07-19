@@ -40,7 +40,7 @@ document.getElementById(NPMap.config.div).innerHTML = '<div id="npmap" style="he
 
 NPMap.config.div = 'npmap-map';
 
-// TODO: Move all of these depencies out of bootstrap.js.
+// TODO: Move all of these dependencies out of bootstrap.js.
 
 if (typeof JSON === 'undefined') {
   /**
@@ -97,52 +97,23 @@ if (typeof bean === 'undefined') {
   !function(a,b,c){typeof module!="undefined"?module.exports=c(a,b):typeof define=="function"&&typeof define.amd=="object"?define(c):b[a]=c(a,b)}("bean",this,function(a,b){var c=window,d=b[a],e=/over|out/,f=/[^\.]*(?=\..*)\.|.*/,g=/\..*/,h="addEventListener",i="attachEvent",j="removeEventListener",k="detachEvent",l="ownerDocument",m="target",n="querySelectorAll",o=document||{},p=o.documentElement||{},q=p[h],r=q?h:i,s=Array.prototype.slice,t=/click|mouse(?!(.*wheel|scroll))|menu|drag|drop/i,u=/mouse.*(wheel|scroll)/i,v=/^text/i,w=/^touch|^gesture/i,x={},y=function(a,b,c){for(c=0;c<b.length;c++)a[b[c]]=1;return a}({},("click dblclick mouseup mousedown contextmenu mousewheel mousemultiwheel DOMMouseScroll mouseover mouseout mousemove selectstart selectend keydown keypress keyup orientationchange focus blur change reset select submit load unload beforeunload resize move DOMContentLoaded readystatechange message error abort scroll "+(q?"show input invalid touchstart touchmove touchend touchcancel gesturestart gesturechange gestureend readystatechange pageshow pagehide popstate hashchange offline online afterprint beforeprint dragstart dragenter dragover dragleave drag drop dragend loadstart progress suspend emptied stalled loadmetadata loadeddata canplay canplaythrough playing waiting seeking seeked ended durationchange timeupdate play pause ratechange volumechange cuechange checking noupdate downloading cached updateready obsolete ":"")).split(" ")),z=function(){function c(a){var c=a.relatedTarget;return c?c!==this&&c.prefix!=="xul"&&!/document/.test(this.toString())&&!b(c,this):c===null}var a="compareDocumentPosition",b=a in p?function(b,c){return c[a]&&(c[a](b)&16)===16}:"contains"in p?function(a,b){return b=b.nodeType===9||b===window?p:b,b!==a&&b.contains(a)}:function(a,b){while(a=a.parentNode)if(a===b)return 1;return 0};return{mouseenter:{base:"mouseover",condition:c},mouseleave:{base:"mouseout",condition:c},mousewheel:{base:/Firefox/.test(navigator.userAgent)?"DOMMouseScroll":"mousewheel"}}}(),A=function(){var a="altKey attrChange attrName bubbles cancelable ctrlKey currentTarget detail eventPhase getModifierState isTrusted metaKey relatedNode relatedTarget shiftKey srcElement target timeStamp type view which".split(" "),b=a.concat("button buttons clientX clientY dataTransfer fromElement offsetX offsetY pageX pageY screenX screenY toElement".split(" ")),c=b.concat("wheelDelta wheelDeltaX wheelDeltaY wheelDeltaZ axis".split(" ")),d=a.concat("char charCode key keyCode keyIdentifier keyLocation".split(" ")),f=a.concat(["data"]),g=a.concat("touches targetTouches changedTouches scale rotation".split(" ")),h=a.concat(["data","origin","source"]),i="preventDefault",j=function(a){return function(){a[i]?a[i]():a.returnValue=!1}},k="stopPropagation",l=function(a){return function(){a[k]?a[k]():a.cancelBubble=!0}},n=function(a){return function(){a[i](),a[k](),a.stopped=!0}},q=function(a,b,c){var d,e;for(d=c.length;d--;)e=c[d],!(e in b)&&e in a&&(b[e]=a[e])};return function(r,s){var x={originalEvent:r,isNative:s};if(!r)return x;var y,z=r.type,A=r[m]||r.srcElement;x[i]=j(r),x[k]=l(r),x.stop=n(x),x[m]=A&&A.nodeType===3?A.parentNode:A;if(s){if(z.indexOf("key")!==-1)y=d,x.keyCode=r.keyCode||r.which;else if(t.test(z)){y=b,x.rightClick=r.which===3||r.button===2,x.pos={x:0,y:0};if(r.pageX||r.pageY)x.clientX=r.pageX,x.clientY=r.pageY;else if(r.clientX||r.clientY)x.clientX=r.clientX+o.body.scrollLeft+p.scrollLeft,x.clientY=r.clientY+o.body.scrollTop+p.scrollTop;e.test(z)&&(x.relatedTarget=r.relatedTarget||r[(z==="mouseover"?"from":"to")+"Element"])}else w.test(z)?y=g:u.test(z)?y=c:v.test(z)?y=f:z==="message"&&(y=h);q(r,x,y||a)}return x}}(),B=function(a,b){return!q&&!b&&(a===o||a===c)?p:a},C=function(){function a(a,b,c,d,e){var f=this.isNative=y[b]&&a[r];this.element=a,this.type=b,this.handler=c,this.original=d,this.namespaces=e,this.custom=z[b],this.eventType=q||f?b:"propertychange",this.customType=!q&&!f&&b,this[m]=B(a,f),this[r]=this[m][r]}return a.prototype={inNamespaces:function(a){var b,c;if(!a)return!0;if(!this.namespaces)return!1;for(b=a.length;b--;)for(c=this.namespaces.length;c--;)if(a[b]===this.namespaces[c])return!0;return!1},matches:function(a,b,c){return this.element===a&&(!b||this.original===b)&&(!c||this.handler===c)}},a}(),D=function(){var a={},b=function(c,d,e,f,g){if(!d||d==="*")for(var h in a)h.charAt(0)==="$"&&b(c,h.substr(1),e,f,g);else{var i=0,j,k=a["$"+d],l=c==="*";if(!k)return;for(j=k.length;i<j;i++)if(l||k[i].matches(c,e,f))if(!g(k[i],k,i,d))return}},c=function(b,c,d){var e,f=a["$"+c];if(f)for(e=f.length;e--;)if(f[e].matches(b,d,null))return!0;return!1},d=function(a,c,d){var e=[];return b(a,c,d,null,function(a){return e.push(a)}),e},e=function(b){return(a["$"+b.type]||(a["$"+b.type]=[])).push(b),b},f=function(c){b(c.element,c.type,null,c.handler,function(b,c,d){return c.splice(d,1),c.length===0&&delete a["$"+b.type],!1})},g=function(){var b,c=[];for(b in a)b.charAt(0)==="$"&&(c=c.concat(a[b]));return c};return{has:c,get:d,put:e,del:f,entries:g}}(),E=o[n]?function(a,b){return b[n](a)}:function(){throw new Error("Bean: No selector engine installed")},F=function(a){E=a},G=q?function(a,b,c,d){a[d?h:j](b,c,!1)}:function(a,b,c,d,e){e&&d&&a["_on"+e]===null&&(a["_on"+e]=0),a[d?i:k]("on"+b,c)},H=function(a,b,d){var e=b.__beanDel,f=function(f){return f=A(f||((this[l]||this.document||this).parentWindow||c).event,!0),e&&(f.currentTarget=e.ft(f[m],a)),b.apply(a,[f].concat(d))};return f.__beanDel=e,f},I=function(a,b,d,e,f,g){var h=b.__beanDel,i=function(i){var j=h?h.ft(i[m],a):this;if(e?e.apply(j,arguments):q?!0:i&&i.propertyName==="_on"+d||!i)i&&(i=A(i||((this[l]||this.document||this).parentWindow||c).event,g),i.currentTarget=j),b.apply(a,i&&(!f||f.length===0)?arguments:s.call(arguments,i?0:1).concat(f))};return i.__beanDel=h,i},J=function(a,b,c,d,e){return function(){a(b,c,e),d.apply(this,arguments)}},K=function(a,b,c,d){var e,f,h,i=b&&b.replace(g,""),j=D.get(a,i,c);for(e=0,f=j.length;e<f;e++)j[e].inNamespaces(d)&&((h=j[e])[r]&&G(h[m],h.eventType,h.handler,!1,h.type),D.del(h))},L=function(a,b,c,d,e){var h,i=b.replace(g,""),j=b.replace(f,"").split(".");if(D.has(a,i,c))return a;i==="unload"&&(c=J(K,a,i,c,d)),z[i]&&(z[i].condition&&(c=I(a,c,i,z[i].condition,e,!0)),i=z[i].base||i),h=D.put(new C(a,i,c,d,j[0]&&j)),h.handler=h.isNative?H(a,h.handler,e):I(a,h.handler,i,!1,e,!1),h[r]&&G(h[m],h.eventType,h.handler,!0,h.customType)},M=function(a,b,c){var d=function(b,d){var e,f=typeof a=="string"?c(a,d):a;for(;b&&b!==d;b=b.parentNode)for(e=f.length;e--;)if(f[e]===b)return b},e=function(a){var c=d(a[m],this);c&&b.apply(c,arguments)};return e.__beanDel={ft:d,selector:a,$:c},e},N=function(a,b,c){var d,e,h,i,j=K,k=b&&typeof b=="string";if(k&&b.indexOf(" ")>0){b=b.split(" ");for(i=b.length;i--;)N(a,b[i],c);return a}e=k&&b.replace(g,""),e&&z[e]&&(e=z[e].type);if(!b||k){if(h=k&&b.replace(f,""))h=h.split(".");j(a,e,c,h)}else if(typeof b=="function")j(a,null,b);else for(d in b)b.hasOwnProperty(d)&&N(a,d,b[d]);return a},O=function(a,b,c,d,e){var f,g,h,i,j=c,k=c&&typeof c=="string";if(b&&!c&&typeof b=="object")for(f in b)b.hasOwnProperty(f)&&O.apply(this,[a,f,b[f]]);else{i=arguments.length>3?s.call(arguments,3):[],g=(k?c:b).split(" "),k&&(c=M(b,j=d,e||E))&&(i=s.call(i,1)),this===x&&(c=J(N,a,b,c,j));for(h=g.length;h--;)L(a,g[h],c,j,i)}return a},P=function(){return O.apply(x,arguments)},Q=q?function(a,b,d){var e=o.createEvent(a?"HTMLEvents":"UIEvents");e[a?"initEvent":"initUIEvent"](b,!0,!0,c,1),d.dispatchEvent(e)}:function(a,b,c){c=B(c,a),a?c.fireEvent("on"+b,o.createEventObject()):c["_on"+b]++},R=function(a,b,c){var d,e,h,i,j,k=b.split(" ");for(d=k.length;d--;){b=k[d].replace(g,"");if(i=k[d].replace(f,""))i=i.split(".");if(!i&&!c&&a[r])Q(y[b],b,a);else{j=D.get(a,b),c=[!1].concat(c);for(e=0,h=j.length;e<h;e++)j[e].inNamespaces(i)&&j[e].handler.apply(a,c)}}return a},S=function(a,b,c){var d=0,e=D.get(b,c),f=e.length,g,h;for(;d<f;d++)e[d].original&&(h=e[d].handler.__beanDel,h?g=[a,h.selector,e[d].type,e[d].original,h.$]:g=[a,e[d].type,e[d].original],O.apply(null,g));return a},T={add:O,one:P,remove:N,clone:S,fire:R,setSelectorEngine:F,noConflict:function(){return b[a]=d,this}};if(c[i]){var U=function(){var a,b=D.entries();for(a in b)b[a].type&&b[a].type!=="unload"&&N(b[a].element,b[a].type);c[k]("onunload",U),c.CollectGarbage&&c.CollectGarbage()};c[i]("onunload",U)}return T})
 }
 
-
-(function() {
-  var s = document.createElement('script'),
-      u = 'http://www.nps.gov/npmap/js/libs/require';
-      
+(function() {  
   /**
-   * Called after jQuery has been loaded.
+   * Called after the map API has been loaded.
    */
-  function jqueryLoaded() {
+  function mappingCallback() {
     /**
-     * jQuery resize event - v1.1 - 3/14/2010
-     * http://benalman.com/projects/jquery-resize-plugin/
-     *
-     * Copyright (c) 2010 "Cowboy" Ben Alman
-     * Dual licensed under the MIT and GPL licenses.
-     * http://benalman.com/about/license/
+     * Domready without jQuery - https://github.com/cms/domready.
      */
-    var w=window;(function(b,g,k){function h(){l=g[e](function(){c.each(function(){var a=b(this),c=a.width(),d=a.height(),j=b.data(this,i);if(c!==j.w||d!==j.h)a.trigger(f,[j.w=c,j.h=d])});h()},d[m])}var g=w,c=b([]),d=b.resize=b.extend(b.resize,{}),l,e="setTimeout",f="resize",i=f+"-special-event",m="delay";d[m]=250;d.throttleWindow=!0;b.event.special[f]={setup:function(){if(!d.throttleWindow&&this[e])return!1;var a=b(this);c=c.add(a);b.data(this,i,{w:a.width(),h:a.height()});1===c.length&&h()},teardown:function(){if(!d.throttleWindow&&this[e])return!1;var a=b(this);c=c.not(a);a.removeData(i);c.length||clearTimeout(l)},add:function(a){function c(a,d,e){var g=b(this),h=b.data(this,i);h.w=d!==k?d:g.width();h.h=e!==k?e:g.height();f.apply(this,arguments)}if(!d.throttleWindow&&this[e])return!1;var f;if(b.isFunction(a))return f=a,c;f=a.handler;a.handler=c}}})(jQuery,this);jQuery.resize.delay=100;jQuery.resize.throttleWindow=!1;
-    
-    if (typeof $ === 'undefined') {
-      $ = jQuery;
-    }
+    var domReady=function(){function a(){e?document.removeEventListener("DOMContentLoaded",a,!0):"complete"===document.readyState&&document.detachEvent("onreadystatechange",a);b()}function h(){if(!c){try{document.documentElement.doScroll("left")}catch(f){window.setTimeout(arguments.callee,15);return}b()}}function b(){if(!c){c=!0;for(var f=d.length,a=0;a<f;a++)d[a].call(document)}}var e=!!document.addEventListener,c=!1,g=!1,d=[];if(e)document.addEventListener("DOMContentLoaded",a,!0),window.addEventListener("load",b,!1);else{document.attachEvent("onreadystatechange",a);window.attachEvent("onload",b);try{g=null===window.frameElement}catch(i){}document.documentElement.doScroll&&g&&h()}return function(a){return c?a.call(document):d.push(a)}}();
 
-    $(document).ready(function() {
-      require.config({
-        baseUrl: NPMap.config.server
-      });
+    domReady(function() {
       require([
         'Event',
         'Util/Util'
-      ], function() {
-        NPMap.Util.injectCss(NPMap.config.server + '/resources/css/base.css');
-        loadMapping();
-      });
-    });
-  }
-  /**
-   * Loads the mapping API.
-   */
-  function loadMapping() {
-    var apiUrl = null,
-        callback = null,
-        preLoaded = false;
-    
-    NPMap.apiLoaded = function() {
-      var callback = function() {
+      ], function(Event, Util) {
+        Util.injectCss(NPMap.config.server + '/resources/css/base.css');
+        
         require([
           NPMap.config.server + '/Map/Map.' + NPMap.config.api + '.js'
         ], function(map) {
@@ -233,25 +204,26 @@ if (typeof bean === 'undefined') {
               }
 
               require(scripts, function() {
-                callback = function() {
-                  setTimeout(function() {
-                    var location = escape(window.top.location),
-                        query = escape(window.top.location.search),
-                        locationUrl = location.replace(query, '');
+                function callback() {
+                  var div = document.getElementById('npmap'),
+                      divLoading = document.getElementById('npmap-loading'),
+                      divMask = document.getElementById('npmap-mask'),
+                      location = escape(window.top.location),
+                      query = escape(window.top.location.search),
+                      locationUrl = location.replace(query, '');
 
-                    $('#npmap-loading').hide();
-                    $('#npmap-mask').fadeOut().remove();
-                    NPMap.Event.processQueue();
+                  divMask.parentNode.removeChild(divMask);
+                  divLoading.parentNode.removeChild(divLoading);
+                  NPMap.Event.processQueue();
 
-                    if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
-                      setTimeout(function() {
-                        reqwest({
-                          type: 'jsonp',
-                          url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?'
-                        });
-                      }, 1000);
-                    }
-                  }, 100);
+                  if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
+                    setTimeout(function() {
+                      reqwest({
+                        type: 'jsonp',
+                        url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?'
+                      });
+                    }, 1000);
+                  }
                 };
 
                 delete NPMap.apiLoaded;
@@ -265,15 +237,38 @@ if (typeof bean === 'undefined') {
             }
           }, 5);
         });
-      };
-      
+      });
+    });
+  }
+  /**
+   * Called after jQuery and requirejs have loaded.
+   */
+  function requirementsCallback() {
+    /**
+     * jQuery resize event v1.1 - http://benalman.com/projects/jquery-resize-plugin/
+     */
+    var w=window;(function(b,g,k){function h(){l=g[e](function(){c.each(function(){var a=b(this),c=a.width(),d=a.height(),j=b.data(this,i);if(c!==j.w||d!==j.h)a.trigger(f,[j.w=c,j.h=d])});h()},d[m])}var g=w,c=b([]),d=b.resize=b.extend(b.resize,{}),l,e="setTimeout",f="resize",i=f+"-special-event",m="delay";d[m]=250;d.throttleWindow=!0;b.event.special[f]={setup:function(){if(!d.throttleWindow&&this[e])return!1;var a=b(this);c=c.add(a);b.data(this,i,{w:a.width(),h:a.height()});1===c.length&&h()},teardown:function(){if(!d.throttleWindow&&this[e])return!1;var a=b(this);c=c.not(a);a.removeData(i);c.length||clearTimeout(l)},add:function(a){function c(a,d,e){var g=b(this),h=b.data(this,i);h.w=d!==k?d:g.width();h.h=e!==k?e:g.height();f.apply(this,arguments)}if(!d.throttleWindow&&this[e])return!1;var f;if(b.isFunction(a))return f=a,c;f=a.handler;a.handler=c}}})(jQuery,this);jQuery.resize.delay=100;jQuery.resize.throttleWindow=!1;
+
+    var apiUrl = null,
+        callback = null,
+        preLoaded = false;
+    
+    if (typeof $ === 'undefined') {
+      $ = jQuery;
+    }
+
+    require({
+      baseUrl: NPMap.config.server
+    });
+
+    NPMap.apiLoaded = function() {
       if (NPMap.config.events && (typeof NPMap.config.events.preinit === 'function')) {
-        NPMap.config.events.preinit(callback);
+        NPMap.config.events.preinit(mappingCallback);
       } else {
-        callback();
+        mappingCallback();
       }
     };
-      
+
     switch (NPMap.config.api) {
       case 'Bing':
         apiUrl = 'http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0&onscriptload=callback';
@@ -282,7 +277,7 @@ if (typeof bean === 'undefined') {
             if (typeof Microsoft !== 'undefined' && typeof Microsoft.Maps !== 'undefined' && typeof Microsoft.Maps.Globals !== 'undefined') {
               clearInterval(interval);
               
-              if ($('head').html().indexOf('veapicore.js') === -1) {
+              if (document.getElementsByTagName('head')[0].innerHTML.indexOf('veapicore.js') === -1) {
                 var s = document.createElement('script');
                 s.src = Microsoft.Maps.Globals.jsPath + 'veapicore.js';
                 document.body.appendChild(s);
@@ -299,7 +294,8 @@ if (typeof bean === 'undefined') {
         };
         break;
       case 'Esri':
-        apiUrl = 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0compact';
+        // TODO: Upgrade to 3.0 ('http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0' or 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0compact') when Esri and/or Dojo get their act together with AMD.
+        apiUrl = 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.8';
         callback = function() {
           var interval = setInterval(function() {
             if (typeof esri !== 'undefined') {
@@ -344,7 +340,10 @@ if (typeof bean === 'undefined') {
               NPMap.apiLoaded();
               NPMap.Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.css');
               
-              if ($.browser.msie && $.browser.version.substr(0, 1) < 8) {
+              // http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
+              var ie=function(){for(var a=3,b=document.createElement("div"),c=b.getElementsByTagName("i");b.innerHTML="<\!--[if gt IE "+ ++a+"]><i></i><![endif]--\>",c[0];);return 4<a?a:void 0}();
+              
+              if (ie < 8) {
                 NPMap.Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.ie.css');
               }
             }
@@ -394,24 +393,23 @@ if (typeof bean === 'undefined') {
     }
   }
 
-  if (NPMap.config.api === 'Esri') {
-    s.src = 'http://www.nps.gov/npmap/scripts/libs/jquery-1.7.1.min.js';
-  } else {
-    if (typeof window.jQuery  === 'undefined') {
-      u += '-jquery';
-    }
-    
-    s.src = u + '-1.0.7.min.js';
+  var s = document.createElement('script'),
+      u = 'http://www.nps.gov/npmap/libs/require-2.0.4';
+
+  if (typeof window.jQuery  === 'undefined') {
+    u += '-jquery-1.7.2';
   }
   
+  s.src = u + '.min.js';
+
   if (window.attachEvent && document.all) {
     s.onreadystatechange = function() {
       if (this.readyState === 'complete' || this.readyState === 'loaded') {
-        jqueryLoaded();
+        requirementsCallback();
       }
     };
   } else {
-    s.onload = jqueryLoaded;
+    s.onload = requirementsCallback;
   }
   
   document.body.appendChild(s);

@@ -61,7 +61,7 @@ define([
 
       utilXml.load(config.url, function(response) {
         var features = utilKml.parse(response);
-
+        
         for (var i = 0; i < features.length; i++) {
           var feature = features[i],
               shape,
@@ -77,7 +77,10 @@ define([
               //shape = NPMap.Map.createLine(feature.ll, style);
               break;
             case 'Marker':
-              shape = NPMap.Map._createMarker(feature.ll.y + ',' + feature.ll.x, style);
+              shape = NPMap.Map._createMarker({
+                lat: feature.ll.lat,
+                lng: feature.ll.lng
+              }, style);
               break;
             case 'Polygon':
               shape = NPMap.Map._createPolygon(feature.ll, style);
@@ -94,6 +97,8 @@ define([
           config.shapes.push(shape);
           NPMap.Map.addShape(shape);
         }
+
+        console.log(config.shapes);
 
         NPMap.Event.trigger('NPMap.Layer', 'added', config);
       });

@@ -36,7 +36,7 @@ define(function() {
       //
       paddingSetting = padding,
       // The pan configuration.
-      pan = config.pan || 'none',
+      pan = config.pan || 'map',
       // The parent config.
       parent = config.parent || 'map',
       // Should the boundsCheck be skipped?
@@ -172,9 +172,13 @@ define(function() {
    * @param {Function} callback (Optional)
    */
   function position(callback) {
+    var bottom,
+        divInfoBox = document.getElementById('npmap-infobox'),
+        right;
+
     if (parent === 'map') {
-      var bottom = $mapDiv.height() - $('#npmap-clickdot').position().top,
-          right = $mapDiv.width() - $('#npmap-clickdot').position().left;
+      bottom = $mapDiv.height() - $('#npmap-clickdot').position().top;
+      right = $mapDiv.width() - $('#npmap-clickdot').position().left;
 
       if (design === 'basic') {
         bottom = bottom + 30;
@@ -183,25 +187,19 @@ define(function() {
         bottom = bottom + 24;
         right = right - ($('#npmap-infobox').outerWidth() / 2) - 8;
       }
-      
-      $('#npmap-infobox').css({
-        bottom: bottom + 'px',
-        right: right + 'px'
-      });
     } else if (parent === 'page') {
       if (design === 'basic') {
-        $('#npmap-infobox').css({
-          bottom: ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px',
-          right: (windowWidth - $('#npmap-clickdot').position().left - offsetLeft - 69) + 'px'
-        });
+        bottom = ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px';
+        right = (windowWidth - $('#npmap-clickdot').position().left - offsetLeft - 69) + 'px';
       } else if (design === 'nps' || design === 'pyv') {
         // TODO: You need to test this. You'll have to adjust it.
-        $('#npmap-infobox').css({
-          bottom: ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px',
-          right: (windowWidth - $('#npmap-clickdot').position().left - offsetLeft - 69) + 'px'
-        });
+        bottom = ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px';
+        right = (windowWidth - $('#npmap-clickdot').position().left - offsetLeft - 69) + 'px';
       }
     }
+
+    divInfoBox.style.bottom = bottom + 'px';
+    divInfoBox.style.right = right + 'px';
 
     if (callback) {
       callback();
@@ -538,8 +536,8 @@ define(function() {
       
       if (target) {
         NPMap.Map[NPMap.config.api].positionClickDot(target);
-        
-        if (typeof target === 'string') {
+
+        if (typeof target === 'string' || (typeof target === 'object' && typeof target.lat === 'number')) {
           NPMap.InfoBox.latLng = target;
         } else {
           NPMap.InfoBox.latLng = NPMap.Map.getMarkerLatLng(target);
