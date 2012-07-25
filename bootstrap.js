@@ -102,21 +102,11 @@ if (typeof bean === 'undefined') {
    * Called after the map API has been loaded.
    */
   function mappingCallback() {
-    /**
-     * Domready without jQuery - https://github.com/cms/domready.
-     */
-    var domReady=function(){function a(){e?document.removeEventListener("DOMContentLoaded",a,!0):"complete"===document.readyState&&document.detachEvent("onreadystatechange",a);b()}function h(){if(!c){try{document.documentElement.doScroll("left")}catch(f){window.setTimeout(arguments.callee,15);return}b()}}function b(){if(!c){c=!0;for(var f=d.length,a=0;a<f;a++)d[a].call(document)}}var e=!!document.addEventListener,c=!1,g=!1,d=[];if(e)document.addEventListener("DOMContentLoaded",a,!0),window.addEventListener("load",b,!1);else{document.attachEvent("onreadystatechange",a);window.attachEvent("onload",b);try{g=null===window.frameElement}catch(i){}document.documentElement.doScroll&&g&&h()}return function(a){return c?a.call(document):d.push(a)}}();
-
-    console.log('here0');
-
-    domReady(function() {
-      console.log(1);
+    var callback = function() {
       require([
         'Event',
         'Util/Util'
       ], function(Event, Util) {
-        console.log(2);
-
         Util.injectCss(NPMap.config.server + '/resources/css/base.css');
         
         if (NPMap.config.api === 'leaflet') {
@@ -129,8 +119,6 @@ if (typeof bean === 'undefined') {
             Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.ie.css');
           }
         }
-
-        console.log('here');
 
         require([
           NPMap.config.server + '/Map/Map.' + NPMap.config.api + '.js'
@@ -222,27 +210,30 @@ if (typeof bean === 'undefined') {
                 }
               }
 
-              console.log(scripts);
-
               require(scripts, function() {
                 function callback() {
                   var div = document.getElementById('npmap'),
                       divLoading = document.getElementById('npmap-loading'),
-                      divMask = document.getElementById('npmap-mask'),
-                      location = escape(window.top.location),
-                      query = escape(window.top.location.search),
-                      locationUrl = location.replace(query, '');
+                      divMask = document.getElementById('npmap-mask');
 
                   divMask.parentNode.removeChild(divMask);
                   divLoading.parentNode.removeChild(divLoading);
 
-                  if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
-                    setTimeout(function() {
-                      reqwest({
-                        type: 'jsonp',
-                        url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?'
-                      });
-                    }, 1000);
+                  try {
+                    var location = escape(window.top.location),
+                        query = escape(window.top.location.search),
+                        locationUrl = location.replace(query, '');
+
+                    if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
+                      setTimeout(function() {
+                        reqwest({
+                          type: 'jsonp',
+                          url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?'
+                        });
+                      }, 1000);
+                    }
+                  } catch(e) {
+                    
                   }
                 };
 
@@ -258,7 +249,13 @@ if (typeof bean === 'undefined') {
           }, 5);
         });
       });
-    });
+    };
+
+    /**
+     * DomReady code borrowed from jQuery.
+     */
+    if(document.addEventListener)DOMContentLoaded=function(){document.removeEventListener("DOMContentLoaded",DOMContentLoaded,false);callback()};else if(document.attachEvent)DOMContentLoaded=function(){if(document.readyState==="complete"){document.detachEvent("onreadystatechange",DOMContentLoaded);callback()}};if(document.readyState==="complete")setTimeout(callback,1);
+    if(document.addEventListener){document.addEventListener("DOMContentLoaded",DOMContentLoaded,false);window.addEventListener("load",callback,false)}else if(document.attachEvent){document.attachEvent("onreadystatechange",DOMContentLoaded);window.attachEvent("onload",callback)};
   }
   /**
    * Called after jQuery and requirejs have loaded.

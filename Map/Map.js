@@ -265,7 +265,7 @@
       tip.id = 'npmap-tip';
       elements.push(tip);
       
-      if (NPMap.config.api !== 'leaflet' && NPMap.config.api !== 'modestmaps') {
+      if (NPMap.config.api.toLowerCase() !== 'leaflet' && NPMap.config.api.toLowerCase() !== 'modestmaps') {
         logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + NPMap.config.api + 'logo.png" /></span>';
       }
       
