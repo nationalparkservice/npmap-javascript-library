@@ -10,7 +10,7 @@ define(function() {
      */
     add: function(obj, event, func) {
       var cl = obj.replace('NPMap.', '');
-      
+
       if (NPMap[cl]) {
         NPMap[cl]._events = NPMap[cl]._events || [];
         
@@ -19,31 +19,11 @@ define(function() {
           func: func
         });
       } else {
-        queue.push({
-          cl: cl,
-          event: event,
-          func: func
-        });
-      }
-    },
-    // TODO: I don't think this is still needed. Check into it. You should be able to talk the call out of bootstrap.js too.
-    /**
-     * Processes the NPMap.Event queue.
-     */
-    processQueue: function() {
-      for (var i = 0; i < queue.length; i++) {
-        var q = queue[i];
+        var me = this;
 
-        NPMap[q.cl]._events.push({
-          event: q.event,
-          func: q.func
-        });
-      }
-      
-      if (queue.length === 0) {
-        delete NPMap.Event.processQueue;
-      } else {
-        // TODO: Should you delay then processQueue again here?
+        setTimeout(function() {
+          me.add(obj, event, func);
+        }, 100);
       }
     },
     /**
@@ -78,12 +58,8 @@ define(function() {
      */
     trigger: function(obj, event, e) {
       var cl = obj.replace('NPMap.', '');
-      
-      if (this.processQueue) {
-        this.processQueue();
-      }
-      
-      if (typeof NPMap[cl] !== 'undefined') {
+
+      if (typeof NPMap[cl] !== 'undefined' && typeof NPMap[cl]._events !== 'undefined') {
         for (var i = 0; i < NPMap[cl]._events.length; i++) {
           var v = NPMap[cl]._events[i];
 

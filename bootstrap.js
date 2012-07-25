@@ -107,18 +107,37 @@ if (typeof bean === 'undefined') {
      */
     var domReady=function(){function a(){e?document.removeEventListener("DOMContentLoaded",a,!0):"complete"===document.readyState&&document.detachEvent("onreadystatechange",a);b()}function h(){if(!c){try{document.documentElement.doScroll("left")}catch(f){window.setTimeout(arguments.callee,15);return}b()}}function b(){if(!c){c=!0;for(var f=d.length,a=0;a<f;a++)d[a].call(document)}}var e=!!document.addEventListener,c=!1,g=!1,d=[];if(e)document.addEventListener("DOMContentLoaded",a,!0),window.addEventListener("load",b,!1);else{document.attachEvent("onreadystatechange",a);window.attachEvent("onload",b);try{g=null===window.frameElement}catch(i){}document.documentElement.doScroll&&g&&h()}return function(a){return c?a.call(document):d.push(a)}}();
 
+    console.log('here0');
+
     domReady(function() {
+      console.log(1);
       require([
         'Event',
         'Util/Util'
       ], function(Event, Util) {
+        console.log(2);
+
         Util.injectCss(NPMap.config.server + '/resources/css/base.css');
         
+        if (NPMap.config.api === 'leaflet') {
+          Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.css');
+              
+          // http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
+          var ie=function(){for(var a=3,b=document.createElement("div"),c=b.getElementsByTagName("i");b.innerHTML="<\!--[if gt IE "+ ++a+"]><i></i><![endif]--\>",c[0];);return 4<a?a:void 0}();
+          
+          if (ie < 8) {
+            Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.ie.css');
+          }
+        }
+
+        console.log('here');
+
         require([
           NPMap.config.server + '/Map/Map.' + NPMap.config.api + '.js'
         ], function(map) {
           var interval = setInterval(function() {
             if (map._isReady === true) {
+              // TODO: This constant is stored in NPMap.Layer already. Reuse that.
               var LAYER_TYPES = {
                     arcgisserverrest: 'ArcGisServerRest',
                     geojson: 'GeoJson',
@@ -203,6 +222,8 @@ if (typeof bean === 'undefined') {
                 }
               }
 
+              console.log(scripts);
+
               require(scripts, function() {
                 function callback() {
                   var div = document.getElementById('npmap'),
@@ -214,7 +235,6 @@ if (typeof bean === 'undefined') {
 
                   divMask.parentNode.removeChild(divMask);
                   divLoading.parentNode.removeChild(divLoading);
-                  NPMap.Event.processQueue();
 
                   if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
                     setTimeout(function() {
@@ -338,14 +358,6 @@ if (typeof bean === 'undefined') {
             if (typeof L !== 'undefined') {
               clearInterval(interval);
               NPMap.apiLoaded();
-              NPMap.Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.css');
-              
-              // http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
-              var ie=function(){for(var a=3,b=document.createElement("div"),c=b.getElementsByTagName("i");b.innerHTML="<\!--[if gt IE "+ ++a+"]><i></i><![endif]--\>",c[0];);return 4<a?a:void 0}();
-              
-              if (ie < 8) {
-                NPMap.Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.ie.css');
-              }
             }
           }, 5);
         };

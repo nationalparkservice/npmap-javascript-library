@@ -236,7 +236,7 @@ define([
             latLng = NPMap.Map.latLngFromApi(latLngApi);
 
         NPMap.InfoBox.hide();
-        NPMap.InfoBox.latLng = latLng;
+        NPMap.InfoBox.latLng = latLngApi;
         NPMap.Map[NPMap.config.api].positionClickDot(latLngApi);
         this._doIdentify(latLng, el.offsetHeight, el.offsetWidth, NPMap.Map.getBounds());
       }
@@ -352,6 +352,8 @@ define([
       var tileLayer,
           uriConstructor = config.url + '/tile/{z}/{y}/{x}';
           
+      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+
       if (!config.tiled) {
         uriConstructor = function(x, y, z, url) {
           var heightWidth = 256,
@@ -385,6 +387,7 @@ define([
       };
 
       NPMap.Map.addTileLayer(tileLayer);
+      NPMap.Event.trigger('NPMap.Layer', 'added', config);
     },
     /**
      * Hides the layer.

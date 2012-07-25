@@ -52,16 +52,16 @@ define([
      * @param {Object} config
      */
     create: function(config) {
-      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
-
       var layerName = config.name,
           layerType = config.type;
+
+      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       config.shapes = [];
 
       utilXml.load(config.url, function(response) {
         var features = utilKml.parse(response);
-        
+
         for (var i = 0; i < features.length; i++) {
           var feature = features[i],
               shape,
@@ -87,18 +87,18 @@ define([
               break;
           }
 
-          shape.npmap = {
-            data: feature.data,
-            layerName: layerName,
-            layerType: layerType,
-            shapeType: feature.shapeType
-          };
+          if (shape) {
+            shape.npmap = {
+              data: feature.data,
+              layerName: layerName,
+              layerType: layerType,
+              shapeType: feature.shapeType
+            };
 
-          config.shapes.push(shape);
-          NPMap.Map.addShape(shape);
+            config.shapes.push(shape);
+            NPMap.Map.addShape(shape);
+          }
         }
-
-        console.log(config.shapes);
 
         NPMap.Event.trigger('NPMap.Layer', 'added', config);
       });
@@ -115,6 +115,7 @@ define([
      */
     remove: function(config) {
       NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
+      // TODO: Not yet implemented.
       NPMap.Event.trigger('NPMap.Layer', 'removed', config);
     },
     /**

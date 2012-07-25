@@ -819,6 +819,13 @@
       NPMap.Map[NPMap.config.api].addTileLayer(layer);
     },
     /**
+     * Adds a Zoomify layer to the map.
+     * @param {Object} layer
+     */
+    addZoomifyLayer: function(layer) {
+      NPMap.Map[NPMap.config.api].addZoomifyLayer(layer);
+    },
+    /**
      * Converts an API bounds to a NPMap bounds.
      * @param {Object} bounds
      * @return {Object}
@@ -908,6 +915,14 @@
      */
     createPolygon: function(latLngs, options) {
       return NPMap.Map[NPMap.config.api].createPolygon(latLngs, NPMap.Map[NPMap.config.api].convertPolygonOptions(options));
+    },
+    /**
+     * Creates a Zoomify layer.
+     * @param {Object} config
+     * @return {Object}
+     */
+    createZoomifyLayer: function(config) {
+      return NPMap.Map[NPMap.config.api].createZoomifyLayer(config);
     },
     /**
      * Gets the active layer types for both baseLayers and layers.

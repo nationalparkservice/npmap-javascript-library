@@ -3,7 +3,9 @@ define([
   'Util/Util.Xml'
 ], function(Util) {
   /**
-   *
+   * Builds a data object for a placemark. Brings in all attributes, including ExtendedData.
+   * @param {Object} placemark
+   * @return {Object}
    */
   function buildData(placemark) {
     var data = {};
@@ -11,7 +13,11 @@ define([
     for (var prop in placemark) {
       if (placemark.hasOwnProperty(prop) && (prop !== 'linestring' && prop !== 'multigeometry' && prop !== 'point' && prop !== 'polygon') && (prop !== 'keyValue')) {
         if (prop === 'extendeddata') {
-          var simpleData = placemark.extendeddata.schemadata.simpledata;
+          var simpleData = placemark.extendeddata.data;
+
+          if (typeof simpleData === 'undefined') {
+            simpleData = placemark.extendeddata.schemadata.simpledata;
+          }
 
           // TODO: This shouldn't be necessary. Something funky is going on here.
           try {

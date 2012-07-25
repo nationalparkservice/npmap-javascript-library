@@ -56,81 +56,6 @@ define([
       // The layer names that have already been added to the map.
       usedNames = [];
 
-  Event.add('NPMap.Layer', 'added', function(config) {
-    usedNames.push(config.name);
-  });
-  Event.add('NPMap.Layer', 'beforeadd', function(config) {
-    if (!config.name) {
-      throw new Error('All layers must have a "name".');
-    }
-
-    if (_.indexOf(usedNames, config.name) === -1) {
-      usedNames.push(config.name);
-    } else {
-      throw new Error('All layer names must be unique. "' + config.name + '" is used more than once.');
-    }
-
-    if (!config.type) {
-      throw new Error('All layers must have a "type".');
-    }
-
-    var meta = LAYER_HANDLERS[config.type];
-
-    if (meta.type === 'vector') {
-      var lineStyle = {};
-          markerStyle = {
-            anchor: {
-              x: 6.5,
-              y: 0
-            },
-            height: 13,
-            url: NPMap.config.server + '/resources/img/markers/brown-circle-13x13.png',
-            width: 13
-          },
-          polygonStyle = {
-            fillColor: '5e7630',
-            fillOpacity: 174,
-            strokeColor: '5e7630',
-            strokeOpacity: 200,
-            strokeWidth: 1
-          },
-          style = config.style;
-
-      if (style) {
-        if (style.line) {
-
-        }
-
-        if (style.marker && style.marker.url) {
-          if (style.marker.height && style.marker.width) {
-            if (!style.marker.anchor) {
-              style.marker.anchor = {
-                x: style.marker.width / 2,
-                y: 0
-              };
-            }
-
-            markerStyle = style.marker;
-          } else {
-            // TODO: You need to load the image and calculate the height, width, and anchor here.
-          }
-        }
-
-        if (style.polygon) {
-          polygonStyle = config.style.polygon;
-        }
-      } else {
-        config.style = {};
-      }
-
-      config.style.line = NPMap.Map[NPMap.config.api].convertLineOptions(lineStyle);
-      config.style.marker = NPMap.Map[NPMap.config.api].convertMarkerOptions(markerStyle);
-      config.style.polygon = NPMap.Map[NPMap.config.api].convertPolygonOptions(polygonStyle);
-    }
-  });
-  Event.add('NPMap.Layer', 'removed', function(config) {
-    usedNames.splice(_.indexOf(usedNames, config.name), 1);
-  });
   Event.add('NPMap.Map', 'click', function(e) {
     for (var i = 0; i < NPMap.config.layers.length; i++) {
       var layerType = NPMap.config.layers[i].type,
@@ -154,7 +79,88 @@ define([
   
   return NPMap.Layer = {
     // Events that have been added to this class.
-    _events: [],
+    _events: [{
+      event: 'added',
+      func: function(config) {
+        usedNames.push(config.name);
+      }
+    },{
+      event: 'beforeadd',
+      func: function(config) {
+        if (!config.name) {
+          throw new Error('All layers must have a "name".');
+        }
+
+        if (_.indexOf(usedNames, config.name) === -1) {
+          usedNames.push(config.name);
+        } else {
+          throw new Error('All layer names must be unique. "' + config.name + '" is used more than once.');
+        }
+
+        if (!config.type) {
+          throw new Error('All layers must have a "type".');
+        }
+
+        var meta = LAYER_HANDLERS[config.type];
+
+        if (meta.type === 'vector') {
+          var lineStyle = {};
+              markerStyle = {
+                anchor: {
+                  x: 6.5,
+                  y: 0
+                },
+                height: 13,
+                url: NPMap.config.server + '/resources/img/markers/brown-circle-13x13.png',
+                width: 13
+              },
+              polygonStyle = {
+                fillColor: '5e7630',
+                fillOpacity: 174,
+                strokeColor: '5e7630',
+                strokeOpacity: 200,
+                strokeWidth: 1
+              },
+              style = config.style;
+
+          if (style) {
+            if (style.line) {
+
+            }
+
+            if (style.marker && style.marker.url) {
+              if (style.marker.height && style.marker.width) {
+                if (!style.marker.anchor) {
+                  style.marker.anchor = {
+                    x: style.marker.width / 2,
+                    y: 0
+                  };
+                }
+
+                markerStyle = style.marker;
+              } else {
+                // TODO: You need to load the image and calculate the height, width, and anchor here.
+              }
+            }
+
+            if (style.polygon) {
+              polygonStyle = config.style.polygon;
+            }
+          } else {
+            config.style = {};
+          }
+
+          config.style.line = NPMap.Map[NPMap.config.api].convertLineOptions(lineStyle);
+          config.style.marker = NPMap.Map[NPMap.config.api].convertMarkerOptions(markerStyle);
+          config.style.polygon = NPMap.Map[NPMap.config.api].convertPolygonOptions(polygonStyle);
+        }
+      }
+    },{
+      event: 'removed',
+      func: function(config) {
+        usedNames.splice(_.indexOf(usedNames, config.name), 1);
+      }
+    }],
     /**
      * Gets the layer name.
      * @param {Object} config

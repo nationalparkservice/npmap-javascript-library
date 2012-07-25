@@ -506,8 +506,7 @@ define(function() {
      * Repositions the npmap-clickdot div then repositions the InfoBox. If the marker or npmap-clickdot is not in the current map bounds, it is hidden.
      */
     reposition: function() {
-      var me = this,
-          to = this.marker || this.latLng;
+      var to = this.marker || this.latLng;
 
       NPMap.Map[NPMap.config.api].positionClickDot(to);
       
@@ -515,7 +514,7 @@ define(function() {
         position();
       } else {
         // TODO: This should only hide if 'parent' is 'page'. Right now, however, the baseApi code doesn't support negative positioning of #npmap-clickdot.
-        me.hide();
+        this.hide();
       }
     },
     /**

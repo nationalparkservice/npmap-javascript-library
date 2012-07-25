@@ -2,6 +2,7 @@
   'Map/Map'
 ], function(Map) {
   var bounds,
+      currentExtent,
       map,
       max = 19,
       min = 0;
@@ -34,12 +35,13 @@
       });
     }
 
+    currentExtent = bounds;
     map = new esri.Map(NPMap.config.div, {
       extent: bounds,
       logo: false,
       showInfoWindowOnClick: false,
       slider: false,
-      wrapAround180: true
+      wrapAround180: false
     });
     
     if (NPMap.config.baseLayers) {
@@ -67,12 +69,24 @@
     dojo.connect(map, 'onClick', function(e) {
       NPMap.Event.trigger('NPMap.Map', 'click', e);
     });
+    dojo.connect(map, 'onExtentChange', function(extent, delta, zoomChanged) {
+      currentExtent = extent;
+
+      if (NPMap.InfoBox.visible) {
+        NPMap.InfoBox.reposition();
+      }
+    });
     dojo.connect(map, 'onLoad', function() {
       dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
     });
     dojo.connect(map, 'onPan', function(extent, delta) {
+      currentExtent = extent;
+
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.reposition();
+
+        console.log(extent);
+        console.log(NPMap.InfoBox.latLng);
       }
     });
 
@@ -258,11 +272,18 @@
      * @return {Object}
      */
     boundsFromApi: function(bounds) {
+      var ne = this.latLngFromApi(new esri.geometry.Point(bounds.xmax, bounds.ymax, new esri.SpatialReference({
+            wkid: 102100
+          }))),
+          sw = this.latLngFromApi(new esri.geometry.Point(bounds.xmin, bounds.ymin, new esri.SpatialReference({
+            wkid: 10200
+          })));
+
       return {
-        e: bounds.xmax,
-        n: bounds.ymax,
-        s: bounds.ymin,
-        w: bounds.xmin
+        e: ne.lng,
+        n: ne.lat,
+        s: sw.lng,
+        w: sw.lat
       };
     },
     /**
@@ -271,7 +292,7 @@
      * @return {Object}
      */
     boundsToApi: function(bounds) {
-      return new esri.geometryExtent(bounds.w, bounds.s, bounds.e, bounds.n, new esri.SpatialReference({
+      return new esri.geometry.Extent(bounds.w, bounds.s, bounds.e, bounds.n, new esri.SpatialReference({
         wkid: 102100
       }));
     },
@@ -322,15 +343,13 @@
       return line;
     },
     /**
-     * Creates an esri.geometry.Point object.
-     * @param {} latLng Where to place the marker.
+     * Creates an esri.Graphic object.
+     * @param {Object} latLng Where to place the marker.
      * @param {} options (Optional) Any additional options to apply to the marker.
-     * @param {Object} data (Optional) An object with key/value pairs of information that need to be stored with the marker. This object will be added to the marker.data property.
-     * @param {Function} clickHandler (Optional) A function to call when the marker is clicked.
      * @return {esri.geometry.Point}
      */
     createMarker: function(latLng, options, data, clickHandler) {
-
+      return new esri.Graphic(latLng, new esri.symbol.SimpleMarkerSymbol().setStyle(esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE).setColor(new dojo.Color([255,0,0,0.5])), {"Xcoord":19,"Ycoord":20,"Plant":"Mesa Mint"}, new esri.InfoTemplate("Vernal Pool Locations","Latitude: ${Ycoord}<br/>Longitude: ${Xcoord}<br/>Plant Name:${Plant}"));
     },
     /**
      * Creates an esri.geometry.Polygon object.
@@ -383,7 +402,7 @@
      * @return {Object}
      */
     getBounds: function() {
-      return map.extent;
+      return currentExtent;
     },
     /**
      * Gets the center of the map.
@@ -391,7 +410,7 @@
      * @return {esri.geometry.Point}
      */
     getCenter: function(spatialReference) {
-      var center = map.extent.getCenter();
+      var center = currentExtent.getCenter();
 
       if (spatialReference === 102100) {
         return center;
@@ -404,7 +423,9 @@
      * @return {}
      */
     getClickDotLatLng: function() {
-      
+      var divClickDot = document.getElementById('npmap-clickdot');
+
+      return esri.geometry.toMapGeometry(currentExtent, map.width, map.height, new esri.geometry.Point(parseFloat(divClickDot.style.left, 0), parseFloat(divClickDot.style.top, 0)));
     },
     /**
      * Gets the container div.
@@ -412,19 +433,6 @@
      */
     getContainerDiv: function() {
       return map.root;
-    },
-    /**
-     *
-     */
-    getExtent: function() {
-      var extent = map.extent;
-      
-      return {
-        xmax: esri.geometry.webMercatorToGeographic(extent.xmax),
-        xmin: esri.geometry.webMercatorToGeographic(extent.xmin),
-        ymax: esri.geometry.webMercatorToGeographic(extent.ymax),
-        ymin: esri.geometry.webMercatorToGeographic(extent.ymin)
-      };
     },
     /**
      * Gets a {} from a {}.
@@ -520,7 +528,13 @@
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
-      
+      console.log(map.extent);
+      console.log(currentExtent);
+      console.log(latLng);
+      console.log(currentExtent.contains(latLng));
+
+
+      return currentExtent.contains(latLng);
     },
     /**
      * Converts an {esri.geometry.Point} object to the NPMap representation of a latitude/longitude string.
@@ -597,7 +611,11 @@
      */
     positionClickDot: function(to) {
       var divClickDot = document.getElementById('npmap-clickdot'),
-          point = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, to);
+          point = esri.geometry.toScreenGeometry(currentExtent, map.width, map.height, to);
+
+      divClickDot.style.height = '5px';
+      divClickDot.style.width = '5px';
+      divClickDot.style.backgroundColor = 'red';
 
       divClickDot.style.left = point.x + 'px';
       divClickDot.style.top = point.y + 'px';

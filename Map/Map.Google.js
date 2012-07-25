@@ -440,6 +440,45 @@
       shape.setMap(map);
     },
     /**
+     * Adds a tile layer to the map.
+     * @param {Object} layer
+     * @param {Boolean} baseLayer (Optional)
+     */
+    addTileLayer: function(layer, baseLayer) {
+      baseLayer = baseLayer || false;
+
+      if (baseLayer) {
+        map.mapTypes.set(layer.name, layer);
+        map.setMapTypeId(layer.name);
+      } else {
+        map.overlayMapTypes.insertAt(0, layer);
+      }
+    },
+    /**
+     * Converts an API bounds to a NPMap bounds.
+     * @param {Object} bounds
+     * @return {Object}
+     */
+    boundsFromApi: function(bounds) {
+      var ne = bounds.getNorthEast(),
+          sw = bounds.getSouthWest();
+
+      return {
+        e: ne.lng(),
+        n: ne.lat(),
+        s: sw.lat(),
+        w: sw.lng()
+      };
+    },
+    /**
+     * Converts a NPMap bounds to an API bounds.
+     * @param {Object}
+     * @return {Object}
+     */
+    boundsToApi: function(bounds) {
+      return new google.maps.LatLngBounds(new google.maps.LatLng(bounds.s, bounds.w), new google.maps.LatLng(bounds.n, bounds.e));
+    },
+    /**
      * Zooms to the center and zoom provided. If zoom isn't provided, the map will zoom to level 17.
      * @param {google.maps.LatLng} latLng
      * @param {Number} zoom
@@ -558,6 +597,33 @@
       return polygon;
     },
     /**
+     * Creates a tile layer.
+     * @param {Object} config
+     * @param {String/Function} constructor
+     */
+    createTileLayer: function(config, constructor) {
+      var uriConstructor;
+
+      if (typeof constructor === 'string') {
+        uriConstructor = function(coord, zoom) {
+          return constructor.replace('{x}', coord.x).replace('{y}', coord.y).replace('{z}', zoom);
+        };
+      } else {
+        uriConstructor = function(coord, zoom) {
+          return constructor(coord.x, coord.y, zoom, config.url);
+        };
+      }
+
+      return new google.maps.ImageMapType({
+        getTileUrl: uriConstructor,
+        tileSize: new google.maps.Size(256, 256),
+        maxZoom: config.maxZoom || 19,
+        minZoom: config.minZoom || 0,
+        name: config.name,
+        opacity: config.opacity || 1.0
+      });
+    },
+    /**
      * Gets a shape from an event object.
      * @param {Object} e
      */
@@ -570,6 +636,13 @@
      */
     eventGetLatLng: function(e) {
       return e.latLng;
+    },
+    /**
+     * Gets the current bounds of the map.
+     * @return {Object}
+     */
+    getBounds: function() {
+      return map.getBounds();
     },
     /**
      * Gets the center {google.maps.LatLng} of the map.
