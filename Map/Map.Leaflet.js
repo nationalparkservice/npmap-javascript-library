@@ -226,17 +226,9 @@ define([
      * @return {Object}
      */
     createZoomifyLayer: function(config) {
-      if (!config.height) {
-        throw new Error('"height" is required.');
-      }
-      
-      if (!config.width) {
-        throw new Error('"width" is required.');
-      }
-
-      return new L.TileLayer.Zoomify(layerConfig.url, {
-        height: layerConfig.height,
-        width: layerConfig.width
+      return new L.TileLayer.Zoomify(config.url, {
+        height: config.height,
+        width: config.width
       });
     },
     /**

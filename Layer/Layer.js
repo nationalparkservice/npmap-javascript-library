@@ -88,7 +88,7 @@ define([
       event: 'beforeadd',
       func: function(config) {
         if (!config.name) {
-          throw new Error('All layers must have a "name".');
+          config.name = 'Layer_' + new Date().getTime();
         }
 
         if (_.indexOf(usedNames, config.name) === -1) {

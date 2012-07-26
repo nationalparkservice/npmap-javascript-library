@@ -169,20 +169,26 @@ if (typeof bean === 'undefined') {
                 require([
                   NPMap.config.server + '/Layer/Layer.' + LAYER_TYPES[layerHandlerType] + '.js'
                 ], function(layerHandler) {
-                  // TODO: Need to migrate baseLayer loads out of Map classes to here. Or migrate both baseLayer and layer loads into NPMap.Map.
-                  /*
                   if (NPMap.config.baseLayers) {
-                    for (var j = 0; j < NPMap.config.baseLayers.length; j++) {
-                      if (NPMap.config.baseLayers[j].type.toLowerCase() === layerType) {
-                        layerHandler.setBaseLayer(NPMap.config.baseLayers[j]);
+                    for (var l = 0; l < NPMap.config.baseLayers.length; l++) {
+                      var baseLayer = NPMap.config.baseLayers[l];
+
+                      if (baseLayer.type.toLowerCase() === layerHandlerType) {
+                        baseLayer.type = LAYER_TYPES[layerHandlerType];
+                        baseLayer.zIndex = 0;
+
+                        // TODO: Iterate through all layers, and if one of them has a zIndex of 0, add 1 to all of their zIndexes.
+
+                        if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
+                          layerHandler.create(baseLayer);
+                        }
                       }
                     }
                   }
-                  */
 
                   if (NPMap.config.layers) {
-                    for (var l = 0; l < NPMap.config.layers.length; l++) {
-                      var layer = NPMap.config.layers[l];
+                    for (var m = 0; m < NPMap.config.layers.length; m++) {
+                      var layer = NPMap.config.layers[m];
 
                       if (layer.type.toLowerCase() === layerHandlerType) {
                         layer.type = LAYER_TYPES[layerHandlerType];
@@ -190,7 +196,7 @@ if (typeof bean === 'undefined') {
                         if (typeof layer.visible === 'undefined' || layer.visible === true) {
                           layer.visible = true;
 
-                          layerHandler.create(NPMap.config.layers[l]);
+                          layerHandler.create(layer);
                         }
                       }
                     }
@@ -199,8 +205,8 @@ if (typeof bean === 'undefined') {
               }
 
               if (NPMap.config.modules) {
-                for (var m = 0; m < NPMap.config.modules.length; m++) {
-                  var name = NPMap.config.modules[m].name.toLowerCase();
+                for (var n = 0; n < NPMap.config.modules.length; n++) {
+                  var name = NPMap.config.modules[n].name.toLowerCase();
 
                   if (name === 'edit' || name === 'route') {
                     scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
