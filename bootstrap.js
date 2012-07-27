@@ -142,7 +142,7 @@ if (typeof bean === 'undefined') {
                   scripts = [];
 
               clearInterval(interval);
-              
+
               if (NPMap.config.baseLayers) {
                 for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
                   var baseLayerType = NPMap.config.baseLayers[i].type;
@@ -173,7 +173,7 @@ if (typeof bean === 'undefined') {
                     for (var l = 0; l < NPMap.config.baseLayers.length; l++) {
                       var baseLayer = NPMap.config.baseLayers[l];
 
-                      if (baseLayer.type.toLowerCase() === layerHandlerType) {
+                      if (baseLayer.type && baseLayer.type.toLowerCase() === layerHandlerType) {
                         baseLayer.type = LAYER_TYPES[layerHandlerType];
                         baseLayer.zIndex = 0;
 
