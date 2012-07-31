@@ -47,9 +47,7 @@
       // An overlay object to use to convert points to latLngs and back.
       overlay = null,
       // Is there at least one tiled layer in the map?
-      tiled = NPMap.Map.hasTiledLayer(),
-      // What should NPMap use to set the initial center and zoom level?
-      use = 'bbox';
+      tiled = NPMap.Map.hasTiledLayer();
   
   /**
    * Converts a 0-255 opacity to 0-1.0.
@@ -67,10 +65,6 @@
       e.shape = shape;
       NPMap.Event.trigger('NPMap.Map', 'shapeclick', e);
     });
-  }
-
-  if (NPMap.config.center && NPMap.config.zoom) {
-    use = 'centerAndZoom';
   }
   
   if (NPMap.config.baseLayers) {
@@ -149,16 +143,10 @@
     streetViewControl: false,
     zoomControl: false
   };
-  
-  if (use === 'bbox') {
-    initialBounds = new google.maps.LatLngBounds(new google.maps.LatLng(29.713, -111), new google.maps.LatLng(46.82, -79));
-    map = new google.maps.Map(document.getElementById(NPMap.config.div), mapConfig);
-    map.fitBounds(initialBounds);
-  } else {
-    mapConfig.center = initialCenter = new google.maps.LatLng(NPMap.config.center.lat, NPMap.config.center.lng);
-    mapConfig.zoom = initialZoom = NPMap.config.zoom;
-    map = new google.maps.Map(document.getElementById('npmap'), mapConfig);
-  }
+
+  mapConfig.center = initialCenter = (NPMap.config.center ? new google.maps.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new google.maps.LatLng(39, -96));
+  mapConfig.zoom = initialZoom = (NPMap.config.zoom ? NPMap.config.zoom : 4);
+  map = new google.maps.Map(document.getElementById('npmap'), mapConfig);
   
   $.each(NPMap.config.baseLayers, function(i, v) {
     if (v.code != 'roadmap' || v.code != 'satellite' || v.code != 'terrain') {
@@ -168,6 +156,9 @@
       }));
     }
   });
+
+  /* wax.g */
+  wax.g={};wax.g.bwdetect=function(b,d){var d=d||{},e=d.png||".png128",a=d.jpg||".jpg70";if(!b.mapTypes["mb-low"]){for(var c=b.mapTypes.mb,g={tiles:[],scheme:c.options.scheme,blankImage:c.options.blankImage,minzoom:c.minZoom,maxzoom:c.maxZoom,name:c.name,description:c.description},f=0;f<c.options.tiles.length;f++)g.tiles.push(c.options.tiles[f].replace(".png",e).replace(".jpg",a));m.mapTypes.set("mb-low",new wax.g.connector(g))}return wax.bwdetect(d,function(a){b.setMapTypeId(a?"mb":"mb-low")})};wax=wax||{};wax.g=wax.g||{};wax.g.interaction=function(){function b(){d=!0}var d=!1,e,a;return wax.interaction().attach(function(c){if(!arguments.length)return a;a=c;google.maps.event.addListener(a,"tileloaded",b);google.maps.event.addListener(a,"idle",b)}).detach(function(){google.maps.event.removeListener(a,"tileloaded",b);google.maps.event.removeListener(a,"idle",b)}).parent(function(){return a.getDiv()}).grid(function(){if(d||!e){e=[];var c=a.getZoom();wax.u.offset(a.getDiv());var b=function(a){if(a.interactive)for(var b in a.cache)if(b.split("/")[0]==c){var d=wax.u.offset(a.cache[b]);e.push([d.top,d.left,a.cache[b]])}},f;for(f in a.mapTypes)b(a.mapTypes[f]);a.overlayMapTypes.forEach(b)}return e})};
   
   var interval = setInterval(function() {
     bounds = map.getBounds();
@@ -598,29 +589,58 @@
     },
     /**
      * Creates a tile layer.
-     * @param {Object} config
      * @param {String/Function} constructor
+     * @param {Object} options (Optional)
      */
-    createTileLayer: function(config, constructor) {
-      var uriConstructor;
+    createTileLayer: function(constructor, options) {
+      var getSubdomain = null,
+          uriConstructor;
+
+      options = options || {};
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
 
       if (typeof constructor === 'string') {
         uriConstructor = function(coord, zoom) {
-          return constructor.replace('{x}', coord.x).replace('{y}', coord.y).replace('{z}', zoom);
+          constructor = constructor.replace('{x}', coord.x).replace('{y}', coord.y).replace('{z}', zoom);
+
+          if (getSubdomain) {
+            constructor = constructor.replace('{{s}}', getSubdomain());
+          }
+          
+          return constructor;
         };
       } else {
         uriConstructor = function(coord, zoom) {
-          return constructor(coord.x, coord.y, zoom, config.url);
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return constructor(coord.x, coord.y, zoom, options.url ? options.url : null, subdomain);
         };
       }
 
       return new google.maps.ImageMapType({
         getTileUrl: uriConstructor,
         tileSize: new google.maps.Size(256, 256),
-        maxZoom: config.maxZoom || 19,
-        minZoom: config.minZoom || 0,
-        name: config.name,
-        opacity: config.opacity || 1.0
+        maxZoom: options.maxZoom || 19,
+        minZoom: options.minZoom || 0,
+        name: options.name,
+        opacity: options.opacity || 1.0
       });
     },
     /**

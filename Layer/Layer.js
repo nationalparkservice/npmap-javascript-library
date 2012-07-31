@@ -41,7 +41,7 @@ define([
           type: 'raster'
         },
         TileStream: {
-          clickable: true,
+          clickable: false, // It's clickable, but handled by wax.
           type: 'raster'
         },
         Xml: {

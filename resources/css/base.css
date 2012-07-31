@@ -11,7 +11,7 @@
 
 /* Core elements */
 #npmap {background-color:#EBF2DA;font-size:13px;line-height:16px;}
-#npmap-map {bottom:0;left:0;position:absolute;right:0;top:0;}
+#npmap-map {bottom:0;left:0;position:absolute !important;right:0;top:0;}
 #npmap-modules {-moz-box-shadow:3px 0 6px #D2D2D2;-webkit-box-shadow:3px 0 6px #D2D2D2;background-color:#F9F7F1;box-shadow:3px 0 6px #D2D2D2;bottom:0;display:none;left:0;position:absolute;top:0;width:350px;}
 #npmap-toolbar {background-color:#908D7C;left:0;height:28px;position:absolute;right:0;top:0;z-index:30;} /*border-bottom-left-radius:3px;border-bottom-right-radius:3px;*/
 

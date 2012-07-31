@@ -1,4 +1,6 @@
-﻿define([
+﻿
+
+define([
   'Map/Map'
 ], function(Map) {
   var bounds,
@@ -84,11 +86,11 @@
 
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.reposition();
-
-        console.log(extent);
-        console.log(NPMap.InfoBox.latLng);
       }
     });
+
+    /* wax.esri */
+    wax.esri=wax.esri||{};wax.esri.interaction=function(){function a(){b=!0}var b=!1,d,c,e;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;e=[dojo.connect(c,"onExtentChange",a),dojo.connect(c,"onUpdateEnd",a),dojo.connect(c,"onReposition",a)]}).detach(function(){for(var a=0;a<e.length;a++)dojo.disconnect(e[a])}).parent(function(){return c.root}).grid(function(){if(b||!d){d=[];for(var a=0;a<c.layerIds.length;a++)for(var e=c.getLayer(c.layerIds[a])._div.getElementsByTagName("img"),f=0;f<e.length;f++){var g=wax.u.offset(e[f]);d.push([g.top,g.left,e[f]])}}return d})};dojo.declare("wax.esri.connector",esri.layers.TiledMapServiceLayer,{constructor:function(a){a=a||{};this.options={tiles:a.tiles,minzoom:a.minzoom||0,maxzoom:a.maxzoom||22};this.spatialReference=new esri.SpatialReference({wkid:3857});this.fullExtent=this.initialExtent=new esri.geometry.Extent(-2.0037508342789E7,-2.0037508342789E7,2.0037508342789E7,2.0037508342789E7,this.spatialReference);for(var a=[],b=this.options.minzoom;b<=this.options.maxzoom;b++)a.push({level:b,scale:5.91657527591555E8/Math.pow(2,b),resolution:156543.033928/Math.pow(2,b)});this.tileInfo=new esri.layers.TileInfo({spatialReference:{wkid:"3857"},rows:256,cols:256,origin:{x:-2.0037508342789E7,y:2.0037508342789E7},lods:a});this.loaded=!0;this.onLoad(this)},getTileUrl:function(a,b,d){console.log(a);return this.options.tiles[parseInt(Math.pow(2,a)*b+d,10)%this.options.tiles.length].replace("{z}",a).replace("{x}",d).replace("{y}",b)}});
 
     var interval = setInterval(function() {
       if (NPMap.Map.Esri) {
@@ -99,7 +101,7 @@
 
         Map._init();
       }
-    }, 10);
+    }, 100);
   });
   dojo.ready(function() {
     dojo.declare('esri.layers.WebTileLayer', [esri.layers.TiledMapServiceLayer], {
@@ -363,19 +365,48 @@
     },
     /**
      * Creates a tile layer.
-     * @param {Object} config
      * @param {String/Function} constructor
+     * @param {Object} options (Optional)
      */
-    createTileLayer: function(config, constructor) {
-      var uriConstructor;
+    createTileLayer: function(constructor, options) {
+      var getSubdomain = null,
+          uriConstructor;
+
+      options = options || {};
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
 
       if (typeof constructor === 'string') {
         uriConstructor = function(level, row, column) {
-          return constructor.replace('{x}', column).replace('{y}', row).replace('{z}', level);
+          constructor = constructor.replace('{{x}}', column).replace('{{y}}', row).replace('{{z}}', level);
+
+          if (getSubdomain) {
+            constructor = constructor.replace('{{s}}', getSubdomain());
+          }
+          
+          return constructor;
         };
       } else {
         uriConstructor = function(level, row, column) {
-          return constructor(column, row, level, config.url);
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return constructor(column, row, level, options.url ? options.url : null, subdomain);
         };
       }
 
@@ -528,11 +559,12 @@
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
+      /*
       console.log(map.extent);
       console.log(currentExtent);
       console.log(latLng);
       console.log(currentExtent.contains(latLng));
-
+      */
 
       return currentExtent.contains(latLng);
     },

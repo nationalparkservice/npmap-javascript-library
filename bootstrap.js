@@ -109,7 +109,7 @@ if (typeof bean === 'undefined') {
       ], function(Event, Util) {
         Util.injectCss(NPMap.config.server + '/resources/css/base.css');
         
-        if (NPMap.config.api === 'leaflet') {
+        if (NPMap.config.api.toLowerCase() === 'leaflet') {
           Util.injectCss('http://www.nps.gov/npmap/scripts/libs/leaflet/leaflet.css');
               
           // http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/

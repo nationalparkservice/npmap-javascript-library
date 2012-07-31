@@ -19,7 +19,7 @@
 
       var layer = NPMap.Map.createZoomifyLayer(config);
       
-      NPMap.Map.addZoomifyLayer(layer);
+      NPMap.Map.addTileLayer(layer);
       NPMap.Event.trigger('NPMap.Layer', 'added', config);
     }
   };

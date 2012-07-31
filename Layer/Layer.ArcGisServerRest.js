@@ -1,8 +1,11 @@
 ﻿// TODO: Start using underscore's templating (or mustache.js) to clean this code up.
 define([
+  'Event',
+  'InfoBox',
   'Layer/Layer',
+  'Map/Map',
   'Util/Util.ArcGisServerRest'
-], function(Layer, utilArcGisServerRest) {
+], function(Event, InfoBox, Layer, Map, utilArcGisServerRest) {
   var
       // The preserved HTML string from the #npmap-infobox-content div.
       backContent = null,
@@ -20,7 +23,7 @@ define([
    */
   function buildHtmlForLayer(layer) {
     var html = '<ul>',
-        layerConfig = NPMap.Map.getLayerByName(layer.layerName),
+        layerConfig = Map.getLayerByName(layer.layerName),
         subLayers = [];
         
     $.each(layer.data.results, function(i, result) {
@@ -63,7 +66,7 @@ define([
         var t;
 
         if (layerConfig.identify && layerConfig.identify.title) {
-          t = NPMap.InfoBox._build(layerConfig, result, 'title');
+          t = InfoBox._build(layerConfig, result, 'title');
               
           if (!t) {
             t = result[subLayer.displayFieldName];
@@ -108,7 +111,7 @@ define([
     return layerName.replace(' ', '') + '-' + layerId + '-' + objectId;
   }
   
-  NPMap.Event.add('NPMap.InfoBox', 'hide', function() {
+  Event.add('NPMap.InfoBox', 'hide', function() {
     NPMap.Layer.ArcGisServerRest._identifyResult = null;
   });
 
@@ -198,12 +201,12 @@ define([
       }
       
       if (count > 0) {
-        NPMap.Map.showProgressBar(value);
+        Map.showProgressBar(value);
 
         var interval = setInterval(function() {
           value = value + 0.1;
 
-          NPMap.Map.updateProgressBar(value);
+          Map.updateProgressBar(value);
           
           if (value < 100) {
             if (count === 0) {
@@ -214,13 +217,13 @@ define([
               infobox = me._buildInfoBox(results);
               me._identifyResult = results;
               
-              NPMap.Map.hideProgressBar(value);
-              NPMap.InfoBox.show(infobox.content, infobox.title);
+              Map.hideProgressBar(value);
+              InfoBox.show(infobox.content, infobox.title);
             }
           } else {
             clearInterval(interval);
-            NPMap.Map.hideProgressBar();
-            NPMap.InfoBox.show('The identify operation is taking too long. Zoom in further and try again.', 'Sorry!');
+            Map.hideProgressBar();
+            InfoBox.show('The identify operation is taking too long. Zoom in further and try again.', 'Sorry!');
           }
         }, 5);
       }
@@ -232,20 +235,20 @@ define([
     _handleClick: function(e) {
       if (identifyLayers > 0) {
         var el = document.getElementById('npmap-map'),
-            latLngApi = NPMap.Map[NPMap.config.api].eventGetLatLng(e),
-            latLng = NPMap.Map.latLngFromApi(latLngApi);
+            latLngApi = Map[NPMap.config.api].eventGetLatLng(e),
+            latLng = Map.latLngFromApi(latLngApi);
 
-        NPMap.InfoBox.hide();
-        NPMap.InfoBox.latLng = latLngApi;
-        NPMap.Map[NPMap.config.api].positionClickDot(latLngApi);
-        this._doIdentify(latLng, el.offsetHeight, el.offsetWidth, NPMap.Map.getBounds());
+        InfoBox.hide();
+        InfoBox.latLng = latLngApi;
+        Map[NPMap.config.api].positionClickDot(latLngApi);
+        this._doIdentify(latLng, el.offsetHeight, el.offsetWidth, Map.getBounds());
       }
     },
     /**
      * Called when the user hits the "<<Back to List" link in an InfoBox.
      */
     _infoBoxBack: function() {
-      NPMap.InfoBox.show(backContent, backTitle);
+      InfoBox.show(backContent, backTitle);
 
       this._identifyResult = identifyResults;
     },
@@ -262,7 +265,7 @@ define([
           }],
           attributes,
           ids = id.split('-'),
-          layer = NPMap.Map.getLayerByName(name, NPMap.config.layers),
+          layer = Map.getLayerByName(name, NPMap.config.layers),
           me = this,
           results,
           subLayer,
@@ -342,7 +345,7 @@ define([
         actions = [];
       }
 
-      NPMap.InfoBox.show(NPMap.InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
+      InfoBox.show(InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
     },
     /**
      * Creates a GeoJson layer.
@@ -352,7 +355,7 @@ define([
       var tileLayer,
           uriConstructor = config.url + '/tile/{z}/{y}/{x}';
           
-      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+      Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       if (!config.tiled) {
         uriConstructor = function(x, y, z, url) {
@@ -379,23 +382,23 @@ define([
       }
 
       config.layersStatus = config.layersStatus || config.layers;
-      tileLayer = NPMap.Map[NPMap.config.api].createTileLayer(config, uriConstructor);
+      tileLayer = Map[NPMap.config.api].createTileLayer(config, uriConstructor);
       config.api = tileLayer;
       tileLayer.npmap = {
         layerName: config.name,
         layerType: config.type
       };
 
-      NPMap.Map.addTileLayer(tileLayer);
-      NPMap.Event.trigger('NPMap.Layer', 'added', config);
+      Map.addTileLayer(tileLayer);
+      Event.trigger('NPMap.Layer', 'added', config);
     },
     /**
      * Hides the layer.
      * @param {Object} config
      */
     hide: function(config) {
-      NPMap.InfoBox.hide();
-      NPMap.Map[NPMap.config.api].hideTileLayer(config);
+      InfoBox.hide();
+      Map[NPMap.config.api].hideTileLayer(config);
 
       if (config.identifiable === true) {
         identifyLayers--;
@@ -409,7 +412,7 @@ define([
      * @param {Object} config
      */
     reload: function(config) {
-      NPMap.InfoBox.hide();
+      InfoBox.hide();
       this.remove(config);
 
       config.visible = true;
@@ -420,8 +423,8 @@ define([
      *
      */
     remove: function(config) {
-      NPMap.InfoBox.hide();
-      NPMap.Map[NPMap.config.api].removeTileLayer(config);
+      InfoBox.hide();
+      Map[NPMap.config.api].removeTileLayer(config);
 
       if (config.identifiable === true) {
         identifyLayers--;
@@ -432,15 +435,15 @@ define([
       delete config.api;
       delete config.identifiable;
 
-      NPMap.Event.trigger('NPMap.Layer', 'removed', config);
+      Event.trigger('NPMap.Layer', 'removed', config);
     },
     /**
      * Shows the layer.
      * @param {Object} config
      */
     show: function(config) {
-      NPMap.InfoBox.hide();
-      NPMap.Map[NPMap.config.api].showTileLayer(config);
+      InfoBox.hide();
+      Map[NPMap.config.api].showTileLayer(config);
 
       if (config.identifiable === true) {
         identifyLayers++;
@@ -493,7 +496,7 @@ define([
         }
 
         if (!on) {
-          NPMap.InfoBox.hide();
+          InfoBox.hide();
         }
       }
     }

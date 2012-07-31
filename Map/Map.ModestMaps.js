@@ -3,15 +3,18 @@
 // TODO: Hook up attribution.
 
 define([
+  'Event',
   'Map/Map'
-], function(Map) {
+], function(Event, Map) {
+  wax.mm=wax.mm||{};wax.mm.interaction=function(){function e(){h=!0}var h=!1,f,a,c="zoomed panned centered extentset resized drawn".split(" ");return wax.interaction().attach(function(d){if(!arguments.length)return a;a=d;for(var b=0;b<c.length;b++)a.addCallback(c[b],e)}).detach(function(){for(var d=0;d<c.length;d++)a.removeCallback(c[d],e)}).parent(function(){return a.parent}).grid(function(){var d=a.getLayerAt(0).levels[Math.round(a.getZoom())];if(h||!(void 0!==f&&f.length)){var b=a.getLayerAt(0).tiles,c=[],g;for(g in b)if(b[g].parentNode===d){var e=wax.u.offset(b[g]);c.push([e.top,e.left,b[g]])}f=c}return f})};
+
   var
       // The map div.
       $mapDiv = $('#' + NPMap.config.div).parent(),
       // The base layer to initialize the map with.
       baseLayer,
-      // Default center of the map.
-      center = new MM.Location(39, -98),
+      // The current center.
+      center,
       // The initial center of the map.
       initialCenter,
       // The initial zoom level of the map.
@@ -39,7 +42,7 @@ define([
       // The last zoom level.
       oldZoom,
       // The current zoom level.
-      zoom = 2;
+      zoom;
       
   /**
    * Helper function for running easey.
@@ -49,7 +52,7 @@ define([
    * @param {Function} callback (Optional)
    */
   function runEasey(latLng, zoom, time, callback) {
-    var panned = !NPMap.Map.latLngsAreEqual(NPMap.modestmaps.map.latLngFromApi(map.getCenter()), NPMap.modestmaps.map.latLngFromApi(latLng)),
+    var panned = !NPMap.Map.latLngsAreEqual(NPMap.Map.ModestMaps.latLngFromApi(map.getCenter()), NPMap.Map.ModestMaps.latLngFromApi(latLng)),
         zoomed = map.getZoom() !== zoom;
         
     time = time || 200;
@@ -63,15 +66,31 @@ define([
     }
   }
   
-  center = initialCenter = NPMap.config.center ? new MM.Location(NPMap.config.center.lat, NPMap.config.center.lng) : center;
+  center = initialCenter = NPMap.config.center ? new MM.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new MM.Location(39, -96);
   map = new MM.Map(NPMap.config.div, [], null, [
     easey.DragHandler(),
     easey.TouchHandler(),
     easey.MouseWheelHandler(),
     easey.DoubleClickHandler()
   ]);
-  zoom = initialZoom = oldZoom = NPMap.config.zoom || zoom;
+  zoom = initialZoom = oldZoom = NPMap.config.zoom || 4;
   
+  if (!NPMap.config.baseLayers) {
+    NPMap.config.baseLayers = [{
+      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
+      id: 'mapbox.mapbox-light',
+      name: 'MapBox Streets',
+      type: 'TileStream',
+      visible: true
+    }];
+  }
+
+  if (NPMap.config.layers && (NPMap.config.layers.length === numberZIndexLayers)) {
+    NPMap.config.layers.sort(function(a, b) {
+      return a.zIndex - b.zIndex;
+    });
+  }
+
   if (NPMap.config.restrictZoom) {
     if (NPMap.config.restrictZoom.max) {
       max = NPMap.config.restrictZoom.max;
@@ -82,44 +101,7 @@ define([
     }
   }
   
-  if (NPMap.config.baseLayers) {
-    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var layer = NPMap.config.baseLayers[i];
-      
-      if (typeof layer.visible === 'undefined' || layer.visible === true) {
-        NPMap.Util.safeLoad('NPMap.modestmaps.layers.' + layer.type, function() {
-          NPMap.modestmaps.layers[layer.type].addLayer(layer);
-        });
-        
-        baseLayer = true;
-        
-        break;
-      }
-    }
-  }
-  
-  if (!baseLayer) {
-    baseLayer = {
-      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
-      id: 'mapbox.mapbox-streets',
-      name: 'MapBox Streets',
-      type: 'TileStream',
-      visible: true
-    };
-    NPMap.config.baseLayers = NPMap.config.baseLayers || [];
-    
-    NPMap.config.baseLayers.push(baseLayer);
-    NPMap.Util.safeLoad('NPMap.modestmaps.layers.TileStream', function() {
-      NPMap.modestmaps.layers.TileStream.addLayer(baseLayer);
-    });
-  }
-  
-  if (NPMap.config.layers && NPMap.config.layers.length === numberZIndexLayers) {
-    NPMap.config.layers.sort(function(a, b) {
-      return a.zIndex - b.zIndex;
-    });
-  }
-  
+  // Setup zoom box.
   (function() {
     var box = document.createElement('div'),
         mouseDownPoint = null,
@@ -196,9 +178,7 @@ define([
     box.id = 'npmap-zoombox';
     box.style.cssText = 'background:rgba(255,255,255,0.25);border:1px dashed #888;display:none;height:0;left:0;margin:0;padding:0;position:absolute;top:0;width:0;z-index:29;';
     
-    NPMap.Util.safeLoad('NPMap.Map', function() {
-      NPMap.Map.addElementToMapDiv(box);
-    });
+    Map.addElementToMapDiv(box);
     com.modestmaps.addEvent(map.parent, 'mousedown', mouseDown);
   })();
   
@@ -212,7 +192,7 @@ define([
         NPMap.InfoBox.hide();
       }
 
-      NPMap.Event.trigger('NPMap.Map', 'zoomchanged');
+      Event.trigger('NPMap.Map', 'zoomchanged');
     }
     
     if (NPMap.InfoBox.visible) {
@@ -239,6 +219,13 @@ define([
     // The MM.Map object. This reference should be used to access any of the Modest Maps JS functionality that can't be done through NPMap's API.
     map: map,
     /**
+     * Adds a tile layer to the map.
+     * @param {Object} layer
+     */
+    addTileLayer: function(layer) {
+      map.insertLayerAt(0, layer);
+    },
+    /**
      * Sets the center and zoom level of the map.
      * @param {Object} center
      * @param {Number} zoom
@@ -246,6 +233,55 @@ define([
      */
     centerAndZoom: function(center, zoom, callback) {
       runEasey(center, zoom, 200, callback);
+    },
+    /**
+     * Creates a tile layer.
+     * @param {String/Function} constructor
+     * @param {Object} options (Optional)
+     */
+    createTileLayer: function(constructor, options) {
+      var getSubdomain = null,
+          uriConstructor;
+
+      options = options || {};
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
+
+      if (typeof constructor === 'string') {
+        uriConstructor = function(coord) {
+          constructor = constructor.replace('{x}', coord.column).replace('{y}', coord.row).replace('{z}', coord.zoom);
+
+          if (getSubdomain) {
+            constructor = constructor.replace('{{s}}', getSubdomain());
+          }
+          
+          return constructor;
+        };
+      } else {
+        uriConstructor = function(coord) {
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return constructor(coord.column, coord.row, coord.zoom, options.url ? options.url : null, subdomain);
+        };
+      }
+
+      return new MM.Layer(new MM.MapProvider(uriConstructor));
     },
     /**
      * Gets the center of the map.
@@ -327,7 +363,18 @@ define([
      * @return {String} A latitude/longitude string in "latitude,longitude" format.
      */
     latLngFromApi: function(latLng) {
-      return latLng.lat + ',' + latLng.lon;
+      return {
+        lat: latLng.lat,
+        lng: latLng.lon
+      };
+    },
+    /**
+     * Converts an NPMap lat/lng string ("latitude,longitude") to a MM.Location object.
+     * @param latLng {Object} (Required) The NPMap lat/lng object to convert.
+     * @return {MM.Location}
+     */
+    latLngToApi: function(latLng) {
+      return new MM.Location(latLng.lat, latLng.lon);
     },
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
@@ -352,16 +399,6 @@ define([
         left: to.x + 'px',
         top: to.y + 'px'
       });
-    },
-    /**
-     * Converts an NPMap lat/lng string ("latitude,longitude") to a MM.Location object.
-     * @param latLng {String} (Required) The NPMap lat/lng string to convert.
-     * @return {MM.Location}
-     */
-    latLngToApi: function(latLng) {
-      latLng = latLng.split(',');
-      
-      return new MM.Location(parseFloat(latLng[0]), parseFloat(latLng[1]));
     },
     /**
      * Switches to a new set of layers.

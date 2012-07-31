@@ -2,7 +2,7 @@
   'Map/Map'
 ], function(Map) {
   var
-      // An array of the default base layers for the Bing baseAPI.
+      // An array of the default base layers for Bing.
       DEFAULT_BASE_LAYERS = [{
         code: 'aerial',
         type: 'Aerial'
@@ -21,15 +21,12 @@
       }],
       // The activeBaseLayer object.
       activeBaseLayer,
-      // The bounds to initialize the map with.
-      bounds = [
-        '29.713 -111',
-        '46.82 -79'
-      ],
-      // Is there at least one clustered layer in the map?
-      clustered = NPMap.Map.hasClusteredLayer(),
       // Has the map been double-clicked?
       doubleClicked = false,
+      // Is there at least one clustered layer in the map?
+      hasClustered = NPMap.Map.hasClusteredLayer(),
+      // Is there at least one tiled layer in the map?
+      hasTiled = NPMap.Map.hasTiledLayer(),
       // The initial center lat/lng of the map.
       initialCenter,
       // The initial zoom of the map.
@@ -54,10 +51,7 @@
       oldTarget = null,
       // The old zoom level of the map.
       oldZoom,
-      // Is there at least one tiled layer in the map?
-      tiled = NPMap.Map.hasTiledLayer(),
-      // The type of bounds config to initialize the map with.
-      use = 'bbox',
+      
       // Has the map view changed?
       viewChanged = false;
 
@@ -110,10 +104,6 @@
     return rgb;
   }
   
-  if (NPMap.config.center && NPMap.config.zoom) {
-    use = 'centerAndZoom';
-  }
-  
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
       if (NPMap.config.baseLayers[i].visible) {
@@ -150,8 +140,7 @@
   }
   
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
-    bounds: use === 'bbox' ? Microsoft.Maps.LocationRect.fromCorners(new Microsoft.Maps.Location(parseFloat(bounds[0].split(' ')[0]), parseFloat(bounds[0].split(' ')[1])), new Microsoft.Maps.Location(parseFloat(bounds[1].split(' ')[0]), parseFloat(bounds[1].split(' ')[1]))) : null,
-    center: use === 'centerAndZoom' ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : null,
+    center: NPMap.config.center ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new Microsoft.Maps.Location(39, -96),
     credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
     disableKeyboardInput: NPMap.config.tools && !NPMap.config.tools.keyboard ? true : false,
     mapTypeId: mapTypeId,
@@ -159,11 +148,11 @@
     showDashboard: false,
     showLogo: false,
     showScalebar: false,
-    zoom: use === 'centerAndZoom' ? NPMap.config.zoom : null
+    zoom: NPMap.config.zoom || 4
   });
   initialCenter = map.getCenter();
   initialZoom = map.getZoom();
-  
+
   if (NPMap.config.restrictZoom) {
     if (NPMap.config.restrictZoom.max) {
       if (NPMap.config.restrictZoom.max === 'auto') {
@@ -280,7 +269,7 @@
     viewChanged = true;
     
     if (NPMap.InfoBox.visible) {
-      if (clustered === true || tiled === true) {
+      if (hasClustered || hasTiled) {
         var zoom = map.getZoom(),
             zoomRange = map.getZoomRange();
           
@@ -559,19 +548,48 @@
     },
     /**
      * Creates a tile layer.
-     * @param {Object} config
      * @param {String/Function} constructor
+     * @param {Object} options (Optional)
      */
-    createTileLayer: function(config, constructor) {
-      var uriConstructor;
+    createTileLayer: function(constructor, options) {
+      var getSubdomain = null,
+          uriConstructor;
+
+      options = options || {};
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
 
       if (typeof constructor === 'string') {
         uriConstructor = function(tile) {
-          return constructor.replace('{x}', tile.x).replace('{y}', tile.y).replace('{z}', tile.levelOfDetail);
+          constructor = constructor.replace('{{x}}', tile.x).replace('{{y}}', tile.y).replace('{{z}}', tile.levelOfDetail);
+
+          if (getSubdomain) {
+            constructor = constructor.replace('{{s}}', getSubdomain());
+          }
+
+          return constructor;
         };
       } else {
         uriConstructor = function(tile) {
-          return constructor(tile.x, tile.y, tile.levelOfDetail, config.url);
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return constructor(tile.x, tile.y, tile.levelOfDetail, options.url ? options.url : null, subdomain);
         };
       }
 
@@ -579,7 +597,7 @@
         mercator: new Microsoft.Maps.TileSource({
           uriConstructor: uriConstructor
         }),
-        opacity: config.opacity || 1
+        opacity: options.opacity || 1
       });
     },
     /**

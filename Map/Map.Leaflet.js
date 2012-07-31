@@ -2,24 +2,20 @@
 define([
   'Map/Map'
 ], function(Map) {
+  wax.leaf=wax.leaf||{};wax.leaf.interaction=function(){function e(){g=!0}var g=!1,f,c;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.on(d[a],e)}).detach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.off(d[a],e)}).parent(function(){return c._container}).grid(function(){if(!g&&f)return f;var b=c._layers,d=[],a;for(a in b)if(b[a]._tiles)for(var e in b[a]._tiles){var h=wax.u.offset(b[a]._tiles[e]);d.push([h.top,h.left,b[a]._tiles[e]])}return f=d})};
+
   var
       // The base layer to initialize the map with.
       baseLayer,
       // The center {L.LatLng} to initialize the map with.
-      center = NPMap.config.center,
+      center = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
       // The {L.Map} object.
       map,
       // The map config object.
-      mapConfig = NPMap.config.mapConfig || {},
+      mapConfig = {},
       // The zoom level to initialize the map with.
-      zoom = (function() {
-        if (typeof NPMap.config.zoom === 'undefined') {
-          return 4;
-        } else {
-          return NPMap.config.zoom;
-        }
-      })();
-      
+      zoom = NPMap.config.zoom ? NPMap.config.zoom : 4;
+
   // Simple projection for "flat" maps. - https://github.com/CloudMade/Leaflet/issues/210#issuecomment-3344944
   // TODO: This should be contained in Zoomify layer handler.
   L.Projection.NoWrap = {
@@ -34,6 +30,14 @@ define([
     code: 'Direct',
     projection: L.Projection.NoWrap,
     transformation: new L.Transformation(1, 0, 1, 0)
+  });
+  L.TileLayer.Simple = L.TileLayer.extend({
+    options: {
+      errorTileUrl: NPMap.config.server + '/resources/img/blank-tile.png'
+    },
+    getTileUrl: function(xy, z) {
+      return this._url(xy, z);
+    }
   });
   L.TileLayer.Zoomify = L.TileLayer.extend({
     options: {
@@ -140,24 +144,18 @@ define([
     }
   });
   
-  if (!center) {
-    center = new L.LatLng(40.78054143186031, -99.931640625);
-  } else {
-    center = new L.LatLng(center.lat, center.lng);
-  }
-  
   mapConfig.attributionControl = false;
   mapConfig.center = center;
   mapConfig.zoom = zoom;
   mapConfig.zoomControl = false;
-  
+
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
       var layer = NPMap.config.baseLayers[i];
       
       if (layer.visible) {
-        NPMap.Util.safeLoad('NPMap.leaflet.layers.' + layer.type, function() {
-          NPMap.leaflet.layers[layer.type].addLayer(layer);
+        NPMap.Util.safeLoad('NPMap.Layer.' + layer.type, function() {
+          NPMap.Layer[layer.type].create(layer);
         });
         
         baseLayer = true;
@@ -171,6 +169,17 @@ define([
         break;
       }
     }
+  } else {
+    // TODO: Initialize the map with a blank baseLayer.
+
+    /*
+    NPMap.config.baseLayers = [{
+      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
+      maxZoom: 17,
+      type: 'TileStream',
+      url: 'http://{{s}}.tiles.mapbox.com/v3/mapbox.mapbox-light/{{z}}/{{x}}/{{y}}.png'
+    }];
+    */
   }
   
   if (typeof NPMap.config.restrictZoom !== 'undefined') {
@@ -189,7 +198,7 @@ define([
   map = new L.Map(NPMap.config.div, mapConfig);
   
   if (!baseLayer) {
-    baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-streets/{z}/{x}/{y}.png', {
+    baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png', {
       attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
       maxZoom: 17
     });
@@ -206,11 +215,14 @@ define([
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
     map: map,
     /**
-     * Adds a Zoomify layer to the map.
+     * Adds a tile layer to the map.
      * @param {Object} layer
      */
-    addZoomifyLayer: function(layer) {
+    addTileLayer: function(layer) {
       map.addLayer(layer);
+    },
+    center: function(latLng) {
+      this.centerAndZoom(latLng, this.getZoom());
     },
     /**
      * Zooms to the center and zoom provided. If zoom isn't provided, the map will zoom to level 17.
@@ -219,6 +231,55 @@ define([
      */
     centerAndZoom: function(latLng, zoom) {
       map.setView(latLng, zoom);
+    },
+    /**
+     * Creates a tile layer.
+     * @param {String/Function} constructor
+     * @param {Object} options (Optional)
+     */
+    createTileLayer: function(constructor, options) {
+      var getSubdomain = null,
+          uriConstructor;
+
+      options = options || {};
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
+
+      if (typeof constructor === 'string') {
+        uriConstructor = function(xy, z) {
+          constructor = constructor.replace('{{x}}', xy.x).replace('{{y}}', xy.y).replace('{{z}}', z);
+
+          if (getSubdomain) {
+            constructor = constructor.replace('{{s}}', getSubdomain());
+          }
+          
+          return constructor;
+        };
+      } else {
+        uriConstructor = function(xy, z) {
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return constructor(xy.x, xy.y, z, options.url ? options.url : null, subdomain);
+        };
+      }
+
+      return new L.TileLayer.Simple(uriConstructor);
     },
     /**
      * Creates a Zoomify layer.
@@ -276,12 +337,23 @@ define([
       }
     },
     /**
-     * Converts a {L.LatLng} to the NPMap representation of a latitude/longitude string.
-     * @param latLng {L.LatLng} The object to convert to a string.
-     * @return {String} A latitude/longitude string in "latitude,longitude" format.
+     * Converts a {L.LatLng} to a NPMap lat/lng object.
+     * @param latLng {L.LatLng} The object to convert.
+     * @return {Object} An NPMap lat/lng object.
      */
     latLngFromApi: function(latLng) {
-      return latLng.lat + ',' + latLng.lng;
+      return {
+        lat: latLng.lat,
+        lng: latLng.lng
+      };
+    },
+    /**
+     * Converts a lat/lng object to a L.LatLng object.
+     * @param {Object} latLng The lat/lng to convert.
+     * @return {Object}
+     */
+    latLngToApi: function(latLng) {
+      return new L.LatLng(latLng.lat, latLng.lng);
     },
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
@@ -330,15 +402,6 @@ define([
       }
       
       // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.
-    },
-    /**
-     * Converts a lat/lng string ("latitude/longitude") to a {Microsoft.Maps.Location} object.
-     * @param {String} latLng The lat/lng string.
-     * @return {Object}
-     */
-    latLngToApi: function(latLng) {
-      latLng = latLng.split(',');
-      return new L.LatLng(parseFloat(latLng[0]), parseFloat(latLng[1]));
     },
     /**
      * Zooms and/or pans the map to its initial extent.
