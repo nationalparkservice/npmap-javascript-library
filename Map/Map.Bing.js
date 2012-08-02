@@ -138,6 +138,8 @@
 
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
   }
+
+  // #npmap-zoombox {background-color:white;border:2px dashed #9F6D00;display:none;height:0;left:0;margin:0;opacity:0.5;padding:0;position:absolute;top:0;width:0;z-index:29;}
   
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
     center: NPMap.config.center ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new Microsoft.Maps.Location(39, -96),

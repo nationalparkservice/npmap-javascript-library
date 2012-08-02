@@ -1,7 +1,9 @@
 ﻿define([
+  'Event',
+  'InfoBox',
   'Layer/Layer',
   'Map/Map'
-], function(Layer, Map) {
+], function(Event, InfoBox, Layer, Map) {
   var
       //
       interaction,
@@ -38,6 +40,10 @@
       z: z
     });
   }
+
+  Event.add('NPMap.Map', 'zoomstart', function() {
+    InfoBox.hide();
+  });
 
   return NPMap.Layer.TileStream = {
     /**
@@ -97,6 +103,18 @@
       }
       
       return visible;
+    },
+    /**
+     * Handles the click operation for TileStream layers.
+     * @param {Object} e
+     */
+    _handleClick: function(e) {
+      var latLng = Map[NPMap.config.api].eventGetLatLng(e.e);
+
+      InfoBox.hide();
+      InfoBox.latLng = latLng;
+      Map[NPMap.config.api].positionClickDot(latLng);
+      InfoBox.show(NPMap.InfoBox._build(null, e.data, 'content'), NPMap.InfoBox._build(null, e.data, 'title'));
     },
     /**
      * Loads all of the TileStream layers that have been added to the map and are visible.
@@ -171,7 +189,15 @@
           }
 
           if (waxShort) {
-            interaction = wax[waxShort].interaction().map(map).tilejson(response).on(wax.tooltip().animate(true).parent(NPMap.Map.getContainerDiv()).events());
+            interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
+              Map.setCursor('pointer');
+
+              if (o.e.type !== 'mousemove') {
+                NPMap.Event.trigger('NPMap.Map', 'shapeclick', o);
+              }
+            }).on('off', function(o) {
+              Map.setCursor('default');
+            });
           }
 
           tileJson = response;

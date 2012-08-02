@@ -36,8 +36,27 @@ define([
         }
       });
     }
-
+    
     currentExtent = bounds;
+    esriConfig.defaults.map.zoomSymbol = {
+      color: [
+        255,
+        255,
+        255,
+        127
+      ],
+      outline: {
+        color: [
+          159,
+          109,
+          0,
+          255
+        ],
+        style: 'esriSLSDash',
+        width: 2
+      },
+      style: 'esriSFSSolid'
+    };
     map = new esri.Map(NPMap.config.div, {
       extent: bounds,
       logo: false,

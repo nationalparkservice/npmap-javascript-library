@@ -102,85 +102,7 @@ define([
   }
   
   // Setup zoom box.
-  (function() {
-    var box = document.createElement('div'),
-        mouseDownPoint = null,
-        mousePoint = null;
-    
-    function getMousePoint(e) {
-      var point = new com.modestmaps.Point(e.clientX, e.clientY);
-      
-      point.x += document.body.scrollLeft + document.documentElement.scrollLeft;
-      point.y += document.body.scrollTop + document.documentElement.scrollTop;
-      
-      for (var node = map.parent; node; node = node.offsetParent) {
-        point.x -= node.offsetLeft;
-        point.y -= node.offsetTop;
-      }
-      
-      return point;
-    }
-    function mouseDown(e) {
-      if (e.shiftKey) {
-        mouseDownPoint = getMousePoint(e);
-        box.style.left = mouseDownPoint.x + 'px';
-        box.style.top = mouseDownPoint.y + 'px';
-        map.parent.style.cursor = 'crosshair';
-        
-        com.modestmaps.addEvent(map.parent, 'mousemove', mouseMove);
-        com.modestmaps.addEvent(map.parent, 'mouseup', mouseUp);
-        
-        return com.modestmaps.cancelEvent(e);
-      }
-    }
-    function mouseMove(e) {
-      var point = getMousePoint(e);
-      
-      box.style.display = 'block';
-      
-      if (point.x < mouseDownPoint.x) {
-        box.style.left = point.x + 'px';
-      } else {
-        box.style.left = mouseDownPoint.x + 'px';
-      }
-      
-      box.style.width = Math.abs(point.x - mouseDownPoint.x) + 'px';
-      
-      if (point.y < mouseDownPoint.y) {
-        box.style.top = point.y + 'px';
-      } else {
-        box.style.top = mouseDownPoint.y + 'px';
-      }
-      
-      box.style.height = Math.abs(point.y - mouseDownPoint.y) + 'px';
-      
-      return com.modestmaps.cancelEvent(e);
-    }
-    function mouseUp(e) {
-      var point = getMousePoint(e),
-          l1 = map.pointLocation(point),
-          l2 = map.pointLocation(mouseDownPoint);
-      
-      map.setExtent([
-        l1,
-        l2
-      ]);
-      
-      box.style.display = 'none';
-      map.parent.style.cursor = 'auto';
-      
-      com.modestmaps.removeEvent(map.parent, 'mousemove', mouseMove);
-      com.modestmaps.removeEvent(map.parent, 'mouseup', mouseUp);
-      
-      return com.modestmaps.cancelEvent(e);
-    }
-    
-    box.id = 'npmap-zoombox';
-    box.style.cssText = 'background:rgba(255,255,255,0.25);border:1px dashed #888;display:none;height:0;left:0;margin:0;padding:0;position:absolute;top:0;width:0;z-index:29;';
-    
-    Map.addElementToMapDiv(box);
-    com.modestmaps.addEvent(map.parent, 'mousedown', mouseDown);
-  })();
+  (function(){var box=document.createElement("div"),mouseDownPoint=null,mousePoint=null;function getMousePoint(e){var point=new com.modestmaps.Point(e.clientX,e.clientY);point.x+=document.body.scrollLeft+document.documentElement.scrollLeft;point.y+=document.body.scrollTop+document.documentElement.scrollTop;for(var node=map.parent;node;node=node.offsetParent){point.x-=node.offsetLeft;point.y-=node.offsetTop}return point}function mouseDown(e){if(e.shiftKey){mouseDownPoint=getMousePoint(e);box.style.left=mouseDownPoint.x+"px";box.style.top=mouseDownPoint.y+"px";map.parent.style.cursor="crosshair";com.modestmaps.addEvent(map.parent,"mousemove",mouseMove);com.modestmaps.addEvent(map.parent,"mouseup",mouseUp);return com.modestmaps.cancelEvent(e)}}function mouseMove(e){var point=getMousePoint(e);box.style.display="block";if(point.x<mouseDownPoint.x)box.style.left=point.x+"px";else box.style.left=mouseDownPoint.x+"px";box.style.width=Math.abs(point.x-mouseDownPoint.x)+"px";if(point.y<mouseDownPoint.y)box.style.top=point.y+"px";else box.style.top=mouseDownPoint.y+"px";box.style.height=Math.abs(point.y-mouseDownPoint.y)+"px";return com.modestmaps.cancelEvent(e)}function mouseUp(e){var point=getMousePoint(e),l1=map.pointLocation(point),l2=map.pointLocation(mouseDownPoint);map.setExtent([l1,l2]);box.style.display="none";map.parent.style.cursor="auto";com.modestmaps.removeEvent(map.parent,"mousemove",mouseMove);com.modestmaps.removeEvent(map.parent,"mouseup",mouseUp);return com.modestmaps.cancelEvent(e)}box.id="npmap-zoombox";Map.addElementToMapDiv(box);com.modestmaps.addEvent(map.parent,"mousedown",mouseDown)})();
   
   map.addCallback('drawn', function(m) {
     var z = Math.round(m.getZoom());
@@ -224,6 +146,29 @@ define([
      */
     addTileLayer: function(layer) {
       map.insertLayerAt(0, layer);
+    },
+    /**
+     * Sets the bounds of the map.
+     * @param {L.LatLngBounds} bounds
+     */
+    bounds: function(bounds) {
+      
+    },
+    /**
+     * Converts an API bounds to a NPMap bounds.
+     * @param {Object} bounds
+     * @return {Object}
+     */
+    boundsFromApi: function(bounds) {
+      
+    },
+    /**
+     * Converts a NPMap bounds to an API bounds.
+     * @param {Object}
+     * @return {Object}
+     */
+    boundsToApi: function(bounds) {
+      
     },
     /**
      * Sets the center and zoom level of the map.
@@ -284,6 +229,24 @@ define([
       return new MM.Layer(new MM.MapProvider(uriConstructor));
     },
     /**
+     * Gets a latLng from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetLatLng: function(e) {
+      var originalEvent = e.originalEvent;
+
+      return map.pointLocation(new MM.Point(originalEvent.layerX, originalEvent.layerY));
+    },
+    /**
+     * Gets a shape from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetShape: function(e) {
+      
+    },
+    /**
      * Gets the center of the map.
      * @return {Float}
      */
@@ -297,6 +260,14 @@ define([
       var position = $('#npmap-clickdot').position();
       
       return map.pointLocation(new MM.Point(position.left, position.top));
+    },
+    /**
+     * Returns the {L.Point} for the #npmap-clickdot div.
+     */
+    getClickDotPixel: function() {
+      var position = $('#npmap-clickdot').position();
+
+      return new MM.Point(position.left, position.top);
     },
     /**
      * Gets the container div.
@@ -343,14 +314,6 @@ define([
       var extent = map.getExtent(),
           isWithinExtent = false;
 
-      latLng = (function() {
-        if (typeof(latLng) === 'string') {
-          return this.latLngToApi(latLng);
-        } else {
-          return latLng;
-        }
-      })();
-          
       if (NPMap.Util.isBetween(extent.north, extent.south, latLng.lat) === true && NPMap.Util.isBetween(extent.east, extent.west, latLng.lon) === true) {
         isWithinExtent = true;
       }
@@ -379,26 +342,52 @@ define([
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
+     * @param {Function} callback (Optional)
      */
-    panByPixels: function(pixels) {
+    panByPixels: function(pixels, callback) {
       var center = map.locationPoint(map.getCenter());
 
-      runEasey(map.pointLocation(new MM.Point(center.x - pixels.x, center.y - pixels.y)), map.getZoom());
+      runEasey(map.pointLocation(new MM.Point(center.x - pixels.x, center.y - pixels.y)), map.getZoom(), callback);
+    },
+    /**
+     * Converts a {MM.Point} to an NPMap point.
+     * @param {MM.Point} pixel
+     * @return {Object}
+     */
+    pixelFromApi: function(pixel) {
+      return {
+        x: pixel.x,
+        y: pixel.y
+      };
+    },
+    /**
+     * Converts a {MM.Point} to a {MM.Location}.
+     * @param {MM.Point} pixel
+     * @return {MM.Location}
+     */
+    pixelToLatLng: function(pixel) {
+      return map.pointLocation(pixel);
     },
     /**
      * Positions the npmap-clickdot div on top of the div that is passed in.
      * @param to {HTML div} (Required) The div to position the npmap-clickdot div onto.
      */
     positionClickDot: function(to) {
-      if (typeof(to) === 'string') {
+      var clickDot = document.getElementById('npmap-clickdot');
+
+      if (typeof to === 'string') {
         to = to.split(',');
         to = map.locationPoint(new MM.Location(parseFloat(to[0]), parseFloat(to[1])));
+      } else {
+        if (to.lon) {
+          to = map.locationPoint(to);
+        } else {
+          to = map.locationPoint(new MM.Location(to.lat, to.lng));
+        }
       }
-      
-      $('#npmap-clickdot').css({
-        left: to.x + 'px',
-        top: to.y + 'px'
-      });
+
+      clickDot.style.left = to.x + 'px';
+      clickDot.style.top = to.y + 'px';
     },
     /**
      * Switches to a new set of layers.
@@ -418,6 +407,23 @@ define([
           // TODO: Support other layer refreshes here.
         }
       }
+    },
+    /**
+     * Sets zoom restrictions on the map.
+     * @param {Object} restrictions
+     */
+    setZoomRestrictions: function(restrictions) {
+      NPMap.config.restrictZoom = NPMap.config.restrictZoom || {};
+      
+      if (restrictions.max) {
+        NPMap.config.restrictZoom.max = max;
+      }
+      
+      if (restrictions.min) {
+        NPMap.config.restrictZoom.min = min;
+      }
+      
+      map.setZoomRange(min, max);
     },
     /**
      * Zooms and/or pans the map to its initial extent.

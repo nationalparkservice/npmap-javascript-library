@@ -41,8 +41,8 @@ define([
           type: 'raster'
         },
         TileStream: {
-          clickable: false, // It's clickable, but handled by wax.
-          type: 'raster'
+          clickable: true,
+          type: 'vector' // TileStream clicks are handled like vector layers, although it is really raster tiles.
         },
         Xml: {
           clickable: true,
@@ -70,7 +70,7 @@ define([
     for (var j = 0; j < NPMap.config.layers.length; j++) {
       var layerType = NPMap.config.layers[j].type,
           meta = LAYER_HANDLERS[layerType];
-
+          
       if (meta.type === 'vector' && meta.clickable === true) {
         NPMap.Layer[layerType]._handleClick(e);
       }

@@ -58,16 +58,32 @@ define(function() {
   
   /**
    * Checks to see if the InfoBox is overlapping beyond the edges of the InfoBox's parent element.
+   * @param {Function} callback
    */
-  function checkBounds() {
+  function checkBounds(callback) {
     if (NPMap.InfoBox && NPMap.InfoBox.visible) {
       var $me = $('#npmap-infobox'),
-          p = $me.position(),
+          clickDotPixel = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
+          infoboxDimensions = {
+            x: $me.outerWidth(),
+            y: $me.outerHeight()
+          },
+          p = {
+            left: clickDotPixel.x - infoboxDimensions.x + 69, // TODO: Take into account width - hook.
+            top: clickDotPixel.y - infoboxDimensions.y
+          },
           paddingHalved = (padding / 2),
           r = {
             h: 0,
             v: 0
           };
+
+      // TODO: Test with 'nps' and 'pyv'.
+      if (design === 'nps' || design === 'pyv') {
+        p.left = p.left + ((infoboxDimensions.x / 2) - 8);
+      } else {
+        p.left = p.left + 69;
+      }
 
       if (pan === 'center') {
         var h = ($mapDiv.outerHeight() - $me.outerHeight()) / 2,
@@ -157,13 +173,21 @@ define(function() {
           }
         });
       }
-
+      
       // TODO: MAYBE??? Get the height and width of the InfoBox, and verify that there is enough space to reposition it. If there isn't, don't reposition it.
       if ((r.h !== 0 && r.h < $mapDiv.outerWidth()) || (r.v !== 0 && r.v < $mapDiv.outerHeight())) {
         NPMap.Map.panByPixels({
           x: r.h,
           y: r.v
+        }, function() {
+          console.log('callback0');
+
+          if (callback) {
+            callback();
+          }
         });
+      } else if (callback) {
+        callback();
       }
     }
   }
@@ -428,15 +452,26 @@ define(function() {
      * @return {String}
      */
     _build: function(config, attributes, element) {
-      var html = null;
+      var html = null,
+          template;
 
-      if (typeof config.identify !== 'undefined' && typeof config.identify[element] !== 'undefined') {
-        if (typeof config.identify[element] === 'function') {
-          html = config.identify[element](attributes);
-        } else {
-          var template = _.template(config.identify[element]);
-
-          html = template(attributes);
+      if (!config) {
+        if (typeof NPMap.config.identify !== 'undefined' && typeof NPMap.config.identify[element] !== 'undefined') {
+          if (typeof NPMap.config.identify[element] === 'function') {
+            html = NPMap.config.identify[element](attributes);
+          } else {
+            template = _.template(NPMap.config.identify[element]);
+            html = template(attributes);
+          }
+        }
+      } else {
+        if (typeof config.identify !== 'undefined' && typeof config.identify[element] !== 'undefined') {
+          if (typeof config.identify[element] === 'function') {
+            html = config.identify[element](attributes);
+          } else {
+            template = _.template(config.identify[element]);
+            html = template(attributes);
+          }
         }
       }
       
@@ -770,14 +805,20 @@ define(function() {
         });
       } else {
         this.visible = true;
-        
-        position(function() {
-          $('#npmap-infobox').show();
-          NPMap.Event.trigger('InfoBox', 'show');
 
+        position(function() {
           if (panActivated && !skipBoundsCheck) {
-            checkBounds();
+            checkBounds(function() {
+              console.log('callback');
+
+              $('#npmap-infobox').show();
+              NPMap.Event.trigger('InfoBox', 'show');
+            });
           }
+
+          
+
+          
         });
       }
     }

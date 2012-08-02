@@ -175,7 +175,9 @@
         enableKeyDragZoom = function() {
           map.enableKeyDragZoom({
             boxStyle: {
-              border: '3px solid #cc9900'
+              background: 'white',
+              border: '2px dashed #9F6D00',
+              opacity: '0.5'
             }
           });
         };
@@ -644,18 +646,18 @@
       });
     },
     /**
-     * Gets a shape from an event object.
-     * @param {Object} e
-     */
-    eventGetShape: function(e) {
-      return e.shape;
-    },
-    /**
      * Gets a latLng from an event object.
      * @param {Object} e
      */
     eventGetLatLng: function(e) {
       return e.latLng;
+    },
+    /**
+     * Gets a shape from an event object.
+     * @param {Object} e
+     */
+    eventGetShape: function(e) {
+      return e.shape;
     },
     /**
      * Gets the current bounds of the map.

@@ -206,6 +206,15 @@ define([
     map.addLayer(baseLayer);
     NPMap.Map.setAttribution('<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>');
   }
+
+  map.on('move', function(e) {
+    if (NPMap.InfoBox.visible) {
+      NPMap.InfoBox.reposition();
+    }
+  });
+  map.on('zoomstart', function(e) {
+    NPMap.Event.trigger('NPMap.Map', 'zoomstart', e);
+  });
   
   Map._init();
   
@@ -221,6 +230,33 @@ define([
     addTileLayer: function(layer) {
       map.addLayer(layer);
     },
+    /**
+     * Sets the bounds of the map.
+     * @param {L.LatLngBounds} bounds
+     */
+    bounds: function(bounds) {
+      map.fitBounds(bounds);
+    },
+    /**
+     * Converts an API bounds to a NPMap bounds.
+     * @param {Object} bounds
+     * @return {Object}
+     */
+    boundsFromApi: function(bounds) {
+      
+    },
+    /**
+     * Converts a NPMap bounds to an API bounds.
+     * @param {Object}
+     * @return {Object}
+     */
+    boundsToApi: function(bounds) {
+      
+    },
+    /**
+     * Centers the map.
+     * @param {Object} latLng
+     */
     center: function(latLng) {
       this.centerAndZoom(latLng, this.getZoom());
     },
@@ -293,6 +329,28 @@ define([
       });
     },
     /**
+     * Gets a latLng from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetLatLng: function(e) {
+      return map.mouseEventToLatLng(e);
+    },
+    /**
+     * Gets a shape from a click event object.
+     * @param {Object} e
+     * @return {Object}
+     */
+    eventGetShape: function(e) {
+      
+    },
+    /**
+     *
+     */
+    getBounds: function() {
+      return map.getBounds();
+    },
+    /**
      *
      * @return {L.LatLng}
      */
@@ -300,10 +358,26 @@ define([
       return map.getCenter();
     },
     /**
+     * Returns the {L.Point} for the #npmap-clickdot div.
+     */
+    getClickDotPixel: function() {
+      var position = $('#npmap-clickdot').position();
+
+      return new L.Point(position.left, position.top);
+    },
+    /**
+     * Returns the {L.LatLng} for the #npmap-clickdot div.
+     */
+    getClickDotLatLng: function() {
+      var position = $('#npmap-clickdot').position();
+
+      return this.pixelToLatLng(new L.Point(position.left, position.top));
+    },
+    /**
      * Gets the container div.
      */
     getContainerDiv: function() {
-      return document.getElementById('npmap');
+      return document.getElementById(NPMap.config.div).childNodes[0];
     },
     /**
      * Gets the maximum zoom level for this map.
@@ -337,6 +411,14 @@ define([
       }
     },
     /**
+     * Returns true if the input latLng is contained within the current map bounds.
+     * @param {L.LatLng} latLng
+     * @return {Boolean}
+     */
+    isLatLngWithinMapBounds: function(latLng) {
+      return this.getBounds().contains(latLng);
+    },
+    /**
      * Converts a {L.LatLng} to a NPMap lat/lng object.
      * @param latLng {L.LatLng} The object to convert.
      * @return {Object} An NPMap lat/lng object.
@@ -356,17 +438,83 @@ define([
       return new L.LatLng(latLng.lat, latLng.lng);
     },
     /**
+     *
+     */
+    latLngToPixel: function(latLng) {
+      return map.latLngToContainerPoint(latLng);
+    },
+    /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
+     * @param {Function} callback (Optional)
      */
-    panByPixels: function(pixels) {
-      map.panBy(new L.Point(-pixels.x, -pixels.y));
+    panByPixels: function(pixels, callback) {
+      /*
+      if (callback) {
+        map.on('moveend', callback);
+      }*/
+
+      
+      map._rawPanBy(new L.Point(-pixels.x, -pixels.y));
+      //map.panBy(new L.Point(-pixels.x, -pixels.y));
+
+      if (callback) {
+        callback();
+      }
+
+      map.fire('move');
+
+      /*
+      if (callback) {
+        setTimeout(function() {
+          map.off('moveend', callback);
+        }, 3000);
+      }
+      */
     },
     /**
      *
      */
-    setBounds: function(bounds) {
-      map.fitBounds(bounds);
+    pixelFromApi: function(pixel) {
+      return {
+        x: pixel.x,
+        y: pixel.y
+      };
+    },
+    /**
+     * Converts a {L.Point} to a {L.LatLng}.
+     * @param {L.Point} pixel
+     * @return {L.LatLng}
+     */
+    pixelToLatLng: function(pixel) {
+      return map.containerPointToLatLng(pixel);
+    },
+    /**
+     * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
+     * @param {google.maps.Marker} OR {google.maps.LatLng} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
+     */
+    positionClickDot: function(to) {
+      var clickDot = document.getElementById('npmap-clickdot'),
+          latLng = (function() {
+            var latLng = null;
+
+            if (typeof(to) === 'string') {
+              to = to.split(',');
+              latLng = new L.LatLng(parseFloat(to[0]), parseFloat(to[1]));
+            } else {
+              if (typeof to.lat === 'number') {
+                latLng = new L.LatLng(to.lat, to.lng);
+              } else {
+                latLng = to.getLatLng();
+              }
+            }
+            
+            return latLng;
+          })(),
+          pixel = this.latLngToPixel(latLng);
+
+      clickDot.style.left = pixel.x + 'px';
+      clickDot.style.top = pixel.y + 'px';
     },
     /**
      * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
