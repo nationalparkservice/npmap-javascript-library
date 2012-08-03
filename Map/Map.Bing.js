@@ -51,7 +51,6 @@
       oldTarget = null,
       // The old zoom level of the map.
       oldZoom,
-      
       // Has the map view changed?
       viewChanged = false;
 
@@ -271,22 +270,7 @@
     viewChanged = true;
     
     if (NPMap.InfoBox.visible) {
-      if (hasClustered || hasTiled) {
-        var zoom = map.getZoom(),
-            zoomRange = map.getZoomRange();
-          
-        if (zoom > zoomRange.min && zoom < zoomRange.max && zoom != oldZoom) {
-          NPMap.InfoBox.hide();
-        } else if (NPMap.Map.latLngsAreEqual(NPMap.Map.Bing.latLngFromApi(map.getCenter()), NPMap.Map.Bing.latLngFromApi(oldCenter)) === false) {
-          if (tiled) {
-            NPMap.InfoBox.reposition();
-          } else {
-            NPMap.InfoBox.hide();
-          }
-        }
-      } else {
-        NPMap.InfoBox.reposition();
-      }
+      NPMap.InfoBox.reposition();
     }
     
     checkMaxMinZoom();
@@ -335,7 +319,7 @@
      * @param {Object} el
      */
     addElementToMapDiv: function(el) {
-      this.getMapDiv().appendChild(el);
+      this.getContainerDiv().appendChild(el);
     },
     /**
      * Adds a shape to the map.
@@ -389,7 +373,8 @@
      */
     centerAndZoom: function(latLng, zoom, callback) {
       var currentLatLng = this.latLngFromApi(map.getCenter()),
-          currentZoom = map.getZoom();
+          currentZoom = map.getZoom(),
+          me = this;
 
       if (NPMap.Map.latLngsAreEqual(currentLatLng, this.latLngFromApi(latLng)) === true && currentZoom === zoom) {
         if (callback) {
@@ -413,7 +398,7 @@
                 if (NPMap.InfoBox.marker) {
                   return NPMap.InfoBox.marker.getLocation();
                 } else if (NPMap.InfoBox.latLng) {
-                  return NPMap.bing.map.latLngToApi(NPMap.InfoBox.latLng);
+                  return me.latLngToApi(NPMap.InfoBox.latLng);
                 } else {
                   return null;
                 }
@@ -422,6 +407,7 @@
 
           if (infoBoxLatLng) {
             pixel = map.tryLocationToPixel(infoBoxLatLng);
+            pixel = this.latLngToPixel(infoBoxLatLng);
             o.centerOffset = new Microsoft.Maps.Point(pixel.x, pixel.y);
           }
         }
@@ -608,7 +594,7 @@
      * @return {Object}
      */
     eventGetLatLng: function(e) {
-      return map.tryPixelToLocation(new Microsoft.Maps.Point(e.getX(), e.getY()));
+      return this.pixelToLatLng(new Microsoft.Maps.Point(e.getX(), e.getY()));
     },
     /**
      * Gets a shape from a click event object.
@@ -637,23 +623,21 @@
      * @return {Microsoft.Maps.Location}
      */
     getClickDotLatLng: function() {
+      return this.pixelToLatLng(this.getClickDotPixel(), Microsoft.Maps.PixelReference.control);
+    },
+    /**
+     * Returns the {Microsoft.Mas.Point} for the #npmap-clickdot div.
+     */
+    getClickDotPixel: function() {
       var position = $('#npmap-clickdot').position();
-      
-      return map.tryPixelToLocation(new Microsoft.Maps.Point(position.left, position.top), Microsoft.Maps.PixelReference.control);
+
+      return new Microsoft.Maps.Point(position.left, position.top);
     },
     /**
      * Gets the container div.
      */
     getContainerDiv: function() {
       return map.getRootElement();
-    },
-    /**
-     * Gets a {Microsoft.Maps.Location} from a {Microsoft.Maps.Point}.
-     * @param {Microsoft.Maps.Point} point
-     * @return {Microsoft.Maps.Location}
-     */
-    getLatLngFromPixel: function(point) {
-      
     },
     /**
      * Gets the anchor of a marker.
@@ -714,13 +698,6 @@
      */
     getMinZoom: function() {
       return min;
-    },
-    /**
-     * Returns a {Microsoft.Maps.Point} object for a given latLng.
-     * @param latLng {Microsoft.Maps.Location} (Required)
-     */
-    getPixelFromLatLng: function(latLng) {
-      
     },
     /**
      * Gets the zoom level of the map.
@@ -803,6 +780,17 @@
       return new Microsoft.Maps.Location(parseFloat(lat), parseFloat(lng));
     },
     /**
+     * Converts a {Microsoft.Maps.Location} to a {Microsoft.Maps.Point}.
+     * @param {Microsoft.Maps.Location} pixel
+     * @param {Microsoft.Maps.PixelReference} reference (Optional)
+     * @return {Microsoft.Maps.Point}
+     */
+    latLngToPixel: function(latLng, reference) {
+      reference = reference || Microsoft.Maps.PixelReference.viewport;
+
+      return map.tryLocationToPixel(latLng, reference);
+    },
+    /**
      * Iterates through the default base layers and returns a match if it exists.
      * @param {Object} baseLayer The baseLayer object.
      * @return {Object}
@@ -819,12 +807,38 @@
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
+     * @param {Function} callback (Optional)
      */
-    panByPixels: function(pixels) {
+    panByPixels: function(pixels, callback) {
       map.setView({
+        animate: !callback,
         center: map.getCenter(),
         centerOffset: new Microsoft.Maps.Point(pixels.x, pixels.y)
       });
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     *
+     */
+    pixelFromApi: function(pixel) {
+      return {
+        x: pixel.x,
+        y: pixel.y
+      };
+    },
+    /**
+     * Converts a {Microsoft.Maps.Point} to a {Microsoft.Maps.Location}.
+     * @param {Microsoft.Maps.Point} pixel
+     * @param {Microsoft.Maps.PixelReference} reference (Optional)
+     * @return {Microsoft.Maps.Location}
+     */
+    pixelToLatLng: function(pixel, reference) {
+      reference = reference || Microsoft.Maps.PixelReference.viewport;
+
+      return map.tryPixelToLocation(pixel, reference);
     },
     /**
      * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
@@ -834,7 +848,7 @@
       var anchorY = 0,
           me = this,
           offset = NPMap.Util.getMapDivOffset(),
-          pixel = map.tryLocationToPixel((function() {
+          pixel = this.latLngToPixel((function() {
             var latLng = null;
             
             if (typeof(to) === 'string') {
@@ -1025,8 +1039,8 @@
       
       if (toDot) {
         var position = $('#npmap-clickdot').position(),
-            latLng = NPMap.bing.map.Map.tryPixelToLocation(new Microsoft.Maps.Point(position.left, position.top, Microsoft.Maps.PixelReference.control), Microsoft.Maps.PixelReference.control);
-            
+            latLng = this.pixelToLatLng(new Microsoft.Maps.Point(position.left, position.top));
+
         map.setView({
           center: latLng,
           zoom: zoom + 1
@@ -1054,13 +1068,6 @@
         bounds: Microsoft.Maps.LocationRect.fromCorners(bbox.nw, bbox.se),
         padding: 30
       });
-    },
-    /**
-     * Zooms the map to a lat/lng.
-     * @param {Object} latLng The {Microsoft.Maps.Location} object to zoom the map to.
-     */
-    zoomToLatLng: function(latLng) {
-      this.centerAndZoom(latLng, 16);
     },
     /**
      * Zooms the map to the extent of an array of {Microsoft.Maps.Location} objects.

@@ -358,20 +358,18 @@ define([
       return map.getCenter();
     },
     /**
+     * Returns the {L.LatLng} for the #npmap-clickdot div.
+     */
+    getClickDotLatLng: function() {
+      return this.pixelToLatLng(this.getClickDotPixel());
+    },
+    /**
      * Returns the {L.Point} for the #npmap-clickdot div.
      */
     getClickDotPixel: function() {
       var position = $('#npmap-clickdot').position();
 
       return new L.Point(position.left, position.top);
-    },
-    /**
-     * Returns the {L.LatLng} for the #npmap-clickdot div.
-     */
-    getClickDotLatLng: function() {
-      var position = $('#npmap-clickdot').position();
-
-      return this.pixelToLatLng(new L.Point(position.left, position.top));
     },
     /**
      * Gets the container div.

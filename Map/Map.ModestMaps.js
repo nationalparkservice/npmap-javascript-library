@@ -2,6 +2,15 @@
 // TODO: You need to re-add support for full screen maps.
 // TODO: Hook up attribution.
 
+
+
+/*
+   On map zoom change, hide InfoBox only if NPMap.InfoBox.marker is null
+ */
+
+
+
+
 define([
   'Event',
   'Map/Map'
@@ -257,9 +266,7 @@ define([
      * Returns the current MM.Location object of the #npmap-clickdot div.
      */
     getClickDotLatLng: function() {
-      var position = $('#npmap-clickdot').position();
-      
-      return map.pointLocation(new MM.Point(position.left, position.top));
+      return map.pointLocation(this.getClickDotPixel());
     },
     /**
      * Returns the {L.Point} for the #npmap-clickdot div.

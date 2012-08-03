@@ -111,6 +111,7 @@
 #npmap-switcher-menu a:hover {background:#F1F1EF;text-decoration:none;}
 #npmap-switcher-menu a:visited {text-decoration:none;}
 #npmap-fullscreen-mask {background-color:black;height:100%;left:0;position:fixed;top:0;width:100%;z-index:99999999999;}
+#npmap-tip {display:none;max-width:200px;position:absolute;z-index:32;}
 /* DEPRECATED */
 #npmap-tools {float:right;}
 #npmap #npmap-tools li {background-color:#828171;border-left:solid 1px #ADACA2;cursor:pointer;float:left;height:28px;width:34px;}

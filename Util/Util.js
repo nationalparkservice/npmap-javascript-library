@@ -51,6 +51,28 @@ define(function() {
       };
     },
     /**
+     * Gets the current scroll position of the browser window.
+     */
+    getScrollPosition: function() {
+      var position = {
+        x: 0,
+        y: 0
+      };
+
+      if (typeof window.pageYOffset !== 'undefined') {
+        position.x = window.pageXOffset;
+        position.y = window.pageYOffset;
+      } else if (typeof document.documentElement.scrolltop !== 'undefined' && document.documentElement.scrollTop > 0) {
+        position.x = document.documentElement.scrollLeft;
+        position.y = document.documentElement.scrollTop;
+      } else if (typeof document.body.scrollTop !== 'undefined') {
+        position.x = document.body.scrollLeft;
+        position.y = document.body.scrollTop;
+      }
+
+      return position;
+    },
+    /**
      * Injects a CSS stylesheet into the page.
      * @param {String} location The path to the CSS stylesheet.
      */

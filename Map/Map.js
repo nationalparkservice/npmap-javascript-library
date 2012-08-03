@@ -9,8 +9,9 @@ zoomstart
 
 define([
   'Event',
-  'InfoBox'
-], function(Event, InfoBox) {
+  'InfoBox',
+  'Util/Util'
+], function(Event, InfoBox, Util) {
   var
       // The jQuery map div object.
       $mapDiv = $('#npmap-map'),
@@ -141,7 +142,14 @@ define([
    */
   return NPMap.Map = {
     // An array of event handler objects that have been added to this class.
-    _events: [],
+    _events: [{
+      event: 'zoomchanged',
+      func: function(e) {
+        if (!NPMap.InfoBox.marker) {
+          NPMap.InfoBox.hide();
+        }
+      }
+    }],
     /**
      * Creates a line using the baseApi's line class, if it exists.
      * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
@@ -185,585 +193,615 @@ define([
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
      */
     _init: function() {
-      var
-          // The jQuery map div.
-          $map,
-          // The attribution control div.
-          attribution = document.createElement('div'),
-          // An array of "setup" callback functions.
-          callbacks = [],
-          // The "clickdot" div.
-          clickdot = document.createElement('div'),
-          // An array of elements to add to the map div.
-          elements = [],
-          // HTML for the logos div.
-          logosHtml = '',
+      var 
           // Self-reference.
-          me = this,
-          // The config object for NPMap's modules.
-          modulesConfig = NPMap.config.modules || null,
-          // The notify div.
-          notify = document.createElement('div'),
-          // The progress div.
-          progress = document.createElement('div'),
-          // The tip div.
-          tip = document.createElement('div'),
-          // The config object for NPMap's tools. Supports legacy config information too.
-          toolsConfig = (function() {
-            if (NPMap.config.tools) {
-              return {
-                fullscreen: NPMap.config.tools.fullscreen || false,
-                navigation: NPMap.config.tools.navigation || {
-                  pan: NPMap.config.tools.pan || 'home',
-                  position: 'top left',
-                  zoom: NPMap.config.tools.zoom || 'small'
-                },
-                overview: NPMap.config.tools.overview || false,
-                print: NPMap.config.tools.print || false,
-                share: NPMap.config.tools.share || false
-              };
-            } else if (typeof NPMap.config.tools === 'undefined') {
-              return {
-                fullscreen: false,
-                navigation: {
-                  pan: 'home',
-                  position: 'top left',
-                  zoom: 'small'
-                },
-                overview: false,
-                print: false,
-                share: false
-              };
-            } else {
-              return {};
-            }
-          })();
+          me = this;
 
-      // Hooks up a navigation control.
-      function hookUpNavigationControl(id, handler) {
-        var el = document.getElementById(id);
-        
-        bean.add(el, 'mousedown dblclick', function(e) {
-          e.stop();
-        });
-        bean.add(el, 'click', function(e) {
-          e.stop();
-          handler();
-        });
-        
-        return el;
-      }
-
-      if (NPMap.config.api === 'bing') {
-        $map = $(document.getElementById('npmap-map').getElementsByTagName('div')[0]);
-      } else {
-        $map = $('#npmap-map');
-      }
-
-      $map.bind('contextmenu', function(e) {
-        return false;
-      });
-
-      attribution.id = 'npmap-attribution';
-      elements.push(attribution);
-      clickdot.id = 'npmap-clickdot';
-      elements.push(clickdot);
-      notify.id = 'npmap-notify';
-      elements.push(notify);
-      progress.id = 'npmap-progressbar';
-      progress.innerHTML = '<div></div>';
-      elements.push(progress);
-      tip.className = 'padded rounded shadowed transparent';
-      tip.id = 'npmap-tip';
-      elements.push(tip);
-      
-      if (NPMap.config.api.toLowerCase() !== 'leaflet' && NPMap.config.api.toLowerCase() !== 'modestmaps') {
-        logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + NPMap.config.api + 'logo.png" /></span>';
-      }
-      
-      if (!NPMap.config.hideNpmapLogo) {
-        logosHtml += '<span style="display:block;float:right;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
-      }
-
-      if (logosHtml.length > 0) {
-        // The logo div.
-        var logos = document.createElement('div');
-        
-        logos.id = 'npmap-logos';
-        logos.innerHTML = logosHtml;
-        logos.style.cssText = 'bottom:3px;height:30px;left:5px;position:absolute;z-index:30;';
-        elements.push(logos);
-        callbacks.push(function() {
-          $('#npmap-logos').resize(setAttributionMaxWidthAndPosition);
-        });
-      }
-
-      if (toolsConfig.navigation) {
+      Util.safeLoad('NPMap.Map.' + NPMap.config.api, function() {
         var
-            // The navigation controls div.
-            navigation = document.createElement('div'),
-            // HTML string for the navigation div.
-            navigationHtml = '',
-            // The position string for the navigation tools.
-            position = toolsConfig.navigation.position.split(' ');
-            
-        if (toolsConfig.navigation.pan) {
-          var compass = toolsConfig.navigation.pan;
+            // The jQuery map div.
+            $map,
+            // The attribution control div.
+            attribution = document.createElement('div'),
+            // The "clickdot" div.
+            clickdot = document.createElement('div'),
+            // An array of elements to add to the map div.
+            elements = [],
+            // HTML for the logos div.
+            logosHtml = '',
+            // The config object for NPMap's modules.
+            modulesConfig = NPMap.config.modules || null,
+            // The notify div.
+            notify = document.createElement('div'),
+            // The progress div.
+            progress = document.createElement('div'),
+            // The tip div.
+            tip = document.createElement('div'),
+            // The config object for NPMap's tools. Supports legacy config information too.
+            toolsConfig = (function() {
+              if (NPMap.config.tools) {
+                return {
+                  fullscreen: NPMap.config.tools.fullscreen || false,
+                  navigation: NPMap.config.tools.navigation || {
+                    pan: NPMap.config.tools.pan || 'home',
+                    position: 'top left',
+                    zoom: NPMap.config.tools.zoom || 'small'
+                  },
+                  overview: NPMap.config.tools.overview || false,
+                  print: NPMap.config.tools.print || false,
+                  share: NPMap.config.tools.share || false
+                };
+              } else if (typeof NPMap.config.tools === 'undefined') {
+                return {
+                  fullscreen: false,
+                  navigation: {
+                    pan: 'home',
+                    position: 'top left',
+                    zoom: 'small'
+                  },
+                  overview: false,
+                  print: false,
+                  share: false
+                };
+              } else {
+                return {};
+              }
+            })();
 
-          navigation.style.width = '58px';
-
-          navigationHtml += '<div id="npmap-navigation-compass" class="npmap-navigation-compass-' + compass + '"><a id="npmap-navigation-compass-east" class="pointer"></a><a id="npmap-navigation-compass-north" class="pointer"></a><a id="npmap-navigation-compass-south" class="pointer"></a><a id="npmap-navigation-compass-west" class="pointer"></a>';
+        function hookUpNavigationControl(id, handler) {
+          var el = document.getElementById(id);
           
-          if (compass === 'home') {
-            navigationHtml += '<a id="npmap-navigation-compass-center" class="pointer"></a>';
-          }
+          bean.add(el, 'mousedown dblclick', function(e) {
+            e.stop();
+          });
+          bean.add(el, 'click', function(e) {
+            e.stop();
+            handler();
+          });
           
-          navigationHtml += '</div>';
+          return el;
+        }
 
-          callbacks.push(function() {
-            var buttons = [];
+        if (NPMap.config.api === 'bing') {
+          $map = $(document.getElementById('npmap-map').getElementsByTagName('div')[0]);
+        } else {
+          $map = $('#npmap-map');
+        }
 
-            buttons.push(hookUpNavigationControl('npmap-navigation-compass-east', function() {
-              NPMap.Map.panInDirection('east');
-            }));
-            buttons.push(hookUpNavigationControl('npmap-navigation-compass-north', function() {
-              NPMap.Map.panInDirection('north');
-            }));
-            buttons.push(hookUpNavigationControl('npmap-navigation-compass-south', function() {
-              NPMap.Map.panInDirection('south');
-            }));
-            buttons.push(hookUpNavigationControl('npmap-navigation-compass-west', function() {
-              NPMap.Map.panInDirection('west');
-            }));
+        $map.bind('contextmenu', function(e) {
+          return false;
+        });
+
+        attribution.id = 'npmap-attribution';
+        elements.push({
+          el: attribution,
+          func: setAttributionMaxWidthAndPosition
+        });
+        clickdot.id = 'npmap-clickdot';
+        elements.push({
+          el: clickdot
+        });
+        notify.id = 'npmap-notify';
+        elements.push({
+          el: notify
+        });
+        progress.id = 'npmap-progressbar';
+        progress.innerHTML = '<div></div>';
+        elements.push({
+          el: progress
+        });
+        tip.className = 'padded rounded shadowed transparent';
+        tip.id = 'npmap-tip';
+        elements.push({
+          el: tip
+        });
+        
+        if (NPMap.config.api.toLowerCase() !== 'leaflet' && NPMap.config.api.toLowerCase() !== 'modestmaps') {
+          logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + NPMap.config.api + 'logo.png" /></span>';
+        }
+        
+        if (!NPMap.config.hideNpmapLogo) {
+          logosHtml += '<span style="display:block;float:right;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+        }
+
+        if (logosHtml.length > 0) {
+          // The logo div.
+          var logos = document.createElement('div');
+          
+          logos.id = 'npmap-logos';
+          logos.innerHTML = logosHtml;
+          logos.style.cssText = 'bottom:3px;height:30px;left:5px;position:absolute;z-index:30;';
+          elements.push({
+            el: logos,
+            func: function() {
+              $('#npmap-logos').resize(setAttributionMaxWidthAndPosition);
+              setAttributionMaxWidthAndPosition();
+            }
+          })
+        }
+
+        if (toolsConfig.navigation) {
+          var
+              // An array of callback functions.
+              callbacks = [],
+              // The navigation controls div.
+              navigation = document.createElement('div'),
+              // HTML string for the navigation div.
+              navigationHtml = '',
+              // The position string for the navigation tools.
+              position = toolsConfig.navigation.position.split(' ');
+              
+          if (toolsConfig.navigation.pan) {
+            var compass = toolsConfig.navigation.pan;
+
+            navigation.style.width = '58px';
+
+            navigationHtml += '<div id="npmap-navigation-compass" class="npmap-navigation-compass-' + compass + '"><a id="npmap-navigation-compass-east" class="pointer"></a><a id="npmap-navigation-compass-north" class="pointer"></a><a id="npmap-navigation-compass-south" class="pointer"></a><a id="npmap-navigation-compass-west" class="pointer"></a>';
             
             if (compass === 'home') {
-              hookUpNavigationControl('npmap-navigation-compass-center', function() {
-                me.toInitialExtent();
-              });
+              navigationHtml += '<a id="npmap-navigation-compass-center" class="pointer"></a>';
             }
             
-            for (var i = 0; i < buttons.length; i++) {
-              var button = buttons[i],
-                  compassEl = document.getElementById('npmap-navigation-compass');
-                  
-              button.direction = button.id.split('-')[3];
-              
-              bean.add(button, 'mouseenter', function(e) {
-                compassEl.className = compassEl.className.replace('npmap-navigation-compass-' + compass, ' npmap-navigation-compass-' + compass + '-' + this.direction + '-over');
-              });
-              bean.add(button, 'mouseleave', function(e) {
-                compassEl.className = compassEl.className.replace(' npmap-navigation-compass-' + compass + '-' + this.direction + '-over', 'npmap-navigation-compass-' + compass);
-              });
-            }
-          });
-        }
-        
-        if (toolsConfig.navigation.zoom === 'small') {
-          navigationHtml += '<div id="npmap-navigation-small-zoom" class="npmap-navigation-small-zoom"';
-          
-          if (typeof toolsConfig.navigation.pan !== 'undefined') {
-            navigationHtml += ' style="margin-left:17px;margin-top:5px;"';
-          }
-          
-          navigationHtml += '><a id="npmap-navigation-small-zoom-in" class="pointer"></a><a id="npmap-navigation-small-zoom-out" class="pointer"></a></div>';
+            navigationHtml += '</div>';
 
-          callbacks.push(function() {
-            var buttons = [];
-          
-            buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-in', function() {
-              NPMap.Map.zoomIn();
-            }));
-            buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-out', function() {
-              NPMap.Map.zoomOut();
-            }));
-            
-            for (var i = 0; i < buttons.length; i++) {
-              var button = buttons[i];
-              
-              button.inOrOut = button.id.split('-')[4];
-              
-              bean.add(button, 'mouseenter', function(e) {
-                $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom').addClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over');
-              });
-              bean.add(button, 'mouseleave', function(e) {
-                $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over').addClass('npmap-navigation-small-zoom');
-              });
-            }
-          });
-        }
+            callbacks.push(function() {
+              var buttons = [];
 
-        if (position[0] === 'bottom') {
-          navigation.style.bottom = '15px';
-        } else {
-          navigation.style.top = '15px';
-        }
-        
-        if (position[1]) {
-          if (position[1] === 'left') {
-            navigation.style.left = '15px';
-          } else {
-            navigation.style.right = '15px';
-          }
-        }
-
-        navigation.id = 'npmap-navigation';
-        navigation.innerHTML = navigationHtml;
-        navigation.style.position = 'absolute';
-        navigation.style.zIndex = '30';
-        elements.push(navigation);
-      }
-      
-      if (toolsConfig.fullscreen || toolsConfig.print || toolsConfig.share) {
-        var html = '<ul id="npmap-tools">',
-            toolbar = document.createElement('div');
-
-        if (toolsConfig.print) {
-          html += '<li id="npmap-toolbar-print"><div class="npmap-toolbar-print"></div></li>';
-
-          callbacks.push(function() {
-            
-          });
-        }
-
-        if (toolsConfig.share) {
-          html += '<li id="npmap-toolbar-share"><div class="npmap-toolbar-share"></div></li>';
-
-          callbacks.push(function() {
-            
-          });
-        }
-
-        if (toolsConfig.fullscreen) {
-          html += '<li id="npmap-toolbar-fullscreen"><div class="npmap-toolbar-fullscreen"></div></li>';
-
-          callbacks.push(function() {
-            hookUpClickEvent('npmap-toolbar-fullscreen', function() {
-              NPMap.Map.toggleFullScreen();
-            });
-          });
-        }
-        
-        toolbar.innerHTML = html + '</ul>';
-        toolbar.id = 'npmap-toolbar';
-        
-        document.getElementById('npmap-map').style.top = '28px';
-        document.getElementById('npmap').insertBefore(toolbar, document.getElementById('npmap-map'));
-      }
-
-      if (NPMap.config.modules && NPMap.config.modules.length > 0) {
-        var count = 0;
-
-        for (var i = 0; i < NPMap.config.modules.length; i++) {
-          var name = NPMap.config.modules[i].name.toLowerCase();
-
-          if (name !== 'edit' && name !== 'route') {
-            count++;
-          }
-        }
-
-        if (count > 0) {
-          var modules = document.createElement('div'),
-              modulesHtml = '',
-              tabs = document.createElement('div'),
-              tabsHtml = '';
-
-          for (var j = 0; j < NPMap.config.modules.length; j++) {
-            var module = NPMap.config.modules[j],
-                nameLower = module.name.toLowerCase();
-
-            if (nameLower !== 'edit' && nameLower !== 'route') {
-              modulesHtml += '<div id="npmap-modules-' + nameLower + '">Test</div>';
-              tabsHtml += '<div id="npmap-module-tab-' + nameLower + '" class="npmap-module-tab" onclick="NPMap.Map.handleModuleTabClick(this);return false;"><div class="npmap-module-tab-' + nameLower + '"></div></div>';
-            }
-          }
-
-          modules.id = 'npmap-modules';
-          modules.innerHTML = '<div id="npmap-modules-close" class="npmap-module-tab" style="position:absolute;right:-29px;top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';z-index:1;" onclick="NPMap.Map.handleModuleCloseClick();return false;"><div class="npmap-module-tab-close"></div></div>';
-          tabs.id = 'npmap-modules-tabs';
-          tabs.innerHTML = tabsHtml;
-          
-          callbacks.push(function() {
-            // Hook up tab click events here.
-          });
-          elements.push(tabs);
-
-          document.getElementById('npmap').insertBefore(modules, document.getElementById('npmap-map'));
-        }
-      }
-
-      // TODO: This is currently Bing specific.
-      if ((toolsConfig.overviewMap || toolsConfig.overview) && NPMap.config.api === 'bing') {
-        var overview = document.createElement('div');
-
-        overview.id = 'npmap-overview';
-        overview.innerHTML = '<div id="npmap-overview-title" style="color:#454545;display:none;padding:8px;position:absolute;">Overview Map</div><div id="npmap-overview-map" style="bottom:0px;left:0px;position:absolute;right:0px;top:0px;"></div>';
-        overview.style.bottom = $('#npmap-attribution').outerHeight() + 'px';
-        
-        elements.push(overview);
-        callbacks.push(function() {
-          var overviewMap = new Microsoft.Maps.Map(document.getElementById('npmap-overviewmap-map'), {
-            credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
-            disablePanning: true,
-            disableZooming: true,
-            fixedMapPosition: true,
-            mapTypeId: Microsoft.Maps.MapTypeId.road,
-            showBreadcrumb: false,
-            showCopyright: false,
-            showDashboard: false,
-            showLogo: false,
-            showMapTypeSelector: false,
-            showScalebar: false
-          });
-
-          function updateOverviewMap() {
-            var bounds = NPMap.bing.map.Map.getBounds(),
-                nw = bounds.getNorthwest(),
-                se = bounds.getSoutheast(),
-                ne = new Microsoft.Maps.Location(se.latitude, nw.longitude),
-                sw = new Microsoft.Maps.Location(nw.latitude, se.longitude);
-            
-            overviewMap.setView({
-              bounds: bounds,
-              padding: 20
-            });
-            overviewMap.entities.clear();
-            
-            if ($('#npmap-overview-button').hasClass('expanded')) {
-              overviewMap.entities.push(new Microsoft.Maps.Polygon([
-                nw,
-                ne,
-                se,
-                sw,
-                nw
-              ], {
-                fillColor: new Microsoft.Maps.Color(175, 218, 233, 228),
-                strokeColor: new Microsoft.Maps.Color(255, 186, 197, 191),
-                strokeThickness: 1
+              buttons.push(hookUpNavigationControl('npmap-navigation-compass-east', function() {
+                NPMap.Map.panInDirection('east');
               }));
-            }
-          }
-
-          cancelMouseEvents($('#npmap-overview'));
-        
-          $('<div id="npmap-overview-button" class="npmap-overview-open cursor" style="position:absolute;"></div>').appendTo('#npmap-overview-map').click(function() {
-            var $overview = $('#npmap-overview'),
-                $this = $(this),
-                $title = $('#npmap-overview-title');
-            
-            if ($this.hasClass('expanded')) {
-              $title.hide();
-              $('#npmap-overview-map').css({
-                top: '0px'
-              });
-              $overview.animate({
-                height: 48,
-                width: 48
-              }, 250, function() {
-                overviewMap.setOptions({
-                  height: 48,
-                  width: 48
+              buttons.push(hookUpNavigationControl('npmap-navigation-compass-north', function() {
+                NPMap.Map.panInDirection('north');
+              }));
+              buttons.push(hookUpNavigationControl('npmap-navigation-compass-south', function() {
+                NPMap.Map.panInDirection('south');
+              }));
+              buttons.push(hookUpNavigationControl('npmap-navigation-compass-west', function() {
+                NPMap.Map.panInDirection('west');
+              }));
+              
+              if (compass === 'home') {
+                hookUpNavigationControl('npmap-navigation-compass-center', function() {
+                  me.toInitialExtent();
                 });
-                setAttributionMaxWidthAndPosition();
-                updateOverviewMap();
-              });
-              $this.removeClass('npmap-overview-close').removeClass('npmap-overview-close-over').removeClass('expanded').addClass('npmap-overview-open');
-              overviewMap.entities.clear();
-            } else {
-              $title.show();
-              $('#npmap-overview-map').css({
-                top: $title.height() + 'px'
-              });
-              $overview.animate({
-                height: 173,
-                width: 174
-              }, 250, function() {
-                overviewMap.setOptions({
-                  height: 173,
-                  width: 174
+              }
+              
+              for (var i = 0; i < buttons.length; i++) {
+                var button = buttons[i],
+                    compassEl = document.getElementById('npmap-navigation-compass');
+                    
+                button.direction = button.id.split('-')[3];
+                
+                bean.add(button, 'mouseenter', function(e) {
+                  compassEl.className = compassEl.className.replace('npmap-navigation-compass-' + compass, ' npmap-navigation-compass-' + compass + '-' + this.direction + '-over');
                 });
-                setAttributionMaxWidthAndPosition();
-                updateOverviewMap();
+                bean.add(button, 'mouseleave', function(e) {
+                  compassEl.className = compassEl.className.replace(' npmap-navigation-compass-' + compass + '-' + this.direction + '-over', 'npmap-navigation-compass-' + compass);
+                });
+              }
+            });
+          }
+          
+          if (toolsConfig.navigation.zoom === 'small') {
+            navigationHtml += '<div id="npmap-navigation-small-zoom" class="npmap-navigation-small-zoom"';
+            
+            if (typeof toolsConfig.navigation.pan !== 'undefined') {
+              navigationHtml += ' style="margin-left:17px;margin-top:5px;"';
+            }
+            
+            navigationHtml += '><a id="npmap-navigation-small-zoom-in" class="pointer"></a><a id="npmap-navigation-small-zoom-out" class="pointer"></a></div>';
+
+            callbacks.push(function() {
+              var buttons = [];
+            
+              buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-in', function() {
+                NPMap.Map.zoomIn();
+              }));
+              buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-out', function() {
+                NPMap.Map.zoomOut();
+              }));
+              
+              for (var i = 0; i < buttons.length; i++) {
+                var button = buttons[i];
+                
+                button.inOrOut = button.id.split('-')[4];
+                
+                bean.add(button, 'mouseenter', function(e) {
+                  $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom').addClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over');
+                });
+                bean.add(button, 'mouseleave', function(e) {
+                  $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over').addClass('npmap-navigation-small-zoom');
+                });
+              }
+            });
+          }
+
+          if (position[0] === 'bottom') {
+            navigation.style.bottom = '15px';
+          } else {
+            navigation.style.top = '15px';
+          }
+          
+          if (position[1]) {
+            if (position[1] === 'left') {
+              navigation.style.left = '15px';
+            } else {
+              navigation.style.right = '15px';
+            }
+          }
+
+          navigation.id = 'npmap-navigation';
+          navigation.innerHTML = navigationHtml;
+          navigation.style.position = 'absolute';
+          navigation.style.zIndex = '30';
+          elements.push({
+            el: navigation,
+            func: function() {
+              for (var i = 0; i < callbacks.length; i++) {
+                callbacks[i]();
+              }
+            }
+          });
+        }
+        
+        if (toolsConfig.fullscreen || toolsConfig.print || toolsConfig.share) {
+          var callbacks = [],
+              html = '<ul id="npmap-tools">',
+              toolbar = document.createElement('div');
+
+          if (toolsConfig.print) {
+            html += '<li id="npmap-toolbar-print"><div class="npmap-toolbar-print"></div></li>';
+
+            callbacks.push(function() {
+              
+            });
+          }
+
+          if (toolsConfig.share) {
+            html += '<li id="npmap-toolbar-share"><div class="npmap-toolbar-share"></div></li>';
+
+            callbacks.push(function() {
+              
+            });
+          }
+
+          if (toolsConfig.fullscreen) {
+            html += '<li id="npmap-toolbar-fullscreen"><div class="npmap-toolbar-fullscreen"></div></li>';
+
+            callbacks.push(function() {
+              hookUpClickEvent('npmap-toolbar-fullscreen', function() {
+                NPMap.Map.toggleFullScreen();
               });
-              $this.removeClass('npmap-overview-open').removeClass('npmap-overview-open-over').addClass('npmap-overview-close').addClass('expanded');
-            }
-          }).mouseover(function() {
-            var $this = $(this);
-            
-            if ($this.hasClass('expanded')) {
-              $this.removeClass('npmap-overview-close').addClass('npmap-overview-close-over');
-            } else {
-              $this.removeClass('npmap-overview-open').addClass('npmap-overview-open-over');
-            }
-          }).mouseout(function() {
-            var $this = $(this);
-            
-            if ($this.hasClass('expanded')) {
-              $this.removeClass('npmap-overview-close-over').addClass('npmap-overview-close');
-            } else {
-              $this.removeClass('npmap-overview-open-over').addClass('npmap-overview-open');
-            }
-          });
-          
-          /*
-          Microsoft.Maps.Events.addHandler(overviewMap, 'viewchangeend', function() {
-            NPMap.bing.map.Map.setView({
-              center: overviewMap.getCenter()
             });
-          });
-          */
-          
-          NPMap.Event.add('NPMap.Map', 'viewchangeend', function(e) {
-            updateOverviewMap();
-          });
-        });
-      }
-
-      if (NPMap.config.baseLayers && NPMap.config.baseLayers.length > 1) {
-        var
-            // The switcher div.
-            switcher = document.createElement('div'),
-            // The switcher menu div.
-            switcherMenu = document.createElement('div');
-
-        // TODO: Write this yourself.
-        (function(b){var d=function(){b(".jdropdown-menu").css({display:"none"});b(".jdropdown-anchor").removeClass("jdropdown-active");b(this).trigger("jdropdown.close")},f={init:function(a){return this.each(function(){var c=b(this),e=c.data("items");c.data("jdropdown")||(b(a.container).addClass("jdropdown-menu"),b(this).addClass("jdropdown-anchor").data("jdropdown",{items:"object"===typeof e?e:a.items,anchor:b(this),menu:b(a.container),options:a}).on({click:h}));return this})},destroy:function(){}},h=function(a){a.preventDefault();
-        if(b(this).hasClass("jdropdown-active"))d();else{d();var a=b(this).data("jdropdown"),c=b(this).position(),e=a.menu;e.data("jdropdown",a).empty();(b.isFunction(a.renderMenu)?b.isFunction(a.renderItem)?a.renderItem(a.renderMenu(),a.items):g(a.renderMenu(),a.items):b.isFunction(a.renderItem)?a.renderItem(b("<ul></ul>"),a.items):g(b("<ul></ul>"),a.items)).appendTo(e);"left"==a.options.orientation?a.menu.css({display:"block",left:c.left,position:"absolute",top:c.top+b(this).outerHeight()}):a.menu.css({display:"block",
-        left:c.left-e.outerWidth()+b(this).outerWidth(),position:"absolute",top:c.top+b(this).outerHeight()});b(this).addClass("jdropdown-active").trigger("jdropdown.open")}},g=function(a,c){b.each(c,function(e,d){b("<li"+(e===c.length-1?"":' style="border-bottom:solid 1px #F2F1EF;"')+"></li>").data("jdropdown.item",d).append(b("<a></a>").attr({href:"javascript:void(0)","class":d["class"]}).html('<div style="color:#818177;height:28px;line-height:28px;vertical-align:middle;"><div style="float:left;text-align:center;width:35px;"><img src="'+
-        d.icon+'" style="height:22px;margin-top:3px;" /></div><div style="float:right;width:105px;">'+d.label+"</div></div>").on({click:i})).appendTo(a)});return a},i=function(){d();b(this).trigger("jdropdown.selectItem")};b(document).on("click",function(a){a=b(a.target);!a.parents().hasClass("jdropdown-menu")&&!a.parents().hasClass("jdropdown-anchor")&&!a.hasClass("jdropdown-menu")&&!a.hasClass("jdropdown-anchor")&&d()});b.fn.jdropdown=function(a){if(f[a])return f[a].apply(this,Array.prototype.slice.call(arguments,
-        1));if("object"===typeof a||!a)return f.init.apply(this,arguments)}})(jQuery);
-        
-        switcher.className = 'npmap-switcher-dropdown';
-        switcher.id = 'npmap-switcher';
-        switcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
-        switcherMenu.id = 'npmap-switcher-menu';
-        
-        elements.push(switcher, switcherMenu);
-        callbacks.push(function() {
-          var activeIcon,
-              activeLabel,
-              items = [];
-          
-          function setIcon(url) {
-            $('#npmap-switcher-dropdown-icon').html('<img src="' + url + '" style="height:15px;margin-top:4.5px;" />');
-          }
-          function setLabel(text) {
-            $('#npmap-switcher-dropdown-text').html(text.toUpperCase());
           }
           
-          $.each(NPMap.config.baseLayers, function(i, baseLayer) {
-            var icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
-                label = baseLayer.code,
-                match = NPMap.Map[NPMap.config.api].matchBaseLayer(baseLayer),
-                type = baseLayer.type;
-            
-            if (match) {
-              label = null;
-              
-              if (baseLayer.name) {
-                label = baseLayer.name;
-              } else if (match.name) {
-                label = match.name;
-              }
-              
-              type = match.type;
-              
-              switch (match.type) {
-                case 'Aerial':
-                  if (!label) {
-                    label = 'Aerial View';
-                  }
-                  
-                  icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png';
-                  
-                  break;
-                case 'NPS':
-                  if (!label) {
-                    label = 'NPS View';
-                  }
-                  
-                  icon = NPMap.config.server + '/resources/img/tools/switcher/nps-large.png';
-                  
-                  break;
-                case 'Street':
-                  if (!label) {
-                    label = 'Street View';
-                  }
-                  
-                  icon = NPMap.config.server + '/resources/img/tools/switcher/street-large.png';
-                  
-                  break;
-                case 'Topo':
-                  if (!label) {
-                    label = 'Topo View';
-                  }
-                  
-                  icon = NPMap.config.server + '/resources/img/tools/switcher/topo-large.png';
-                  
-                  break;
-              }
-            } else {
-              if (baseLayer.icon) {
-                icon = baseLayer.icon;
-              }
-              
-              if (baseLayer.name) {
-                label = baseLayer.name;
-              }
-            }
-            
-            if (typeof baseLayer.visible !== undefined && baseLayer.visible === true) {
-              activeIcon = icon;
-              activeLabel = label;
-            }
-            
-            items.push({
-              baseLayer: baseLayer,
-              icon: icon,
-              label: label
-            });
-          });
+          toolbar.innerHTML = html + '</ul>';
+          toolbar.id = 'npmap-toolbar';
           
-          setIcon(activeIcon);
-          setLabel(activeLabel);
-          
-          items.sort(function(a, b) {
-            return a.label > b.label;
-          });
-          
-          $('.npmap-switcher-dropdown').jdropdown({
-            container: '#npmap-switcher-menu',
-            items: items,
-            orientation: 'right'
-          });
-          $(document).on('jdropdown.selectItem', '#npmap-switcher-menu a', function(e, event) {
-            var data = $(this).parent().data('jdropdown.item');
-            
-            e.preventDefault();
-            setIcon(data.icon.replace('large', 'small'));
-            setLabel(data.label);
-            NPMap.Map[NPMap.config.api].switchBaseLayer(data.baseLayer);
-          });
-        });
-      }
-      
-      this.addElementsToMapDiv(elements, function() {
-        if (callbacks.length > 0) {
-          for (var i = 0; i < callbacks.length; i++) {
+          document.getElementById('npmap-map').style.top = '28px';
+          document.getElementById('npmap').insertBefore(toolbar, document.getElementById('npmap-map'));
+
+          for (var i = 0; i < callbacks.length; i ++) {
             callbacks[i]();
           }
         }
 
-        setAttributionMaxWidthAndPosition();
-        $('#npmap-tip').css({
-          display: 'none',
-          maxWidth: '200px',
-          position: 'absolute',
-          zIndex: 32
-        });
-        
-        NPMap.Util.safeLoad('NPMap.' + NPMap.config.api + '.map.Map', function() {
-          NPMap.Event.trigger('NPMap.Map', 'ready', NPMap.Map[NPMap.config.api].map);
-        });
+        if (NPMap.config.modules && NPMap.config.modules.length > 0) {
+          var count = 0;
+
+          for (var i = 0; i < NPMap.config.modules.length; i++) {
+            var name = NPMap.config.modules[i].name.toLowerCase();
+
+            if (name !== 'edit' && name !== 'route') {
+              count++;
+            }
+          }
+
+          if (count > 0) {
+            var modules = document.createElement('div'),
+                modulesHtml = '',
+                tabs = document.createElement('div'),
+                tabsHtml = '';
+
+            for (var j = 0; j < NPMap.config.modules.length; j++) {
+              var module = NPMap.config.modules[j],
+                  nameLower = module.name.toLowerCase();
+
+              if (nameLower !== 'edit' && nameLower !== 'route') {
+                modulesHtml += '<div id="npmap-modules-' + nameLower + '">Test</div>';
+                tabsHtml += '<div id="npmap-module-tab-' + nameLower + '" class="npmap-module-tab" onclick="NPMap.Map.handleModuleTabClick(this);return false;"><div class="npmap-module-tab-' + nameLower + '"></div></div>';
+              }
+            }
+
+            modules.id = 'npmap-modules';
+            modules.innerHTML = '<div id="npmap-modules-close" class="npmap-module-tab" style="position:absolute;right:-29px;top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';z-index:1;" onclick="NPMap.Map.handleModuleCloseClick();return false;"><div class="npmap-module-tab-close"></div></div>';
+            tabs.id = 'npmap-modules-tabs';
+            tabs.innerHTML = tabsHtml;
+
+            elements.push({
+              el: tabs,
+              func: function() {
+
+              }
+            });
+
+            document.getElementById('npmap').insertBefore(modules, document.getElementById('npmap-map'));
+          }
+        }
+
+        // TODO: This is currently Bing specific.
+        if ((toolsConfig.overviewMap || toolsConfig.overview) && NPMap.config.api === 'bing') {
+          var overview = document.createElement('div');
+
+          overview.id = 'npmap-overview';
+          overview.innerHTML = '<div id="npmap-overview-title" style="color:#454545;display:none;padding:8px;position:absolute;">Overview Map</div><div id="npmap-overview-map" style="bottom:0px;left:0px;position:absolute;right:0px;top:0px;"></div>';
+          overview.style.bottom = $('#npmap-attribution').outerHeight() + 'px';
+          
+          elements.push({
+            el: overview,
+            func: function() {
+              var overviewMap = new Microsoft.Maps.Map(document.getElementById('npmap-overviewmap-map'), {
+                credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
+                disablePanning: true,
+                disableZooming: true,
+                fixedMapPosition: true,
+                mapTypeId: Microsoft.Maps.MapTypeId.road,
+                showBreadcrumb: false,
+                showCopyright: false,
+                showDashboard: false,
+                showLogo: false,
+                showMapTypeSelector: false,
+                showScalebar: false
+              });
+
+              function updateOverviewMap() {
+                var bounds = NPMap.bing.map.Map.getBounds(),
+                    nw = bounds.getNorthwest(),
+                    se = bounds.getSoutheast(),
+                    ne = new Microsoft.Maps.Location(se.latitude, nw.longitude),
+                    sw = new Microsoft.Maps.Location(nw.latitude, se.longitude);
+                
+                overviewMap.setView({
+                  bounds: bounds,
+                  padding: 20
+                });
+                overviewMap.entities.clear();
+                
+                if ($('#npmap-overview-button').hasClass('expanded')) {
+                  overviewMap.entities.push(new Microsoft.Maps.Polygon([
+                    nw,
+                    ne,
+                    se,
+                    sw,
+                    nw
+                  ], {
+                    fillColor: new Microsoft.Maps.Color(175, 218, 233, 228),
+                    strokeColor: new Microsoft.Maps.Color(255, 186, 197, 191),
+                    strokeThickness: 1
+                  }));
+                }
+              }
+
+              cancelMouseEvents($('#npmap-overview'));
+            
+              $('<div id="npmap-overview-button" class="npmap-overview-open cursor" style="position:absolute;"></div>').appendTo('#npmap-overview-map').click(function() {
+                var $overview = $('#npmap-overview'),
+                    $this = $(this),
+                    $title = $('#npmap-overview-title');
+                
+                if ($this.hasClass('expanded')) {
+                  $title.hide();
+                  $('#npmap-overview-map').css({
+                    top: '0px'
+                  });
+                  $overview.animate({
+                    height: 48,
+                    width: 48
+                  }, 250, function() {
+                    overviewMap.setOptions({
+                      height: 48,
+                      width: 48
+                    });
+                    setAttributionMaxWidthAndPosition();
+                    updateOverviewMap();
+                  });
+                  $this.removeClass('npmap-overview-close').removeClass('npmap-overview-close-over').removeClass('expanded').addClass('npmap-overview-open');
+                  overviewMap.entities.clear();
+                } else {
+                  $title.show();
+                  $('#npmap-overview-map').css({
+                    top: $title.height() + 'px'
+                  });
+                  $overview.animate({
+                    height: 173,
+                    width: 174
+                  }, 250, function() {
+                    overviewMap.setOptions({
+                      height: 173,
+                      width: 174
+                    });
+                    setAttributionMaxWidthAndPosition();
+                    updateOverviewMap();
+                  });
+                  $this.removeClass('npmap-overview-open').removeClass('npmap-overview-open-over').addClass('npmap-overview-close').addClass('expanded');
+                }
+              }).mouseover(function() {
+                var $this = $(this);
+                
+                if ($this.hasClass('expanded')) {
+                  $this.removeClass('npmap-overview-close').addClass('npmap-overview-close-over');
+                } else {
+                  $this.removeClass('npmap-overview-open').addClass('npmap-overview-open-over');
+                }
+              }).mouseout(function() {
+                var $this = $(this);
+                
+                if ($this.hasClass('expanded')) {
+                  $this.removeClass('npmap-overview-close-over').addClass('npmap-overview-close');
+                } else {
+                  $this.removeClass('npmap-overview-open-over').addClass('npmap-overview-open');
+                }
+              });
+              
+              /*
+              Microsoft.Maps.Events.addHandler(overviewMap, 'viewchangeend', function() {
+                NPMap.bing.map.Map.setView({
+                  center: overviewMap.getCenter()
+                });
+              });
+              */
+              
+              NPMap.Event.add('NPMap.Map', 'viewchangeend', function(e) {
+                updateOverviewMap();
+              });
+            }
+          });
+        }
+
+        if (NPMap.config.baseLayers && NPMap.config.baseLayers.length > 1) {
+          var
+              // The switcher div.
+              switcher = document.createElement('div'),
+              // The switcher menu div.
+              switcherMenu = document.createElement('div');
+
+          // TODO: Write this yourself.
+          (function(b){var d=function(){b(".jdropdown-menu").css({display:"none"});b(".jdropdown-anchor").removeClass("jdropdown-active");b(this).trigger("jdropdown.close")},f={init:function(a){return this.each(function(){var c=b(this),e=c.data("items");c.data("jdropdown")||(b(a.container).addClass("jdropdown-menu"),b(this).addClass("jdropdown-anchor").data("jdropdown",{items:"object"===typeof e?e:a.items,anchor:b(this),menu:b(a.container),options:a}).on({click:h}));return this})},destroy:function(){}},h=function(a){a.preventDefault();
+          if(b(this).hasClass("jdropdown-active"))d();else{d();var a=b(this).data("jdropdown"),c=b(this).position(),e=a.menu;e.data("jdropdown",a).empty();(b.isFunction(a.renderMenu)?b.isFunction(a.renderItem)?a.renderItem(a.renderMenu(),a.items):g(a.renderMenu(),a.items):b.isFunction(a.renderItem)?a.renderItem(b("<ul></ul>"),a.items):g(b("<ul></ul>"),a.items)).appendTo(e);"left"==a.options.orientation?a.menu.css({display:"block",left:c.left,position:"absolute",top:c.top+b(this).outerHeight()}):a.menu.css({display:"block",
+          left:c.left-e.outerWidth()+b(this).outerWidth(),position:"absolute",top:c.top+b(this).outerHeight()});b(this).addClass("jdropdown-active").trigger("jdropdown.open")}},g=function(a,c){b.each(c,function(e,d){b("<li"+(e===c.length-1?"":' style="border-bottom:solid 1px #F2F1EF;"')+"></li>").data("jdropdown.item",d).append(b("<a></a>").attr({href:"javascript:void(0)","class":d["class"]}).html('<div style="color:#818177;height:28px;line-height:28px;vertical-align:middle;"><div style="float:left;text-align:center;width:35px;"><img src="'+
+          d.icon+'" style="height:22px;margin-top:3px;" /></div><div style="float:right;width:105px;">'+d.label+"</div></div>").on({click:i})).appendTo(a)});return a},i=function(){d();b(this).trigger("jdropdown.selectItem")};b(document).on("click",function(a){a=b(a.target);!a.parents().hasClass("jdropdown-menu")&&!a.parents().hasClass("jdropdown-anchor")&&!a.hasClass("jdropdown-menu")&&!a.hasClass("jdropdown-anchor")&&d()});b.fn.jdropdown=function(a){if(f[a])return f[a].apply(this,Array.prototype.slice.call(arguments,
+          1));if("object"===typeof a||!a)return f.init.apply(this,arguments)}})(jQuery);
+          
+          switcher.className = 'npmap-switcher-dropdown';
+          switcher.id = 'npmap-switcher';
+          switcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
+          switcherMenu.id = 'npmap-switcher-menu';
+          
+          elements.push({
+            el: switcher
+          }, {
+            el: switcherMenu,
+            func: function() {
+              var activeIcon,
+                  activeLabel,
+                  items = [];
+              
+              function setIcon(url) {
+                $('#npmap-switcher-dropdown-icon').html('<img src="' + url + '" style="height:15px;margin-top:4.5px;" />');
+              }
+              function setLabel(text) {
+                $('#npmap-switcher-dropdown-text').html(text.toUpperCase());
+              }
+              
+              $.each(NPMap.config.baseLayers, function(i, baseLayer) {
+                var icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
+                    label = baseLayer.code,
+                    match = NPMap.Map[NPMap.config.api].matchBaseLayer(baseLayer),
+                    type = baseLayer.type;
+                
+                if (match) {
+                  label = null;
+                  
+                  if (baseLayer.name) {
+                    label = baseLayer.name;
+                  } else if (match.name) {
+                    label = match.name;
+                  }
+                  
+                  type = match.type;
+                  
+                  switch (match.type) {
+                    case 'Aerial':
+                      if (!label) {
+                        label = 'Aerial View';
+                      }
+                      
+                      icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png';
+                      
+                      break;
+                    case 'NPS':
+                      if (!label) {
+                        label = 'NPS View';
+                      }
+                      
+                      icon = NPMap.config.server + '/resources/img/tools/switcher/nps-large.png';
+                      
+                      break;
+                    case 'Street':
+                      if (!label) {
+                        label = 'Street View';
+                      }
+                      
+                      icon = NPMap.config.server + '/resources/img/tools/switcher/street-large.png';
+                      
+                      break;
+                    case 'Topo':
+                      if (!label) {
+                        label = 'Topo View';
+                      }
+                      
+                      icon = NPMap.config.server + '/resources/img/tools/switcher/topo-large.png';
+                      
+                      break;
+                  }
+                } else {
+                  if (baseLayer.icon) {
+                    icon = baseLayer.icon;
+                  }
+                  
+                  if (baseLayer.name) {
+                    label = baseLayer.name;
+                  }
+                }
+                
+                if (typeof baseLayer.visible !== undefined && baseLayer.visible === true) {
+                  activeIcon = icon;
+                  activeLabel = label;
+                }
+                
+                items.push({
+                  baseLayer: baseLayer,
+                  icon: icon,
+                  label: label
+                });
+              });
+              
+              setIcon(activeIcon);
+              setLabel(activeLabel);
+              
+              items.sort(function(a, b) {
+                return a.label > b.label;
+              });
+              
+              $('.npmap-switcher-dropdown').jdropdown({
+                container: '#npmap-switcher-menu',
+                items: items,
+                orientation: 'right'
+              });
+              $(document).on('jdropdown.selectItem', '#npmap-switcher-menu a', function(e, event) {
+                var data = $(this).parent().data('jdropdown.item');
+                
+                e.preventDefault();
+                setIcon(data.icon.replace('large', 'small'));
+                setLabel(data.label);
+                NPMap.Map[NPMap.config.api].switchBaseLayer(data.baseLayer);
+              });
+            }
+          });
+        }
+
+        for (var i = 0; i < elements.length; i++) {
+          var element = elements[i];
+
+          me.addElementToMapDiv(element.el, element.func);
+        }
+
+        var interval = setInterval(function() {
+          if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
+            clearInterval(interval);
+            Event.trigger('NPMap.Map', 'ready');
+          }
+        })
       });
     },
     /**
@@ -776,12 +814,7 @@ define([
         el.style.zIndex = '30';
       }
 
-      if (NPMap.config.api === 'bing') {
-        NPMap.Map.Bing.addElementToMapDiv(el);
-      } else {
-        document.getElementById(NPMap.config.div).appendChild(el);
-      }
-      
+      NPMap.Map[NPMap.config.api].addElementToMapDiv(el);
       cancelMouseEvents($(el));
 
       if (callback) {
@@ -795,25 +828,9 @@ define([
      */
     addElementsToMapDiv: function(els, callback) {
       var me = this;
-      
-      if (NPMap.config.api === 'bing') {
-        NPMap.Util.safeLoad('NPMap.bing', function() {
-          $.each(els, function(i, el) {
-            me.addElementToMapDiv(el);
-          });
-          
-          if (callback) {
-            callback();
-          }
-        });
-      } else {
-        $.each(els, function(i, el) {
-          me.addElementToMapDiv(el);
-        });
-        
-        if (callback) {
-         callback();
-        }
+
+      for (var i = 0; i < els.length; i++) {
+        me.addElementToMapDiv(els[i], callback);
       }
     },
     /**
@@ -1152,7 +1169,11 @@ define([
      * Hides the tip.
      */
     hideTip: function() {
-      document.getElementById('npmap-tip').style.display = 'none';
+      var tip = document.getElementById('npmap-tip');
+
+      if (tip) {
+        tip.style.display = 'none';
+      }
     },
     /**
      * Tests to see if a latLng is within the map's current bounds.

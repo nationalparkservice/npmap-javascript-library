@@ -578,13 +578,6 @@ define([
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
-      /*
-      console.log(map.extent);
-      console.log(currentExtent);
-      console.log(latLng);
-      console.log(currentExtent.contains(latLng));
-      */
-
       return currentExtent.contains(latLng);
     },
     /**

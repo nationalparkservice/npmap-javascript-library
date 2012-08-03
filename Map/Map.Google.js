@@ -402,12 +402,11 @@
               clearInterval(intOverlay);
             }
           }, 100);
-      
-      Map._init();
-      
+
       NPMap.Map.Google._isReady = true;
+      NPMap.Map._init();
     }
-  }, 5);
+  }, 1000);
 
   return NPMap.Map.Google = {
     // Is the map loaded and ready to be interacted with programatically?
@@ -424,6 +423,13 @@
       }
       
       return baseLayer;
+    },
+    /**
+     * Adds an HTML element to the map div.
+     * @param {Object} el
+     */
+    addElementToMapDiv: function(el) {
+      this.getContainerDiv().appendChild(el);
     },
     /**
      * Adds a shape to the map.
@@ -678,9 +684,15 @@
      * @return {google.maps.LatLng}
      */
     getClickDotLatLng: function() {
+      return this.getLatLngFromPixel(this.getClickDotPixel());
+    },
+    /**
+     * Returns the {Microsoft.Mas.Point} for the #npmap-clickdot div.
+     */
+    getClickDotPixel: function() {
       var position = $('#npmap-clickdot').position();
-      
-      return this.getLatLngFromPixel(new google.maps.Point(position.left, position.top));
+
+      return new google.maps.Point(position.left, position.top);
     },
     /**
      * Gets the container div.
@@ -731,13 +743,6 @@
      */
     getMinZoom: function() {
       return min;
-    },
-    /**
-     * Returns a google.maps.Point object for a given latLng.
-     * @param latLng {google.maps.LatLng} (Required)
-     */
-    getPixelFromLatLng: function(latLng) {
-      return overlay.getProjection().fromLatLngToContainerPixel(latLng);
     },
     /**
      * Gets the zoom level of the map.
@@ -801,6 +806,13 @@
       return new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
     },
     /**
+     * Returns a google.maps.Point object for a given latLng.
+     * @param latLng {google.maps.LatLng} (Required)
+     */
+    latLngToPixel: function(latLng) {
+      return overlay.getProjection().fromLatLngToContainerPixel(latLng);
+    },
+    /**
      * Iterates through the default base layers and returns a match if it exists.
      * @param {Object} baseLayer The baseLayer object.
      * @return {Object}
@@ -817,8 +829,9 @@
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
+     * @param {Function} callback (Optional)
      */
-    panByPixels: function(pixels) {
+    panByPixels: function(pixels, callback) {
       if (pixels.x !== 0) {
         pixels.x = -pixels.x;
       }
@@ -828,6 +841,27 @@
       }
       
       map.panBy(pixels.x, pixels.y);
+      
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     *
+     */
+    pixelFromApi: function(pixel) {
+      return {
+        x: pixel.x,
+        y: pixel.y
+      };
+    },
+    /**
+     * Converts a {Microsoft.Maps.Point} to a {Microsoft.Maps.Location}.
+     * @param {Microsoft.Maps.Point} pixel
+     * @return {Microsoft.Maps.Location}
+     */
+    pixelToLatLng: function(pixel) {
+      return overlay.getProjection().fromContainerPixelToLatLng(pixel);
     },
     /**
      * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
@@ -835,7 +869,7 @@
      */
     positionClickDot: function(to) {
       var offset = NPMap.Util.getMapDivOffset(),
-          pixel = this.getPixelFromLatLng((function() {
+          pixel = this.latLngToPixel((function() {
             var latLng = null;
 
             if (typeof(to) === 'string') {

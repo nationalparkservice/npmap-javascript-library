@@ -1,9 +1,9 @@
 // TODO: underscore.js is a requirement. Make sure it is loaded properly.
-// TODO: You need to support panning if the InfoBox falls within the "padding" set around the edge of the map.
-define(function() {
+// TODO: Auto-pan is working properly except for when parent === 'page' and you've scrolled horizontally/vertically and at least one side of the InfoBox falls off of the page.
+define([
+  'Util/Util'
+], function(Util) {
   var
-      // The parent map div of the NPMap div.
-      $mapDiv = $('#' + NPMap.config.div).parent(),
       // The InfoBox config object from the NPMap.config object.
       config = NPMap.config.infobox || {},
       // The number of actions currently being displayed in the InfoBox.
@@ -14,6 +14,10 @@ define(function() {
       design = config.design || 'basic',
       // The infobox div.
       infobox = document.createElement('div'),
+      // The map div.
+      mapDiv = document.getElementById(NPMap.config.div),
+      // The height of the map div.
+      mapHeight = mapDiv.offsetHeight,
       // The position of the map on the page in pixels.
       mapPosition = {
         east: 0,
@@ -21,6 +25,8 @@ define(function() {
         south: 0,
         west: 0
       },
+      // The width of the map div.
+      mapWidth = mapDiv.offsetWidth,
       // This variable holds the user-defined maxHeight for the #npmapinfobox div.
       maxHeight = null,
       // This variable holds the user-defined maxWidth for the #npmapinfobox div.
@@ -43,6 +49,8 @@ define(function() {
       skipBoundsCheck = false,
       // An object with CSS key-value pairs.
       styles = config.styles || {},
+      // The height of the browser window, in pixels.
+      windowHeight = $(window).height(),
       // The width of the browser window, in pixels.
       windowWidth = $(window).width(),
       // Should the map pan when an InfoBox is shown or resized?
@@ -55,7 +63,6 @@ define(function() {
           return false;
         }
       })();
-  
   /**
    * Checks to see if the InfoBox is overlapping beyond the edges of the InfoBox's parent element.
    * @param {Function} callback
@@ -64,13 +71,9 @@ define(function() {
     if (NPMap.InfoBox && NPMap.InfoBox.visible) {
       var $me = $('#npmap-infobox'),
           clickDotPixel = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
-          infoboxDimensions = {
-            x: $me.outerWidth(),
-            y: $me.outerHeight()
-          },
           p = {
-            left: clickDotPixel.x - infoboxDimensions.x + 69, // TODO: Take into account width - hook.
-            top: clickDotPixel.y - infoboxDimensions.y
+            left: clickDotPixel.x - $me.outerWidth() + 69, // TODO: Take into account width - hook.
+            top: clickDotPixel.y - $me.outerHeight() - $('#npmap-infobox-bottom').outerHeight()
           },
           paddingHalved = (padding / 2),
           r = {
@@ -78,31 +81,37 @@ define(function() {
             v: 0
           };
 
-      // TODO: Test with 'nps' and 'pyv'.
-      if (design === 'nps' || design === 'pyv') {
-        p.left = p.left + ((infoboxDimensions.x / 2) - 8);
-      } else {
-        p.left = p.left + 69;
+      if (parent === 'page') {
+        var scrollPosition = Util.getScrollPosition();
+        p.left = p.left + (mapPosition.west - scrollPosition.x);
+        p.top = p.top + (mapPosition.north - scrollPosition.y);
       }
 
       if (pan === 'center') {
-        var h = ($mapDiv.outerHeight() - $me.outerHeight()) / 2,
+        var h = (mapHeight - $me.outerHeight()) / 2,
             o = NPMap.Util.getMapDivOffset(),
-            w = ($mapDiv.outerWidth() - $me.outerWidth()) / 2;
+            w = (mapWidth - $me.outerWidth()) / 2;
 
         if (parent === 'map') {
           o.left = 0;
           o.top = 0;
-        }
-        
-        if (p.top < 0) {
-          r.v = -p.top + h + o.top;
+
+          if (p.top < 0) {
+            r.v = -p.top + h + o.top;
+          } else {
+            r.v = h - p.top + o.top;
+          }
         } else {
-          r.v = h - p.top + o.top;
+          r.v = (mapHeight / 2) - clickDotPixel.y + $('#npmap-infobox-bottom').outerHeight() + $me.outerHeight() / 2;
         }
-        
+
         if (p.left < 0) {
-          r.h = -p.left + w + o.left;
+          if (parent === 'map') {
+            r.h = -p.left + w + o.left;
+          } else {
+            // TODO: Hook this up for parent === 'page'
+            r.h = -p.left + (mapWidth / 2) - (($me.outerWidth() * 2) / 2);
+          }
         } else {
           r.h = w - p.left + o.left;
         }
@@ -111,19 +120,23 @@ define(function() {
           switch (i) {
             case 'east':
               if (parent === 'map' && pan === 'map') {
-                var o = p.left + $me.outerWidth() - $mapDiv.width();
-                
+                var o = p.left + $me.outerWidth() - mapWidth;
+
                 if (o > 0) {
                   r.h = -o - paddingHalved;
+                } else if (Math.abs(o) < paddingHalved) {
+                  r.h = -paddingHalved - o;
                 }
               } else {
                 if (pan === 'map') {
                   if ((p.left + $me.outerWidth()) > mapPosition.east) {
                     r.h = mapPosition.east - (p.left + $me.outerWidth()) - paddingHalved;
+                  } else if (p.left + $me.outerWidth() > mapPosition.east - paddingHalved) {
+                    r.h = mapPosition.east - paddingHalved - (p.left + $me.outerWidth());
                   }
                 } else if (pan === 'page') {
-                  var n = (p.left + $me.outerWidth()) - $(document.body).width();
-                  
+                  var n = (p.left + $me.outerWidth()) - windowWidth;
+
                   if (n > 0) {
                     r.h = -n - paddingHalved;
                   }
@@ -133,13 +146,19 @@ define(function() {
               break;
             case 'north':
               if (parent === 'map' && pan === 'map') {
-                if (p.top < 0) {
-                  r.v = Math.abs(p.top) + paddingHalved;
+                if (p.top < paddingHalved) {
+                  if (p.top < 0) {
+                    r.v = Math.abs(p.top) + paddingHalved;
+                  } else {
+                    r.v = paddingHalved - p.top;
+                  }
                 }
               } else {
                 if (pan === 'map') {
                   if (p.top < mapPosition.north) {
                     r.v = mapPosition.north - p.top + paddingHalved;
+                  } else if (p.top < mapPosition.north + paddingHalved) {
+                    r.v = mapPosition.north - (p.top - paddingHalved);
                   }
                 } else if (pan === 'page') {
                   if (p.top < 0) {
@@ -156,11 +175,15 @@ define(function() {
               if (parent === 'map' && pan === 'map') {
                 if (p.left < 0) {
                   r.h = Math.abs(p.left) + paddingHalved;
+                } else if (p.left < paddingHalved) {
+                  r.h = paddingHalved -p.left;
                 }
               } else {
                 if (pan === 'map') {
                   if (p.left < mapPosition.west) {
                     r.h = mapPosition.west - p.left + paddingHalved;
+                  } else if (p.left < mapPosition.west + paddingHalved) {
+                    r.h = paddingHalved - (p.left - mapPosition.west);
                   }
                 } else if (pan === 'page') {
                   if (p.left < 0) {
@@ -173,15 +196,13 @@ define(function() {
           }
         });
       }
-      
+
       // TODO: MAYBE??? Get the height and width of the InfoBox, and verify that there is enough space to reposition it. If there isn't, don't reposition it.
-      if ((r.h !== 0 && r.h < $mapDiv.outerWidth()) || (r.v !== 0 && r.v < $mapDiv.outerHeight())) {
+      if ((r.h !== 0 && r.h < mapWidth) || (r.v !== 0 && r.v < mapHeight)) {
         NPMap.Map.panByPixels({
           x: r.h,
           y: r.v
         }, function() {
-          console.log('callback0');
-
           if (callback) {
             callback();
           }
@@ -197,12 +218,15 @@ define(function() {
    */
   function position(callback) {
     var bottom,
+        clickDotPosition = $('#npmap-clickdot').position(),
+        clickDotLeft = clickDotPosition.left,
+        clickDotTop = clickDotPosition.top,
         divInfoBox = document.getElementById('npmap-infobox'),
         right;
 
     if (parent === 'map') {
-      bottom = $mapDiv.height() - $('#npmap-clickdot').position().top;
-      right = $mapDiv.width() - $('#npmap-clickdot').position().left;
+      bottom = mapHeight - clickDotTop;
+      right = mapWidth - clickDotLeft;
 
       if (design === 'basic') {
         bottom = bottom + 30;
@@ -213,12 +237,12 @@ define(function() {
       }
     } else if (parent === 'page') {
       if (design === 'basic') {
-        bottom = ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px';
-        right = (windowWidth - $('#npmap-clickdot').position().left - offsetLeft - 69) + 'px';
+        bottom = (windowHeight - (clickDotTop + offsetTop)) + 30;
+        right = (windowWidth - clickDotLeft - offsetLeft - 69);
       } else if (design === 'nps' || design === 'pyv') {
         // TODO: You need to test this. You'll have to adjust it.
-        bottom = ($(window).height() - ($('#npmap-clickdot').position().top + offsetTop)) + 30 + 'px';
-        right = (windowWidth - $('#npmap-clickdot').position().left - offsetLeft - 69) + 'px';
+        bottom = (windowHeight - (clickDotTop + offsetTop)) + 30;
+        right = (windowWidth - clickDotLeft - offsetLeft - 69);
       }
     }
 
@@ -235,12 +259,15 @@ define(function() {
    * Refreshes the dimensions of the map.
    */
   function refreshDimensions() {
-    var p = $mapDiv.position();
+    var divMap = document.getElementById('npmap-map'),
+        offset = Util.getMapDivOffset(),
+        left = offset.left,
+        top = offset.top;
     
-    mapPosition.east = p.left + $mapDiv.width();
-    mapPosition.north = p.top;
-    mapPosition.south = p.top + $mapDiv.height();
-    mapPosition.west = p.left;
+    mapPosition.east = left + divMap.offsetWidth;
+    mapPosition.north = top;
+    mapPosition.south = top + divMap.offsetHeight;
+    mapPosition.west = left;
   }
   /**
    * Updates the mapPosition object, sets the max-height/width dimensions of the InfoBox, and checks the bounds of the InfoBox.
@@ -266,9 +293,13 @@ define(function() {
    * Refreshes the map div offsets and width.
    */
   function refreshOffsetsAndWidth() {
+    // TODO: You should move this into NPMap.Map.
+    mapHeight = mapDiv.offsetHeight;
+    mapWidth = mapDiv.offsetWidth;
     offset = NPMap.Util.getMapDivOffset();
     offsetLeft = offset.left;
     offsetTop = offset.top;
+    windowHeight = $(window).height();
     windowWidth = $(window).width();
   }
   /**
@@ -310,7 +341,7 @@ define(function() {
   function setMaxHeight() {
     // TODO: If parent is set to 'page', you need to set maxHeight based on available height. This should probably update when the page is scrolled vertically?
 
-    var valid = $mapDiv.outerHeight() - (padding * 2);
+    var valid = mapHeight - (padding * 2);
 
     if (maxHeight && (maxHeight <= valid)) {
       // Leave it.
@@ -327,7 +358,7 @@ define(function() {
   function setMaxWidth() {
     // TODO: If parent is set to 'page', you need to set maxWidth based on available width. This should probably update when the page is scrolled horizontally?
     
-    var valid = $mapDiv.outerWidth() - (padding * 2);
+    var valid = mapWidth - (padding * 2);
 
     if (maxWidth && (maxWidth <= valid)) {
       // Leave it.
@@ -384,9 +415,9 @@ define(function() {
     // TODO: Change cursor to default.
     
     if (panActivated) {
-      $mapDiv.resize(refreshDimensionsAndHeightWidth);
+      $(mapDiv).resize(refreshDimensionsAndHeightWidth);
     } else {
-      $mapDiv.resize(refreshDimensions);
+      $(mapDiv).resize(refreshDimensions);
     }
     
     // TODO: Test this.
@@ -428,8 +459,8 @@ define(function() {
   infobox.style.position = 'absolute';
   
   if (parent === 'map') {
-    infobox.style.zIndex = 29;
-    
+    infobox.style.zIndex = 1;
+
     NPMap.Util.safeLoad('NPMap.Map', function() {
       NPMap.Map.addElementToMapDiv(infobox);
       setupInfoBox();
@@ -809,16 +840,10 @@ define(function() {
         position(function() {
           if (panActivated && !skipBoundsCheck) {
             checkBounds(function() {
-              console.log('callback');
-
               $('#npmap-infobox').show();
               NPMap.Event.trigger('InfoBox', 'show');
             });
           }
-
-          
-
-          
         });
       }
     }
