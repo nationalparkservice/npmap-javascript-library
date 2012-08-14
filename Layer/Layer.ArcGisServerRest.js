@@ -3,8 +3,7 @@ define([
   'Event',
   'InfoBox',
   'Layer/Layer',
-  'Map/Map',
-  'Util/Util.ArcGisServerRest'
+  'Map/Map'
 ], function(Event, InfoBox, Layer, Map, utilArcGisServerRest) {
   var
       // The preserved HTML string from the #npmap-infobox-content div.
@@ -166,6 +165,17 @@ define([
           results = [],
           value = 0.1;
 
+      function onSuccess(response) {
+        if (response.results && response.results.length > 0) {
+          results.push({
+            data: response,
+            layerName: layer.name
+          });
+        }
+
+        count--;
+      }
+
       for (var i = 0; i < NPMap.config.layers.length; i++) {
         var layer = NPMap.config.layers[i];
         
@@ -184,16 +194,7 @@ define([
               sr: 4326,
               tolerance: 10
             },
-            success: function(response) {
-              if (response.results && response.results.length > 0) {
-                results.push({
-                  data: response,
-                  layerName: layer.name
-                });
-              }
-
-              count--;
-            },
+            success: onSuccess,
             type: 'jsonp',
             url: layer.url + '/identify?callback=?'
           });
@@ -353,18 +354,18 @@ define([
      */
     create: function(config) {
       var tileLayer,
-          uriConstructor = config.url + '/tile/{z}/{y}/{x}';
+          uriConstructor = config.url + '/tile/{{z}}/{{y}}/{{x}}';
           
       Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       if (!config.tiled) {
-        uriConstructor = function(x, y, z, url) {
+        uriConstructor = function(x, y, z) {
           var heightWidth = 256,
               e = ((x + 1) * heightWidth) * 360 / (heightWidth * Math.pow(2, z)) - 180,
               n = Math.asin((Math.exp((0.5 - (y * heightWidth) / (heightWidth) / Math.pow(2, z)) * 4 * Math.PI) - 1) / (Math.exp((0.5 - (y * heightWidth) / 256 / Math.pow(2, z)) * 4 * Math.PI) + 1)) * 180 / Math.PI,
               s = Math.asin((Math.exp((0.5 - ((y + 1) * heightWidth) / (heightWidth) / Math.pow(2, z)) * 4 * Math.PI) - 1) / (Math.exp((0.5 - ((y + 1) * heightWidth) / 256 / Math.pow(2, z)) * 4 * Math.PI) + 1)) * 180 / Math.PI,
               w = (x * heightWidth) * 360 / (heightWidth * Math.pow(2, z)) - 180,
-              u = url + '/export?dpi=96&transparent=true&format=png8&bbox=' + w + ',' + s + ',' + e + ',' + n + '&bboxSR=4326&imageSR=102100&size=256,256&f=image';
+              u = config.url + '/export?dpi=96&transparent=true&format=png8&bbox=' + w + ',' + s + ',' + e + ',' + n + '&bboxSR=4326&imageSR=102100&size=256,256&f=image';
 
           if (config.layersStatus && config.layersStatus !== 'all') {
             u += '&layers=show:' + config.layersStatus;
@@ -382,12 +383,16 @@ define([
       }
 
       config.layersStatus = config.layersStatus || config.layers;
-      tileLayer = Map[NPMap.config.api].createTileLayer(config, uriConstructor);
+      tileLayer = Map[NPMap.config.api].createTileLayer(uriConstructor, {
+        opacity: config.opacity
+      });
       config.api = tileLayer;
       tileLayer.npmap = {
         layerName: config.name,
         layerType: config.type
       };
+
+      console.log(uriConstructor);
 
       Map.addTileLayer(tileLayer);
       Event.trigger('NPMap.Layer', 'added', config);

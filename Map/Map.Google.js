@@ -66,28 +66,46 @@
       NPMap.Event.trigger('NPMap.Map', 'shapeclick', e);
     });
   }
-  
-  if (NPMap.config.baseLayers) {
-    $.each(NPMap.config.baseLayers, function(i, v) {
-      if (v.visible) {
-        activeBaseLayer = v;
-      }
-      
-      if (v.code === 'roadmap' || v.code === 'satellite' || v.code === 'terrain') {
-        mapTypeIds.push(google.maps.MapTypeId[v.code.toUpperCase()]);
-      } else {
-        mapTypeIds.push(v.code);
-      }
-    });
+  /**
+   * Is the longitude in the eastern or western hemisphere?
+   * @param {Number} lng
+   */
+  function inEasternOrWesternHemisphere(lng) {
+    if (lng < 0) {
+      return 'western';
+    } else {
+      return 'eastern';
+    }
   }
   
-  if (activeBaseLayer) {
-    if (activeBaseLayer.code === 'roadmap' || activeBaseLayer.code === 'satellite' || activeBaseLayer.code === 'terrain') {
-      mapTypeId = google.maps.MapTypeId[activeBaseLayer.code.toUpperCase()];
-    } else {
-      mapTypeId = activeBaseLayer.code;
+  if (NPMap.config.baseLayers) {
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var baseLayer = NPMap.config.baseLayers[i];
+
+      if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
+        activeBaseLayer = baseLayer;
+
+        if (baseLayer.code) {
+          var code;
+
+          if (baseLayer.code === 'roadmap' || baseLayer.code === 'satellite' || baseLayer.code === 'terrain') {
+            code = mapTypeId = google.maps.MapTypeId[baseLayer.code.toUpperCase()];
+          } else {
+            code = mapTypeId = baseLayer.code;
+          }
+
+          mapTypeIds.push(code);
+        } else {
+          // TODO: Blank baseLayer?
+          activeBaseLayer = true;
+
+          
+        }
+      }
     }
-  } else {
+  }
+
+  if (!activeBaseLayer) {
     activeBaseLayer = {
       code: 'terrain',
       visible: true
@@ -184,14 +202,6 @@
       })();
 
       enableKeyDragZoom();
-
-      function inEasternOrWesternHemisphere(lng) {
-        if (lng < 0) {
-          return 'western';
-        } else {
-          return 'eastern';
-        }
-      }
       
       if (!initialBounds) {
         initialBounds = map.getBounds();
@@ -622,13 +632,13 @@
 
       if (typeof constructor === 'string') {
         uriConstructor = function(coord, zoom) {
-          constructor = constructor.replace('{x}', coord.x).replace('{y}', coord.y).replace('{z}', zoom);
+          var uri = constructor.replace('{x}', coord.x).replace('{y}', coord.y).replace('{z}', zoom);
 
           if (getSubdomain) {
-            constructor = constructor.replace('{{s}}', getSubdomain());
+            uri = uri.replace('{{s}}', getSubdomain());
           }
           
-          return constructor;
+          return uri;
         };
       } else {
         uriConstructor = function(coord, zoom) {
@@ -841,7 +851,7 @@
       }
       
       map.panBy(pixels.x, pixels.y);
-      
+
       if (callback) {
         callback();
       }

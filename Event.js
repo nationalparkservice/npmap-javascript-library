@@ -1,6 +1,4 @@
 define(function() {
-  var queue = [];
-
   return NPMap.Event = {
     /**
      * Add an event to an NPMap class.
@@ -69,14 +67,12 @@ define(function() {
             } else {
               v.func(e);
             }
-
-            break;
           }
         }
       } else {
         var me = this;
         
-        console.log('Event ("' + obj + ', ' + event + '") triggered, but class does not exist. Looping at 100...');
+        console.log('Event ("' + obj + ', ' + event + '") triggered, but class does not exist. Looping in 100ms...');
         setTimeout(function() {
           me.trigger(obj, event, e);
         }, 100);

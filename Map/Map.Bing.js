@@ -105,7 +105,9 @@
   
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      if (NPMap.config.baseLayers[i].visible) {
+      var visible = NPMap.config.baseLayers[i].visible;
+
+      if (typeof visible === 'undefined' || visible === true) {
         activeBaseLayer = NPMap.config.baseLayers[i];
         break;
       }
@@ -130,10 +132,14 @@
       activeBaseLayer.zIndex = 0;
     }
 
+    /*
     // TODO: You'll need to fix this.
     NPMap.Util.safeLoad('NPMap.bing.layers.' + activeBaseLayer.type, function() {
+      
+
       NPMap.bing.layers[activeBaseLayer.type].addLayer(activeBaseLayer);
     });
+*/
 
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
   }
@@ -561,13 +567,13 @@
 
       if (typeof constructor === 'string') {
         uriConstructor = function(tile) {
-          constructor = constructor.replace('{{x}}', tile.x).replace('{{y}}', tile.y).replace('{{z}}', tile.levelOfDetail);
+          var uri = constructor.replace('{{x}}', tile.x).replace('{{y}}', tile.y).replace('{{z}}', tile.levelOfDetail);
 
           if (getSubdomain) {
-            constructor = constructor.replace('{{s}}', getSubdomain());
+            uri = uri.replace('{{s}}', getSubdomain());
           }
 
-          return constructor;
+          return uri;
         };
       } else {
         uriConstructor = function(tile) {
@@ -580,6 +586,8 @@
           return constructor(tile.x, tile.y, tile.levelOfDetail, options.url ? options.url : null, subdomain);
         };
       }
+
+      console.log(typeof constructor);
 
       return new Microsoft.Maps.TileLayer({
         mercator: new Microsoft.Maps.TileSource({

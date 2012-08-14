@@ -224,6 +224,13 @@ define([
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
     map: map,
     /**
+     * Adds an HTML element to the map div.
+     * @param {Object} el
+     */
+    addElementToMapDiv: function(el) {
+      document.getElementById('npmap-map').appendChild(el);
+    },
+    /**
      * Adds a tile layer to the map.
      * @param {Object} layer
      */

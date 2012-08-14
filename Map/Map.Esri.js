@@ -274,6 +274,13 @@ define([
       return layer;
     },
     /**
+     * Adds an HTML element to the map div.
+     * @param {Object} el
+     */
+    addElementToMapDiv: function(el) {
+      this.getContainerDiv().appendChild(el);
+    },
+    /**
      * Adds a shape to the map.
      * @param {Object} shape The shape to add to the map. This can be an esri.geometry.Point, Polygon, or Polyline object.
      */
@@ -409,13 +416,13 @@ define([
 
       if (typeof constructor === 'string') {
         uriConstructor = function(level, row, column) {
-          constructor = constructor.replace('{{x}}', column).replace('{{y}}', row).replace('{{z}}', level);
+          var uri = constructor.replace('{{x}}', column).replace('{{y}}', row).replace('{{z}}', level);
 
           if (getSubdomain) {
-            constructor = constructor.replace('{{s}}', getSubdomain());
+            uri = uri.replace('{{s}}', getSubdomain());
           }
           
-          return constructor;
+          return uri;
         };
       } else {
         uriConstructor = function(level, row, column) {
