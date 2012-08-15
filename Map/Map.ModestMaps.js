@@ -211,13 +211,18 @@ define([
 
       if (typeof constructor === 'string') {
         uriConstructor = function(coord) {
-          constructor = constructor.replace('{x}', coord.column).replace('{y}', coord.row).replace('{z}', coord.zoom);
+          var template = _.template(constructor),
+              uri = template({
+                x: coord.column,
+                y: coord.row,
+                z: coord.zoom
+              });
 
           if (getSubdomain) {
-            constructor = constructor.replace('{{s}}', getSubdomain());
+            uri = uri.replace('{{s}}', getSubdomain());
           }
           
-          return constructor;
+          return uri;
         };
       } else {
         uriConstructor = function(coord) {

@@ -1,12 +1,64 @@
-﻿define(function() {
-  NPMap.layers = NPMap.layers || {};
-  
-  return NPMap.layers.GoogleFusion = {
+﻿// TODO: This is Google Maps-specific.
+define([
+  'Event',
+  'Layer/Layer'
+], function(Event, Layer) {
+  return NPMap.Layer.GoogleFusion = {
     /**
-     * Builds an infobox for the GoogleFusion layer. Takes information provided by the user as part of the activeLayer config.
-     * data {object} required - The data object returned from the GoogleFusion table.
-     * layer {object} required - The layer object taken from the activeLayer config.
+     * Handles the click operation for GoogleFusion layers.
+     * @param {Object} e
      */
+    _handleClick: function(e) {
+      if (e.npmap && e.npmap.layerType === 'GoogleFusion') {
+        var config = NPMap.Map.getLayerByName(e.npmap.layerName),
+            data = e.npmap.data;
+
+        //NPMap.InfoBox.hide();
+        NPMap.InfoBox.show(NPMap.InfoBox._build(config, data, 'content'), NPMap.InfoBox._build(config, data, 'title'), NPMap.InfoBox._build(config, data, 'footer'), null, null, NPMap.Map[NPMap.config.api].latLngFromApi(e.latLng));
+      }
+    },
+    /**
+     * Creates a GoogleFusion layer.
+     * @param {Object} config
+     */
+    create: function(config) {
+      Event.trigger('NPMap.Layer', 'beforeadd', config);
+
+      if (!config.query) {
+        throw new Error('The "query" config is required for GoogleFusion layers.');
+      }
+
+      if (typeof config.query.from !== 'string') {
+        throw new Error('The "query.from" config is required for GoogleFusion layers, and it must be a string.');
+      }
+
+      var layer = new google.maps.FusionTablesLayer({
+        map: NPMap.Map[NPMap.config.api].map,
+        query: config.query,
+        suppressInfoWindows: true
+      });
+
+      config.api = layer;
+
+      google.maps.event.addListener(layer, 'click', function(e) {
+        var data = {},
+            row = e.row;
+
+        for (var p in row) {
+          data[p] = row[p].value;
+        }
+
+        e.npmap = {
+          data: data,
+          layerName: config.name,
+          layerType: 'GoogleFusion'
+        };
+
+        Event.trigger('NPMap.Map', 'shapeclick', e);
+      });
+    }
+
+    /*
     buildInfoBox: function(data, layer) {
       var content,
           title;
@@ -40,5 +92,8 @@
 
       NPMap.InfoBox.show(content, title);
     }
+    */
   };
 });
+
+

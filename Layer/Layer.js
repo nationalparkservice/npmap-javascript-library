@@ -22,7 +22,7 @@ define([
         },
         GoogleFusion: {
           clickable: true,
-          type: 'raster'
+          type: 'vector'
         },
         Json: {
           clickable: true,
@@ -42,7 +42,7 @@ define([
         },
         TileStream: {
           clickable: true,
-          type: 'vector' // TileStream clicks are handled like vector layers, although it is really raster tiles.
+          type: 'vector'
         },
         Xml: {
           clickable: true,
@@ -57,22 +57,26 @@ define([
       usedNames = [];
 
   Event.add('NPMap.Map', 'click', function(e) {
-    for (var i = 0; i < NPMap.config.layers.length; i++) {
-      var layerType = NPMap.config.layers[i].type,
-          meta = LAYER_HANDLERS[layerType];
+    if (NPMap.config.layers && NPMap.config.layers.length > 0) {
+      for (var i = 0; i < NPMap.config.layers.length; i++) {
+        var layerType = NPMap.config.layers[i].type,
+            meta = LAYER_HANDLERS[layerType];
 
-      if (meta.type === 'raster' && meta.clickable === true) {
-        NPMap.Layer[layerType]._handleClick(e);
+        if (meta.type === 'raster' && meta.clickable === true) {
+          NPMap.Layer[layerType]._handleClick(e);
+        }
       }
     }
   });
   Event.add('NPMap.Map', 'shapeclick', function(e) {
-    for (var j = 0; j < NPMap.config.layers.length; j++) {
-      var layerType = NPMap.config.layers[j].type,
-          meta = LAYER_HANDLERS[layerType];
-          
-      if (meta.type === 'vector' && meta.clickable === true) {
-        NPMap.Layer[layerType]._handleClick(e);
+    if (NPMap.config.layers && NPMap.config.layers.length > 0) {
+      for (var j = 0; j < NPMap.config.layers.length; j++) {
+        var layerType = NPMap.config.layers[j].type,
+            meta = LAYER_HANDLERS[layerType];
+            
+        if (meta.type === 'vector' && meta.clickable === true) {
+          NPMap.Layer[layerType]._handleClick(e);
+        }
       }
     }
   });
@@ -102,7 +106,7 @@ define([
         }
 
         var meta = LAYER_HANDLERS[config.type];
-
+        
         if (meta.type === 'vector') {
           var lineStyle = {};
               markerStyle = {

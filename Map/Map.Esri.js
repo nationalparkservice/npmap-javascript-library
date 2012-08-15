@@ -1,5 +1,4 @@
-﻿
-
+﻿// TODO: Hook up attribution.
 define([
   'Map/Map'
 ], function(Map) {
@@ -416,7 +415,12 @@ define([
 
       if (typeof constructor === 'string') {
         uriConstructor = function(level, row, column) {
-          var uri = constructor.replace('{{x}}', column).replace('{{y}}', row).replace('{{z}}', level);
+          var template = _.template(constructor),
+              uri = template({
+                x: column,
+                y: row,
+                z: level
+              });
 
           if (getSubdomain) {
             uri = uri.replace('{{s}}', getSubdomain());

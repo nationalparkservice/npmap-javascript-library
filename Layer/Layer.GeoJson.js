@@ -6,7 +6,7 @@ define([
 ], function(layer, utilJson, utilGeoJson) {
   return NPMap.Layer.GeoJson = {
     /**
-     * Handles the click operation for ArcGisServerRest layers.
+     * Handles the click operation for GeoJson layers.
      * @param {Object} e
      */
     _handleClick: function(e) {
@@ -79,14 +79,16 @@ define([
               //shape = NPMap.Map._createLine();
               break;
             case 'Marker':
-              shape = NPMap.Map._createMarker(feature.ll.y + ',' + feature.ll.x);
+              shape = NPMap.Map._createMarker({
+                lat: feature.ll.lat,
+                lng: feature.ll.lng
+              }, style);
               break;
             case 'Polygon':
-              //shape = NPMap.Map._createPolygon();
+              shape = NPMap.Map._createPolygon(feature.ll, style);
               break;
           }
 
-          // Marker is the only shape that has been implemented.
           if (shape) {
             shape.npmap = {
               data: feature.data,

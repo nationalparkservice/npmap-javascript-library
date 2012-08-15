@@ -1,12 +1,10 @@
-﻿// TODO: Hook up attribution for all layers.
+﻿// TODO: Hook up attribution.
 define([
   'Map/Map'
 ], function(Map) {
   wax.leaf=wax.leaf||{};wax.leaf.interaction=function(){function e(){g=!0}var g=!1,f,c;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.on(d[a],e)}).detach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.off(d[a],e)}).parent(function(){return c._container}).grid(function(){if(!g&&f)return f;var b=c._layers,d=[],a;for(a in b)if(b[a]._tiles)for(var e in b[a]._tiles){var h=wax.u.offset(b[a]._tiles[e]);d.push([h.top,h.left,b[a]._tiles[e]])}return f=d})};
 
   var
-      // The base layer to initialize the map with.
-      baseLayer,
       // The center {L.LatLng} to initialize the map with.
       center = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
       // The {L.Map} object.
@@ -151,17 +149,11 @@ define([
 
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var layer = NPMap.config.baseLayers[i];
+      var baseLayer = NPMap.config.baseLayers[i];
       
-      if (layer.visible) {
-        NPMap.Util.safeLoad('NPMap.Layer.' + layer.type, function() {
-          NPMap.Layer[layer.type].create(layer);
-        });
-        
-        baseLayer = true;
-        
+      if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
         // TODO: This should be contained in Zoomify layer handler.
-        if (layer.type === 'Zoomify') {
+        if (baseLayer.type === 'Zoomify') {
           mapConfig.crs = L.CRS.Direct;
           mapConfig.worldCopyJump = false;
         }
@@ -170,16 +162,13 @@ define([
       }
     }
   } else {
-    // TODO: Initialize the map with a blank baseLayer.
-
-    /*
     NPMap.config.baseLayers = [{
       attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
+      id: 'mapbox.mapbox-light',
       maxZoom: 17,
       type: 'TileStream',
-      url: 'http://{{s}}.tiles.mapbox.com/v3/mapbox.mapbox-light/{{z}}/{{x}}/{{y}}.png'
+      visible: true
     }];
-    */
   }
   
   if (typeof NPMap.config.restrictZoom !== 'undefined') {
@@ -196,16 +185,6 @@ define([
   }
   
   map = new L.Map(NPMap.config.div, mapConfig);
-  
-  if (!baseLayer) {
-    baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png', {
-      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
-      maxZoom: 17
-    });
-    
-    map.addLayer(baseLayer);
-    NPMap.Map.setAttribution('<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>');
-  }
 
   map.on('move', function(e) {
     if (NPMap.InfoBox.visible) {
@@ -302,13 +281,18 @@ define([
 
       if (typeof constructor === 'string') {
         uriConstructor = function(xy, z) {
-          constructor = constructor.replace('{{x}}', xy.x).replace('{{y}}', xy.y).replace('{{z}}', z);
+          var template = _.template(constructor),
+              uri = template({
+                x: xy.x,
+                y: xy.y,
+                z: z
+              });
 
           if (getSubdomain) {
-            constructor = constructor.replace('{{s}}', getSubdomain());
+            uri = uri.replace('{{s}}', getSubdomain());
           }
           
-          return constructor;
+          return uri;
         };
       } else {
         uriConstructor = function(xy, z) {
@@ -454,28 +438,13 @@ define([
      * @param {Function} callback (Optional)
      */
     panByPixels: function(pixels, callback) {
-      /*
       if (callback) {
-        map.on('moveend', callback);
-      }*/
-
-      
-      map._rawPanBy(new L.Point(-pixels.x, -pixels.y));
-      //map.panBy(new L.Point(-pixels.x, -pixels.y));
-
-      if (callback) {
+        map._rawPanBy(new L.Point(-pixels.x, -pixels.y));
         callback();
+        map.fire('move');
+      } else {
+        map.panBy(new L.Point(-pixels.x, -pixels.y));
       }
-
-      map.fire('move');
-
-      /*
-      if (callback) {
-        setTimeout(function() {
-          map.off('moveend', callback);
-        }, 3000);
-      }
-      */
     },
     /**
      *

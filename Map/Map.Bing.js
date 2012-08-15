@@ -1,4 +1,5 @@
-﻿define([
+﻿// TODO: Hook up attribution.
+define([
   'Map/Map'
 ], function(Map) {
   var
@@ -105,13 +106,16 @@
   
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var visible = NPMap.config.baseLayers[i].visible;
+      var baseLayer = NPMap.config.baseLayers[i],
+          visible = baseLayer.visible;
 
       if (typeof visible === 'undefined' || visible === true) {
-        activeBaseLayer = NPMap.config.baseLayers[i];
+        activeBaseLayer = baseLayer;
         break;
       }
     }
+  } else {
+    NPMap.config.baseLayers = [];
   }
 
   if (!activeBaseLayer) {
@@ -120,9 +124,7 @@
       visible: true
     };
     
-    NPMap.config.baseLayers = [
-      activeBaseLayer
-    ];
+    NPMap.config.baseLayers.push(activeBaseLayer);
   }
 
   if (activeBaseLayer.code === 'aerial' || activeBaseLayer.code === 'auto' || activeBaseLayer.code === 'birdseye' || activeBaseLayer.code === 'mercator' || activeBaseLayer.code === 'road') {
@@ -131,15 +133,6 @@
     if (!activeBaseLayer.zIndex) {
       activeBaseLayer.zIndex = 0;
     }
-
-    /*
-    // TODO: You'll need to fix this.
-    NPMap.Util.safeLoad('NPMap.bing.layers.' + activeBaseLayer.type, function() {
-      
-
-      NPMap.bing.layers[activeBaseLayer.type].addLayer(activeBaseLayer);
-    });
-*/
 
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
   }
@@ -494,7 +487,7 @@
      */
     createMarker: function(latLng, options) {
       options = options || {};
-
+      
       if (!options.anchor || !options.height || !options.width) {
         if (options.height && options.width) {
           options.anchor = new Microsoft.Maps.Point(options.width / 2, options.height / 2);
@@ -567,12 +560,17 @@
 
       if (typeof constructor === 'string') {
         uriConstructor = function(tile) {
-          var uri = constructor.replace('{{x}}', tile.x).replace('{{y}}', tile.y).replace('{{z}}', tile.levelOfDetail);
+          var template = _.template(constructor),
+              uri = template({
+                x: tile.x,
+                y: tile.y,
+                z: tile.levelOfDetail
+              });
 
           if (getSubdomain) {
             uri = uri.replace('{{s}}', getSubdomain());
           }
-
+          
           return uri;
         };
       } else {
@@ -586,8 +584,6 @@
           return constructor(tile.x, tile.y, tile.levelOfDetail, options.url ? options.url : null, subdomain);
         };
       }
-
-      console.log(typeof constructor);
 
       return new Microsoft.Maps.TileLayer({
         mercator: new Microsoft.Maps.TileSource({

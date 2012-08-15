@@ -124,7 +124,7 @@ if (typeof bean === 'undefined') {
               },
               layerHandlers = [],
               scripts = [];
-
+              
           if (NPMap.config.baseLayers) {
             for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
               var baseLayerType = NPMap.config.baseLayers[i].type;
