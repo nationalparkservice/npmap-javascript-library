@@ -20,8 +20,6 @@ define([
             title,
             to;
 
-        NPMap.InfoBox.hide();
-
         if (shapeType === 'Marker') {
           to = target;
         } else {

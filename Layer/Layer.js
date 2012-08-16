@@ -16,6 +16,10 @@ define([
           clickable: true,
           type: 'raster'
         },
+        CartoDb: {
+          clickable: true,
+          type: 'vector'
+        },
         GeoJson: {
           clickable: true,
           type: 'vector'

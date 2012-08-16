@@ -1,4 +1,10 @@
-﻿define([
+﻿// TODO: Change the way you handle TileStream layers. Composited layers should be added as a single layer object to NPMap.config.layers.
+
+
+
+
+
+define([
   'Event',
   'InfoBox',
   'Layer/Layer',
@@ -167,7 +173,9 @@
               'c',
               'd'
             ],
-            url: uriTemplate.replace('{{layers}}', layersString)
+            url: uriTemplate.replace('{{layers}}', layersString),
+            // TODO: You need to work on the zIndex. This is difficult because of compositing.
+            zIndex: typeof baseLayer !== 'undefined' ? 0 : 1
           });
           apiMap.addTileLayer(tileLayer);
 

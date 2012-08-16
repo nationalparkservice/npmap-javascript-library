@@ -30,11 +30,15 @@ define([
     transformation: new L.Transformation(1, 0, 1, 0)
   });
   L.TileLayer.Simple = L.TileLayer.extend({
-    options: {
-      errorTileUrl: NPMap.config.server + '/resources/img/blank-tile.png'
-    },
     getTileUrl: function(xy, z) {
       return this._url(xy, z);
+    },
+    initialize: function(url, options) {
+      options.errorTileUrl = NPMap.config.server + '/resources/img/blank-tile.png';
+
+      this._url = url;
+
+      L.Util.setOptions(this, options);
     }
   });
   L.TileLayer.Zoomify = L.TileLayer.extend({
@@ -214,7 +218,7 @@ define([
      * @param {Object} layer
      */
     addTileLayer: function(layer) {
-      map.addLayer(layer);
+      map.addLayer(layer, false);
     },
     /**
      * Sets the bounds of the map.
@@ -280,12 +284,12 @@ define([
       }
 
       if (typeof constructor === 'string') {
-        uriConstructor = function(xy, z) {
+        uriConstructor = function(xy) {
           var template = _.template(constructor),
               uri = template({
                 x: xy.x,
                 y: xy.y,
-                z: z
+                z: map.getZoom()
               });
 
           if (getSubdomain) {
@@ -295,18 +299,18 @@ define([
           return uri;
         };
       } else {
-        uriConstructor = function(xy, z) {
+        uriConstructor = function(xy) {
           var subdomain = null;
 
           if (getSubdomain) {
             subdomain = getSubdomain();
           }
 
-          return constructor(xy.x, xy.y, z, options.url ? options.url : null, subdomain);
+          return constructor(xy.x, xy.y, map.getZoom(), options.url ? options.url : null, subdomain);
         };
       }
 
-      return new L.TileLayer.Simple(uriConstructor);
+      return new L.TileLayer.Simple(uriConstructor, options);
     },
     /**
      * Creates a Zoomify layer.
