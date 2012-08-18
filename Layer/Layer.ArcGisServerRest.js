@@ -127,7 +127,7 @@ define([
       var content = '',
           me = this,
           title = '';
-          
+
       identifyResults = [];
       
       if (!data || data.length === 0) {
@@ -238,7 +238,7 @@ define([
         var el = document.getElementById('npmap-map'),
             latLngApi = Map[NPMap.config.api].eventGetLatLng(e),
             latLng = Map.latLngFromApi(latLngApi);
-
+            
         InfoBox.hide();
         InfoBox.latLng = latLngApi;
         Map[NPMap.config.api].positionClickDot(latLngApi);
@@ -384,15 +384,14 @@ define([
 
       config.layersStatus = config.layersStatus || config.layers;
       tileLayer = Map[NPMap.config.api].createTileLayer(uriConstructor, {
-        opacity: config.opacity
+        opacity: config.opacity,
+        zIndex: config.zIndex || null
       });
       config.api = tileLayer;
       tileLayer.npmap = {
         layerName: config.name,
         layerType: config.type
       };
-
-      console.log(uriConstructor);
 
       Map.addTileLayer(tileLayer);
       Event.trigger('NPMap.Layer', 'added', config);

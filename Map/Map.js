@@ -39,27 +39,7 @@ define([
         [18, 1128],
         [19, 564]
       ];
-  
-  /**
-   * Cancels navigation click events for an element.
-   */
-  function cancelMouseEvents($el) {
-    $el.bind('contextmenu', function(e) {
-      e.stopPropagation();
-    }).bind('click', function(e) {
-      e.stopPropagation();
-    }).bind('dblclick', function(e) {
-      e.stopPropagation();
-    }).bind('mousedown', function(e) {
-      e.stopPropagation();
-    }).bind('mouseover', function(e) {
-      e.stopPropagation();
-    }).bind('mousewheel', function(e) {
-      e.stopPropagation();
-    });
-    
-    return $el;
-  }
+
   /**
    * Creates a notify div.
    * @param {String} message
@@ -97,7 +77,7 @@ define([
   function hookUpClickEvent(id, func) {
     var $el = $('#' + id);
     
-    cancelMouseEvents($el);
+    Util.stopAllPropagation($el);
 
     $el.click(function(e) {
       func();
@@ -577,8 +557,7 @@ define([
                 }
               }
 
-              cancelMouseEvents($('#npmap-overview'));
-            
+              Util.stopAllPropagation(document.getElementById('npmap-overview'));
               $('<div id="npmap-overview-button" class="npmap-overview-open cursor" style="position:absolute;"></div>').appendTo('#npmap-overview-map').click(function() {
                 var $overview = $('#npmap-overview'),
                     $this = $(this),
@@ -803,14 +782,18 @@ define([
      * Adds an HTML element to the map div.
      * @param {Object} el
      * @param {Function} callback (Optional)
+     * @param {Boolean} stopPropagation (Optiona)
      */
-    addElementToMapDiv: function(el, callback) {
+    addElementToMapDiv: function(el, callback, stopPropagation) {
       if (el.style.cssText.indexOf('z-index') === -1) {
         el.style.zIndex = '30';
       }
 
       NPMap.Map[NPMap.config.api].addElementToMapDiv(el);
-      cancelMouseEvents($(el));
+
+      if (typeof stopPropagation === 'undefined' || stopPropagation === true) {
+        Util.stopAllPropagation(el);
+      }
 
       if (callback) {
         callback();

@@ -1,4 +1,53 @@
 define(function() {
+  var
+      // The interval for the div resize.
+      divResizeInterval,
+      // The divs to monitor for changes in size.
+      divsToMonitor = [],
+      // Events to cancel when stopPropagation is called.
+      propagationEvents = [
+        'click',
+        'contextmenu',
+        'dblclick',
+        'mousedown',
+        'mouseover',
+        'mouseup',
+        'mousewheel',
+        'scroll',
+        'wheel'
+      ];
+
+  /**
+   * Cross-browser cancel event propagation.
+   * @param {Object} e
+   */
+  function cancelEventPropagation(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    } else if (window.event) {
+      window.event.cancelBubble = true;
+    }
+  }
+  /**
+   * Cancels the mouse wheel event.
+   * @param {Object} e
+   */
+  function cancelMouseWheel(e) {
+    e = e || window.event;
+
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+
+    e.cancelBubble = true;
+    e.returnValue = false;
+    return false;
+  }
+
   // TODO: Switch all Array.remove() calls over to splice.
   Array.prototype.remove = function(from, to) {
     var rest = this.slice((to || from) + 1 || this.length);
@@ -108,7 +157,21 @@ define(function() {
      * @return {Boolean}
      */
     isInt: function(n) {
-      return n % 1 == 0;
+      return n % 1 === 0;
+    },
+    /**
+     *
+     */
+    monitorDivSize: function(el, handler) {
+      divsToMonitor.push(el);
+
+      if (!divResizeInterval) {
+        divResizeInterval = setInterval(function() {
+          for (var i = 0; i < divsToMonitor.length; i++) {
+            
+          }
+        }, 250);
+      }
     },
     /**
      * Replaces "bad characters" that have been inserted by NPMap into strings.
@@ -145,6 +208,23 @@ define(function() {
 
             }
           }, 100);
+    },
+    /**
+     * Stops the propagation of all events.
+     * @param {Object} el
+     */
+    stopAllPropagation: function(el) {
+      for (var i = 0; i < propagationEvents.length; i++) {
+        var propagationEvent = propagationEvents[i];
+
+        if (propagationEvent === 'mousewheel') {
+          // http://www.stoimen.com/blog/2009/07/01/javascript-disable-mouse-wheel/
+          el.addEventListener('mousewheel', cancelMouseWheel, false);
+        } else {
+          el.addEventListener(propagationEvent, cancelEventPropagation, false);
+        }
+        
+      }
     },
     /**
      * Strips HTML elements from a string.

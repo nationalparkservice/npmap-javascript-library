@@ -72,7 +72,7 @@ define([
       var $me = $('#npmap-infobox'),
           clickDotPixel = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
           p = {
-            left: clickDotPixel.x - $me.outerWidth() + 69, // TODO: Take into account width - hook.
+            left: clickDotPixel.x - $me.outerWidth() + 69,
             top: clickDotPixel.y - $me.outerHeight() - $('#npmap-infobox-bottom').outerHeight()
           },
           paddingHalved = (padding / 2),
@@ -142,7 +142,7 @@ define([
                   }
                 }
               }
-  
+
               break;
             case 'north':
               if (parent === 'map' && pan === 'map') {
@@ -191,7 +191,7 @@ define([
                   }
                 }
               }
-              
+
               break;
           }
         });
@@ -218,9 +218,9 @@ define([
    */
   function position(callback) {
     var bottom,
-        clickDotPosition = $('#npmap-clickdot').position(),
-        clickDotLeft = clickDotPosition.left,
-        clickDotTop = clickDotPosition.top,
+        clickDotPosition = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
+        clickDotLeft = clickDotPosition.x,
+        clickDotTop = clickDotPosition.y,
         divInfoBox = document.getElementById('npmap-infobox'),
         right;
 
@@ -397,21 +397,13 @@ define([
     if (!maxWidth) {
       setMaxWidth();
     }
-    
-    $('#npmap-infobox').bind('contextmenu', function(e) {
-      e.stopPropagation();
-    }).bind('click', function(e) {
-      e.stopPropagation();
-    }).bind('dblclick', function(e) {
-      e.stopPropagation();
-    }).bind('mousedown', function(e) {
-      e.stopPropagation();
-    }).bind('mouseover', function(e) {
-      e.stopPropagation();
-    }).bind('mousewheel', function(e) {
-      e.stopPropagation();
+
+    $.each($('#npmap-infobox').children(), function(i, v) {
+      if (v.id !== 'npmap-infobox-bottom') {
+        Util.stopAllPropagation(v);
+      }
     });
-    
+
     // TODO: Change cursor to default.
     
     if (panActivated) {
@@ -666,49 +658,49 @@ define([
             switch (v.name) {
               case 'route':
                 var address = null,
-                  config = v,
-                  latLngSplit = me.latLng.split(','),
-                  lat = parseFloat(latLngSplit[0]).toFixed(5),
-                  lng = parseFloat(latLngSplit[1]).toFixed(5),
-                  titleNoHtml = ($.trim(NPMap.Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
-                
-              if (this.marker && this.marker.data) {
-                if (this.marker.data['address']) {
-                  address = this.marker.data['address'];
-                } else if (this.marker.data['Address']) {
-                  address = this.marker.data['Address'];
-                } else if (config.addressAttribute && this.marker.data[config.addressAttribute]) {
-                  address = this.marker.data[config.addressAttribute];
+                    config = v,
+                    latLngSplit = me.latLng.split(','),
+                    lat = parseFloat(latLngSplit[0]).toFixed(5),
+                    lng = parseFloat(latLngSplit[1]).toFixed(5),
+                    titleNoHtml = ($.trim(NPMap.Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
+                  
+                if (this.marker && this.marker.data) {
+                  if (this.marker.data['address']) {
+                    address = this.marker.data['address'];
+                  } else if (this.marker.data['Address']) {
+                    address = this.marker.data['Address'];
+                  } else if (config.addressAttribute && this.marker.data[config.addressAttribute]) {
+                    address = this.marker.data[config.addressAttribute];
+                  }
                 }
-              }
-              
-              address = address || null;
-              
-              if (config.mode === 'multi') {
-                actions.push({
-                  handler: function() {
-                    NPMap.Route.addDestinationToItinerary(address, lat, lng, titleNoHtml);
-                  },
-                  text: 'Add destination to itinerary'
-                });
-              } else {
-                actions.push({
-                  group: 'Route',
-                  handler: function() {
-                    NPMap.Route.addDestinationFrom(address, lat, lng, titleNoHtml);
-                  },
-                  text: 'Directions from here'
-                });
-                actions.push({
-                  group: 'Route',
-                  handler: function() {
-                    NPMap.Route.addDestinationTo(address, lat, lng, titleNoHtml);
-                  },
-                  text: 'Directions to here'
-                });
-              }
                 
-              break;
+                address = address || null;
+                
+                if (config.mode === 'multi') {
+                  actions.push({
+                    handler: function() {
+                      NPMap.Route.addDestinationToItinerary(address, lat, lng, titleNoHtml);
+                    },
+                    text: 'Add destination to itinerary'
+                  });
+                } else {
+                  actions.push({
+                    group: 'Route',
+                    handler: function() {
+                      NPMap.Route.addDestinationFrom(address, lat, lng, titleNoHtml);
+                    },
+                    text: 'Directions from here'
+                  });
+                  actions.push({
+                    group: 'Route',
+                    handler: function() {
+                      NPMap.Route.addDestinationTo(address, lat, lng, titleNoHtml);
+                    },
+                    text: 'Directions to here'
+                  });
+                }
+                  
+                break;
             }
           });
         }

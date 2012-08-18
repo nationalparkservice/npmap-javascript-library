@@ -1,7 +1,8 @@
 ﻿// TODO: Hook up attribution.
 define([
+  'Event',
   'Map/Map'
-], function(Map) {
+], function(Event, Map) {
   wax.leaf=wax.leaf||{};wax.leaf.interaction=function(){function e(){g=!0}var g=!1,f,c;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.on(d[a],e)}).detach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.off(d[a],e)}).parent(function(){return c._container}).grid(function(){if(!g&&f)return f;var b=c._layers,d=[],a;for(a in b)if(b[a]._tiles)for(var e in b[a]._tiles){var h=wax.u.offset(b[a]._tiles[e]);d.push([h.top,h.left,b[a]._tiles[e]])}return f=d})};
 
   var
@@ -190,6 +191,9 @@ define([
   
   map = new L.Map(NPMap.config.div, mapConfig);
 
+  map.on('click', function(e) {
+    Event.trigger('NPMap.Map', 'click', e);
+  });
   map.on('move', function(e) {
     if (NPMap.InfoBox.visible) {
       NPMap.InfoBox.reposition();
@@ -233,7 +237,15 @@ define([
      * @return {Object}
      */
     boundsFromApi: function(bounds) {
-      
+      var nw = bounds.getNorthWest(),
+          se = bounds.getSouthEast();
+
+      return {
+        e: se.lng,
+        n: nw.lat,
+        s: se.lat,
+        w: nw.lng
+      };
     },
     /**
      * Converts a NPMap bounds to an API bounds.
@@ -241,7 +253,7 @@ define([
      * @return {Object}
      */
     boundsToApi: function(bounds) {
-      
+      return new L.LatLngBounds(new L.LatLng(bounds.w, bounds.n), new L.LatLng(bounds.e, bounds.s));
     },
     /**
      * Centers the map.
@@ -329,7 +341,11 @@ define([
      * @return {Object}
      */
     eventGetLatLng: function(e) {
-      return map.mouseEventToLatLng(e);
+      if (e.latlng) {
+        return e.latlng;
+      } else {
+        return map.mouseEventToLatLng(e);
+      }
     },
     /**
      * Gets a shape from a click event object.
@@ -340,7 +356,8 @@ define([
       
     },
     /**
-     *
+     * Gets the current bounds of the map.
+     * @return {Object}
      */
     getBounds: function() {
       return map.getBounds();
