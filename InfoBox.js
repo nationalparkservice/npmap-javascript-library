@@ -13,11 +13,21 @@ define([
       // The design to use for the InfoBox.
       design = config.design || 'basic',
       // The infobox div.
-      infobox = document.createElement('div'),
+      divInfoBox = document.createElement('div'),
+      //
+      divInfoBoxBottom,
+      //
+      divInfoBoxContent,
+      //
+      divInfoBoxContentWrapper,
+      //
+      divInfoBoxFooter,
+      //
+      divInfoBoxTitle,
       // The map div.
-      mapDiv = document.getElementById(NPMap.config.div),
+      divMap = document.getElementById('npmap-map'),
       // The height of the map div.
-      mapHeight = mapDiv.offsetHeight,
+      mapHeight = divMap.offsetHeight,
       // The position of the map on the page in pixels.
       mapPosition = {
         east: 0,
@@ -26,13 +36,13 @@ define([
         west: 0
       },
       // The width of the map div.
-      mapWidth = mapDiv.offsetWidth,
+      mapWidth = divMap.offsetWidth,
       // This variable holds the user-defined maxHeight for the #npmapinfobox div.
       maxHeight = null,
       // This variable holds the user-defined maxWidth for the #npmapinfobox div.
       maxWidth = null,
       // The offset of the map div element (NPMap.config.div).
-      offset = NPMap.Util.getMapDivOffset(),
+      offset = NPMap.Util.getOffset(divMap),
       // The left offset of the map div element, in pixels.
       offsetLeft = offset.left,
       // The top offset of the map div element, in pixels.
@@ -49,10 +59,12 @@ define([
       skipBoundsCheck = false,
       // An object with CSS key-value pairs.
       styles = config.styles || {},
+      //
+      windowDimensions = Util.getWindowDimensions(),
       // The height of the browser window, in pixels.
-      windowHeight = $(window).height(),
+      windowHeight = windowDimensions.height,
       // The width of the browser window, in pixels.
-      windowWidth = $(window).width(),
+      windowWidth = windowDimensions.width,
       // Should the map pan when an InfoBox is shown or resized?
       panActivated = (function() {
         if (parent === 'map' && (pan === 'center' || pan === 'map')) {
@@ -63,17 +75,19 @@ define([
           return false;
         }
       })();
+
   /**
    * Checks to see if the InfoBox is overlapping beyond the edges of the InfoBox's parent element.
    * @param {Function} callback
    */
   function checkBounds(callback) {
     if (NPMap.InfoBox && NPMap.InfoBox.visible) {
-      var $me = $('#npmap-infobox'),
-          clickDotPixel = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
+      var clickDotPixel = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
+          infoboxBottomDimensions = Util.getOuterDimensions(divInfoBoxBottom),
+          infoboxDimensions = Util.getOuterDimensions(divInfoBox),
           p = {
-            left: clickDotPixel.x - $me.outerWidth() + 69,
-            top: clickDotPixel.y - $me.outerHeight() - $('#npmap-infobox-bottom').outerHeight()
+            left: clickDotPixel.x - infoboxDimensions.width + 69,
+            top: clickDotPixel.y - infoboxDimensions.height - infoboxBottomDimensions.height
           },
           paddingHalved = (padding / 2),
           r = {
@@ -88,9 +102,9 @@ define([
       }
 
       if (pan === 'center') {
-        var h = (mapHeight - $me.outerHeight()) / 2,
-            o = NPMap.Util.getMapDivOffset(),
-            w = (mapWidth - $me.outerWidth()) / 2;
+        var h = (mapHeight - infoboxDimensions.height) / 2,
+            o = NPMap.Util.getOffset(divMap),
+            w = (mapWidth - infoboxDimensions.width) / 2;
 
         if (parent === 'map') {
           o.left = 0;
@@ -102,7 +116,7 @@ define([
             r.v = h - p.top + o.top;
           }
         } else {
-          r.v = (mapHeight / 2) - clickDotPixel.y + $('#npmap-infobox-bottom').outerHeight() + $me.outerHeight() / 2;
+          r.v = (mapHeight / 2) - clickDotPixel.y + infoboxBottomDimensions.height + infoboxDimensions.height / 2;
         }
 
         if (p.left < 0) {
@@ -110,32 +124,32 @@ define([
             r.h = -p.left + w + o.left;
           } else {
             // TODO: Hook this up for parent === 'page'
-            r.h = -p.left + (mapWidth / 2) - (($me.outerWidth() * 2) / 2);
+            r.h = -p.left + (mapWidth / 2) - ((infoboxDimensions.width * 2) / 2);
           }
         } else {
           r.h = w - p.left + o.left;
         }
       } else {
-        $.each(mapPosition, function(i, v) {
-          switch (i) {
+        for (var property in mapPosition) {
+          switch (property) {
             case 'east':
               if (parent === 'map' && pan === 'map') {
-                var o = p.left + $me.outerWidth() - mapWidth;
+                var outer = p.left + infoboxDimensions.width - mapWidth;
 
-                if (o > 0) {
-                  r.h = -o - paddingHalved;
-                } else if (Math.abs(o) < paddingHalved) {
-                  r.h = -paddingHalved - o;
+                if (outer > 0) {
+                  r.h = -outer - paddingHalved;
+                } else if (Math.abs(outer) < paddingHalved) {
+                  r.h = -paddingHalved - outer;
                 }
               } else {
                 if (pan === 'map') {
-                  if ((p.left + $me.outerWidth()) > mapPosition.east) {
-                    r.h = mapPosition.east - (p.left + $me.outerWidth()) - paddingHalved;
-                  } else if (p.left + $me.outerWidth() > mapPosition.east - paddingHalved) {
-                    r.h = mapPosition.east - paddingHalved - (p.left + $me.outerWidth());
+                  if ((p.left + infoboxDimensions.width) > mapPosition.east) {
+                    r.h = mapPosition.east - (p.left + infoboxDimensions.width) - paddingHalved;
+                  } else if (p.left + infoboxDimensions.width > mapPosition.east - paddingHalved) {
+                    r.h = mapPosition.east - paddingHalved - (p.left + infoboxDimensions.width);
                   }
                 } else if (pan === 'page') {
-                  var n = (p.left + $me.outerWidth()) - windowWidth;
+                  var n = (p.left + infoboxDimensions.width) - windowWidth;
 
                   if (n > 0) {
                     r.h = -n - paddingHalved;
@@ -194,7 +208,7 @@ define([
 
               break;
           }
-        });
+        }
       }
 
       // TODO: MAYBE??? Get the height and width of the InfoBox, and verify that there is enough space to reposition it. If there isn't, don't reposition it.
@@ -221,7 +235,6 @@ define([
         clickDotPosition = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
         clickDotLeft = clickDotPosition.x,
         clickDotTop = clickDotPosition.y,
-        divInfoBox = document.getElementById('npmap-infobox'),
         right;
 
     if (parent === 'map') {
@@ -233,7 +246,7 @@ define([
         right = right - 69;
       } else if (design === 'nps' || design === 'pyv') {
         bottom = bottom + 24;
-        right = right - ($('#npmap-infobox').outerWidth() / 2) - 8;
+        right = right - (Util.getOuterDimensions(divInfoBox).width / 2) - 8;
       }
     } else if (parent === 'page') {
       if (design === 'basic') {
@@ -259,8 +272,7 @@ define([
    * Refreshes the dimensions of the map.
    */
   function refreshDimensions() {
-    var divMap = document.getElementById('npmap-map'),
-        offset = Util.getMapDivOffset(),
+    var offset = Util.getOffset(divMap),
         left = offset.left,
         top = offset.top;
     
@@ -293,46 +305,43 @@ define([
    * Refreshes the map div offsets and width.
    */
   function refreshOffsetsAndWidth() {
+    windowDimensions = Util.getWindowDimensions();
+
     // TODO: You should move this into NPMap.Map.
-    mapHeight = mapDiv.offsetHeight;
-    mapWidth = mapDiv.offsetWidth;
-    offset = NPMap.Util.getMapDivOffset();
+    mapHeight = divMap.offsetHeight;
+    mapWidth = divMap.offsetWidth;
+    offset = NPMap.Util.getOffset(divMap);
     offsetLeft = offset.left;
     offsetTop = offset.top;
-    windowHeight = $(window).height();
-    windowWidth = $(window).width();
+    windowHeight = windowDimensions.height;
+    windowWidth = windowDimensions.width;
   }
   /**
-   * Resizes an image to fit into the current InfoBox content size.
-   * @param {Object} img The image or "object" to work with.
+   * Resizes an object to fit into the current InfoBox content size.
+   * @param {Object} obj The object to resize.
    * @param {Number} mH The max-height.
    * @param {Number} mW The max-width.
    */
-  function resizeImageForContent(img, mH, mW) {
-    var $img = $(img);
-    
-    if ($img.height() > mH) {
-      $img.css({
-        height: mH
-      });
+  function resizeObjectForContent(obj, mH, mW) {
+    var dimensions = Util.getOuterDimensions(obj),
+        dimensionsContent = Util.getOuterDimensions(divInfoBoxContentWrapper),
+        height = dimensions.height,
+        width = dimensions.width;
+
+    if (height > mH) {
+      obj.style.height = mH + 'px';
+    }
+
+    if (width > mW) {
+      obj.style.width = mW + 'px';
     }
     
-    if ($img.width() > mW) {
-      $img.css({
-        width: mW
-      });
+    if (height > dimensionsContent.height) {
+      divInfoBoxContentWrapper.style.height = height + 'px';
     }
-    
-    if ($img.height() > $('#npmap-infobox-content-wrapper').outerHeight()) {
-      $('#npmap-infobox-content-wrapper').css({
-        height: $img.height()
-      });
-    }
-    
-    if ($img.width() > $('#npmap-infobox-content-wrapper').outerWidth()) {
-      $('#npmap-infobox-content-wrapper').css({
-        width: $img.width()
-      });
+
+    if (width > dimensionsContent.width) {
+      divInfoBoxContentWrapper.style.width = width + 'px';
     }
   }
   /**
@@ -349,7 +358,7 @@ define([
       maxHeight = valid;
       
       // TODO: Animate.
-      $('#npmap-infobox').css('max-height', maxHeight + 'px');
+      divInfoBox.style.maxHeight = maxHeight + 'px';
     }
   }
   /**
@@ -366,29 +375,32 @@ define([
       maxWidth = valid;
       
       // TODO: Animate.
-      $('#npmap-infobox').css('max-width', maxWidth + 'px');
+      divInfoBox.style.maxWidth = maxWidth + 'px';
     }
   }
+  /**
+   *
+   */
   function setupInfoBox() {
-    $.each(styles, function(i, v) {
-      if (i === 'max-height' || i === 'maxHeight') {
-        if (typeof(v) === 'string') {
-          v = v.replace('px', '');
+    for (var property in styles) {
+      if (property === 'max-height' || property === 'maxHeight') {
+        if (typeof styles[property] === 'string') {
+          styles[property] = styles[property].replace('px', '');
         }
-        
-        maxHeight = parseFloat(v);
-        $('#npmap-infobox').css(i, v + 'px !important');
-      } else if (i === 'max-width' || i === 'maxWidth') {
-        if (typeof(v) === 'string') {
-          v = v.replace('px', '');
+
+        maxHeight = parseFloat(styles[property]);
+        divInfoBox.style.maxHeight = maxHeight + 'px !important';
+      } else if (property === 'max-width' || property === 'maxWidth') {
+        if (typeof styles[property] === 'string') {
+          styles[property] = styles[property].replace('px', '');
         }
-        
-        maxWidth = parseFloat(v);
-        $('#npmap-infobox').css(i, v + 'px !important');
+
+        maxWidth = parseFloat(styles[property]);
+        divInfoBox.style.maxWidth = maxWidth + 'px !important';
       } else {
-        $('#npmap-infobox').css(i, v + ' !important');
+        divInfoBox.style[property] = styles[property] + ' !important';
       }
-    });
+    }
     
     if (!maxHeight) {
       setMaxHeight();
@@ -398,23 +410,26 @@ define([
       setMaxWidth();
     }
 
-    $.each($('#npmap-infobox').children(), function(i, v) {
-      if (v.id !== 'npmap-infobox-bottom') {
-        Util.stopAllPropagation(v);
+    Util.iterateThroughChildNodes(divInfoBox, function(el) {
+      if (el.id !== 'npmap-infobox-bottom') {
+        Util.stopAllPropagation(el);
       }
     });
 
-    // TODO: Change cursor to default.
-    
+    divInfoBoxBottom = document.getElementById('npmap-infobox-bottom');
+    divInfoBoxContent = document.getElementById('npmap-infobox-content');
+    divInfoBoxContentWrapper = document.getElementById('npmap-infobox-content-wrapper');
+    divInfoBoxFooter = document.getElementById('npmap-infobox-footer');
+    divInfoBoxTitle = document.getElementById('npmap-infobox-title');
+
     if (panActivated) {
-      $(mapDiv).resize(refreshDimensionsAndHeightWidth);
+      Util.monitorResize(divMap, refreshDimensionsAndHeightWidth);
     } else {
-      $(mapDiv).resize(refreshDimensions);
+      Util.monitorResize(divMap, refreshDimensions);
     }
-    
-    // TODO: Test this.
+
     if (parent === 'page') {
-      $(window).resize(function() {
+      window.onresize = function() {
         refreshOffsetsAndWidth();
 
         if (NPMap.InfoBox && NPMap.InfoBox.visible) {
@@ -422,48 +437,44 @@ define([
         }
       
         refreshDimensions();
-      });
+      };
     }
     
     refreshDimensions();
     refreshOffsetsAndWidth();
   }
-
-  // Setup underscorejs to do mustache.js style templating.
-  _.templateSettings = {
-    interpolate : /\{\{(.+?)\}\}/g
-  };
   
   if (design === 'basic') {
     NPMap.Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/basic.css');
     
-    infobox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook' + (Modernizr.boxshadow ? '-shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
+    divInfoBox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook' + (Modernizr.boxshadow ? '-shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
   } else if (design === 'nps' || design === 'pyv') {
     NPMap.Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/nps.css');
     
     // TODO: Add support for non-shadowed "hook".
-    infobox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook-nps.png" /></div>';
+    divInfoBox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook-nps.png" /></div>';
   }
   
-  infobox.className = 'shadow';
-  infobox.id = 'npmap-infobox';
-  infobox.style.display = 'none';
-  infobox.style.position = 'absolute';
+  divInfoBox.className = 'shadow';
+  divInfoBox.id = 'npmap-infobox';
+  divInfoBox.style.display = 'none';
+  divInfoBox.style.position = 'absolute';
   
   if (parent === 'map') {
-    infobox.style.zIndex = 1;
+    divInfoBox.style.zIndex = 1;
 
-    NPMap.Util.safeLoad('NPMap.Map', function() {
-      NPMap.Map.addElementToMapDiv(infobox);
+    // TODO: Set this up the way a proper circular dependency should be setup.
+    Util.safeLoad('NPMap.Map', function() {
+      NPMap.Map.addElementToMapDiv(divInfoBox);
       setupInfoBox();
     });
   } else {
-    infobox.style.zIndex = 999999;
+    divInfoBox.style.zIndex = 999999;
     
-    document.body.appendChild(infobox);
+    document.body.appendChild(divInfoBox);
     setupInfoBox();
   }
-  
+
   return NPMap.InfoBox = {
     // An array of event handler objects that have been added to this class.
     _events: [],
@@ -523,22 +534,16 @@ define([
      */
     hide: function() {
       if (this.visible) {
-        $('#npmap-infobox').hide();
-        
         if (this.marker && this.marker.oldIconUrl) {
           NPMap.Map[NPMap.config.api].setMarkerIcon(this.marker, this.marker.oldIconUrl);
           delete this.marker.oldIconUrl;
         }
 
-        $('#npmap-infobox').css({
-          width: 'auto'
-        });
-        $('#npmap-infobox-content-wrapper').css({
-          height: 'auto',
-          width: '250px'
-        });
-        $('#npmap-infobox-footer').hide();
-
+        divInfoBox.style.display = 'none';
+        divInfoBox.style.width = 'auto';
+        divInfoBoxContentWrapper.style.height = 'auto';
+        divInfoBoxContentWrapper.style.width = '250px';
+        document.getElementById('npmap-infobox-footer').style.display = 'none';
         this.actions = [];
         this.visible = false;
         this.latLng = null;
@@ -551,13 +556,13 @@ define([
      * Removes an action HTML element (<a>) from the InfoBox.
      */
     removeAction: function(el) {
-      $(el).remove();
-      
+      el.parentNode.removeChild(el);
+
       actions--;
       skipBoundsCheck = true;
 
       if (actions === 0) {
-        $('#npmap-infobox-footer').hide();
+        divInfoBoxFooter.style.display = 'none';
       }
     },
     /**
@@ -591,6 +596,8 @@ define([
           me = this,
           mH;
       
+      actions = actions || [];
+
       if (target) {
         NPMap.Map[NPMap.config.api].positionClickDot(target);
 
@@ -603,16 +610,11 @@ define([
       }
 
       NPMap.Map.hideTip();
-      $('#npmap-infobox-content-wrapper').css({
-        height: 'auto',
-        width: design === 'basic' ? '250px' : '381px'
-      });
-      $('#npmap-infobox-footer').hide();
-      $('#npmap-infobox-title').html(title);
-      
-      actions = actions || [];
-      
-      me.actions = [];
+
+      divInfoBoxContentWrapper.style.height = 'auto';
+      divInfoBoxContentWrapper.style.width = (design === 'basic' ? '250px' : '381px');
+      divInfoBoxFooter.style.display = 'none';
+      divInfoBoxTitle.innerHTML = title;
       
       if (config.skipActions) {
         actions = [];
@@ -621,86 +623,76 @@ define([
           var add = [],
               remove = [];
           
-          $.each(actions, function(i, v) {
-            if (typeof v === 'string') {
-              switch (v) {
-                case 'zoomable':
-                  if (NPMap.config.api != 'modestmaps') {
-                    var max = NPMap.Map[NPMap.config.api].getMaxZoom();
-  
-                    if (NPMap.Map[NPMap.config.api].getZoom() < max) {
-                      add.push({
-                        handler: function() {
-                          //NPMap.InfoBox.removeAction(this);
-                          NPMap.Map.centerAndZoom(me.latLng, max);
-                        },
-                        text: 'Zoom to this location'
-                      });
-                    }
-                  }
+          _.each(actions, function(action, i) {
+            if (typeof action === 'string') {
+              if (action === 'zoomable') {
+                var max = NPMap.Map[NPMap.config.api].getMaxZoom();
 
-                  remove.push(i);
-  
-                  break;
+                if (NPMap.Map[NPMap.config.api].getZoom() < max - 2) {
+                  add.push({
+                    handler: function() {
+                      //NPMap.InfoBox.removeAction(this);
+                      NPMap.Map.centerAndZoom(me.latLng, max - 2);
+                    },
+                    text: 'Zoom to this location'
+                  });
+                }
+
+                remove.push(i);
               }
             }
           });
-          $.each(remove, function(i, v) {
-            actions.remove(v);
+          _.each(remove, function(action) {
+            actions.remove(action);
           });
-          $.each(add, function(i, v) {
-            actions.push(v);
+          _.each(add, function(action) {
+            actions.push(action);
           });
         }
         
         if (NPMap.config.modules) {
-          $.each(NPMap.config.modules, function(i, v) {
-            switch (v.name) {
-              case 'route':
-                var address = null,
-                    config = v,
-                    latLngSplit = me.latLng.split(','),
-                    lat = parseFloat(latLngSplit[0]).toFixed(5),
-                    lng = parseFloat(latLngSplit[1]).toFixed(5),
-                    titleNoHtml = ($.trim(NPMap.Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
-                  
-                if (this.marker && this.marker.data) {
-                  if (this.marker.data['address']) {
-                    address = this.marker.data['address'];
-                  } else if (this.marker.data['Address']) {
-                    address = this.marker.data['Address'];
-                  } else if (config.addressAttribute && this.marker.data[config.addressAttribute]) {
-                    address = this.marker.data[config.addressAttribute];
-                  }
-                }
+          _.each(NPMap.config.modules, function(module) {
+            if (module.name === 'route') {
+              var address = null,
+                  lat = me.latLng.lat.toFixed(5),
+                  lng = me.latLng.lng.toFixed(5),
+                  titleNoHtml = (Util.trimString(NPMap.Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
                 
-                address = address || null;
-                
-                if (config.mode === 'multi') {
-                  actions.push({
-                    handler: function() {
-                      NPMap.Route.addDestinationToItinerary(address, lat, lng, titleNoHtml);
-                    },
-                    text: 'Add destination to itinerary'
-                  });
-                } else {
-                  actions.push({
-                    group: 'Route',
-                    handler: function() {
-                      NPMap.Route.addDestinationFrom(address, lat, lng, titleNoHtml);
-                    },
-                    text: 'Directions from here'
-                  });
-                  actions.push({
-                    group: 'Route',
-                    handler: function() {
-                      NPMap.Route.addDestinationTo(address, lat, lng, titleNoHtml);
-                    },
-                    text: 'Directions to here'
-                  });
+              if (this.marker && this.marker.data) {
+                if (this.marker.data['address']) {
+                  address = this.marker.data['address'];
+                } else if (this.marker.data['Address']) {
+                  address = this.marker.data['Address'];
+                } else if (config.addressAttribute && this.marker.data[module.addressAttribute]) {
+                  address = this.marker.data[module.addressAttribute];
                 }
-                  
-                break;
+              }
+              
+              address = address || null;
+              
+              if (module.mode === 'multi') {
+                actions.push({
+                  handler: function() {
+                    NPMap.Route.addDestinationToItinerary(address, lat, lng, titleNoHtml);
+                  },
+                  text: 'Add destination to itinerary'
+                });
+              } else {
+                actions.push({
+                  group: 'Route',
+                  handler: function() {
+                    NPMap.Route.addDestinationFrom(address, lat, lng, titleNoHtml);
+                  },
+                  text: 'Directions from here'
+                });
+                actions.push({
+                  group: 'Route',
+                  handler: function() {
+                    NPMap.Route.addDestinationTo(address, lat, lng, titleNoHtml);
+                  },
+                  text: 'Directions to here'
+                });
+              }
             }
           });
         }
@@ -715,14 +707,14 @@ define([
         actions = (function() {
           var a = [];
   
-          $.each(actions, function(i, v) {
+          _.each(actions, function(action, i) {
             var h = '<a href="javascript:void(0)"';
 
-            if (v.text.indexOf('Back') === 0) {
+            if (action.text.indexOf('Back') === 0) {
               h += ' class="back"';
             }
   
-            h += ' onclick="NPMap.InfoBox.actions[' + i + '].handler();return false;">' + v.text + '</a>';
+            h += ' onclick="NPMap.InfoBox.actions[' + i + '].handler();return false;">' + action.text + '</a>';
   
             a.push(h);
           });
@@ -756,42 +748,38 @@ define([
       
       if (footer) {
         if (actions.length > 0) {
-          $.each(actions, function(i, v) {
-            footer += v + '<br>';
+          _.each(actions, function(action) {
+            footer += action + '<br>';
           });
           
           footer = footer.slice(0, footer.length - 4);
         }
         
-        $('#npmap-infobox-footer').html('<div style="text-align:left;">' + footer + '</div>').show();
+        divInfoBoxFooter.innerHTML = '<div style="text-align:left;">' + h + '</div>';
+        divInfoBoxFooter.style.display = 'block';
         hasFooterContent = true;
       } else {
         if (actions.length > 0) {
           var h = '';
 
-          $.each(actions, function(i, v) {
-            h += v + '<br>';
+          _.each(actions, function(action) {
+            h += action + '<br>';
           });
 
           h = h.slice(0, h.length - 4);
           
-          $('#npmap-infobox-footer').html('<div style="text-align:left;">' + h + '</div>').show();
+          divInfoBoxFooter.innerHTML = '<div style="text-align:left;">' + h + '</div>';
+          divInfoBoxFooter.style.display = 'block';
           hasFooterContent = true;
         } else {
-          $('#npmap-infobox-footer').hide();
-          hasFooterContent = true;
+          divInfoBoxFooter.style.display = 'none';
+          hasFooterContent = false;
         }
       }
       
-      bottomHeight = $('#npmap-infobox-bottom').outerHeight();
-      footerHeight = (function() {
-        if (hasFooterContent) {
-          return $('#npmap-infobox-footer').outerHeight();
-        } else {
-          return 0;
-        }
-      })();
-      mH = maxHeight - $('#npmap-infobox-title').outerHeight() - bottomHeight;
+      bottomHeight = Util.getOuterDimensions(divInfoBoxBottom).height;
+      footerHeight = hasFooterContent ? Util.getOuterDimensions(divInfoBoxFooter).height : 0;
+      mH = maxHeight - Util.getOuterDimensions(divInfoBoxTitle).height - bottomHeight;
 
       if (padding < (bottomHeight + footerHeight)) {
         padding = bottomHeight + footerHeight;
@@ -800,24 +788,24 @@ define([
       mH = mH - padding;
       
       // TODO: Animate the height and width resize of the InfoBox, if it is visible.
-      $('#npmap-infobox-content-wrapper').css({
-        maxHeight: mH + 'px',
-        maxWidth: maxWidth + 'px'
-      });
-      $('#npmap-infobox-content').html(content);
-      
+      divInfoBoxContentWrapper.style.maxHeight = mH + 'px';
+      divInfoBoxContentWrapper.style.maxWidth = maxWidth + 'px';
+      divInfoBoxContent.innerHTML = content;
+
       try {
         // TODO: You should only scroll to top if "more info". This is more complicated than you might think, though, because you'll need to preserve the scrollTop of the "clustered" contents and then restore it on "back".
-        $('#npmap-infobox-content-wrapper').scrollLeft(0).scrollTop(0);
+        divInfoBoxContentWrapper.scrollLeft = 0;
+        divInfoBoxContentWrapper.scrollTop = 0;
       } catch(e) {
       
       }
 
-      $('#npmap-infobox img').each(function(i, v) {
-        resizeImageForContent(v, mH, maxWidth);
-      });
-      $('#npmap-infobox object').each(function(i, v) {
-        resizeImageForContent(v, mH, maxWidth);
+      Util.iterateThroughChildNodes(divInfoBox, function(el) {
+        var nodeName = el.nodeName.toLowerCase();
+
+        if (nodeName === 'img' || nodeName === 'object') {
+          resizeObjectForContent(el, mH, maxWidth);
+        }
       });
 
       if (this.visible) {
@@ -832,7 +820,7 @@ define([
         position(function() {
           if (panActivated && !skipBoundsCheck) {
             checkBounds(function() {
-              $('#npmap-infobox').show();
+              divInfoBox.style.display = 'block';
               NPMap.Event.trigger('InfoBox', 'show');
             });
           }

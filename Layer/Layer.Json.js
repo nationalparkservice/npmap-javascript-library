@@ -9,7 +9,7 @@
       json = json[layer.root];
     }
 
-    $.each(json, function(i, v) {
+    _.each(json, function(v, i) {
       var d = {
             layerName: layer.name,
             layerType: 'Json'
@@ -32,7 +32,7 @@
         NPMap.Map.addShape(m);
       }
       
-      $.each(v, function(i2, v2) {
+      _.each(v, function(v2, i2) {
         if (i2 !== layer.lat && i2 !== layer.lng) {
           d[i2] = v2;
         }
@@ -98,7 +98,7 @@
           }
         }
 
-        $.each(remove, function(i, v) {
+        _.each(remove, function(v, i) {
           queue.splice(v, 1);
         });
       }
@@ -112,7 +112,7 @@
      * @param {Object} The layer config object of the layer to hide.
      */
     hideLayer: function(layer) {
-      $.each(layer.geometries, function(i, v) {
+      _.each(layer.geometries, function(v, i) {
         NPMap.Map.setMarkerOptions(v, {
           visible: false
         });
@@ -129,7 +129,7 @@
      * @param {Object} The layer config object of the layer to hide.
      */
     showLayer: function(layer) {
-      $.each(layer.geometries, function(i, v) {
+      _.each(layer.geometries, function(v) {
         NPMap.Map.setMarkerOptions(v, {
           visible: true
         });

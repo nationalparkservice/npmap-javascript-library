@@ -21,7 +21,7 @@
     if (!data.d) {
       content = 'No information is available for this location.';
       title = 'Sorry!';
-    } else if ($.isArray(data.d)) {
+    } else if (_.isArray(data.d)) {
       var getCountText = function(count) {
         var text = null;
             
@@ -43,10 +43,10 @@
       content = '<ul>';
       title = ('<h2>' + layer.identify.clusterTitle + '</h2>').replace('[{count}]', getCountText(data.d.length)).replace('[{singularPlural}]', getSingularPlural(data.d.length));
           
-      $.each(data.d, function(i, v) {
+      _.each(data.d, function(v, i) {
         var liContent = '<li><a href="javascript:void(0)" onclick="NPMap.layers.NativeVectors.infoBoxMoreInfo(\'' + v[layer.primaryKey] + '\',\'' + layer.name + '\');return false;">' + layer.identify.clusterContent + '</a></li>';
             
-        $.each(v, function(i2, v2) {
+        _.each(v, function(v2, i2) {
           liContent = liContent.replace('{' + i2 + '}', v2);
         });
             
@@ -60,7 +60,7 @@
       backTitle = title;
     } else {
       if (geometry && geometry.data) {
-        $.each(geometry.data, function(i, v) {
+        _.each(geometry.data, function(v, i) {
           data.d[i] = v;
         });
       }
@@ -85,7 +85,7 @@
       }
           
       if (!contentIsFunction || !titleIsFunction) {
-        $.each(data.d, function(i, v) {
+        _.each(data.d, function(v, i) {
           if (!contentIsFunction) {
             content = content.replace('{' + i + '}', v);
           }
@@ -96,7 +96,7 @@
         });
 
         if (geometry && geometry.data) {
-          $.each(geometry.data, function(i, v) {
+          _.each(geometry.data, function(v, i) {
             if (!contentIsFunction) {
               content = content.replace('{' + i + '}', v);
             }
@@ -180,7 +180,7 @@
           url;
       
       if (typeof(content) === 'object') {
-        ids = content.content.split(',')
+        ids = content.content.split(',');
       } else {
         ids = content.split(',');
       }
@@ -208,7 +208,7 @@
           url += 'callback=?&$format=json';
 
           if (content.data) {
-            $.each(content.data, function(i, v) {
+            _.each(content.data, function(v, i) {
               url = url.replace('{' + i + '}', v);
             });
           }
@@ -234,7 +234,7 @@
           url += '&$filter=';
         }
         
-        $.each(ids, function(i, v) {
+        _.each(ids, function(v, i) {
           url += layer.primaryKey + ' eq ' + layer.identify.identifier.replace('{primaryKey}', v) + ' or ';
         });
         
@@ -251,8 +251,12 @@
       
       goBack = goBack || false;
       
-      $.getJSON(url, function(data) {
-        buildInfoBox(data, layer, goBack, content);
+      reqwest({
+        success: function(data) {
+          buildInfoBox(data, layer, goBack, content);
+        },
+        type: 'jsonp',
+        url: url
       });
     },
     /**
@@ -284,15 +288,15 @@
      */
     loadData: function(url, data) {
       var options = {
-        dataType: 'jsonp',
         jsonpCallback: 'NPMap.layers.NativeVectors.loadDataCallback',
+        type: 'jsonp',
         url: url
       };
 
       function load() {
-        var jqxhr = $.ajax(options);
+        var jqxhr = reqwest(options);
         
-        if (typeof(jqxhr) != 'undefined' && typeof(data) != 'undefined' && typeof(data.tileId) != 'undefined') {
+        if (typeof jqxhr !== 'undefined' && typeof data !== 'undefined' && typeof data.tileId !== 'undefined') {
           jqxhr.tileId = data.tileId;
           pendingRequests.push(jqxhr);
         }
@@ -342,7 +346,7 @@
      * Stops all the pending jQuery AJAX requests.
      */
     stopAllPendingRequests: function() {
-      $.each(pendingRequests, function(i, v) {
+      _.each(pendingRequests, function(v, i) {
         v.abort();
       });
 

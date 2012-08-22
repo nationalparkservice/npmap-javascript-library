@@ -31,6 +31,7 @@
       queue.push(layer);
       reqwest({
         success: function(js) {
+          /*
           var $xml = $($.parseXML(js.d));
           
           layer.geometries = [];
@@ -88,6 +89,7 @@
           if (layer.events && layer.events.load) {
             layer.events.load(layer);
           }
+          */
         },
         type: 'jsonp',
         url: 'http://maps.nps.gov/proxy/kml?url=' + layer.url + '&callback=?'

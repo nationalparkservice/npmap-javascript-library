@@ -1,25 +1,33 @@
 ﻿// TODO: Hook up attribution.
 define([
+  'Event',
   'Map/Map'
-], function(Map) {
-  var bounds,
+], function(Event, Map) {
+  var
+      //
+      bounds,
+      //
       currentExtent,
+      //
       map,
+      //
       max = 19,
-      min = 0;
+      //
+      min = 0,
+      //
+      programaticPan = false;
 
-  dojo.require('esri.map');
-  dojo.require('esri.geometry');
+  dojo.require('esri.map', 'esri.geometry');
   dojo.addOnLoad(function() {
-    var baseLayer;
+    var baseLayer = false;
 
     if (NPMap.config.bbox) {
       bounds = NPMap.config.bbox.slice(1, NPMap.config.bbox.length - 1).split(',');
       bounds = new esri.geometry.Extent({
-        xmax: parseFloat(bounds[2]),
-        xmin: parseFloat(bounds[0]),
-        ymin: parseFloat(bounds[1]),
-        ymax: parseFloat(bounds[3]),
+        xmax: parseFloat(bounds[2], 0),
+        xmin: parseFloat(bounds[0], 0),
+        ymin: parseFloat(bounds[1], 0),
+        ymax: parseFloat(bounds[3], 0),
         spatialReference: {
           wkid: 4326
         }
@@ -61,9 +69,9 @@ define([
       logo: false,
       showInfoWindowOnClick: false,
       slider: false,
-      wrapAround180: false
+      wrapAround180: true
     });
-    
+
     if (NPMap.config.baseLayers) {
       for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
         var layer = NPMap.config.baseLayers[i];
@@ -72,29 +80,32 @@ define([
           if (layer.type === 'ArcGisServerRest') {
             baseLayer = true;
             layer.zIndex = 0;
-            NPMap.Util.safeLoad('NPMap.esri.layers.ArcGisServerRest', function() {
-              NPMap.esri.layers.ArcGisServerRest.addLayer(layer);
-            });
-            
             break;
           }
         }
       }
+    } else {
+      NPMap.config.baseLayers = [];
     }
     
     if (!baseLayer) {
-      map.addLayer(new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer"));
+      NPMap.config.baseLayers.push({
+        tiled: true,
+        type: 'ArcGisServerRest',
+        url: 'http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer',
+        visible: true
+      });
     }
     
     dojo.connect(map, 'onClick', function(e) {
-      NPMap.Event.trigger('NPMap.Map', 'click', e);
+      Event.trigger('NPMap.Map', 'click', e);
     });
     dojo.connect(map, 'onExtentChange', function(extent, delta, zoomChanged) {
-      currentExtent = extent;
+      //currentExtent = extent;
 
-      if (NPMap.InfoBox.visible) {
-        NPMap.InfoBox.reposition();
-      }
+      
+
+      NPMap.Event.trigger('NPMap.Map', 'viewchanged');
     });
     dojo.connect(map, 'onLoad', function() {
       dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
@@ -102,9 +113,29 @@ define([
     dojo.connect(map, 'onPan', function(extent, delta) {
       currentExtent = extent;
 
+      if (NPMap.InfoBox.visible && programaticPan === false) {
+        NPMap.InfoBox.reposition();
+        //document.getElementById('npmap-infobox').style.display = 'none';
+      }
+
+      NPMap.Event.trigger('NPMap.Map', 'viewchange');
+    });
+    dojo.connect(map, 'onPanEnd', function(extent) {
+      currentExtent = extent;
+      programaticPan = false;
+
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.reposition();
       }
+    });
+    dojo.connect(map, 'onZoom', function(extent, zoomFactor, anchor) {
+      NPMap.Event.trigger('NPMap.Map', 'viewchange');
+    });
+    dojo.connect(map, 'onZoomEnd', function(extent, zoomFactor, anchor, zoomLevel) {
+      Event.trigger('NPMap.Map', 'zoomchanged');
+    });
+    dojo.connect(map, 'onZoomStart', function(extent, zoomFactor, anchor, zoomLevel) {
+      Event.trigger('NPMap.Map', 'zoomchange');
     });
 
     /* wax.esri */
@@ -303,14 +334,14 @@ define([
             wkid: 102100
           }))),
           sw = this.latLngFromApi(new esri.geometry.Point(bounds.xmin, bounds.ymin, new esri.SpatialReference({
-            wkid: 10200
+            wkid: 102100
           })));
 
       return {
         e: ne.lng,
         n: ne.lat,
-        s: sw.lng,
-        w: sw.lat
+        s: sw.lat,
+        w: sw.lng
       };
     },
     /**
@@ -320,7 +351,7 @@ define([
      */
     boundsToApi: function(bounds) {
       return new esri.geometry.Extent(bounds.w, bounds.s, bounds.e, bounds.n, new esri.SpatialReference({
-        wkid: 102100
+        wkid: 4326
       }));
     },
     /**
@@ -471,7 +502,7 @@ define([
      * @return {esri.geometry.Point}
      */
     getCenter: function(spatialReference) {
-      var center = currentExtent.getCenter();
+      var center = this.getBounds().getCenter();
 
       if (spatialReference === 102100) {
         return center;
@@ -484,9 +515,16 @@ define([
      * @return {}
      */
     getClickDotLatLng: function() {
+      // There is a major discrepancy between the first and the second time this gets called.
+      return esri.geometry.toMapGeometry(this.getBounds(), map.width, map.height, this.getClickDotPixel());
+    },
+    /**
+     * Returns the {esri.geometry.Point} for the #npmap-clickdot div.
+     */
+    getClickDotPixel: function() {
       var divClickDot = document.getElementById('npmap-clickdot');
 
-      return esri.geometry.toMapGeometry(currentExtent, map.width, map.height, new esri.geometry.Point(parseFloat(divClickDot.style.left, 0), parseFloat(divClickDot.style.top, 0)));
+      return new esri.geometry.Point(parseFloat(divClickDot.style.left.replace('px', ''), 0), parseFloat(divClickDot.style.top.replace('px', ''), 0));
     },
     /**
      * Gets the container div.
@@ -617,8 +655,8 @@ define([
 
       if (typeof latLng === 'string') {
         latLng = latLng.split(',');
-        lat = latLng[0];
-        lng = latLng[1];
+        lat = parseFloat(latLng[0], 0);
+        lng = parseFloat(latLng[1], 0);
       } else {
         lat = latLng.lat;
         lng = latLng.lng;
@@ -639,26 +677,62 @@ define([
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
+     * @param {Function} callback (Optional)
      */
-    panByPixels: function(pixels) {
-      var extent = map.extent,
+    panByPixels: function(pixels, callback) {
+      var extent = this.getBounds(),
           height = map.height,
           width = map.width,
           center = esri.geometry.toScreenGeometry(extent, width, height, this.getCenter(102100));
-          
+
+      programaticPan = true;
+
       map.centerAt(esri.geometry.toMapGeometry(extent, width, height, new esri.geometry.Point(center.x - pixels.x, center.y - pixels.y)));
+
+      if (callback) {
+        callback();
+      }
     },
+    /**
+     *
+     */
     panEast: function() {
+      programaticPan = true;
+
       map.panRight();
     },
+    /**
+     *
+     */
     panNorth: function() {
+      programaticPan = true;
+
       map.panUp();
     },
+    /**
+     *
+     */
     panSouth: function() {
+      programaticPan = true;
+
       map.panDown();
     },
+    /**
+     *
+     */
     panWest: function() {
+      programaticPan = true;
+
       map.panLeft();
+    },
+    /**
+     *
+     */
+    pixelFromApi: function(pixel) {
+      return {
+        x: pixel.x,
+        y: pixel.y
+      };
     },
     /**
      * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
@@ -667,10 +741,6 @@ define([
     positionClickDot: function(to) {
       var divClickDot = document.getElementById('npmap-clickdot'),
           point = esri.geometry.toScreenGeometry(currentExtent, map.width, map.height, to);
-
-      divClickDot.style.height = '5px';
-      divClickDot.style.width = '5px';
-      divClickDot.style.backgroundColor = 'red';
 
       divClickDot.style.left = point.x + 'px';
       divClickDot.style.top = point.y + 'px';

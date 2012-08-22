@@ -82,7 +82,7 @@ define([
 
         title += '</h2>';
 
-        $.each(data, function(i, v) {
+        _.each(data, function(v, i) {
           // TODO: These should be regular expressions that replace multiple instances if they exist.
           content = content.replace('{' + v.columnName + '}', v.value);
           title = title.replace('{' + v.columnName + '}', v.value);

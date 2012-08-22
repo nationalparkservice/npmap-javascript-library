@@ -332,8 +332,17 @@ define([
       });
       
       var intHtml = setInterval(function() {
-            var a = $('a[title="Click to see this area on Google Maps"]');
-            
+            var a;
+
+            Util.iterateThroughChildNodes(document.getElementById('npmap-map'), function(el) {
+              console.log(el);
+              if (el.getAttribute('title') === 'Click to see this area on Google Maps') {
+                a = el;
+              }
+            });
+
+            console.log(a);
+
             if (a.length > 0) {
               var d = $(a.parent().next().children()[0]),
                   attribution = $(d).html();
@@ -839,7 +848,7 @@ define([
      * @param {google.maps.Marker} OR {google.maps.LatLng} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
      */
     positionClickDot: function(to) {
-      var offset = NPMap.Util.getMapDivOffset(),
+      var offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
           pixel = this.latLngToPixel((function() {
             var latLng = null;
 

@@ -1,9 +1,9 @@
 define(function() {
   var
       // The interval for the div resize.
-      divResizeInterval,
-      // The divs to monitor for changes in size.
-      divsToMonitor = [],
+      elementResizeInterval = null,
+      // The elements to monitor for changes in size.
+      elementsToMonitor = [],
       // Events to cancel when stopPropagation is called.
       propagationEvents = [
         'click',
@@ -91,12 +91,49 @@ define(function() {
      * Gets the offset, in pixels, of the map div in the page.
      * @return {Object}
      */
-    getMapDivOffset: function() {
-      var offset = $('#' + NPMap.config.div).offset();
-      
+    getOffset: function(el) {
       return {
-        left: offset.left,
-        top: offset.top
+        left: el.offsetLeft - el.scrollLeft,
+        top: el.offsetTop - el.scrollTop
+      };
+    },
+    /**
+     *
+     */
+    getOuterDimensions: function(el) {
+      var changed = [],
+          height = 0,
+          parentNode = el.parentNode,
+          width = 0;
+
+      function checkDisplay(node) {
+        if (node.style.display === 'none') {
+          changed.push(node);
+          node.style.display = 'block';
+        }
+      }
+      
+      checkDisplay(el);
+      checkDisplay(parentNode);
+
+      while (parentNode.id !== 'npmap' && parentNode.id !== 'npmap-map') {
+        parentNode = parentNode.parentNode;
+
+        checkDisplay(parentNode);
+      }
+
+      height = el.offsetHeight;
+      width = el.offsetWidth;
+
+      changed.reverse();
+
+      for (var i = 0; i < changed.length; i++) {
+        changed[i].style.display = 'none';
+      }
+
+      return {
+        height: height,
+        width: width
       };
     },
     /**
@@ -120,6 +157,29 @@ define(function() {
       }
 
       return position;
+    },
+    /**
+     *
+     */
+    getWindowDimensions: function() {
+      var height = 0,
+          width = 0;
+
+      if (typeof window.innerWidth === 'number') {
+        height = window.innerHeight;
+        width = window.innerWidth;
+      } else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+        height = document.documentElement.clientHeight;
+        width = document.documentElement.clientWidth;
+      } else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+        height = document.body.clientHeight;
+        width = document.body.clientWidth;
+      }
+      
+      return {
+        height: height,
+        width: width
+      };
     },
     /**
      * Injects a CSS stylesheet into the page.
@@ -160,15 +220,49 @@ define(function() {
       return n % 1 === 0;
     },
     /**
+     * Iterates through all of the child nodes of an element.
+     * @param {Object} el
+     * @param {Function} func (Optional)
+     */
+    iterateThroughChildNodes: function(el, func) {
+      if (el && el.childNodes) {
+        for (var i = 0; i < el.childNodes.length; i++) {
+          var childNode = el.childNodes[i];
+
+          if (func) {
+            func(childNode);
+          }
+
+          this.iterateThroughChildNodes(childNode, func);
+        }
+      }
+    },
+    /**
      *
      */
-    monitorDivSize: function(el, handler) {
-      divsToMonitor.push(el);
+    monitorResize: function(el, handler) {
+      var dimensions = this.getOuterDimensions(el),
+          me = this;
 
-      if (!divResizeInterval) {
-        divResizeInterval = setInterval(function() {
-          for (var i = 0; i < divsToMonitor.length; i++) {
-            
+      elementsToMonitor.push({
+        el: el,
+        handler: handler,
+        height: dimensions.height,
+        width: dimensions.width
+      });
+
+      if (!elementResizeInterval) {
+        elementResizeInterval = setInterval(function() {
+          for (var i = 0; i < elementsToMonitor.length; i++) {
+            var e = elementsToMonitor[i],
+                d = me.getOuterDimensions(e.el);
+
+            if (e.height !== d.height || e.width !== d.width) {
+              e.handler(d);
+
+              e.height = d.height;
+              e.width = d.width;
+            }
           }
         }, 250);
       }
@@ -207,7 +301,7 @@ define(function() {
             } catch (e) {
 
             }
-          }, 100);
+          }, 250);
     },
     /**
      * Stops the propagation of all events.
@@ -218,12 +312,10 @@ define(function() {
         var propagationEvent = propagationEvents[i];
 
         if (propagationEvent === 'mousewheel') {
-          // http://www.stoimen.com/blog/2009/07/01/javascript-disable-mouse-wheel/
           el.addEventListener('mousewheel', cancelMouseWheel, false);
         } else {
           el.addEventListener(propagationEvent, cancelEventPropagation, false);
         }
-        
       }
     },
     /**
@@ -235,6 +327,20 @@ define(function() {
       var div = document.createElement("div");
       div.innerHTML = html;
       return div.textContent || div.innerText || "";
+    },
+    /**
+     *
+     */
+    trimString: function(string) {
+      string = string.replace(/^\s+/, '');
+
+      for (var i = string.length - 1; i >= 0; i--) {
+        if (/\S/.test(string.charAt(i))) {
+          string = string.substring(0, i + 1);
+          break;
+        }
+      }
+      return string;
     }
   };
 });

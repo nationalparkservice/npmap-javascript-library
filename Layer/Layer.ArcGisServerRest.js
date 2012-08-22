@@ -25,10 +25,10 @@ define([
         layerConfig = Map.getLayerByName(layer.layerName),
         subLayers = [];
         
-    $.each(layer.data.results, function(i, result) {
+    _.each(layer.data.results, function(result, i) {
       var subLayerObject;
 
-      $.each(subLayers, function(i2, subLayer) {
+      _.each(subLayers, function(subLayer, i2) {
         if (subLayer.layerName === result.layerName) {
           subLayerObject = subLayer;
         }
@@ -54,14 +54,14 @@ define([
       layerName: layer.layerName,
       results: subLayers
     });
-    $.each(subLayers, function(i, subLayer) {
+    _.each(subLayers, function(subLayer, i) {
       var titles = [];
           
       if (!layerConfig.identify || !layerConfig.identify.simpleTree) {
         html += '<li>' + subLayer.layerName.replace(/_/g, ' ') + '<ul>';
       }
 
-      $.each(subLayer.results, function(i2, result) {
+      _.each(subLayer.results, function(result, i2) {
         var t;
 
         if (layerConfig.identify && layerConfig.identify.title) {
@@ -88,7 +88,7 @@ define([
             
         return (A < B) ? -1 : (A > B) ? 1 : 0;
       });
-      $.each(titles, function(i2, t) {
+      _.each(titles, function(t, i2) {
         html += '<li><a href="javascript:void(0)" onclick="NPMap.Layer.ArcGisServerRest._infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, t.r['OBJECTID']) + '\',\'' + layer.layerName + '\',this);return false;">' + t.t + '</a></li>';
       });
 
@@ -137,7 +137,7 @@ define([
         content = buildHtmlForLayer(data[0]);
         title = data[0].layerName.replace(/_/g, ' ');
       } else {
-        $.each(data, function(i, v) {
+        _.each(data, function(v, i) {
           content += '<div><h3>' + data[i].layerName.replace(/_/g, ' ') + '</h3>' + buildHtmlForLayer(data[i]) + '</div>';
         });
 
@@ -239,7 +239,6 @@ define([
             latLngApi = Map[NPMap.config.api].eventGetLatLng(e),
             latLng = Map.latLngFromApi(latLngApi);
             
-        InfoBox.hide();
         InfoBox.latLng = latLngApi;
         Map[NPMap.config.api].positionClickDot(latLngApi);
         this._doIdentify(latLng, el.offsetHeight, el.offsetWidth, Map.getBounds());
@@ -270,7 +269,7 @@ define([
           me = this,
           results,
           subLayer,
-          title = $(el).html();
+          title = el.innerHTML;
       
       for (var i = 0; i < identifyResults.length; i++) {
         if (identifyResults[i].layerName === name) {

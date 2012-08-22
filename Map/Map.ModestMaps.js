@@ -296,7 +296,7 @@ define([
      * Returns the {L.Point} for the #npmap-clickdot div. This pixel is relative to the upper-lefthand corner of the map.
      */
     getClickDotPixel: function() {
-      var offset = NPMap.Util.getMapDivOffset(),
+      var offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
           position = $('#npmap-clickdot').position();
 
       return new MM.Point(position.left - offset.left, position.top - offset.top);
@@ -406,7 +406,7 @@ define([
      */
     positionClickDot: function(to) {
       var clickDot = document.getElementById('npmap-clickdot'),
-          offset = NPMap.Util.getMapDivOffset();
+          offset = NPMap.Util.getOffset(document.getElementById('npmap-map'));
 
       if (typeof to === 'string') {
         to = to.split(',');

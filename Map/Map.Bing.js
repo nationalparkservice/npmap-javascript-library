@@ -1,7 +1,8 @@
 ﻿// TODO: Hook up attribution.
 define([
-  'Map/Map'
-], function(Map) {
+  'Map/Map',
+  'Util/Util'
+], function(Map, Util) {
   var
       // An array of the default base layers for Bing.
       DEFAULT_BASE_LAYERS = [{
@@ -273,6 +274,14 @@ define([
     }
     
     checkMaxMinZoom();
+    NPMap.Event.trigger('NPMap.Map', 'viewchange');
+
+    if (map.getZoom() != oldZoom) {
+      NPMap.Event.trigger('NPMap.Map', 'zoomchange');
+    }
+    
+    oldCenter = map.getCenter();
+    oldZoom = map.getZoom();
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function(e) {
     if (map.getZoom() != oldZoom) {
@@ -285,11 +294,11 @@ define([
     map.getCopyrights(function(a) {
       var attribution = '';
       
-      $.each(a, function(i, v) {
-        if ($.isArray(v) === false) {
+      _.each(a, function(v, i) {
+        if (!_.isArray(v)) {
           attribution += v + '|';
         } else {
-          $.each(v, function(i2, v2) {
+          _.each(v, function(v2, i2) {
             attribution += v2 + '|';
           });
         }
@@ -297,7 +306,7 @@ define([
       NPMap.Map.setAttribution(NPMap.Map.buildAttributionStringForVisibleLayers(attribution.slice(0, attribution.length - 1)));
     });
     
-    NPMap.Event.trigger('NPMap.Map', 'viewchangeend', e);
+    NPMap.Event.trigger('NPMap.Map', 'viewchanged', e);
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangestart', function() {
     viewChanged = true;
@@ -633,7 +642,7 @@ define([
      * Returns the {Microsoft.Mas.Point} for the #npmap-clickdot div.
      */
     getClickDotPixel: function() {
-      var position = $('#npmap-clickdot').position();
+      var position = Util.getOffset(document.getElementById('#npmap-clickdot'));
 
       return new Microsoft.Maps.Point(position.left, position.top);
     },
@@ -714,11 +723,11 @@ define([
      * Handles any necessary sizing and positioning for the map when its div is resized.
      */
     handleResize: function() {
-      var div = $('#' + NPMap.config.div);
+      var dimensions = Util.getOuterDimensions(document.getElementById(NPMap.config.div));
             
       map.setOptions({
-        height: div.outerHeight(),
-        width: div.outerWidth()
+        height: dimensions.height,
+        width: dimensions.width
       });
     },
     /**
@@ -850,8 +859,9 @@ define([
      */
     positionClickDot: function(to) {
       var anchorY = 0,
+          divClickDot = document.getElementById('npmap-clickdot'),
           me = this,
-          offset = NPMap.Util.getMapDivOffset(),
+          offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
           pixel = this.latLngToPixel((function() {
             var latLng = null;
             
@@ -872,10 +882,8 @@ define([
             return latLng;
           })(), Microsoft.Maps.PixelReference.page);
       
-      $('#npmap-clickdot').css({
-        left: pixel.x - offset.left,
-        top: pixel.y - offset.top - anchorY
-      });
+      divClickDot.style.left = pixel.x - offset.left + 'px';
+      divClickDot.style.top = pixel.y - offset.top - anchorY + 'px';
     },
     // TODO: Not implemented yet, as this is handled by Layer.ArcGisServerRest. Will be needed when you handle another layer type.
     reloadTileLayer: function(config) {
@@ -923,7 +931,7 @@ define([
     setMarkerOptions: function(marker, options) {
       var valid = {};
 
-      $.each(options, function(i, v) {
+      _.each(options, function(v, i) {
         switch (i) {
           case 'class':
             valid.typeName = v;
@@ -1042,7 +1050,7 @@ define([
       var zoom = map.getZoom();
       
       if (toDot) {
-        var position = $('#npmap-clickdot').position(),
+        var position = Util.getOffset(document.getElementById('npmap-clickdot')),
             latLng = this.pixelToLatLng(new Microsoft.Maps.Point(position.left, position.top));
 
         map.setView({

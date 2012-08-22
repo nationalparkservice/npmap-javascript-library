@@ -118,8 +118,15 @@ define([
   return NPMap.Map = {
     // An array of event handler objects that have been added to this class.
     _events: [{
+      event: 'zoomchange',
+      func: function() {
+        if (!NPMap.InfoBox.marker) {
+          NPMap.InfoBox.hide();
+        }
+      }
+    },{
       event: 'zoomchanged',
-      func: function(e) {
+      func: function() {
         if (!NPMap.InfoBox.marker) {
           NPMap.InfoBox.hide();
         }
@@ -226,10 +233,10 @@ define([
         function hookUpNavigationControl(id, handler) {
           var el = document.getElementById(id);
           
-          bean.add(el, 'mousedown dblclick', function(e) {
+          bean.add(el, 'click dblclick mousedown', function(e) {
             e.stop();
           });
-          bean.add(el, 'click', function(e) {
+          bean.add(el, 'mouseup', function(e) {
             e.stop();
             handler();
           });
@@ -403,6 +410,8 @@ define([
             } else {
               navigation.style.right = '15px';
             }
+          } else {
+            navigation.style.left = '15px';
           }
 
           navigation.id = 'npmap-navigation';
@@ -625,7 +634,7 @@ define([
               });
               */
               
-              Event.add('NPMap.Map', 'viewchangeend', function(e) {
+              Event.add('NPMap.Map', 'viewchanged', function(e) {
                 updateOverviewMap();
               });
             }
@@ -772,6 +781,8 @@ define([
 
         var interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
+            // Iterate through all child elements of #npmap-map and detect width and set InfoBox padding.
+
             clearInterval(interval);
             Event.trigger('NPMap.Map', 'ready');
           }
