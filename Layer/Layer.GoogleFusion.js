@@ -21,6 +21,8 @@ define([
      * @param {Object} config
      */
     create: function(config) {
+      var layer;
+
       Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       if (!config.query) {
@@ -31,13 +33,11 @@ define([
         throw new Error('The "query.from" config is required for GoogleFusion layers, and it must be a string.');
       }
 
-      var layer = new google.maps.FusionTablesLayer({
+      layer = config.api = new google.maps.FusionTablesLayer({
         map: NPMap.Map[NPMap.config.api].map,
         query: config.query,
         suppressInfoWindows: true
       });
-
-      config.api = layer;
 
       google.maps.event.addListener(layer, 'click', function(e) {
         var data = {},

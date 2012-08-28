@@ -57,6 +57,12 @@ define(function() {
 
   return NPMap.Util = {
     /**
+     *
+     */
+    addClass: function(el, cls) {
+      el.className = el.className += ' ' + cls;
+    },
+    /**
      * Given an object, does a property exist.
      * @param {Object} obj The object to test.
      * @param {String} prop The property to look for. Ex: 'NPMap.config.tools.keyboard'.
@@ -86,6 +92,13 @@ define(function() {
         }
       }
     },
+    getNextElement: function(el) {
+      do {
+        el = el.nextSibling;
+      } while (el && el.nodeType != 1);
+      
+      return el;
+    },
     // TODO: Rename to getContainerDivOffset.
     /**
      * Gets the offset, in pixels, of the map div in the page.
@@ -101,34 +114,40 @@ define(function() {
      *
      */
     getOuterDimensions: function(el) {
-      var changed = [],
-          height = 0,
-          parentNode = el.parentNode,
+      var height = 0,
           width = 0;
 
-      function checkDisplay(node) {
-        if (node.style.display === 'none') {
-          changed.push(node);
-          node.style.display = 'block';
+      if (el) {
+        var changed = [],
+            parentNode = el.parentNode;
+
+        function checkDisplay(node) {
+          if (node.style.display === 'none') {
+            changed.push(node);
+            node.style.display = 'block';
+          }
         }
-      }
-      
-      checkDisplay(el);
-      checkDisplay(parentNode);
+        
+        checkDisplay(el);
 
-      while (parentNode.id !== 'npmap' && parentNode.id !== 'npmap-map') {
-        parentNode = parentNode.parentNode;
+        if (parentNode) {
+          checkDisplay(parentNode);
 
-        checkDisplay(parentNode);
-      }
+          while (parentNode.id !== 'npmap' && parentNode.id !== 'npmap-map') {
+            parentNode = parentNode.parentNode;
 
-      height = el.offsetHeight;
-      width = el.offsetWidth;
+            checkDisplay(parentNode);
+          }
+        }
 
-      changed.reverse();
+        height = el.offsetHeight;
+        width = el.offsetWidth;
 
-      for (var i = 0; i < changed.length; i++) {
-        changed[i].style.display = 'none';
+        changed.reverse();
+
+        for (var i = 0; i < changed.length; i++) {
+          changed[i].style.display = 'none';
+        }
       }
 
       return {
@@ -180,6 +199,12 @@ define(function() {
         height: height,
         width: width
       };
+    },
+    /**
+     *
+     */
+    hasClass: function(el, cls) {
+      return el.className.indexOf(cls) !== -1;
     },
     /**
      * Injects a CSS stylesheet into the page.
@@ -266,6 +291,12 @@ define(function() {
           }
         }, 250);
       }
+    },
+    /**
+     *
+     */
+    removeClass: function(el, cls) {
+      el.className = el.className.replace(cls, '');
     },
     /**
      * Replaces "bad characters" that have been inserted by NPMap into strings.

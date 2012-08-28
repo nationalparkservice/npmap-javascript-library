@@ -2,17 +2,18 @@
 // TODO: Hook up attribution.
 define([
   'Event',
-  'Map/Map'
-], function(Event, Map) {
+  'Map/Map',
+  'Util/Util'
+], function(Event, Map, Util) {
   wax.mm=wax.mm||{};wax.mm.interaction=function(){function e(){h=!0}var h=!1,f,a,c="zoomed panned centered extentset resized drawn".split(" ");return wax.interaction().attach(function(d){if(!arguments.length)return a;a=d;for(var b=0;b<c.length;b++)a.addCallback(c[b],e)}).detach(function(){for(var d=0;d<c.length;d++)a.removeCallback(c[d],e)}).parent(function(){return a.parent}).grid(function(){var d=a.getLayerAt(0).levels[Math.round(a.getZoom())];if(h||!(void 0!==f&&f.length)){var b=a.getLayerAt(0).tiles,c=[],g;for(g in b)if(b[g].parentNode===d){var e=wax.u.offset(b[g]);c.push([e.top,e.left,b[g]])}f=c}return f})};
 
   var
-      // The map div.
-      $mapDiv = $('#' + NPMap.config.div).parent(),
       // The base layer to initialize the map with.
       baseLayer,
       // The current center.
       center,
+      // The map div.
+      divMap = document.getElementById(NPMap.config.div).parentNode,
       // The initial center of the map.
       initialCenter,
       // The initial zoom level of the map.
@@ -297,7 +298,7 @@ define([
      */
     getClickDotPixel: function() {
       var offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
-          position = $('#npmap-clickdot').position();
+          position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
       return new MM.Point(position.left - offset.left, position.top - offset.top);
     },
@@ -473,7 +474,7 @@ define([
           zoom = map.getZoom();
       
       if (toDot) {
-        var position = $('#npmap-clickdot').position();
+        var position = Util.getOffset(document.getElementById('npmap-clickdot'));
         
         latLng = map.locationCoordinate(map.pointLocation(new MM.Point(position.left, position.top)));
       } else {

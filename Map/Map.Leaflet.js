@@ -1,8 +1,9 @@
 ﻿// TODO: Hook up attribution.
 define([
   'Event',
-  'Map/Map'
-], function(Event, Map) {
+  'Map/Map',
+  'Util/Util'
+], function(Event, Map, Util) {
   wax.leaf=wax.leaf||{};wax.leaf.interaction=function(){function e(){g=!0}var g=!1,f,c;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.on(d[a],e)}).detach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.off(d[a],e)}).parent(function(){return c._container}).grid(function(){if(!g&&f)return f;var b=c._layers,d=[],a;for(a in b)if(b[a]._tiles)for(var e in b[a]._tiles){var h=wax.u.offset(b[a]._tiles[e]);d.push([h.top,h.left,b[a]._tiles[e]])}return f=d})};
 
   var
@@ -91,8 +92,14 @@ define([
       };
     },
     // Taken from https://github.com/migurski/canvas-warp
-    getTileUrl: function(xy, z) {
-      return this._url + 'TileGroup' + this._coordinateGroup({column:xy.x,row:xy.y,zoom:z}) + '/'+ z + '-' + xy.x + '-' + xy.y + '.jpg';
+    getTileUrl: function(xy) {
+      var zoom = NPMap.Map.getZoom();
+
+      return this._url + 'TileGroup' + this._coordinateGroup({
+        column: xy.x,
+        row: xy.y,
+        zoom: zoom
+      }) + '/'+ zoom + '-' + xy.x + '-' + xy.y + '.jpg';
     },
     initialize: function(url, options) {
       options = L.Util.setOptions(this, options);
@@ -379,7 +386,7 @@ define([
      * Returns the {L.Point} for the #npmap-clickdot div.
      */
     getClickDotPixel: function() {
-      var position = $('#npmap-clickdot').position();
+      var position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
       return new L.Point(position.left, position.top);
     },

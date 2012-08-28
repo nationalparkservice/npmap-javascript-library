@@ -17,8 +17,8 @@
      * Removes all of the shapes that have been created by the edit module from the map.
      */
     removeAllShapes: function() {
-      $.each(NPMap[NPMap.config.api].modules.edit.shapes, function(i, v) {
-        NPMap[NPMap.config.api].map.removeShape(v);
+      _.each(NPMap[NPMap.config.api].modules.edit.shapes, function(shape) {
+        NPMap[NPMap.config.api].map.removeShape(shape);
       });
       NPMap[NPMap.config.api].modules.edit.shapes = [];
     }

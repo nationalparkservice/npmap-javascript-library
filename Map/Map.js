@@ -8,10 +8,12 @@ define([
   'Util/Util'
 ], function(Event, InfoBox, Util) {
   var
-      // The jQuery map div object.
-      $mapDiv = $('#npmap-map'),
-      // The jQuery map div parent object.
-      $mapDivParent = $mapDiv.parent(),
+      //
+      activeNotificationMessages = [],
+      //
+      activeNotificationMessagesHeight = 0,
+      // The map div.
+      divMap = document.getElementById(NPMap.config.div),
       // Does the map have active tile layers?
       hasTiled = false,
       // Is the map in fullscreen mode?
@@ -65,7 +67,7 @@ define([
     }
 
     msg.innerHTML = html;
-        
+
     return msg;
   }
   /**
@@ -75,40 +77,34 @@ define([
    * @return {Object}
    */
   function hookUpClickEvent(id, func) {
-    var $el = $('#' + id);
+    var el = document.getElementsById(id);
     
-    Util.stopAllPropagation($el);
-
-    $el.click(function(e) {
+    Util.stopAllPropagation(el);
+    bean.add(el, 'click', function(e) {
       func();
     });
-    
-    return $el;
+
+    return el;
   }
   /**
    * Sets the width of the attribution control based on the width of the map and logos and positions it.
    */
   function setAttributionMaxWidthAndPosition() {
-    var divOverviewMap = document.getElementById('npmap-overviewmap'),
-        max = $mapDiv.width() - $('#npmap-logos').outerWidth() - 40,
+    var divAttribution = document.getElementById('npmap-attribution'),
+        divOverviewMap = document.getElementById('npmap-overviewmap'),
+        max = Util.getOuterDimensions(divMap).width - Util.getOuterDimensions(document.getElementById('npmap-logos')).width - 40,
         right = 0;
-    
+
     if (divOverviewMap) {
-      max = max - $('#npmap-overviewmap').outerWidth();
-      right = $('#npmap-overviewmap').outerWidth();
+      var divOverviewMapWidth = Util.getOuterDimensions(divOverviewMap).width;
+
+      max = max - divOverviewMapWidth;
+      right = divOverviewMapWidth;
     }
     
-    $('#npmap-attribution').css({
-      'right': right + 'px',
-      'max-width': max + 'px'
-    });
+    divAttribution.style.maxWidth = max + 'px';
+    divAttribution.style.right = right + 'px';
   }
-  
-  // Hook up the resize event on the map div.
-  $mapDiv.resize(function() {
-    setAttributionMaxWidthAndPosition();
-    NPMap.Map.handleResize();
-  });
   
   /**
    * @class NPMap.Map
@@ -141,8 +137,8 @@ define([
       var apiLatLngs = [],
           me = this;
       
-      $.each(latLngs, function(i, v) {
-        apiLatLngs.push(me.latLngToApi(v));
+      _.each(latLngs, function(latLng) {
+        apiLatLngs.push(me.latLngToApi(latLng));
       });
       
       return NPMap.Map[NPMap.config.api].createLine(apiLatLngs, options);
@@ -181,8 +177,6 @@ define([
 
       Util.safeLoad('NPMap.Map.' + NPMap.config.api, function() {
         var
-            // The jQuery map div.
-            $map,
             // The attribution control div.
             attribution = document.createElement('div'),
             // The "clickdot" div.
@@ -245,13 +239,11 @@ define([
         }
 
         if (NPMap.config.api === 'Bing') {
-          $map = $(document.getElementById('npmap-map').getElementsByTagName('div')[0]);
-        } else {
-          $map = $('#npmap-map');
+          divMap = document.getElementById(NPMap.config.div).getElementsByTagName('div')[0]
         }
 
-        $map.bind('contextmenu', function(e) {
-          return false;
+        bean.add(divMap, 'contextmenu', function(e) {
+          e.stop();
         });
 
         attribution.id = 'npmap-attribution';
@@ -296,7 +288,9 @@ define([
           elements.push({
             el: logos,
             func: function() {
-              $('#npmap-logos').resize(setAttributionMaxWidthAndPosition);
+              Util.monitorResize(document.getElementById('npmap-logos'), function() {
+                setAttributionMaxWidthAndPosition();
+              });
               setAttributionMaxWidthAndPosition();
             }
           })
@@ -384,15 +378,16 @@ define([
               }));
               
               for (var i = 0; i < buttons.length; i++) {
-                var button = buttons[i];
+                var button = buttons[i],
+                    divZoom = document.getElementById('npmap-navigation-small-zoom'); 
                 
                 button.inOrOut = button.id.split('-')[4];
                 
                 bean.add(button, 'mouseenter', function(e) {
-                  $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom').addClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over');
+                  divZoom.className += '-' + this.inOrOut + '-over';
                 });
                 bean.add(button, 'mouseleave', function(e) {
-                  $('#npmap-navigation-small-zoom').removeClass('npmap-navigation-small-zoom-' + this.inOrOut + '-over').addClass('npmap-navigation-small-zoom');
+                  divZoom.className = divZoom.className.replace('-' + this.inOrOut + '-over', '');
                 });
               }
             });
@@ -515,28 +510,31 @@ define([
 
         // TODO: This is currently Bing specific.
         if ((toolsConfig.overviewMap || toolsConfig.overview) && NPMap.config.api === 'bing') {
-          var overview = document.createElement('div');
+          var divOverview = document.createElement('div');
 
-          overview.id = 'npmap-overview';
-          overview.innerHTML = '<div id="npmap-overview-title" style="color:#454545;display:none;padding:8px;position:absolute;">Overview Map</div><div id="npmap-overview-map" style="bottom:0px;left:0px;position:absolute;right:0px;top:0px;"></div>';
-          overview.style.bottom = $('#npmap-attribution').outerHeight() + 'px';
+          divOverview.id = 'npmap-overview';
+          divOverview.innerHTML = '<div id="npmap-overview-title" style="color:#454545;display:none;padding:8px;position:absolute;">Overview Map</div><div id="npmap-overview-map" style="bottom:0px;left:0px;position:absolute;right:0px;top:0px;"></div>';
+          divOverview.style.bottom = Util.getOuterDimensions(document.getElementById('npmap-attribution')).height + 'px';
           
           elements.push({
-            el: overview,
+            el: divOverview,
             func: function() {
-              var overviewMap = new Microsoft.Maps.Map(document.getElementById('npmap-overviewmap-map'), {
-                credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
-                disablePanning: true,
-                disableZooming: true,
-                fixedMapPosition: true,
-                mapTypeId: Microsoft.Maps.MapTypeId.road,
-                showBreadcrumb: false,
-                showCopyright: false,
-                showDashboard: false,
-                showLogo: false,
-                showMapTypeSelector: false,
-                showScalebar: false
-              });
+              var divOverviewButton = document.createElement('div'),
+                  divOverviewMap = document.getElementById('npmap-overview-map'),
+                  divOverviewTitle = document.getElementById('npmap-overview-title'),
+                  mapOverview = new Microsoft.Maps.Map(divOverviewMap, {
+                    credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
+                    disablePanning: true,
+                    disableZooming: true,
+                    fixedMapPosition: true,
+                    mapTypeId: Microsoft.Maps.MapTypeId.road,
+                    showBreadcrumb: false,
+                    showCopyright: false,
+                    showDashboard: false,
+                    showLogo: false,
+                    showMapTypeSelector: false,
+                    showScalebar: false
+                  });
 
               function updateOverviewMap() {
                 var bounds = NPMap.bing.map.Map.getBounds(),
@@ -545,14 +543,14 @@ define([
                     ne = new Microsoft.Maps.Location(se.latitude, nw.longitude),
                     sw = new Microsoft.Maps.Location(nw.latitude, se.longitude);
                 
-                overviewMap.setView({
+                mapOverview.setView({
                   bounds: bounds,
                   padding: 20
                 });
-                overviewMap.entities.clear();
-                
-                if ($('#npmap-overview-button').hasClass('expanded')) {
-                  overviewMap.entities.push(new Microsoft.Maps.Polygon([
+                mapOverview.entities.clear();
+
+                if (Util.hasClass(divOverviewButton, 'expanded')) {
+                  mapOverview.entities.push(new Microsoft.Maps.Polygon([
                     nw,
                     ne,
                     se,
@@ -566,63 +564,67 @@ define([
                 }
               }
 
-              Util.stopAllPropagation(document.getElementById('npmap-overview'));
-              $('<div id="npmap-overview-button" class="npmap-overview-open cursor" style="position:absolute;"></div>').appendTo('#npmap-overview-map').click(function() {
-                var $overview = $('#npmap-overview'),
-                    $this = $(this),
-                    $title = $('#npmap-overview-title');
-                
-                if ($this.hasClass('expanded')) {
-                  $title.hide();
-                  $('#npmap-overview-map').css({
-                    top: '0px'
-                  });
-                  $overview.animate({
+              Util.stopAllPropagation(divOverview);
+
+              divOverviewButton.id = 'npmap-overviewmap-button';
+              divOverviewButton.className = 'npmap-overview-open cursor';
+              divOverviewButton.style.cssText = 'position:absolute;';
+
+              document.getElementById('npmap-overview-map').appendChild(divOverviewButton);
+
+              bean.add(divOverviewButton, 'click', function() {
+                if (Util.hasClass(this, 'expanded')) {
+                  this.style.display = 'none';
+                  divOverviewMap.style.top = '0px';
+                  // TODO: Animate this resize.
+                  divOverview.style.height = '48px';
+                  divOverview.style.width = '48px';
+                  
+                  mapOverview.setOptions({
                     height: 48,
                     width: 48
-                  }, 250, function() {
-                    overviewMap.setOptions({
-                      height: 48,
-                      width: 48
-                    });
-                    setAttributionMaxWidthAndPosition();
-                    updateOverviewMap();
                   });
-                  $this.removeClass('npmap-overview-close').removeClass('npmap-overview-close-over').removeClass('expanded').addClass('npmap-overview-open');
-                  overviewMap.entities.clear();
+                  setAttributionMaxWidthAndPosition();
+                  updateOverviewMap();
+                  Util.removeClass(this, 'npmap-overview-close-over');
+                  Util.removeClass(this, 'expanded');
+                  Util.addClass(this, 'npmap-overview-open');
+                  mapOverview.entities.clear();
                 } else {
-                  $title.show();
-                  $('#npmap-overview-map').css({
-                    top: $title.height() + 'px'
-                  });
-                  $overview.animate({
+                  divOverviewTitle.style.display = 'block';
+                  divOverviewMap.style.top = Util.getOuterDimensions(divOverviewTitle).height + 'px';
+                  // TODO: Animate this resize.
+                  divOverview.style.height = '173px';
+                  divOverview.style.width = '174px';
+
+                  mapOverview.setOptions({
                     height: 173,
                     width: 174
-                  }, 250, function() {
-                    overviewMap.setOptions({
-                      height: 173,
-                      width: 174
-                    });
-                    setAttributionMaxWidthAndPosition();
-                    updateOverviewMap();
                   });
-                  $this.removeClass('npmap-overview-open').removeClass('npmap-overview-open-over').addClass('npmap-overview-close').addClass('expanded');
+                  setAttributionMaxWidthAndPosition();
+                  updateOverviewMap();
+                  Util.removeClass(this, 'npmap-overview-open');
+                  Util.removeClass(this, 'npmap-overview-open-over');
+                  Util.addClass(this, 'npmap-overview-close');
+                  Util.addClass(this, 'expanded');
                 }
-              }).mouseover(function() {
-                var $this = $(this);
-                
-                if ($this.hasClass('expanded')) {
-                  $this.removeClass('npmap-overview-close').addClass('npmap-overview-close-over');
+              });
+              bean.add(divOverviewButton, 'mouseover', function() {
+                if (Util.hasClass(this, 'expanded')) {
+                  Util.removeClass(this, 'npmap-overview-close');
+                  Util.addClass(this, 'npmap-overview-close-over');
                 } else {
-                  $this.removeClass('npmap-overview-open').addClass('npmap-overview-open-over');
+                  Util.removeClass(this, 'npmap-overview-open');
+                  Util.addClass('npmap-overview-open-over');
                 }
-              }).mouseout(function() {
-                var $this = $(this);
-                
-                if ($this.hasClass('expanded')) {
-                  $this.removeClass('npmap-overview-close-over').addClass('npmap-overview-close');
+              });
+              bean.add(divOverviewButton, 'mouseout', function() {
+                if (Util.hasClass(this, 'expanded')) {
+                  Util.removeClass(this, 'npmap-overview-close-over');
+                  Util.addClass(this, 'npmap-overview-close');
                 } else {
-                  $this.removeClass('npmap-overview-open-over').addClass('npmap-overview-open');
+                  Util.removeClass(this, 'npmap-overview-open-over');
+                  Util.addClass(this, 'npmap-overview-open');
                 }
               });
               
@@ -642,11 +644,9 @@ define([
         }
 
         if (NPMap.config.baseLayers && NPMap.config.baseLayers.length > 1) {
-          var
-              // The switcher div.
-              switcher = document.createElement('div'),
-              // The switcher menu div.
-              switcherMenu = document.createElement('div');
+          /*
+          var divSwitcher = document.createElement('div'),
+              divSwitcherMenu = document.createElement('div');
 
           // TODO: Write this yourself.
           (function(b){var d=function(){b(".jdropdown-menu").css({display:"none"});b(".jdropdown-anchor").removeClass("jdropdown-active");b(this).trigger("jdropdown.close")},f={init:function(a){return this.each(function(){var c=b(this),e=c.data("items");c.data("jdropdown")||(b(a.container).addClass("jdropdown-menu"),b(this).addClass("jdropdown-anchor").data("jdropdown",{items:"object"===typeof e?e:a.items,anchor:b(this),menu:b(a.container),options:a}).on({click:h}));return this})},destroy:function(){}},h=function(a){a.preventDefault();
@@ -655,28 +655,28 @@ define([
           d.icon+'" style="height:22px;margin-top:3px;" /></div><div style="float:right;width:105px;">'+d.label+"</div></div>").on({click:i})).appendTo(a)});return a},i=function(){d();b(this).trigger("jdropdown.selectItem")};b(document).on("click",function(a){a=b(a.target);!a.parents().hasClass("jdropdown-menu")&&!a.parents().hasClass("jdropdown-anchor")&&!a.hasClass("jdropdown-menu")&&!a.hasClass("jdropdown-anchor")&&d()});b.fn.jdropdown=function(a){if(f[a])return f[a].apply(this,Array.prototype.slice.call(arguments,
           1));if("object"===typeof a||!a)return f.init.apply(this,arguments)}})(jQuery);
           
-          switcher.className = 'npmap-switcher-dropdown';
-          switcher.id = 'npmap-switcher';
-          switcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
-          switcherMenu.id = 'npmap-switcher-menu';
+          divSwitcher.className = 'npmap-switcher-dropdown';
+          divSwitcher.id = 'npmap-switcher';
+          divSwitcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
+          divSwitcherMenu.id = 'npmap-switcher-menu';
           
           elements.push({
-            el: switcher
+            el: divSwitcher
           }, {
-            el: switcherMenu,
+            el: divSwitcherMenu,
             func: function() {
               var activeIcon,
                   activeLabel,
                   items = [];
               
               function setIcon(url) {
-                $('#npmap-switcher-dropdown-icon').html('<img src="' + url + '" style="height:15px;margin-top:4.5px;" />');
+                document.getElementById('npmap-switcher-dropdown-icon').innerHTML = '<img src="' + url + '" style="height:15px;margin-top:4.5px;" />';
               }
               function setLabel(text) {
-                $('#npmap-switcher-dropdown-text').html(text.toUpperCase());
+                document.getElementById('npmap-switcher-dropdown-text').innerHTML = text.toUpperCase();
               }
               
-              $.each(NPMap.config.baseLayers, function(i, baseLayer) {
+              _.each(NPMap.config.baseLayers, function(baseLayer) {
                 var icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
                     label = baseLayer.code,
                     match = NPMap.Map[NPMap.config.api].matchBaseLayer(baseLayer),
@@ -755,7 +755,6 @@ define([
               items.sort(function(a, b) {
                 return a.label > b.label;
               });
-              
               $('.npmap-switcher-dropdown').jdropdown({
                 container: '#npmap-switcher-menu',
                 items: items,
@@ -771,6 +770,7 @@ define([
               });
             }
           });
+          */
         }
 
         for (var i = 0; i < elements.length; i++) {
@@ -781,12 +781,16 @@ define([
 
         var interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
-            // Iterate through all child elements of #npmap-map and detect width and set InfoBox padding.
+            // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding.
 
+            Util.monitorResize(divMap, function() {
+              setAttributionMaxWidthAndPosition();
+              NPMap.Map.handleResize();
+            });
             clearInterval(interval);
             Event.trigger('NPMap.Map', 'ready');
           }
-        }, 100);
+        }, 250);
       });
     },
     /**
@@ -869,17 +873,17 @@ define([
           me = this;
       
       if (attribution) {
-        $.each(attribution.split('|'), function(i, v) {
+        _.each(attribution.split('|'), function(v) {
           attr.push(v);
         });
       }
       
-      $.each(me.getVisibleLayers(), function(i, v) {
+      _.each(me.getVisibleLayers(), function(v) {
         if (v.attribution) {
-          $.each(v.attribution.split('|'), function(i2, v2) {
+          _.each(v.attribution.split('|'), function(v2) {
             var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
 
-            if ($.inArray(credit, attr) === -1) {
+            if (_.indexOf(attr, credit) === -1) {
               attr.push(credit);
             }
           });
@@ -1069,10 +1073,10 @@ define([
     getVisibleLayers: function() {
       var layers = [];
 
-      if (NPMap.config.layers && $.isArray(NPMap.config.layers)) {
-        $.each(NPMap.config.layers, function(i, v) {
-          if (v.visible) {
-            layers.push(v);
+      if (NPMap.config.layers) {
+        _.each(NPMap.config.layers, function(layer) {
+          if (layer.visible) {
+            layers.push(layer);
           }
         });
       }
@@ -1142,10 +1146,18 @@ define([
      * Hides the progress bar.
      */
     hideProgressBar: function() {
-      $('#npmap-progressbar div').css({
-        width: '100%'
+      var divProgressBar = document.getElementById('npmap-progressbar');
+
+      divProgressBar.childNodes[0].style.width = '100%';
+
+      morpheus(divProgressBar, {
+        complete: function() {
+          divProgressBar.style.display = 'none';
+          divProgressBar.style.opacity = 1;
+        },
+        duration: 1000,
+        opacity: 0
       });
-      $('#npmap-progressbar').fadeOut();
     },
     /**
      * Hides a shape.
@@ -1237,16 +1249,40 @@ define([
      * @param {Number} interval (Optional)
      */
     notify: function(message, title, type, interval) {
-      var $msg = $(createNotify(message, title, type));
+      // TODO: This needs work. To see bug, show a bunch of notifications one after the other, wait for them to start hiding, then try to show some more.
+      var height,
+          msg = createNotify(message, title, type);
 
+      msg.style.display = 'none';
+
+      document.getElementById('npmap-notify').appendChild(msg);
+
+      height = Util.getOuterDimensions(msg).height;
       interval = interval || 3000;
+      msg.style.top = -height + 'px';
+      msg.style.display = 'block';
 
-      $('#npmap-notify').append($msg);
-      $msg.hide().slideDown(100, function() {
-        setTimeout(function() {
-          $msg.slideUp(100);
-        }, interval);
+      morpheus(msg, {
+        complete: function() {
+          setTimeout(function() {
+            activeNotificationMessagesHeight = activeNotificationMessagesHeight - height;
+
+            morpheus(activeNotificationMessages, {
+              complete: function() {
+                activeNotificationMessages.splice(activeNotificationMessages.indexOf(msg), 1);
+                msg.parentNode.removeChild(msg);
+              },
+              duration: 100,
+              top: '-=' + height + 'px'
+            });
+          }, interval);
+        },
+        duration: 400,
+        top: activeNotificationMessagesHeight + 'px'
       });
+      activeNotificationMessages.push(msg);
+
+      activeNotificationMessagesHeight = activeNotificationMessagesHeight + height;
     },
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
@@ -1261,10 +1297,11 @@ define([
      * @param {String} direction The direction to pan the map in. Valid directions are 'east', 'north', 'south', and 'west'.
      */
     panInDirection: function(direction) {
-      var h = $('#' + NPMap.config.div).outerHeight(),
+      var divMapDimensions = Util.getOuterDimensions(divMap),
+          h = divMapDimensions.height,
           me = this,
-          w = $('#' + NPMap.config.div).outerWidth();
-          
+          w = divMapDimensions.width;
+
       switch (direction) {
         case 'east':
           me.panByPixels({
@@ -1304,19 +1341,19 @@ define([
      * @param {String} attribution
      */
     setAttribution: function(attribution) {
-      var $d = $('#npmap-attribution');
+      var divAttribution = document.getElementById('npmap-attribution');
 
-      if ($d.length > 0) {
-        $('#npmap-attribution').html(attribution);
+      if (divAttribution) {
+        divAttribution.innerHTML = attribution;
       } else {
-        var int = setInterval(function() {
-          $d = $('#npmap-attribution');
-          
-          if ($d.length > 0) {
-            clearInterval(int);
-            $('#npmap-attribution').html(attribution);
+        var interval = setInterval(function() {
+          divAttribution = document.getElementsByTagName('npmap-attribution');
+
+          if (divAttribution) {
+            clearInterval(interval);
+            divAttribution.innerHTML = attribution;
           }
-        }, 100);
+        }, 250);
       }
     },
     /**
@@ -1366,7 +1403,7 @@ define([
      * @param {Object} target
      */
     setNotifyTarget: function(target) {
-      $('#npmap-notify').appendTo($(target));
+      target.appendChild(document.getElementById('npmap-notify'));
     },
     /**
      *
@@ -1379,12 +1416,13 @@ define([
      * @param {Number} value (Optional) The value to start the progress bar at.
      */
     showProgressBar: function(value) {
+      document.getElementById('npmap-progressbar').style.display = 'block';
+
       if (!value) {
         value = 0;
       }
 
       this.updateProgressBar(value);
-      $('#npmap-progressbar').fadeIn();
     },
     /**
      * Shows a shape.
@@ -1399,10 +1437,13 @@ define([
      * @param {Object} position
      */
     showTip: function(content, position) {
-      $('#npmap-tip').html(content).css({
-        bottom: $mapDiv.height() - position.y + 'px',
-        right: $mapDiv.width() - position.x + 'px'
-      }).show();
+      var divMapDimensions = Util.getOuterDimensions(divMap),
+          divTip = document.getElementById('npmap-tip');
+
+      divTip.innerHTML = content;
+      divTip.style.bottom = divMapDimensions.height - position.y + 'px';
+      divTip.style.right = divMapDimensions.width - position.x + 'px';
+      divTip.style.display = 'block';
     },
     /**
      * Toggles fullscreen mode on or off.
@@ -1411,7 +1452,7 @@ define([
       var baseApi = NPMap.Map[NPMap.config.api],
           currentCenter = baseApi.getCenter(),
           currentZoom = baseApi.getZoom(),
-          el = document.getElementById('npmap');
+          divNpmap = document.getElementById('npmap');
 
       /*
       if (el.requestFullScreen || el.mozRequestFullScreen || el.webkitRequestFullScreen) {
@@ -1446,41 +1487,41 @@ define([
         }
       } else {
         */
-        var $mask = $('#npmap-fullscreen-mask'),
-            $window = $(window);
+        var dimensionsWindow = Util.getWindowDimensions(),
+            divMask = document.getElementById('npmap-fullscreen-mask');
         
         if (NPMap.InfoBox.visible) {
           currentCenter = baseApi.latLngToApi(NPMap.InfoBox.latLng);
         }
 
         if (isFullScreen) {
-          $('body').css({
-            overflow: 'visible'
-          });
-          $mapDiv.removeClass('npmap-fullscreen-map').css({
-            height: '100%',
-            width: '100%'
-          }).appendTo($mapDivParent);
-          $mask.hide();
-          
-          isFullScreen = false;
+          document.body.style.overflow = 'visible';
+
+          Util.removeClass(divMap, 'npmap-fullscreen-map');
+
+          divMap.style.height = '100%';
+          divMap.style.width = '100%';
+
+          divMapParent.appendChild(divMap);
+
+          divMask.style.display = 'none';
           document.getElementById('npmap-infobox').style.zIndex = '999999';
         } else {
-          if ($mask.length === 0) {
+          if (!divMask) {
             var div = document.createElement('div');
             div.id = 'npmap-fullscreen-mask';
             document.body.appendChild(div);
-            $mask = $('#npmap-fullscreen-mask');
+            divMask = document.getElementById('npmap-fullscreen-mask');
           }
+
+          document.body.style.overflow = 'hidden';
+          divMask.style.display = 'block';
           
-          $('body').css({
-            overflow: 'hidden'
-          });
-          $mask.show();
-          $mapDiv.addClass('npmap-fullscreen-map').css({
-            height: $window.height() + 'px',
-            width: $window.width() + 'px'
-          }).appendTo($mask);
+          divMap.addClass('npmap-fullscreen-map');
+          divMap.style.height = dimensionsWindow.height + 'px';
+          divMap.style.width = dimensionsWindow.width + 'px';
+
+          divMask.appendChild(divMap);
           
           isFullScreen = true;
           document.getElementById('npmap-infobox').style.zIndex = '99999999999999';
@@ -1511,6 +1552,7 @@ define([
      * @param {Boolean} on
      */
     toggleModule: function(module, on) {
+      /*
       console.log(module);
       
       var $module = $('#npmap-modules-' + module),
@@ -1539,6 +1581,7 @@ define([
         $module.hide();
         $('#npmap-modules-tabs').show();
       }
+      */
     },
     /**
      * Zooms and/or pans the map to its initial extent.
@@ -1613,7 +1656,7 @@ define([
       var apiLatLngs = [],
           me = this;
       
-      $.each(latLngs, function(i, latLng) {
+      _.each(latLngs, function(latLng) {
         apiLatLngs.push(me.latLngToApi(latLng));
       });
       

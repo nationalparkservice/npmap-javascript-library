@@ -632,17 +632,17 @@ define([
       return map.getCenter();
     },
     /**
-     * Gets the latLng (Microsoft.Maps.Location) of the #npmap-clickdot div element.
+     * Gets the latLng (Microsoft.Maps.Location) of the npmap-clickdot div element.
      * @return {Microsoft.Maps.Location}
      */
     getClickDotLatLng: function() {
       return this.pixelToLatLng(this.getClickDotPixel(), Microsoft.Maps.PixelReference.control);
     },
     /**
-     * Returns the {Microsoft.Mas.Point} for the #npmap-clickdot div.
+     * Returns the {Microsoft.Mas.Point} for the npmap-clickdot div.
      */
     getClickDotPixel: function() {
-      var position = Util.getOffset(document.getElementById('#npmap-clickdot'));
+      var position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
       return new Microsoft.Maps.Point(position.left, position.top);
     },
@@ -854,7 +854,7 @@ define([
       return map.tryPixelToLocation(pixel, reference);
     },
     /**
-     * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
+     * Positions the npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
      * @param {Microsoft.Maps.Pushpin} OR {Microsoft.Maps.Location} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
      */
     positionClickDot: function(to) {
@@ -1044,7 +1044,7 @@ define([
     },
     /**
      * Zooms the map in by one zoom level.
-     * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on the location of the #npmap-clickdot div.
+     * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on the location of the npmap-clickdot div.
      */
     zoomIn: function(toDot) {
       var zoom = map.getZoom();

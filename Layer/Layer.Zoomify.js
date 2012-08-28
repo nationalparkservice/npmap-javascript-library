@@ -7,6 +7,8 @@
      ** @param {Object} config.
      */
     create: function(config) {
+      var layer;
+
       NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       if (!config.height) {
@@ -17,7 +19,7 @@
         throw new Error('"width" is required.');
       }
 
-      var layer = NPMap.Map.createZoomifyLayer(config);
+      layer = NPMap.Map.createZoomifyLayer(config);
       
       NPMap.Map.addTileLayer(layer);
       NPMap.Event.trigger('NPMap.Layer', 'added', config);

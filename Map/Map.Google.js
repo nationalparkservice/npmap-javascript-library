@@ -1,7 +1,8 @@
 ﻿// TODO: Hook up attribution.
 define([
-  'Map/Map'
-], function(Map) {
+  'Map/Map',
+  'Util/Util'
+], function(Map, Util) {
   /* wax.g */
   wax.g={};wax.g.bwdetect=function(b,d){var d=d||{},e=d.png||".png128",a=d.jpg||".jpg70";if(!b.mapTypes["mb-low"]){for(var c=b.mapTypes.mb,g={tiles:[],scheme:c.options.scheme,blankImage:c.options.blankImage,minzoom:c.minZoom,maxzoom:c.maxZoom,name:c.name,description:c.description},f=0;f<c.options.tiles.length;f++)g.tiles.push(c.options.tiles[f].replace(".png",e).replace(".jpg",a));m.mapTypes.set("mb-low",new wax.g.connector(g))}return wax.bwdetect(d,function(a){b.setMapTypeId(a?"mb":"mb-low")})};wax=wax||{};wax.g=wax.g||{};wax.g.interaction=function(){function b(){d=!0}var d=!1,e,a;return wax.interaction().attach(function(c){if(!arguments.length)return a;a=c;google.maps.event.addListener(a,"tileloaded",b);google.maps.event.addListener(a,"idle",b)}).detach(function(){google.maps.event.removeListener(a,"tileloaded",b);google.maps.event.removeListener(a,"idle",b)}).parent(function(){return a.getDiv()}).grid(function(){if(d||!e){e=[];var c=a.getZoom();wax.u.offset(a.getDiv());var b=function(a){if(a.interactive)for(var b in a.cache)if(b.split("/")[0]==c){var d=wax.u.offset(a.cache[b]);e.push([d.top,d.left,a.cache[b]])}},f;for(f in a.mapTypes)b(a.mapTypes[f]);a.overlayMapTypes.forEach(b)}return e})};
 
@@ -163,7 +164,7 @@ define([
 
   mapConfig.center = initialCenter = (NPMap.config.center ? new google.maps.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new google.maps.LatLng(39, -96));
   mapConfig.zoom = initialZoom = (NPMap.config.zoom ? NPMap.config.zoom : 4);
-  map = new google.maps.Map(document.getElementById('npmap'), mapConfig);
+  map = new google.maps.Map(document.getElementById(NPMap.config.div), mapConfig);
 
   if (mapTypeId === 'blank') {
     map.mapTypes.set('blank', blankMapType);
@@ -189,7 +190,7 @@ define([
   */
   
   /*
-  $.each(NPMap.config.baseLayers, function(i, v) {
+  _.each(NPMap.config.baseLayers, function(v, i) {
     if (v.code != 'roadmap' || v.code != 'satellite' || v.code != 'terrain') {
       map.mapTypes.set(v.code, new google.maps.StyledMapType(v.style, {
         alt: v.alt ? v.alt : null,
@@ -331,52 +332,55 @@ define([
         oldZoom = zoom;
       });
       
-      var intHtml = setInterval(function() {
-            var a;
+      var intervalAttribution = setInterval(function() {
+        var divLogo,
+            links = document.getElementsByTagName('a');
 
-            Util.iterateThroughChildNodes(document.getElementById('npmap-map'), function(el) {
-              console.log(el);
-              if (el.getAttribute('title') === 'Click to see this area on Google Maps') {
-                a = el;
-              }
-            });
+        for (var i in links) {
+          var link = links[i];
 
-            console.log(a);
+          if (typeof link.getAttribute !== 'undefined' && link.getAttribute('title') === 'Click to see this area on Google Maps') {
+            divLogo = link;
+          }
+        }
 
-            if (a.length > 0) {
-              var d = $(a.parent().next().children()[0]),
-                  attribution = $(d).html();
+        if (divLogo) {
+          var attribution,
+              divAttribution;
 
-              clearInterval(intHtml);
-              
-              a.parent().hide();
-              d.hide();
-              
-              NPMap.Map.setAttribution(attribution);
-              
-              intHtml = setInterval(function() {
-                a = $(d).html();
-                
-                if (a !== attribution) {
-                  NPMap.Map.setAttribution(a);
-                  attribution = a;
-                }
-              }, 500);
+          clearInterval(intervalAttribution);
+
+          divAttribution = Util.getNextElement(divLogo.parentNode);
+          divAttribution.style.display = 'none';
+          divLogo.style.display = 'none';
+          attribution = Util.stripHtmlFromString(divAttribution.innerHTML);
+          
+          NPMap.Map.setAttribution(attribution);
+          
+          intHtml = setInterval(function() {
+            var a = Util.stripHtmlFromString(divAttribution.innerHTML);
+            
+            if (a !== attribution) {
+              NPMap.Map.setAttribution(a);
+              attribution = a;
             }
-          }, 500),
-          intOverlay = setInterval(function() {
-            if (!overlay) {
-              try {
-                overlay = new google.maps.OverlayView();
-                overlay.draw = function() {};
-                overlay.setMap(map);
-              } catch(e) {
-                
-              }
-            } else {
-              clearInterval(intOverlay);
-            }
-          }, 100);
+          }, 250);
+        }
+      }, 250);
+
+      var intOverlay = setInterval(function() {
+        if (!overlay) {
+          try {
+            overlay = new google.maps.OverlayView();
+            overlay.draw = function() {};
+            overlay.setMap(map);
+          } catch(e) {
+            
+          }
+        } else {
+          clearInterval(intOverlay);
+        }
+      }, 250);
 
       NPMap.Map.Google._isReady = true;
       NPMap.Map._init();
@@ -670,7 +674,7 @@ define([
      * Returns the {Microsoft.Mas.Point} for the #npmap-clickdot div.
      */
     getClickDotPixel: function() {
-      var position = $('#npmap-clickdot').position();
+      var position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
       return new google.maps.Point(position.left, position.top);
     },
@@ -848,7 +852,8 @@ define([
      * @param {google.maps.Marker} OR {google.maps.LatLng} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
      */
     positionClickDot: function(to) {
-      var offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
+      var divClickDot = document.getElementById('npmap-clickdot'),
+          offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
           pixel = this.latLngToPixel((function() {
             var latLng = null;
 
@@ -868,10 +873,8 @@ define([
             return latLng;
           })());
 
-      $('#npmap-clickdot').css({
-        left: pixel.x,
-        top: pixel.y
-      });
+      divClickDot.style.left = pixel.x + 'px';
+      divClickDot.style.top = pixel.y + 'px';
     },
     /**
      * A google.maps.MapCanvasProjection object.
@@ -911,7 +914,7 @@ define([
      */
     zoomIn: function(toDot) {
       if (toDot) {
-        var position = $('#npmap-clickdot').position(),
+        var position = Util.getOffset(document.getElementById('npmap-clickdot')),
             latLng = this.projection.fromContainerPixelToLatLng(new google.maps.Point(position.left, position.top));
         
         this.centerAndZoom(latLng.lat() + ',' + latLng.lng(), map.getZoom() + 1);
@@ -946,7 +949,7 @@ define([
     zoomToLatLngs: function(latLngs) {
       var bounds = new google.maps.LatLngBounds();
 
-      $.each(latLngs, function(i, v) {
+      _.each(latLngs, function(v, i) {
         bounds.extend(v);
       });
 

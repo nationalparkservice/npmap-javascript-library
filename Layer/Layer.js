@@ -61,6 +61,8 @@ define([
       usedNames = [];
 
   Event.add('NPMap.Map', 'click', function(e) {
+    NPMap.InfoBox.hide();
+
     if (NPMap.config.layers && NPMap.config.layers.length > 0) {
       for (var i = 0; i < NPMap.config.layers.length; i++) {
         var layerType = NPMap.config.layers[i].type,
@@ -73,6 +75,8 @@ define([
     }
   });
   Event.add('NPMap.Map', 'shapeclick', function(e) {
+    NPMap.InfoBox.hide();
+
     if (NPMap.config.layers && NPMap.config.layers.length > 0) {
       for (var j = 0; j < NPMap.config.layers.length; j++) {
         var layerType = NPMap.config.layers[j].type,
