@@ -122,7 +122,7 @@ define(function() {
             parentNode = el.parentNode;
 
         function checkDisplay(node) {
-          if (node.style.display === 'none') {
+          if (node.style && node.style.display === 'none') {
             changed.push(node);
             node.style.display = 'block';
           }
@@ -130,13 +130,15 @@ define(function() {
         
         checkDisplay(el);
 
-        if (parentNode) {
+        if (el.id !== 'npmap' && parentNode) {
           checkDisplay(parentNode);
 
           while (parentNode.id !== 'npmap' && parentNode.id !== 'npmap-map') {
             parentNode = parentNode.parentNode;
 
-            checkDisplay(parentNode);
+            if (parentNode) {
+              checkDisplay(parentNode);
+            }
           }
         }
 
@@ -289,7 +291,7 @@ define(function() {
               e.width = d.width;
             }
           }
-        }, 250);
+        }, 0);
       }
     },
     /**

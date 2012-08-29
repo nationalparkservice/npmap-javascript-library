@@ -11,7 +11,7 @@
 
 /* Core elements */
 #npmap {background-color:#EBF2DA;font-size:13px;line-height:16px;}
-#npmap-map {bottom:0;left:0;position:absolute !important;right:0;top:0;}
+#npmap-map {}
 #npmap-modules {-moz-box-shadow:3px 0 6px #D2D2D2;-webkit-box-shadow:3px 0 6px #D2D2D2;background-color:#F9F7F1;box-shadow:3px 0 6px #D2D2D2;bottom:0;display:none;left:0;position:absolute;top:0;width:350px;}
 #npmap-toolbar {background-color:#908D7C;left:0;height:28px;position:absolute;right:0;top:0;z-index:30;} /*border-bottom-left-radius:3px;border-bottom-right-radius:3px;*/
 
@@ -114,7 +114,7 @@
 #npmap-tip {display:none;max-width:200px;position:absolute;z-index:32;}
 /* DEPRECATED */
 #npmap-tools {float:right;}
-#npmap #npmap-tools li {background-color:#828171;border-left:solid 1px #ADACA2;cursor:pointer;float:left;height:28px;width:34px;}
+#npmap #npmap-tools li {background-color:#828171;border-left:solid 1px #ADACA2;cursor:pointer;list-style:none;float:left;height:28px;width:34px;}
 #npmap-tools .npmap-toolbar-fullscreen {background:url(../img/tools/toolbar/sprite.png) 0px -14px no-repeat;display:block;height:12px;margin:8px 0 0 10.5px;width:13px;}
 #npmap-tools .npmap-toolbar-print {background:url(../img/tools/toolbar/sprite.png) -15px -14px no-repeat;display:block;height:12px;margin:8px 0 0 10px;width:12px;}
 #npmap-tools .npmap-toolbar-share {background:url(../img/tools/toolbar/sprite.png) -15px 0px no-repeat;display:block;height:9px;margin:10px 0 0 10.5px;width:13px;}

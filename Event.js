@@ -5,8 +5,9 @@ define(function() {
      * @param {String} obj The name of the nested class, in "NPMap.ObjectName" format, to add the event to.
      * @param {String} event The name of the event to add to the class.
      * @param {Function} func The function to call when the event is fired.
+     * @param {Boolean} single Should this event only be called once and then disposed?
      */
-    add: function(obj, event, func) {
+    add: function(obj, event, func, single) {
       var cl = obj.replace('NPMap.', '');
 
       if (NPMap[cl]) {
@@ -14,7 +15,8 @@ define(function() {
         
         NPMap[cl]._events.push({
           event: event,
-          func: func
+          func: func,
+          single: single || false
         });
       } else {
         var me = this;
@@ -55,7 +57,8 @@ define(function() {
      * @param {Object} e (Optional) The event object to pass to the event handler function.
      */
     trigger: function(obj, event, e) {
-      var cl = obj.replace('NPMap.', '');
+      var cl = obj.replace('NPMap.', ''),
+          remove = [];
 
       if (typeof NPMap[cl] !== 'undefined' && typeof NPMap[cl]._events !== 'undefined') {
         for (var i = 0; i < NPMap[cl]._events.length; i++) {
@@ -67,8 +70,16 @@ define(function() {
             } else {
               v.func(e);
             }
+
+            if (v.single === true) {
+              remove.push(v);
+            }
           }
         }
+
+        _.each(remove, function(handler) {
+          NPMap[cl]._events.splice(NPMap[cl]._events.indexOf(handler), 1);
+        });
       } else {
         var me = this;
         

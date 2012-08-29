@@ -14,6 +14,8 @@ define([
       activeNotificationMessagesHeight = 0,
       // The map div.
       divMap = document.getElementById(NPMap.config.div),
+      // The parent div.
+      divNpmapParent = document.getElementById('npmap').parentNode,
       // Does the map have active tile layers?
       hasTiled = false,
       // Is the map in fullscreen mode?
@@ -77,10 +79,10 @@ define([
    * @return {Object}
    */
   function hookUpClickEvent(id, func) {
-    var el = document.getElementsById(id);
+    var el = document.getElementById(id);
     
     Util.stopAllPropagation(el);
-    bean.add(el, 'click', function(e) {
+    bean.add(el, 'mouseup', function(e) {
       func();
     });
 
@@ -209,7 +211,7 @@ define([
                 };
               } else if (typeof NPMap.config.tools === 'undefined') {
                 return {
-                  fullscreen: false,
+                  fullscreen: true,
                   navigation: {
                     pan: 'home',
                     position: 'top left',
@@ -299,7 +301,7 @@ define([
         if (toolsConfig.navigation) {
           var
               // An array of callback functions.
-              callbacks = [],
+              callbacksNavigation = [],
               // The navigation controls div.
               navigation = document.createElement('div'),
               // HTML string for the navigation div.
@@ -320,7 +322,7 @@ define([
             
             navigationHtml += '</div>';
 
-            callbacks.push(function() {
+            callbacksNavigation.push(function() {
               var buttons = [];
 
               buttons.push(hookUpNavigationControl('npmap-navigation-compass-east', function() {
@@ -367,7 +369,7 @@ define([
             
             navigationHtml += '><a id="npmap-navigation-small-zoom-in" class="pointer"></a><a id="npmap-navigation-small-zoom-out" class="pointer"></a></div>';
 
-            callbacks.push(function() {
+            callbacksNavigation.push(function() {
               var buttons = [];
             
               buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-in', function() {
@@ -416,8 +418,8 @@ define([
           elements.push({
             el: navigation,
             func: function() {
-              for (var i = 0; i < callbacks.length; i++) {
-                callbacks[i]();
+              for (var i = 0; i < callbacksNavigation.length; i++) {
+                callbacksNavigation[i]();
               }
             }
           });
@@ -428,22 +430,6 @@ define([
               html = '<ul id="npmap-tools">',
               toolbar = document.createElement('div');
 
-          if (toolsConfig.print) {
-            html += '<li id="npmap-toolbar-print"><div class="npmap-toolbar-print"></div></li>';
-
-            callbacks.push(function() {
-              
-            });
-          }
-
-          if (toolsConfig.share) {
-            html += '<li id="npmap-toolbar-share"><div class="npmap-toolbar-share"></div></li>';
-
-            callbacks.push(function() {
-              
-            });
-          }
-
           if (toolsConfig.fullscreen) {
             html += '<li id="npmap-toolbar-fullscreen"><div class="npmap-toolbar-fullscreen"></div></li>';
 
@@ -453,16 +439,28 @@ define([
               });
             });
           }
-          
+
+          if (toolsConfig.print) {
+            html += '<li id="npmap-toolbar-print"><div class="npmap-toolbar-print"></div></li>';
+            //callbacks.push();
+          }
+
+          if (toolsConfig.share) {
+            html += '<li id="npmap-toolbar-share"><div class="npmap-toolbar-share"></div></li>';
+            //callbacks.push();
+          }
+
           toolbar.innerHTML = html + '</ul>';
           toolbar.id = 'npmap-toolbar';
           
           document.getElementById('npmap-map').style.top = '28px';
           document.getElementById('npmap').insertBefore(toolbar, document.getElementById('npmap-map'));
 
-          for (var i = 0; i < callbacks.length; i ++) {
+          for (var i = 0; i < callbacks.length; i++) {
             callbacks[i]();
           }
+
+          callbacks = [];
         }
 
         if (NPMap.config.modules && NPMap.config.modules.length > 0) {
@@ -776,35 +774,41 @@ define([
         for (var i = 0; i < elements.length; i++) {
           var element = elements[i];
 
-          me.addElementToMapDiv(element.el, element.func);
+          me.addElement(element.el, element.func);
         }
 
         var interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
             // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding.
-
-            Util.monitorResize(divMap, function() {
+            Util.monitorResize(document.getElementById('npmap'), function() {
               setAttributionMaxWidthAndPosition();
               NPMap.Map.handleResize();
+              Event.trigger('NPMap.Map', 'resized');
             });
             clearInterval(interval);
             Event.trigger('NPMap.Map', 'ready');
+
+            bean.add(document.getElementById('npmap-map-controls'), 'click', function(e) {
+              console.log(e);
+            });
           }
-        }, 250);
+        }, 0);
       });
     },
     /**
-     * Adds an HTML element to the map div.
+     * Adds an HTML element to the npmap-controls div.
      * @param {Object} el
      * @param {Function} callback (Optional)
      * @param {Boolean} stopPropagation (Optiona)
      */
-    addElementToMapDiv: function(el, callback, stopPropagation) {
+    addElement: function(el, callback, stopPropagation) {
       if (el.style.cssText.indexOf('z-index') === -1) {
-        el.style.zIndex = '30';
+        el.style.zIndex = '0';
       }
 
-      NPMap.Map[NPMap.config.api].addElementToMapDiv(el);
+      document.getElementById('npmap-map-controls').appendChild(el);
+
+      //NPMap.Map[NPMap.config.api].addElement(el);
 
       if (typeof stopPropagation === 'undefined' || stopPropagation === true) {
         Util.stopAllPropagation(el);
@@ -812,18 +816,6 @@ define([
 
       if (callback) {
         callback();
-      }
-    },
-    /**
-     * Adds an array of HTML elements to the map div.
-     * @param {Array} els
-     * @param {Function} callback (Optional)
-     */
-    addElementsToMapDiv: function(els, callback) {
-      var me = this;
-
-      for (var i = 0; i < els.length; i++) {
-        me.addElementToMapDiv(els[i], callback);
       }
     },
     /**
@@ -1494,18 +1486,23 @@ define([
           currentCenter = baseApi.latLngToApi(NPMap.InfoBox.latLng);
         }
 
+        Event.add('NPMap.Map', 'resized', function() {
+          baseApi.centerAndZoom(currentCenter, currentZoom);
+        }, true);
+
         if (isFullScreen) {
           document.body.style.overflow = 'visible';
 
-          Util.removeClass(divMap, 'npmap-fullscreen-map');
+          Util.removeClass(divNpmap, 'npmap-fullscreen-map');
 
-          divMap.style.height = '100%';
-          divMap.style.width = '100%';
+          divNpmap.style.height = '100%';
+          divNpmap.style.width = '100%';
 
-          divMapParent.appendChild(divMap);
+          divNpmapParent.appendChild(divNpmap);
 
           divMask.style.display = 'none';
           document.getElementById('npmap-infobox').style.zIndex = '999999';
+          isFullScreen = false;
         } else {
           if (!divMask) {
             var div = document.createElement('div');
@@ -1513,24 +1510,20 @@ define([
             document.body.appendChild(div);
             divMask = document.getElementById('npmap-fullscreen-mask');
           }
-
+          
           document.body.style.overflow = 'hidden';
           divMask.style.display = 'block';
           
-          divMap.addClass('npmap-fullscreen-map');
-          divMap.style.height = dimensionsWindow.height + 'px';
-          divMap.style.width = dimensionsWindow.width + 'px';
+          Util.addClass(divNpmap, 'npmap-fullscreen-map');
+          divNpmap.style.height = dimensionsWindow.height + 'px';
+          divNpmap.style.width = dimensionsWindow.width + 'px';
 
-          divMask.appendChild(divMap);
-          
-          isFullScreen = true;
+          divMask.appendChild(divNpmap);
+
           document.getElementById('npmap-infobox').style.zIndex = '99999999999999';
+          isFullScreen = true;
         }
       //}
-      
-      baseApi.handleResize(function() {
-        baseApi.centerAndZoom(currentCenter, currentZoom);
-      });
     },
 
 

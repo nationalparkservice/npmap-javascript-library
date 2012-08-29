@@ -560,7 +560,7 @@
         break;
     }
     
-    NPMap.Map.addElementToMapDiv(divRoute);
+    NPMap.Map.addElement(divRoute);
 
     if (config.mode === 'multi') {
       $('#routeadd').watermark('Address or landmark');

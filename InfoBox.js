@@ -465,7 +465,7 @@ define([
 
     // TODO: Set this up the way a proper circular dependency should be setup.
     Util.safeLoad('NPMap.Map', function() {
-      NPMap.Map.addElementToMapDiv(divInfoBox);
+      NPMap.Map.addElement(divInfoBox);
       setupInfoBox();
     });
   } else {

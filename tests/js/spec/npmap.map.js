@@ -4,7 +4,7 @@ describe("NPMap.Map", function() {
     div.id = 'npmap-test-div';
     div.style.cssText = 'background-color:blue;height:5px;left:100px;position:absolute;top:100px;width:5px;';
 
-    NPMap.Map.addElementToMapDiv(div);
+    NPMap.Map.addElement(div);
 
     expect(document.getElementById('npmap-test-div')).toBeDefined();
   });

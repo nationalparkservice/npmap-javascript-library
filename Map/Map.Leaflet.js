@@ -209,21 +209,16 @@ define([
   map.on('zoomstart', function(e) {
     NPMap.Event.trigger('NPMap.Map', 'zoomstart', e);
   });
-  
   Map._init();
+  Util.safeLoad('NPMap.Map.Leaflet', function() {
+    NPMap.Map.Leaflet.handleResize();
+  });
   
   return NPMap.Map.Leaflet = {
     // Is the map loaded and ready to be interacted with programatically?
     _isReady: true,
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
     map: map,
-    /**
-     * Adds an HTML element to the map div.
-     * @param {Object} el
-     */
-    addElementToMapDiv: function(el) {
-      document.getElementById('npmap-map').appendChild(el);
-    },
     /**
      * Adds a tile layer to the map.
      * @param {Object} layer

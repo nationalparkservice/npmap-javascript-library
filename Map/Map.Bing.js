@@ -61,7 +61,7 @@ define([
    * @param {String} cursor
    */
   function changeMapCursor(cursor) {
-    if (map.getRootElement().style.cursor) {
+    if (typeof map.getRootElement().style.cursor !== 'undefined') {
       map.getRootElement().style.cursor.replace(/cursor:[^;]+/g, '');
     }
     
@@ -322,13 +322,6 @@ define([
     _isReady: true,
     // The Microsoft.Maps.Map object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.
     map: map,
-    /**
-     * Adds an HTML element to the map div.
-     * @param {Object} el
-     */
-    addElementToMapDiv: function(el) {
-      this.getContainerDiv().appendChild(el);
-    },
     /**
      * Adds a shape to the map.
      * @param {Object} shape The shape to add to the map. This can be a Microsoft.Maps.Pushpin, Polygon, or Polyline object.
@@ -724,7 +717,7 @@ define([
      */
     handleResize: function() {
       var dimensions = Util.getOuterDimensions(document.getElementById(NPMap.config.div));
-            
+
       map.setOptions({
         height: dimensions.height,
         width: dimensions.width

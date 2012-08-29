@@ -304,13 +304,6 @@ define([
       return layer;
     },
     /**
-     * Adds an HTML element to the map div.
-     * @param {Object} el
-     */
-    addElementToMapDiv: function(el) {
-      this.getContainerDiv().appendChild(el);
-    },
-    /**
      * Adds a shape to the map.
      * @param {Object} shape The shape to add to the map. This can be an esri.geometry.Point, Polygon, or Polyline object.
      */

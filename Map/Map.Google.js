@@ -1,8 +1,9 @@
 ﻿// TODO: Hook up attribution.
 define([
+  'Event',
   'Map/Map',
   'Util/Util'
-], function(Map, Util) {
+], function(Event, Map, Util) {
   /* wax.g */
   wax.g={};wax.g.bwdetect=function(b,d){var d=d||{},e=d.png||".png128",a=d.jpg||".jpg70";if(!b.mapTypes["mb-low"]){for(var c=b.mapTypes.mb,g={tiles:[],scheme:c.options.scheme,blankImage:c.options.blankImage,minzoom:c.minZoom,maxzoom:c.maxZoom,name:c.name,description:c.description},f=0;f<c.options.tiles.length;f++)g.tiles.push(c.options.tiles[f].replace(".png",e).replace(".jpg",a));m.mapTypes.set("mb-low",new wax.g.connector(g))}return wax.bwdetect(d,function(a){b.setMapTypeId(a?"mb":"mb-low")})};wax=wax||{};wax.g=wax.g||{};wax.g.interaction=function(){function b(){d=!0}var d=!1,e,a;return wax.interaction().attach(function(c){if(!arguments.length)return a;a=c;google.maps.event.addListener(a,"tileloaded",b);google.maps.event.addListener(a,"idle",b)}).detach(function(){google.maps.event.removeListener(a,"tileloaded",b);google.maps.event.removeListener(a,"idle",b)}).parent(function(){return a.getDiv()}).grid(function(){if(d||!e){e=[];var c=a.getZoom();wax.u.offset(a.getDiv());var b=function(a){if(a.interactive)for(var b in a.cache)if(b.split("/")[0]==c){var d=wax.u.offset(a.cache[b]);e.push([d.top,d.left,a.cache[b]])}},f;for(f in a.mapTypes)b(a.mapTypes[f]);a.overlayMapTypes.forEach(b)}return e})};
 
@@ -74,7 +75,7 @@ define([
   function hookUpShapeClickHandler(shape) {
     google.maps.event.addListener(shape, 'click', function(e) {
       e.shape = shape;
-      NPMap.Event.trigger('NPMap.Map', 'shapeclick', e);
+      Event.trigger('NPMap.Map', 'shapeclick', e);
     });
   }
   /**
@@ -293,13 +294,13 @@ define([
         
         setTimeout(function() {
           if (!doubleClicked) {
-            NPMap.Event.trigger('NPMap.Map', 'click', e);
+            Event.trigger('NPMap.Map', 'click', e);
           }
         }, 250);
       });
       google.maps.event.addListener(map, 'dblclick', function(e) {
         doubleClicked = true;
-        NPMap.Event.trigger('NPMap.Map', 'doubleclick', e);
+        Event.trigger('NPMap.Map', 'doubleclick', e);
       });
       google.maps.event.addListener(map, 'drag', function() {
         if (NPMap.InfoBox.visible) {
@@ -326,7 +327,7 @@ define([
           }
           */
 
-          NPMap.Event.trigger('NPMap.Map', 'zoomchanged');
+          Event.trigger('NPMap.Map', 'zoomchanged');
         }
         
         oldZoom = zoom;
@@ -402,13 +403,6 @@ define([
       }
       
       return baseLayer;
-    },
-    /**
-     * Adds an HTML element to the map div.
-     * @param {Object} el
-     */
-    addElementToMapDiv: function(el) {
-      this.getContainerDiv().appendChild(el);
     },
     /**
      * Adds a shape to the map.
