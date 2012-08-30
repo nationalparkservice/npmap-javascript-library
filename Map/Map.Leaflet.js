@@ -386,9 +386,9 @@ define([
       return new L.Point(position.left, position.top);
     },
     /**
-     * Gets the container div.
+     * Gets the map element.
      */
-    getContainerDiv: function() {
+    getMapElement: function() {
       return document.getElementById(NPMap.config.div).childNodes[0];
     },
     /**
@@ -477,6 +477,14 @@ define([
         x: pixel.x,
         y: pixel.y
       };
+    },
+    /**
+     * Converts a NPMap pixel object to a {L.Point}.
+     * @param {Object} pixel
+     * @return {Object}
+     */
+    pixelToApi: function(pixel) {
+      return new L.Point(pixel.x, pixel.y);
     },
     /**
      * Converts a {L.Point} to a {L.LatLng}.

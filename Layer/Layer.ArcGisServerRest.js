@@ -4,7 +4,7 @@ define([
   'InfoBox',
   'Layer/Layer',
   'Map/Map'
-], function(Event, InfoBox, Layer, Map, utilArcGisServerRest) {
+], function(Event, InfoBox, Layer, Map) {
   var
       // The preserved HTML string from the #npmap-infobox-content div.
       backContent = null,
@@ -24,7 +24,7 @@ define([
     var html = '<ul>',
         layerConfig = Map.getLayerByName(layer.layerName),
         subLayers = [];
-        
+
     _.each(layer.data.results, function(result, i) {
       var subLayerObject;
 
@@ -238,7 +238,7 @@ define([
         var el = document.getElementById('npmap-map'),
             latLngApi = Map[NPMap.config.api].eventGetLatLng(e),
             latLng = Map.latLngFromApi(latLngApi);
-            
+
         InfoBox.latLng = latLngApi;
         Map[NPMap.config.api].positionClickDot(latLngApi);
         this._doIdentify(latLng, el.offsetHeight, el.offsetWidth, Map.getBounds());

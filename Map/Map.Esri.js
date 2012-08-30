@@ -45,6 +45,7 @@ define([
     }
     
     currentExtent = bounds;
+    /*
     esriConfig.defaults.map.zoomSymbol = {
       color: [
         255,
@@ -64,6 +65,7 @@ define([
       },
       style: 'esriSFSSolid'
     };
+    */
     map = new esri.Map(NPMap.config.div, {
       extent: bounds,
       logo: false,
@@ -71,6 +73,8 @@ define([
       slider: false,
       wrapAround180: true
     });
+
+    //map.disableRubberBandZoom();
 
     if (NPMap.config.baseLayers) {
       for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
@@ -520,19 +524,19 @@ define([
       return new esri.geometry.Point(parseFloat(divClickDot.style.left.replace('px', ''), 0), parseFloat(divClickDot.style.top.replace('px', ''), 0));
     },
     /**
-     * Gets the container div.
-     * @return {Object}
-     */
-    getContainerDiv: function() {
-      return map.root;
-    },
-    /**
      * Gets a {} from a {}.
      * @param {} point
      * @return {}
      */
     getLatLngFromPixel: function(point) {
       
+    },
+    /**
+     * Gets the map element.
+     * @return {Object}
+     */
+    getMapElement: function() {
+      return map.root;
     },
     /**
      * Gets the anchor of a marker.
@@ -728,8 +732,22 @@ define([
       };
     },
     /**
+     *
+     */
+    pixelToApi: function(pixel) {
+      return new esri.geometry.Point(pixel.x, pixel.y);
+    },
+    /**
+     * Converts an {esri.geometry.Point} that doesn't have a spatial reference to an {esri.geometry.Point} in Web Mercator (102100) projection.
+     * @param {Object} pixel
+     * @return {Object}
+     */
+    pixelToLatLng: function(pixel) {
+      return esri.geometry.toMapGeometry(currentExtent, map.width, map.height, pixel);
+    },
+    /**
      * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
-     * @param {esri.geometry.Point} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
+     * @param {esri.geometry.Point} OR {Object} to The Pushpin, Location, or latitude/longitude object to position the div on to.
      */
     positionClickDot: function(to) {
       var divClickDot = document.getElementById('npmap-clickdot'),

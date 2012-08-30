@@ -42,7 +42,7 @@ define([
       // This variable holds the user-defined maxWidth for the #npmapinfobox div.
       maxWidth = null,
       // The offset of the map div element (NPMap.config.div).
-      offset = NPMap.Util.getOffset(divMap),
+      offset = Util.getOffset(divMap),
       // The left offset of the map div element, in pixels.
       offsetLeft = offset.left,
       // The top offset of the map div element, in pixels.
@@ -103,7 +103,7 @@ define([
 
       if (pan === 'center') {
         var h = (mapHeight - infoboxDimensions.height) / 2,
-            o = NPMap.Util.getOffset(divMap),
+            o = Util.getOffset(divMap),
             w = (mapWidth - infoboxDimensions.width) / 2;
 
         if (parent === 'map') {
@@ -310,7 +310,7 @@ define([
     // TODO: You should move this into NPMap.Map.
     mapHeight = divMap.offsetHeight;
     mapWidth = divMap.offsetWidth;
-    offset = NPMap.Util.getOffset(divMap);
+    offset = Util.getOffset(divMap);
     offsetLeft = offset.left;
     offsetTop = offset.top;
     windowHeight = windowDimensions.height;
@@ -445,11 +445,11 @@ define([
   }
   
   if (design === 'basic') {
-    NPMap.Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/basic.css');
+    Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/basic.css');
     
     divInfoBox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook' + (Modernizr.boxshadow ? '-shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
   } else if (design === 'nps' || design === 'pyv') {
-    NPMap.Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/nps.css');
+    Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/nps.css');
     
     // TODO: Add support for non-shadowed "hook".
     divInfoBox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook-nps.png" /></div>';
@@ -465,7 +465,7 @@ define([
 
     // TODO: Set this up the way a proper circular dependency should be setup.
     Util.safeLoad('NPMap.Map', function() {
-      NPMap.Map.addElement(divInfoBox);
+      NPMap.Map.addControl(divInfoBox);
       setupInfoBox();
     });
   } else {
@@ -656,7 +656,7 @@ define([
               var address = null,
                   lat = me.latLng.lat.toFixed(5),
                   lng = me.latLng.lng.toFixed(5),
-                  titleNoHtml = (Util.trimString(NPMap.Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
+                  titleNoHtml = (Util.trimString(Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
                 
               if (this.marker && this.marker.data) {
                 if (this.marker.data['address']) {

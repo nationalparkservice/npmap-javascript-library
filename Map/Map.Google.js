@@ -290,13 +290,7 @@ define([
         }
       });
       google.maps.event.addListener(map, 'click', function(e) {
-        doubleClicked = false;
-        
-        setTimeout(function() {
-          if (!doubleClicked) {
-            Event.trigger('NPMap.Map', 'click', e);
-          }
-        }, 250);
+        Event.trigger('NPMap.Map', 'click', e);
       });
       google.maps.event.addListener(map, 'dblclick', function(e) {
         doubleClicked = true;
@@ -634,7 +628,7 @@ define([
      * @param {Object} e
      */
     eventGetLatLng: function(e) {
-      return e.latLng;
+      return this.pixelToLatLng(new google.maps.Point(e.offsetX, e.offsetY));
     },
     /**
      * Gets a shape from an event object.
@@ -673,18 +667,19 @@ define([
       return new google.maps.Point(position.left, position.top);
     },
     /**
-     * Gets the container div.
-     */
-    getContainerDiv: function() {
-      return map.getDiv();
-    },
-    /**
      * Gets a {google.maps.LatLng} from a {google.maps.Point}.
      * @param {google.maps.Point} point
      * @return {google.maps.LatLng}
      */
     getLatLngFromPixel: function(point) {
       return overlay.getProjection().fromContainerPixelToLatLng(point);
+    },
+    /**
+     * Gets the map element.
+     * @return {Object}
+     */
+    getMapElement: function() {
+      return map.getDiv();
     },
     /**
      * Gets the anchor of a marker.
@@ -834,9 +829,15 @@ define([
       };
     },
     /**
-     * Converts a {Microsoft.Maps.Point} to a {Microsoft.Maps.Location}.
-     * @param {Microsoft.Maps.Point} pixel
-     * @return {Microsoft.Maps.Location}
+     *
+     */
+    pixelToApi: function(pixel) {
+      return new google.maps.Point(pixel.x, pixel.y);
+    },
+    /**
+     * Converts a {google.maps.Point} to a {google.maps.LatLng}.
+     * @param {Object} pixel
+     * @return {Object}
      */
     pixelToLatLng: function(pixel) {
       return overlay.getProjection().fromContainerPixelToLatLng(pixel);
@@ -903,6 +904,32 @@ define([
       this.centerAndZoom(initialCenter, initialZoom);
     },
     /**
+     *
+     */
+    triggerEvent: function(target, name, e) {
+      /*
+      if (target === 'map') {
+        e.targetType = 'map';
+        target = map;
+      }
+      */
+
+      if (target === 'map') {
+        target = map;
+      }
+
+      google.maps.event.trigger(target, name, e);
+    },
+    /**
+     * Zooms the map to a zoom level.
+     * @param {Number} zoom
+     */
+    zoom: function(zoom) {
+      map.setView({
+        zoom: zoom
+      });
+    },
+    /**
      * Zooms the map in by one zoom level.
      * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on #npmap-clickdot location.
      */
@@ -920,33 +947,14 @@ define([
      * Zooms the map out by one zoom level.
      */
     zoomOut: function() {
-      map.setZoom(map.getZoom() - 1);
+      this.zoom(this.getZoom() - 1);
     },
     /**
-     * Set the center and then zoom level of the map back to the initial extent. The initial extent is automatically set when the map loads, but NPMap.Map.Google.initialCenter and NPMap.Map.Google.initialZoom can be overriden at anytime.
+     * Zooms the map to a bounding box.
+     * @param {Object} bounds
+     * @return null
      */
-    zoomToExtent: function() {
-      map.setCenter(this.initialCenter);
-      map.setZoom(this.initialZoom);
-    },
-    /**
-     * Zooms the map to a lat/lng.
-     * @param {Object} latLng The {google.maps.LatLng} object to zoom the map to.
-     */
-    zoomToLatLng: function(latLng) {
-      this.centerAndZoom(latLng, 16);
-    },
-    /**
-     * Zooms the map to the extent of an array of lat/lng objects.
-     * @param {Array} latLngs The array of google.maps.LatLng objects.
-     */
-    zoomToLatLngs: function(latLngs) {
-      var bounds = new google.maps.LatLngBounds();
-
-      _.each(latLngs, function(v, i) {
-        bounds.extend(v);
-      });
-
+    zoomToBounds: function(bounds) {
       map.fitBounds(bounds);
     }
   };

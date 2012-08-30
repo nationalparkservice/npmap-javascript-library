@@ -57,17 +57,6 @@ define([
       viewChanged = false;
 
   /**
-   * Changes the cursor style on the map.
-   * @param {String} cursor
-   */
-  function changeMapCursor(cursor) {
-    if (typeof map.getRootElement().style.cursor !== 'undefined') {
-      map.getRootElement().style.cursor.replace(/cursor:[^;]+/g, '');
-    }
-    
-    document.getElementById(NPMap.config.div).childNodes[0].style.cursor = cursor;
-  }
-  /**
    * Checks to see if the map is currently zoomed in further out/in than it is supposed to and repositions it, if needed.
    */
   function checkMaxMinZoom() {
@@ -137,8 +126,6 @@ define([
 
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
   }
-
-  // #npmap-zoombox {background-color:white;border:2px dashed #9F6D00;display:none;height:0;left:0;margin:0;opacity:0.5;padding:0;position:absolute;top:0;width:0;z-index:29;}
   
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
     center: NPMap.config.center ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new Microsoft.Maps.Location(39, -96),
@@ -184,40 +171,47 @@ define([
   };
   
   Microsoft.Maps.Events.addHandler(map, 'click', function(e) {
-    changeMapCursor(oldCursor);
-    
     doubleClicked = false;
-    
+
+    Map.setCursor(oldCursor);
     setTimeout(function() {
       if (!doubleClicked && !viewChanged && e.isPrimary === true) {
-        if (e.targetType === 'map' || e.target.allowClickThrough === true) {
-          NPMap.Event.trigger('NPMap.Map', 'click', e);
+        if (e.targetType === 'map' || e.target.allowClickThrow === true) {
+          NPMap.Event.trigger('NPMap.Map', 'click', e.originalEvent);
         } else {
           if (e.target.clickHandler) {
             e.target.clickHandler(e.target);
           }
-          
-          NPMap.Event.trigger('NPMap.Map', 'shapeclick', e);
+
+          NPMap.Event.trigger('NPMap.Map', 'shapeclick', e.originalEvent);
         }
       }
     }, 350);
   });
   Microsoft.Maps.Events.addHandler(map, 'dblclick', function(e) {
-    changeMapCursor(oldCursor);
-    
     doubleClicked = true;
+
+    Map.setCursor(oldCursor);
+    NPMap.Event.trigger('NPMap.Map', 'dblclick', e.originalEvent);
   });
   Microsoft.Maps.Events.addHandler(map, 'mousedown', function(e) {
-    changeMapCursor('move');
-    
     mouseDown = true;
     viewChanged = false;
+
+    Map.setCursor('move');
+    NPMap.Event.trigger('NPMap.Map', 'mousedown', e.originalEvent);
+
+    if (e.originalEvent.shiftKey) {
+      //e.handled = true;
+
+      return false;
+    }
   });
   Microsoft.Maps.Events.addHandler(map, 'mousemove', function(e) {
     if (mouseDown) {
-      changeMapCursor('move');
+      Map.setCursor('move');
     } else {
-      changeMapCursor('default');
+      Map.setCursor('auto');
     
       if (oldIcon && oldTarget) {
         oldTarget.setOptions({
@@ -229,7 +223,7 @@ define([
       }
 
       if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
-        changeMapCursor('pointer');
+        Map.setCursor('pointer');
         
         if (e.target.data && e.target.data.overIcon) {
           oldIcon = e.target.getIcon();
@@ -246,12 +240,17 @@ define([
       oldCursor = map.getRootElement().style.cursor;
     }
 
+    NPMap.Event.trigger('NPMap.Map', 'mousemove', e.originalEvent);
+
     return false;
   });
   Microsoft.Maps.Events.addHandler(map, 'mouseup', function(e) {
-    changeMapCursor(oldCursor);
+    console.log('mouseup bing');
 
     mouseDown = false;
+
+    Map.setCursor(oldCursor);
+    NPMap.Event.trigger('NPMap.Map', 'mouseup', e.originalEvent);
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchange', function() {
     var bounds =  map.getBounds(),
@@ -277,15 +276,15 @@ define([
     NPMap.Event.trigger('NPMap.Map', 'viewchange');
 
     if (map.getZoom() != oldZoom) {
-      NPMap.Event.trigger('NPMap.Map', 'zoomchange');
+      NPMap.Event.trigger('NPMap.Map', 'zoomstart');
     }
     
     oldCenter = map.getCenter();
     oldZoom = map.getZoom();
   });
-  Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function(e) {
+  Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function() {
     if (map.getZoom() != oldZoom) {
-      NPMap.Event.trigger('NPMap.Map', 'zoomchanged', e);
+      NPMap.Event.trigger('NPMap.Map', 'zoomend');
     }
     
     oldCenter = map.getCenter();
@@ -306,16 +305,16 @@ define([
       NPMap.Map.setAttribution(NPMap.Map.buildAttributionStringForVisibleLayers(attribution.slice(0, attribution.length - 1)));
     });
     
-    NPMap.Event.trigger('NPMap.Map', 'viewchanged', e);
+    NPMap.Event.trigger('NPMap.Map', 'viewchangeend');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangestart', function() {
     viewChanged = true;
     
     checkMaxMinZoom();
+    NPMap.Event.trigger('NPMap.Map', 'viewchangestart');
   });
   
   Map._init();
-  changeMapCursor('default');
 
   return NPMap.Map.Bing = {
     // Is the map loaded and ready to be interacted with programatically.
@@ -374,10 +373,10 @@ define([
      */
     centerAndZoom: function(latLng, zoom, callback) {
       var currentLatLng = this.latLngFromApi(map.getCenter()),
-          currentZoom = map.getZoom(),
+          currentZoom = this.getZoom(),
           me = this;
 
-      if (NPMap.Map.latLngsAreEqual(currentLatLng, this.latLngFromApi(latLng)) === true && currentZoom === zoom) {
+      if (NPMap.Map.latLngsAreEqual(currentLatLng, this.latLngFromApi(latLng)) === true && (currentZoom === zoom)) {
         if (callback) {
           callback();
         }
@@ -394,6 +393,7 @@ define([
               zoom: parseInt(zoom, 0)
             };
             
+        /*
         if (NPMap.InfoBox && NPMap.InfoBox.visible) {
           var infoBoxLatLng = (function() {
                 if (NPMap.InfoBox.marker) {
@@ -407,12 +407,12 @@ define([
               pixel;
 
           if (infoBoxLatLng) {
-            pixel = map.tryLocationToPixel(infoBoxLatLng);
             pixel = this.latLngToPixel(infoBoxLatLng);
             o.centerOffset = new Microsoft.Maps.Point(pixel.x, pixel.y);
           }
         }
-        
+        */
+
         map.setView(o);
       }
     },
@@ -600,7 +600,7 @@ define([
      * @return {Object}
      */
     eventGetLatLng: function(e) {
-      return this.pixelToLatLng(new Microsoft.Maps.Point(e.getX(), e.getY()));
+      return this.pixelToLatLng(new Microsoft.Maps.Point(e.pageX, e.pageY), Microsoft.Maps.PixelReference.page);
     },
     /**
      * Gets a shape from a click event object.
@@ -629,20 +629,22 @@ define([
      * @return {Microsoft.Maps.Location}
      */
     getClickDotLatLng: function() {
-      return this.pixelToLatLng(this.getClickDotPixel(), Microsoft.Maps.PixelReference.control);
+      return this.pixelToLatLng(this.getClickDotPixel());
     },
     /**
      * Returns the {Microsoft.Mas.Point} for the npmap-clickdot div.
      */
     getClickDotPixel: function() {
-      var position = Util.getOffset(document.getElementById('npmap-clickdot'));
+      var offset = Util.getOffset(document.getElementById('npmap-map')),
+          position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
-      return new Microsoft.Maps.Point(position.left, position.top);
+      return new Microsoft.Maps.Point(position.left - offset.left, position.top - offset.top);
     },
     /**
-     * Gets the container div.
+     * Gets the map element.
+     * @return {Object}
      */
-    getContainerDiv: function() {
+    getMapElement: function() {
       return map.getRootElement();
     },
     /**
@@ -836,13 +838,19 @@ define([
       };
     },
     /**
+     *
+     */
+    pixelToApi: function(pixel) {
+      return new Microsoft.Maps.Point(pixel.x, pixel.y);
+    },
+    /**
      * Converts a {Microsoft.Maps.Point} to a {Microsoft.Maps.Location}.
      * @param {Microsoft.Maps.Point} pixel
      * @param {Microsoft.Maps.PixelReference} reference (Optional)
      * @return {Microsoft.Maps.Location}
      */
     pixelToLatLng: function(pixel, reference) {
-      reference = reference || Microsoft.Maps.PixelReference.viewport;
+      reference = reference || Microsoft.Maps.PixelReference.control;
 
       return map.tryPixelToLocation(pixel, reference);
     },
@@ -854,29 +862,23 @@ define([
       var anchorY = 0,
           divClickDot = document.getElementById('npmap-clickdot'),
           me = this,
-          offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
           pixel = this.latLngToPixel((function() {
             var latLng = null;
-            
-            if (typeof(to) === 'string') {
-              to = to.split(',');
-              latLng = new Microsoft.Maps.Location(parseFloat(to[0]), parseFloat(to[1]));
+
+            if (to.lat) {
+              latLng = new Microsoft.Maps.Location(to.lat, to.lng);
+            } else if (to.latitude) {
+              latLng = to;
             } else {
-              if (to.lat) {
-                latLng = new Microsoft.Maps.Location(to.lat, to.lng);
-              } else if (to.latitude) {
-                latLng = to;
-              } else {
-                anchorY = me.getMarkerAnchor(to).y;
-                latLng = to.getLocation();
-              }
+              anchorY = me.getMarkerAnchor(to).y;
+              latLng = to.getLocation();
             }
 
             return latLng;
-          })(), Microsoft.Maps.PixelReference.page);
-      
-      divClickDot.style.left = pixel.x - offset.left + 'px';
-      divClickDot.style.top = pixel.y - offset.top - anchorY + 'px';
+          })(), Microsoft.Maps.PixelReference.control);
+
+      divClickDot.style.left = pixel.x + 'px';
+      divClickDot.style.top = pixel.y - anchorY + 'px';
     },
     // TODO: Not implemented yet, as this is handled by Layer.ArcGisServerRest. Will be needed when you handle another layer type.
     reloadTileLayer: function(config) {
@@ -1007,24 +1009,15 @@ define([
       });
     },
     /**
-     * DEPRECATED: Updates a marker's icon.
-     * @param {Microsoft.Maps.Pushpin} marker
-     * @param {String} icon The url of the new icon.
+     *
      */
-    updateMarkerIcon: function(marker, icon) {
-      marker.setOptions({
-        icon: icon
-      });
-    },
-    /**
-     * DEPRECATED: Updates a marker's label.
-     * @param {Microsoft.Maps.Pushpin} marker
-     * @param {String} label The new label string.
-     */
-    updateMarkerLabel: function(marker, label) {
-      marker.setOptions({
-        text: label
-      });
+    triggerEvent: function(target, name, e) {
+      if (target === 'map') {
+        e.targetType = 'map';
+        target = map;
+      }
+
+      Microsoft.Maps.Events.invoke(target, name, e);
     },
     /**
      * Zooms the map to a zoom level.
@@ -1044,7 +1037,7 @@ define([
       
       if (toDot) {
         var position = Util.getOffset(document.getElementById('npmap-clickdot')),
-            latLng = this.pixelToLatLng(new Microsoft.Maps.Point(position.left, position.top));
+            latLng = this.pixelToLatLng(new Microsoft.Maps.Point(position.left, position.top), Microsoft.Maps.PixelReference.viewport);
 
         map.setView({
           center: latLng,
@@ -1068,19 +1061,9 @@ define([
      * Zooms the map to a bounding box.
      * @param {Object} bbox A bbox object with nw and se {Microsoft.Maps.Location} objects.
      */
-    zoomToBoundingBox: function(bbox) {
+    zoomToBounds: function(bounds) {
       map.setView({
-        bounds: Microsoft.Maps.LocationRect.fromCorners(bbox.nw, bbox.se),
-        padding: 30
-      });
-    },
-    /**
-     * Zooms the map to the extent of an array of {Microsoft.Maps.Location} objects.
-     * @param {Array} latLngs The array of lat/lng objects.
-     */
-    zoomToLatLngs: function(latLngs) {
-      map.setView({
-        bounds: Microsoft.Maps.LocationRect.fromLocations(latLngs),
+        bounds: bounds,
         padding: 30
       });
     },
@@ -1095,6 +1078,20 @@ define([
       for (var i = 0; i < markers.length; i++) {
         latLngs.push(me.getMarkerLatLng(markers[i]));
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       this.zoomToLatLngs(latLngs);
     }

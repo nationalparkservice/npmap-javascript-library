@@ -39,14 +39,14 @@ define(function() {
         var index = -1;
         
         for (var i = 0; i < NPMap[cl]._events.length; i++) {
-          if (NPMap[cl]._events[i].event === event) {
+          if (NPMap[cl]._events[i].func === func) {
             index = i;
             break;
           }
         }
-
-        if (index != -1) {
-          NPMap[cl]._events.slice(index, 1);
+        
+        if (index !== -1) {
+          NPMap[cl]._events.splice(index, 1);
         }
       }
     },

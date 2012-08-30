@@ -139,17 +139,6 @@ define([
   });
   map.setCenterZoom(center, zoom);
   map.setZoomRange(min, max);
-  Event.add('NPMap.Map', 'ready', function() {
-    // Setup zoom box.
-    (function(){var box=document.createElement("div"),mouseDownPoint=null,mousePoint=null;
-     function getMousePoint(e){
-      var point=new com.modestmaps.Point(e.clientX,e.clientY);
-
-      point.x+=document.body.scrollLeft+document.documentElement.scrollLeft;
-      point.y+=document.body.scrollTop+document.documentElement.scrollTop;
-
-      for(var node=map.parent;node;node=node.offsetParent){point.x-=node.offsetLeft;point.y-=node.offsetTop}return point}function mouseDown(e){if(e.shiftKey){mouseDownPoint=getMousePoint(e);box.style.left=mouseDownPoint.x+"px";box.style.top=mouseDownPoint.y+"px";map.parent.style.cursor="crosshair";com.modestmaps.addEvent(map.parent,"mousemove",mouseMove);com.modestmaps.addEvent(map.parent,"mouseup",mouseUp);return com.modestmaps.cancelEvent(e)}}function mouseMove(e){var point=getMousePoint(e);box.style.display="block";if(point.x<mouseDownPoint.x)box.style.left=point.x+"px";else box.style.left=mouseDownPoint.x+"px";box.style.width=Math.abs(point.x-mouseDownPoint.x)+"px";if(point.y<mouseDownPoint.y)box.style.top=point.y+"px";else box.style.top=mouseDownPoint.y+"px";box.style.height=Math.abs(point.y-mouseDownPoint.y)+"px";return com.modestmaps.cancelEvent(e)}function mouseUp(e){var point=getMousePoint(e),l1=map.pointLocation(point),l2=map.pointLocation(mouseDownPoint);map.setExtent([l1,l2]);box.style.display="none";map.parent.style.cursor="auto";com.modestmaps.removeEvent(map.parent,"mousemove",mouseMove);com.modestmaps.removeEvent(map.parent,"mouseup",mouseUp);return com.modestmaps.cancelEvent(e)}box.id="npmap-zoombox";Map.addElement(box, null, false);com.modestmaps.addEvent(map.parent,"mousedown",mouseDown)})();
-    });
   Map._init();
   
   return NPMap.Map.ModestMaps = {
@@ -303,7 +292,8 @@ define([
       return new MM.Point(position.left - offset.left, position.top - offset.top);
     },
     /**
-     * Gets the container div.
+     * Gets the map element.
+     * @return {Object}
      */
     getContainerDiv: function() {
       return map.parent;
@@ -384,7 +374,7 @@ define([
      * @return {MM.Location}
      */
     latLngToApi: function(latLng) {
-      return new MM.Location(latLng.lat, latLng.lon);
+      return new MM.Location(latLng.lat, latLng.lng);
     },
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
@@ -406,6 +396,14 @@ define([
         x: pixel.x,
         y: pixel.y
       };
+    },
+    /**
+     * Converts a NPMap pixel object to a {MM.Point}.
+     * @param {Object} pixel
+     * @return {Object}
+     */
+    pixelToApi: function(pixel) {
+      return new MM.Point(pixel.x, pixel.y);
     },
     /**
      * Converts a {MM.Point} to a {MM.Location}.

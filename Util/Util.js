@@ -99,16 +99,23 @@ define(function() {
       
       return el;
     },
-    // TODO: Rename to getContainerDivOffset.
     /**
-     * Gets the offset, in pixels, of the map div in the page.
+     * Gets the offset, in pixels, of an element.
+     * @param {Object} el
      * @return {Object}
      */
     getOffset: function(el) {
+      /*
       return {
         left: el.offsetLeft - el.scrollLeft,
         top: el.offsetTop - el.scrollTop
       };
+      */
+      // yay readability
+    for (var lx=0, ly=0;
+         el != null;
+         lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent);
+    return {left: lx,top: ly};
     },
     /**
      *
@@ -162,19 +169,19 @@ define(function() {
      */
     getScrollPosition: function() {
       var position = {
-        x: 0,
-        y: 0
+        left: 0,
+        top: 0
       };
 
       if (typeof window.pageYOffset !== 'undefined') {
-        position.x = window.pageXOffset;
-        position.y = window.pageYOffset;
+        position.left = window.pageXOffset;
+        position.top = window.pageYOffset;
       } else if (typeof document.documentElement.scrolltop !== 'undefined' && document.documentElement.scrollTop > 0) {
-        position.x = document.documentElement.scrollLeft;
-        position.y = document.documentElement.scrollTop;
+        position.left = document.documentElement.scrollLeft;
+        position.top = document.documentElement.scrollTop;
       } else if (typeof document.body.scrollTop !== 'undefined') {
-        position.x = document.body.scrollLeft;
-        position.y = document.body.scrollTop;
+        position.left = document.body.scrollLeft;
+        position.top = document.body.scrollTop;
       }
 
       return position;

@@ -8,18 +8,32 @@ define([
   'Util/Util'
 ], function(Event, InfoBox, Util) {
   var
-      //
+      // The active notification messages.
       activeNotificationMessages = [],
-      //
+      // The combined pixel height of all the active notification messages.
       activeNotificationMessagesHeight = 0,
       // The map div.
-      divMap = document.getElementById(NPMap.config.div),
+      divMap = document.getElementById('npmap-map'),
+      // The notify div.
+      divNotify,
+      // The npmap div.
+      divNpmap = document.getElementById('npmap'),
+      // The npmap-controls div.
+      divNpmapControls = document.getElementById('npmap-map-controls'),
       // The parent div.
       divNpmapParent = document.getElementById('npmap').parentNode,
+      // The npmap-progressbar div.
+      divProgressBar,
+      // The tip div.
+      divTip,
       // Does the map have active tile layers?
       hasTiled = false,
       // Is the map in fullscreen mode?
       isFullScreen = false,
+      //
+      mouseDownPixel = null,
+      // The zoombox.
+      zoombox = document.createElement('div'),
       // The zoom level to scale in meters.
       zoomScales = [
         [0, 295829355],
@@ -73,6 +87,24 @@ define([
     return msg;
   }
   /**
+   * Gets the pixel coordinates of a mouse click event.
+   * @param {Object} e
+   * @return {Object}
+   */
+  function getMousePixel(e) {
+    var pixel = {
+          x: e.clientX,
+          y: e.clientY
+        },
+        position = Util.getOffset(divMap),
+        scroll = Util.getScrollPosition(divMap);
+
+    pixel.x = pixel.x - position.left + scroll.left;
+    pixel.y = pixel.y - position.top + scroll.top;
+
+    return pixel;
+  }
+  /**
    * Hooks up the click event to an element.
    * @param {String} id
    * @param {Function} func
@@ -87,6 +119,34 @@ define([
     });
 
     return el;
+  }
+  /**
+   *
+   */
+  function mouseMoveZoomBox(e) {
+    var left,
+        pixel = getMousePixel(e),
+        top;
+
+    zoombox.style.display = 'block';
+
+    if (pixel.x < mouseDownPixel.x) {
+      left = pixel.x;
+    } else {
+      left = mouseDownPixel.x;
+    }
+
+    zoombox.style.left = left + 'px';
+    zoombox.style.width = Math.abs(pixel.x - mouseDownPixel.x) + 'px';
+
+    if (pixel.y < mouseDownPixel.y) {
+      top = pixel.y;
+    } else {
+      top = mouseDownPixel.y;
+    }
+
+    zoombox.style.height = Math.abs(pixel.y - mouseDownPixel.y) + 'px';
+    zoombox.style.top = top + 'px';
   }
   /**
    * Sets the width of the attribution control based on the width of the map and logos and positions it.
@@ -116,14 +176,80 @@ define([
   return NPMap.Map = {
     // An array of event handler objects that have been added to this class.
     _events: [{
-      event: 'zoomchange',
+      event: 'mousedown',
+      func: function(e) {
+        mouseDownPixel = getMousePixel(e);
+
+        console.log(mouseDownPixel);
+
+        if (e.shiftKey) {
+          zoombox.style.display = 'block';
+          zoombox.style.left = mouseDownPixel.x + 'px';
+          zoombox.style.top = mouseDownPixel.y + 'px';
+
+          NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+          NPMap.Map.setCursor('crosshair');
+        }
+      }
+    },{
+      event: 'mouseup',
+      func: function(e) {
+        if (e.shiftKey) {
+          var pixel = getMousePixel(e),
+              coords = {},
+              nw,
+              se;
+
+          if (pixel.x > mouseDownPixel.x) {
+            coords.e = pixel.x;
+            coords.w = mouseDownPixel.x;
+          } else {
+            coords.e = mouseDownPixel.x;
+            coords.w = pixel.x;
+          }
+
+          if (pixel.y > mouseDownPixel.y) {
+            coords.n = pixel.y;
+            coords.s = mouseDownPixel.y;
+          } else {
+            coords.n = mouseDownPixel.y;
+            coords.s = pixel.y;
+          }
+
+          nw = NPMap.Map.pixelToLatLng({
+            x: coords.w,
+            y: coords.n
+          });
+          se = NPMap.Map.pixelToLatLng({
+            x: coords.e,
+            y: coords.s
+          });
+
+          NPMap.Map.zoomToBounds({
+            e: se.lng,
+            n: nw.lat,
+            s: se.lat,
+            w: nw.lng
+          });
+          NPMap.Map.setCursor('auto');
+
+          mouseDownPixel = null;
+          zoombox.style.display = 'none';
+          zoombox.style.height = '0px';
+          zoombox.style.width = '0px';
+
+          NPMap.Event.remove('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+        }
+      }
+    },{
+      event: 'zoomstart',
       func: function() {
         if (!NPMap.InfoBox.marker) {
           NPMap.InfoBox.hide();
         }
       }
     },{
-      event: 'zoomchanged',
+      event: 'zoomend',
       func: function() {
         if (!NPMap.InfoBox.marker) {
           NPMap.InfoBox.hide();
@@ -170,6 +296,18 @@ define([
       return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
     },
     /**
+     * The click handler for the module close button.
+     */
+    _handleModuleCloseClick: function() {
+      this.toggleModule('search', false);
+    },
+    /**
+     * The click handler for the module tabs.
+     */
+    _handleModuleTabClick: function(el) {
+      this.toggleModule(el.id.replace('npmap-module-tab-', ''), true);
+    },
+    /**
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
      */
     _init: function() {
@@ -211,7 +349,7 @@ define([
                 };
               } else if (typeof NPMap.config.tools === 'undefined') {
                 return {
-                  fullscreen: true,
+                  fullscreen: false,
                   navigation: {
                     pan: 'home',
                     position: 'top left',
@@ -240,14 +378,6 @@ define([
           return el;
         }
 
-        if (NPMap.config.api === 'Bing') {
-          divMap = document.getElementById(NPMap.config.div).getElementsByTagName('div')[0]
-        }
-
-        bean.add(divMap, 'contextmenu', function(e) {
-          e.stop();
-        });
-
         attribution.id = 'npmap-attribution';
         elements.push({
           el: attribution,
@@ -270,6 +400,10 @@ define([
         tip.id = 'npmap-tip';
         elements.push({
           el: tip
+        });
+        zoombox.id = 'npmap-zoombox';
+        elements.push({
+          el: zoombox
         });
         
         if (NPMap.config.api.toLowerCase() !== 'leaflet' && NPMap.config.api.toLowerCase() !== 'modestmaps') {
@@ -453,8 +587,9 @@ define([
           toolbar.innerHTML = html + '</ul>';
           toolbar.id = 'npmap-toolbar';
           
-          document.getElementById('npmap-map').style.top = '28px';
-          document.getElementById('npmap').insertBefore(toolbar, document.getElementById('npmap-map'));
+          divMap.style.top = '28px';
+
+          divNpmap.insertBefore(toolbar, divMap);
 
           for (var i = 0; i < callbacks.length; i++) {
             callbacks[i]();
@@ -502,7 +637,7 @@ define([
               }
             });
 
-            document.getElementById('npmap').insertBefore(modules, document.getElementById('npmap-map'));
+            divNpmap.insertBefore(modules, divMap);
           }
         }
 
@@ -774,23 +909,20 @@ define([
         for (var i = 0; i < elements.length; i++) {
           var element = elements[i];
 
-          me.addElement(element.el, element.func);
+          me.addControl(element.el, element.func);
         }
 
         var interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
             // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding.
-            Util.monitorResize(document.getElementById('npmap'), function() {
+
+            clearInterval(interval);
+            Util.monitorResize(divNpmap, function() {
               setAttributionMaxWidthAndPosition();
-              NPMap.Map.handleResize();
+              me.handleResize();
               Event.trigger('NPMap.Map', 'resized');
             });
-            clearInterval(interval);
             Event.trigger('NPMap.Map', 'ready');
-
-            bean.add(document.getElementById('npmap-map-controls'), 'click', function(e) {
-              console.log(e);
-            });
           }
         }, 0);
       });
@@ -799,16 +931,17 @@ define([
      * Adds an HTML element to the npmap-controls div.
      * @param {Object} el
      * @param {Function} callback (Optional)
-     * @param {Boolean} stopPropagation (Optiona)
+     * @param {Boolean} stopPropagation (Optional)
+     * @return null
      */
-    addElement: function(el, callback, stopPropagation) {
+    addControl: function(el, callback, stopPropagation) {
+      var div = NPMap.Map[NPMap.config.api].getMapElement();
+
       if (el.style.cssText.indexOf('z-index') === -1) {
-        el.style.zIndex = '0';
+        el.style.zIndex = '1';
       }
 
-      document.getElementById('npmap-map-controls').appendChild(el);
-
-      //NPMap.Map[NPMap.config.api].addElement(el);
+      div.appendChild(el);
 
       if (typeof stopPropagation === 'undefined' || stopPropagation === true) {
         Util.stopAllPropagation(el);
@@ -820,21 +953,24 @@ define([
     },
     /**
      * Adds a shape to the map.
-     * @param {Object} shape The shape to add to the map. This can be a marker, line, or polygon object for the active baseApi.
+     * @param {Object} shape The shape to add to the map. This can be a base API marker, line, or polygon object.
+     * @return null
      */
     addShape: function(shape) {
       NPMap.Map[NPMap.config.api].addShape(shape);
     },
     /**
      * Adds a tile layer to the map.
-     * @param {Object} layer
+     * @param {Object} layer The layer to add to the map. This object should be created with the base API.
+     * @return null
      */
     addTileLayer: function(layer) {
       NPMap.Map[NPMap.config.api].addTileLayer(layer);
     },
     /**
      * Adds a Zoomify layer to the map.
-     * @param {Object} layer
+     * @param {Object} layer The layer to add to the map. This object should be created with the base API.
+     * @return null
      */
     addZoomifyLayer: function(layer) {
       NPMap.Map[NPMap.config.api].addZoomifyLayer(layer);
@@ -849,14 +985,14 @@ define([
     },
     /**
      * Converts a NPMap bounds to an API bounds.
-     * @param {Object}
+     * @param {Object} bounds
      * @return {Object}
      */
     boundsToApi: function(bounds) {
       return NPMap.Map[NPMap.config.api].boundsToApi(bounds);
     },
     /**
-     * Builds the attribution string for the visible layers.
+     * Builds the attribution string for all of the visible layers.
      * @param {String} attribution An attribution string to add to the visible layer attribution.
      * @return {String}
      */
@@ -890,40 +1026,44 @@ define([
       }
     },
     /**
-     * Centers then zooms the map.
+     * Centers the map.
      * @param {Object} latLng The latLng object to center the map on.
+     * @return null
      */
     center: function(latLng) {
       NPMap.Map[NPMap.config.api].center(NPMap.Map[NPMap.config.api].latLngToApi(latLng));
     },
     /**
      * Centers then zooms the map.
-     * @param {String} latLng The latLng string, in "latitude,longitude" format, to center the map on.
-     * @param {Integer} zoom The zoom level to zoom the map to.
+     * @param {Object} latLng The latLng object to center the map on.
+     * @param {Number} zoom The zoom level to zoom the map to.
      * @param {Function} callback (Optional) A callback function to call after the map has been centered and zoomed.
+     * @return null
      */
     centerAndZoom: function(latLng, zoom, callback) {
       NPMap.Map[NPMap.config.api].centerAndZoom(NPMap.Map[NPMap.config.api].latLngToApi(latLng), zoom, callback);
     },
     /**
-     * Creates a line using the baseApi's line class, if it exists.
-     * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
+     * Creates a line using the base API's line class.
+     * @param {Array} latLngs An array of the latitude/longitude objects to use to create the line.
      * @param {Object} options (Optional) Line options.
+     * @return {Object}
      */
     createLine: function(latLngs, options) {
       return NPMap.Map[NPMap.config.api].createLine(latLngs, NPMap.Map[NPMap.config.api].convertLineOptions(options));
     },
     /**
-     * Creates a marker using the baseApi's marker class, if it exists.
-     * @param {String} latLng The latitude/longitude string, in "latitude,longitude" format, to use to create the marker.
+     * Creates a marker using the base API's marker class.
+     * @param {String} latLng The latitude/longitude object to use to create the marker.
      * @param {Object} options (Optional) Marker options.
+     * @return {Object}
      */
     createMarker: function(latLng, options) {
       return this._createMarker(latLng, NPMap.Map[NPMap.config.api].convertMarkerOptions(options));
     },
     /**
-     * Creates a polygon using the baseApi's marker class, if it exists.
-     * @param {Array} latLngs An array of latitude/longitude strings, in "latitude,longitude" format, to use to create the polygon.
+     * Creates a polygon using the base API's polygon class.
+     * @param {Array} latLngs An array of latitude/longitude objects to use to create the polygon.
      * @param {Object} options (Optional) Polygon options.
      * @return {Object}
      */
@@ -939,101 +1079,106 @@ define([
       return NPMap.Map[NPMap.config.api].createZoomifyLayer(config);
     },
     /**
-     * Gets the active layer types for both baseLayers and layers.
+     * Gets the active layer types for both the baseLayers and layers configs.
      * @return {Array}
      */
     getActiveLayerTypes: function() {
       var types = [];
       
       if (NPMap.config.baseLayers) {
-        for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-          var baseLayer = NPMap.config.baseLayers[i],
-              baseLayerType = baseLayer.type;
+        _.each(NPMap.config.baseLayers, function(baseLayer) {
+          var type = baseLayer.type,
+              visible = baseLayer.visible;
 
-          if ((typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) && _.indexOf(types, baseLayerType) === -1) {
-            types.push(baseLayerType);
+          if ((typeof visible === 'undefined' || visible === true) && _.indexOf(types, type) === -1) {
+            types.push(type);
           }
-        }
+        });
       }
 
       if (NPMap.config.layers) {
-        for (var j = 0; j < NPMap.config.layers.length; j++) {
-          var layer = NPMap.config.layers[j],
-              layerType = layer.type;
+        _.each(NPMap.config.layers, function(layer) {
+          var type = layer.type,
+              visible = layer.visible;
 
-          if ((typeof layer.visible === 'undefined' || layer.visible === true) && _.indexOf(types, layerType) === -1) {
-            types.push(layerType);
+          if ((typeof visible === 'undefined' || visible === true) && _.indexOf(types, type) === -1) {
+            types.push(type);
           }
-        }
+        });
       }
 
       return types;
     },
     /**
-     *
+     * Gets the map bounds.
+     * @return {Object}
      */
     getBounds: function() {
       return this.boundsFromApi(NPMap.Map[NPMap.config.api].getBounds());
     },
     /**
      * Gets the center of the map.
-     * @return {String}
+     * @return {Object}
      */
     getCenter: function() {
       return this.latLngFromApi(NPMap.Map[NPMap.config.api].getCenter());
     },
     /**
-     * Gets the container div.
-     */
-    getContainerDiv: function() {
-      return NPMap.Map[NPMap.config.api].getContainerDiv();
-    },
-    /**
-     * Returns the layerConfig object for a layer.
-     * @param {String} layerId The id of the layer to search for.
-     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
-     * @returns {Object}
-     */
-    getLayerById: function(layerId, layers) {
-      if (!layers) {
-        layers = NPMap.config.layers;
-      }
-      
-      for (var i = 0; i < layers.length; i++) {
-        if (layers[i].id === layerId) {
-          return layers[i];
-        }
-      }
-    },
-    /**
-     * Returns the layerConfig object for a layer.
-     * @param {String} layerName The name of the layer to search for.
+     * Gets a layer config object by layer id.
+     * @param {String} id The id of the layer to search for.
      * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
      * @return {Object}
      */
-    getLayerByName: function(layerName, layers) {
+    getLayerById: function(id, layers) {
       if (!layers) {
         layers = NPMap.config.layers;
       }
-      
+
+      _.each(layers, function(layer) {
+        if (layer.id == id) {
+          return layer;
+        }
+      });
+    },
+    /**
+     * Gets a layer config object by layer name.
+     * @param {String} name The name of the layer to search for.
+     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
+     * @return {Object}
+     */
+    getLayerByName: function(name, layers) {
+      if (!layers) {
+        layers = NPMap.config.layers;
+      }
+
       for (var i = 0; i < layers.length; i++) {
-        if (layers[i].name === layerName) {
-          return layers[i];
+        var layer = layers[i];
+
+        if (layer.name === name) {
+          return layer;
         }
       }
     },
     /**
-     * Get the marker latitude and longitude, in "latitude,longitude" format.
+     * Gets the map element.
+     * @return {Object}
+     */
+    getMapElement: function() {
+      return NPMap.Map[NPMap.config.api].getMapElement();
+    },
+    /**
+     * Get the marker latitude and longitude.
      * @param {Object} marker
-     * @return {String}
+     * @return {Object}
      */
     getMarkerLatLng: function(marker) {
       return this.latLngFromApi(NPMap.Map[NPMap.config.api].getMarkerLatLng(marker));
     },
     /**
      * Gets a marker option.
-     * @param {Object} marker The baseApi marker object.
+     * @param {Object} marker The marker object.
      * @param {String} option The option to get. Currently the valid options are: 'icon'.
+     * @return {String}
      */
     getMarkerOption: function(marker, option) {
       return NPMap.Map[NPMap.config.api].getMarkerOption(marker, option);
@@ -1041,26 +1186,28 @@ define([
     /**
      * Gets the visibility property of a marker.
      * @param {Object} marker The marker to check the visibility for.
+     * @return {Boolean}
      */
     getMarkerVisibility: function(marker) {
       return NPMap.Map[NPMap.config.api].getMarkerVisibility(marker);
     },
     /**
-     * Gets the maximum zoom level for this map.
+     * Gets the maximum zoom level for the map.
      * @return {Number}
      */
     getMaxZoom: function() {
       return NPMap.Map[NPMap.config.api].getMaxZoom();
     },
     /**
-     * Gets the minimum zoom level for this map.
+     * Gets the minimum zoom level for the map.
      * @return {Number}
      */
     getMinZoom: function() {
       return NPMap.Map[NPMap.config.api].getMinZoom();
     },
     /**
-     * Builds out an array of visible layers. Can filter out visible layers that have either grids or tiles, if the checkFor parameter is passed in.
+     * Gets the layers that are currently visible.
+     * @return {Array}
      */
     getVisibleLayers: function() {
       var layers = [];
@@ -1083,7 +1230,7 @@ define([
       return NPMap.Map[NPMap.config.api].getZoom();
     },
     /**
-     * Handles any necessary sizing and positioning for the map when its div is resized.
+     * Handles any necessary sizing and positioning for the map when its parent HTML element is resized.
      */
     handleResize: function() {
       if (typeof NPMap.Map[NPMap.config.api] !== 'undefined') {
@@ -1125,7 +1272,7 @@ define([
         for (var i = 0; i < NPMap.config.layers.length; i++) {
           var layer = NPMap.config.layers[i];
 
-          if ((layer.type === 'NativeVectors' && layer.tiled) || (layer.type === 'ArcGisServerRest' || layer.type === 'TileStream')) {
+          if ((layer.type === 'NativeVectors' && layer.tiled) || (layer.type === 'ArcGisServerRest' || layer.type === 'CartoDb' || layer.type === 'TileStream')) {
             hasTiled = true;
             break;
           }
@@ -1136,10 +1283,9 @@ define([
     },
     /**
      * Hides the progress bar.
+     * @return null
      */
     hideProgressBar: function() {
-      var divProgressBar = document.getElementById('npmap-progressbar');
-
       divProgressBar.childNodes[0].style.width = '100%';
 
       morpheus(divProgressBar, {
@@ -1154,23 +1300,23 @@ define([
     /**
      * Hides a shape.
      * @param {Object} shape The shape to hide.
+     * @return null
      */
     hideShape: function(shape) {
       NPMap.Map[NPMap.config.api].hideShape(shape);
     },
     /**
      * Hides the tip.
+     * @return null
      */
     hideTip: function() {
-      var tip = document.getElementById('npmap-tip');
-
-      if (tip) {
-        tip.style.display = 'none';
+      if (divTip) {
+        divTip.style.display = 'none';
       }
     },
     /**
      * Tests to see if a latLng is within the map's current bounds.
-     * @param latLng {String} {Required} The latitude/longitude string, in "latitude,longitude" format, to test.
+     * @param latLng {Object} The latitude/longitude object to test.
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
@@ -1178,9 +1324,9 @@ define([
     },
     /**
      * Tests the equivalency of two location strings.
-     * @param {String} latLng1 The first latLng string.
-     * @param {String} latLng2 The second latLng string.
-     * @returns {Boolean}
+     * @param {Object} latLng1 The first latLng object.
+     * @param {Object} latLng2 The second latLng object.
+     * @return {Boolean}
      */
     latLngsAreEqual: function(latLng1, latLng2) {
       var areEqual = false;
@@ -1192,23 +1338,23 @@ define([
       return areEqual;
     },
     /**
-     * Converts a baseApi lat/lng object to a lat/lng string in "latitude/longitude" format.
+     * Converts a base API lat/lng object to a NPMap lat/lng object.
      * @param {Object} latLng The lat/lng object.
-     * @return {String}
+     * @return {Object}
      */
     latLngFromApi: function(latLng) {
       return NPMap.Map[NPMap.config.api].latLngFromApi(latLng);
     },
     /**
-     * Converts a lat/lng string ("latitude/longitude") to a baseApi's latLng object.
-     * @param {String} latLng The lat/lng string.
+     * Converts a NPMap lat/lng object to a base API latLng object.
+     * @param {Object} latLng The lat/lng object.
      * @return {Object}
      */
     latLngToApi: function(latLng) {
       return NPMap.Map[NPMap.config.api].latLngToApi(latLng);
     },
     /**
-     * Turns meters into a zoom level. This function is not precise, as it is impossible to get precise meter scale values for the entire earth reprojected to web mercator. Only use this in cases where approximate numbers are acceptable.
+     * Turns meters into a zoom level. This function is not precise, as it is impossible to get precise meter scale values for the entire earth reprojected to web mercator.
      * @param {Number} meters
      * @return {Number}
      */
@@ -1222,12 +1368,15 @@ define([
           if (zoomScales[i - 1]) {
             if (meters < zoomScales[i - 1][1]) {
               z = zoomScales[i + 1][0];
+              break;
             }
           } else {
             z = zoom;
+            break;
           }
         } else if (meters < zoomScales[zoomScales.length - 1][1]) {
           z = zoom;
+          break;
         }
       }
 
@@ -1239,15 +1388,20 @@ define([
      * @param {String} title (Optional)
      * @param {String} type (Optional) Valid values are 'error', 'info', or 'success'.
      * @param {Number} interval (Optional)
+     * @return null
      */
     notify: function(message, title, type, interval) {
-      // TODO: This needs work. To see bug, show a bunch of notifications one after the other, wait for them to start hiding, then try to show some more.
+      // TODO: This needs work. To reproduce bug, show a bunch of notifications one after the other, wait for them to start hiding, then try to show some more.
       var height,
           msg = createNotify(message, title, type);
 
+      if (!divNotify) {
+        divNotify = document.getElementById('npmap-notify');
+      }
+
       msg.style.display = 'none';
 
-      document.getElementById('npmap-notify').appendChild(msg);
+      divNotify.appendChild(msg);
 
       height = Util.getOuterDimensions(msg).height;
       interval = interval || 3000;
@@ -1277,9 +1431,10 @@ define([
       activeNotificationMessagesHeight = activeNotificationMessagesHeight + height;
     },
     /**
-     * Pans the map horizontally and vertically based on the pixels passed in.
+     * Pans the map horizontally and/or vertically based on the pixels passed in.
      * @param {Object} pixels
      * @param {Function} callback (Optional)
+     * @return null
      */
     panByPixels: function(pixels, callback) {
       NPMap.Map[NPMap.config.api].panByPixels(pixels, callback);
@@ -1287,6 +1442,7 @@ define([
     /**
      * Pans the map in a direction by a quarter of the current map viewport.
      * @param {String} direction The direction to pan the map in. Valid directions are 'east', 'north', 'south', and 'west'.
+     * @return null
      */
     panInDirection: function(direction) {
       var divMapDimensions = Util.getOuterDimensions(divMap),
@@ -1322,8 +1478,17 @@ define([
       }
     },
     /**
+     * Converts a pixel object to a lat/lng object.
+     * @param {Object} pixel
+     * @return {Object}
+     */
+    pixelToLatLng: function(pixel) {
+      return NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].pixelToLatLng(NPMap.Map[NPMap.config.api].pixelToApi(pixel)));
+    },
+    /**
      * Removes a shape from the map.
      * @param {Object} shape The shape to remove from the map.
+     * @return null
      */
     removeShape: function(shape) {
       NPMap.Map[NPMap.config.api].removeShape(shape);
@@ -1331,6 +1496,7 @@ define([
     /**
      * Sets the attribution string for the map.
      * @param {String} attribution
+     * @return null
      */
     setAttribution: function(attribution) {
       var divAttribution = document.getElementById('npmap-attribution');
@@ -1351,6 +1517,7 @@ define([
     /**
      * Sets the map bounds.
      * @param {Object} bounds
+     * @return null
      */
     setBounds: function(bounds) {
       NPMap.Map[NPMap.config.api].setBounds(bounds);
@@ -1358,9 +1525,10 @@ define([
     /**
      * Sets the map cursor.
      * @param {String} cursor
+     * @return null
      */
     setCursor: function(cursor) {
-      var div = this.getContainerDiv();
+      var div = this.getMapElement();
 
       if (div.style.cursor) {
         div.style.cursor.replace(/cursor:[^;]+/g, '');
@@ -1370,7 +1538,8 @@ define([
     },
     /**
      * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
-     * @param {Object} c
+     * @param {Object} center
+     * @return null
      */
     setInitialCenter: function(center) {
       NPMap.Map[NPMap.config.api].setInitialCenter(this.latLngToApi(center));
@@ -1378,6 +1547,7 @@ define([
     /**
      * Sets the initial zoom of the map. This initial zoom is stored with the map, and is used by the setInitialExtent method, among other things.
      * @param {Number} zoom
+     * @return null
      */
     setInitialZoom: function(zoom) {
       NPMap.Map[NPMap.config.api].setInitialZoom(zoom);
@@ -1386,6 +1556,7 @@ define([
      * Sets a marker's options.
      * @param {Object} marker The baseApi marker object.
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
+     * @return null
      */
     setMarkerOptions: function(marker, options) {
       NPMap.Map[NPMap.config.api].setMarkerOptions(marker, options);
@@ -1393,12 +1564,19 @@ define([
     /**
      * Sets the notify target to an HTML element other than the map div. This can only be called after NPMap has been initialized.
      * @param {Object} target
+     * @return null
      */
     setNotifyTarget: function(target) {
-      target.appendChild(document.getElementById('npmap-notify'));
+      if (!divNotify) {
+        divNotify = document.getElementById('npmap-notify');
+      }
+
+      target.appendChild(divNotify);
     },
     /**
-     *
+     * Sets min and/or max zoom restrictions on the map.
+     * @param {Object} restrictions
+     * @return null
      */
     setZoomRestrictions: function(restrictions) {
       NPMap.Map[NPMap.config.api].setZoomRestrictions(restrictions);
@@ -1406,9 +1584,14 @@ define([
     /**
      * Shows the progress bar.
      * @param {Number} value (Optional) The value to start the progress bar at.
+     * @return null
      */
     showProgressBar: function(value) {
-      document.getElementById('npmap-progressbar').style.display = 'block';
+      if (!divProgressBar) {
+        divProgressBar = document.getElementById('npmap-progressbar');
+      }
+
+      divProgressBar.style.display = 'block';
 
       if (!value) {
         value = 0;
@@ -1419,6 +1602,7 @@ define([
     /**
      * Shows a shape.
      * @param {Object} shape The shape to show.
+     * @return null
      */
     showShape: function(shape) {
       NPMap.Map[NPMap.config.api].showShape(shape);
@@ -1427,18 +1611,23 @@ define([
      * Shows the tip.
      * @param {String} content
      * @param {Object} position
+     * @return null
      */
     showTip: function(content, position) {
-      var divMapDimensions = Util.getOuterDimensions(divMap),
-          divTip = document.getElementById('npmap-tip');
+      var dimensions = Util.getOuterDimensions(divMap);
+
+      if (!divTip) {
+        divTip = document.getElementById('npmap-tip');
+      }
 
       divTip.innerHTML = content;
-      divTip.style.bottom = divMapDimensions.height - position.y + 'px';
-      divTip.style.right = divMapDimensions.width - position.x + 'px';
+      divTip.style.bottom = (dimensions.height - position.y) + 'px';
+      divTip.style.right = (dimensions.width - position.x) + 'px';
       divTip.style.display = 'block';
     },
     /**
      * Toggles fullscreen mode on or off.
+     * @return null
      */
     toggleFullScreen: function() {
       var baseApi = NPMap.Map[NPMap.config.api],
@@ -1525,24 +1714,11 @@ define([
         }
       //}
     },
-
-
-    /*
-    handleModuleCloseClick: function() {
-      console.log(0);
-
-      NPMap.Map.toggleModule('search', false);
-    },
-    handleModuleTabClick: function(el) {
-      NPMap.Map.toggleModule(el.id.replace('npmap-module-tab-', ''), true);
-    },
-    */
-
-
     /**
      * Toggles a module on or off.
      * @param {String} module
      * @param {Boolean} on
+     * @return null
      */
     toggleModule: function(module, on) {
       /*
@@ -1578,86 +1754,87 @@ define([
     },
     /**
      * Zooms and/or pans the map to its initial extent.
+     * @return null
      */
     toInitialExtent: function() {
       NPMap.Map[NPMap.config.api].toInitialExtent();
     },
     /**
-     * DEPRECATED: Updates a marker's icon.
-     * @param {Object} marker A baseApi marker object.
-     * @param {String} icon The url of the new icon.
-     */
-    updateMarkerIcon: function(marker, icon) {
-      NPMap.Map[NPMap.config.api].updateMarkerIcon(marker, icon);
-    },
-    /**
-     * DEPRECATED: Updates a marker's label.
-     * @param {Object} marker A baseApi marker object.
-     * @param {String} label The new label string.
-     */
-    updateMarkerLabel: function(marker, label) {
-      NPMap.Map[NPMap.config.api].updateMarkerLabel(marker, label);
-    },
-    /**
      * Updates the progress bar value.
      * @param {Number} value The value to update the progress bar with.
+     * @return null;
      */
     updateProgressBar: function(value) {
-      document.getElementById('npmap-progressbar').childNodes[0].style.width = value + '%';
+      divProgressBar.childNodes[0].style.width = value + '%';
     },
     /**
      * Zooms the map to a zoom level.
      * @param {Number} zoom
+     * @return null
      */
     zoom: function(zoom) {
       NPMap.Map[NPMap.config.api].zoom(zoom);
     },
     /**
      * Zooms the map in by one zoom level.
+     * @return null
      */
     zoomIn: function() {
       NPMap.Map[NPMap.config.api].zoomIn();
     },
     /**
      * Zooms the map out by one zoom level.
+     * @return null
      */
     zoomOut: function() {
       NPMap.Map[NPMap.config.api].zoomOut();
     },
     /**
      * Zooms the map to a bounding box.
-     * @param {Object} bbox A bbox object with nw and se lat/lng strings.
+     * @param {Object} bounds
+     * @return null
      */
-    zoomToBoundingBox: function(bbox) {
-      NPMap.Map[NPMap.config.api].zoomToBoundingBox({
-        nw: NPMap.Map[NPMap.config.api].latLngToApi(bbox.nw),
-        se: NPMap.Map[NPMap.config.api].latLngToApi(bbox.se)
-      });
+    zoomToBounds: function(bounds) {
+      NPMap.Map[NPMap.config.api].zoomToBounds(NPMap.Map[NPMap.config.api].boundsToApi(bounds));
     },
     /**
-     * Zooms the map to a lat/lng.
-     * @param {String} latLng The lat/lng string, in "latitude,longitude" format, to zoom the map to.
-     */
-    zoomToLatLng: function(latLng) {
-      NPMap.Map[NPMap.config.api].zoomToLatLng(this.latLngToApi(latLng));
-    },
-    /**
-     * Zooms the map to the extent of an array of lat/lng strings.
-     * @param {Array} latLngs The array of lat/lng strings.
+     * Zooms the map to the extent of an array of lat/lng objects.
+     * @param {Array} latLngs The array of lat/lng objects.
+     * @return null
      */
     zoomToLatLngs: function(latLngs) {
-      var apiLatLngs = [],
-          me = this;
-      
+      var first = latLngs[0],
+          bounds = {
+            e: first.lng,
+            n: first.lat,
+            s: first.lat,
+            w: first.lng
+          };
+
       _.each(latLngs, function(latLng) {
-        apiLatLngs.push(me.latLngToApi(latLng));
+        if (latLng.lat > bounds.n) {
+          bounds.n = latLng.lat;
+        }
+
+        if (latLng.lat < bounds.s) {
+          bounds.s = latLng.lat;
+        }
+
+        if (latLng.lng > bounds.e) {
+          bounds.e = latLng.lng;
+        }
+
+        if (latLng.lng < bounds.w) {
+          bounds.w = latLng.lng;
+        }
       });
-      
-      NPMap.Map[NPMap.config.api].zoomToLatLngs(apiLatLngs);
+
+      me.zoomToBounds(bounds);
     },
     /**
      * Zooms the map to the extent of an array of marker objects.
      * @param {Array} markers The array of marker objects.
+     * @return null
      */
     zoomToMarkers: function(markers) {
       NPMap.Map[NPMap.config.api].zoomToMarkers(markers);
