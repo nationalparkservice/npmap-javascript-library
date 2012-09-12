@@ -298,7 +298,7 @@ if (typeof bean === 'undefined') {
             } catch(e) {
               
             }
-          };
+          }
 
           delete NPMap.apiLoaded;
 

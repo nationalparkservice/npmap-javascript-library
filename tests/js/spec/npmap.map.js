@@ -1,80 +1,116 @@
-describe("NPMap.Map", function() {
-  it('should be able to add an element to the map div', function() {
-    var div = document.createElement('div');
-    div.id = 'npmap-test-div';
-    div.style.cssText = 'background-color:blue;height:5px;left:100px;position:absolute;top:100px;width:5px;';
+var latLng = {
+      lat: 39.751527115853754,
+      lng: -104.88604848489224
+    },
+    line,
+    lineLatLngs = [{
+      lat: 38.7841,
+      lng: -96.9255
+    },{
+      lat: 38.7862,
+      lng: -96.7
+    },{
+      lat: 38.833,
+      lng: -96.4723
+    }],
+    marker,
+    markerLatLng = {
+      lat: 39.2153,
+      lng: -97.2578
+    },
+    polygon,
+    polygonLatLngs = [{
+      lat: 39.1833,
+      lng: -96.4805
+    },{
+      lat: 39.0448,
+      lng: -96.49699
+    },{
+      lat: 39.0448,
+      lng: -96.25804
+    },{
+      lat: 39.17268,
+      lng: -96.26092
+    }],
+    zoom = 15;
 
-    NPMap.Map.addElement(div);
+describe('Conversion methods:', function() {
+  var boundsApi = null,
+      boundsNpmap = {
+        e: -37.3330078125,
+        n: 48.49296796071654,
+        s: 28.040498067172177,
+        w: -154.6669921875
+      },
+      latLngApi = null,
+      latLngNpmap = {
+        lat: 39,
+        lng: -96
+      },
+      pixelApi = null,
+      pixelNpmap = {
+        x: 50,
+        y: 50
+      };
 
-    expect(document.getElementById('npmap-test-div')).toBeDefined();
+  it('boundsFromApi', function() {
+    if (!boundsApi) {
+      boundsApi = NPMap.Map.boundsToApi(boundsNpmap);
+    }
+    
+    expect(NPMap.Map.boundsFromApi(boundsApi).e).toBeNumber();
   });
-  // addElementsToMapDiv
-  // addShape
-  it('should be able to center the map', function() {
+  it('boundsToApi', function() {
     expect(function() {
-      NPMap.Map.center('39.751527115853754,-104.88604848489224');
+      boundsApi = NPMap.Map.boundsToApi(boundsNpmap);
     }).not.toThrow();
   });
-  it('should be able to center and zoom the map', function() {
+  it('latLngFromApi', function() {
+    if (!latLngApi) {
+      latLngApi = NPMap.Map.latLngToApi(latLngNpmap);
+    }
+
+    expect(NPMap.Map.latLngFromApi(latLngApi).lat).toBeNumber();
+  });
+  it('latLngToApi', function() {
     expect(function() {
-      NPMap.Map.centerAndZoom('39.752544764563154,-105.01213075031792', 15);
+      latLngApi = NPMap.Map.latLngToApi(latLngNpmap);
     }).not.toThrow();
   });
-  // createLine
-  // createMarker
-  // createPolygon
-  it('should be able to get the center', function() {
-    expect(NPMap.Map.getCenter()).toBeString();
+  it('latLngToPixel', function() {
+    expect(NPMap.Map.latLngToPixel(latLngNpmap).x).toBeNumber();
   });
-  // getClickDotLatLng
-  // getLatLngFromPixel
-  it('should be able to get the container div', function() {
-    expect(NPMap.Map.getContainerDiv()).toBeDefined();
-  });
-  // getMarkerAnchor
-  // getMarkerIcon
-  // getMarkerLatLng
-  // getMarkerOption
-  // getMarkerVisibility
-  it('should be able to get the max zoom', function() {
-    expect(NPMap.Map.getMaxZoom()).toBeNumber();
-  });
-  it('should be able to get the min zoom', function() {
-    expect(NPMap.Map.getMinZoom()).toBeNumber();
-  });
-  // getPixelFromLatLng
-  it('should be able to get the zoom', function() {
-    expect(NPMap.Map.getZoom()).toBeNumber();
-  });
-  // handleResize
-  // hideShape
-  // isLatLngWithinMapBounds
-  // latLngFromApi
-  // matchBaseLayer
-  // panByPixels
-  // positionClickDot
-  // removeShape
-  // setMarkerIcon
-  // setMarkerOptions
-  // showShape
-  // latLngToApi
-  // switchBaseLayer
-  it('should be able to zoom and/or pan the map to its initial extent', function() {
+  it('pixelToApi', function() {
     expect(function() {
-      NPMap.Map.toInitialExtent();
+      pixelApi = NPMap.Map.pixelToApi(pixelNpmap);
     }).not.toThrow();
   });
-  // updateMarkerIcon DEPRECATED
-  // updateMarkerLabel DEPRECATED
-  it('should be able to zoom the map', function() {
-    expect(function() {
-      NPMap.Map.zoom(9);
-    }).not.toThrow();
+  it('pixelFromApi', function() {
+    if (!pixelApi) {
+      pixelApi = NPMap.Map.pixelToApi(pixelNpmap);
+    }
+
+    expect(NPMap.Map.pixelFromApi(pixelApi).x).toBeNumber();
   });
-  // zoomIn
-  // zoomOut
-  // zoomToBoundingBox
-  // zoomToLatLng
-  // zoomToLatLngs
-  // zoomToMarkers
+  it('pixelToLatLng', function() {
+    expect(NPMap.Map.pixelToLatLng(pixelNpmap).lat).toBeNumber();
+  });
 });
+
+/*
+switch (baseApi) {
+  case 'bing':
+    describe('\'bing\' features:', function() {
+
+    });
+    break;
+  case 'esri':
+    break;
+  case 'google':
+    break;
+  case 'leaflet':
+    break;
+  case 'modestmaps':
+    break;
+}
+*/

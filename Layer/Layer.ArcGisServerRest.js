@@ -369,7 +369,7 @@ define([
           if (config.layersStatus && config.layersStatus !== 'all') {
             u += '&layers=show:' + config.layersStatus;
           }
-
+          
           return u;
         };
       }

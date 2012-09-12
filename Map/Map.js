@@ -941,7 +941,7 @@ define([
       }
 
       div.appendChild(el);
-
+      
       if (typeof stopPropagation === 'undefined' || stopPropagation === true) {
         Util.stopAllPropagation(el);
       }
@@ -1049,7 +1049,9 @@ define([
      * @return {Object}
      */
     createLine: function(latLngs, options) {
-      return NPMap.Map[NPMap.config.api].createLine(latLngs, NPMap.Map[NPMap.config.api].convertLineOptions(options));
+      options = options || {};
+
+      return this._createLine(latLngs, NPMap.Map[NPMap.config.api].convertLineOptions(options));
     },
     /**
      * Creates a marker using the base API's marker class.
@@ -1058,6 +1060,8 @@ define([
      * @return {Object}
      */
     createMarker: function(latLng, options) {
+      options = options || {};
+
       return this._createMarker(latLng, NPMap.Map[NPMap.config.api].convertMarkerOptions(options));
     },
     /**
@@ -1067,7 +1071,9 @@ define([
      * @return {Object}
      */
     createPolygon: function(latLngs, options) {
-      return NPMap.Map[NPMap.config.api].createPolygon(latLngs, NPMap.Map[NPMap.config.api].convertPolygonOptions(options));
+      options = options || {};
+
+      return this._createPolygon(latLngs, NPMap.Map[NPMap.config.api].convertPolygonOptions(options));
     },
     /**
      * Creates a Zoomify layer.
@@ -1353,6 +1359,12 @@ define([
       return NPMap.Map[NPMap.config.api].latLngToApi(latLng);
     },
     /**
+     *
+     */
+    latLngToPixel: function(latLng) {
+      return NPMap.Map[NPMap.config.api].latLngToPixel(this.latLngToApi(latLng));
+    },
+    /**
      * Turns meters into a zoom level. This function is not precise, as it is impossible to get precise meter scale values for the entire earth reprojected to web mercator.
      * @param {Number} meters
      * @return {Number}
@@ -1475,6 +1487,22 @@ define([
           });
           break;
       }
+    },
+    /**
+     * Converts a base API pixel object to its NPMap equivalent.
+     * @param {Object} pixel
+     * @return {Object}
+     */
+    pixelFromApi: function(pixel) {
+      return NPMap.Map[NPMap.config.api].pixelFromApi(pixel);
+    },
+    /**
+     * Converts a NPMap pixel object to its base API equivalent.
+     * @param {Object} pixel
+     * @return {Object}
+     */
+    pixelToApi: function(pixel) {
+      return NPMap.Map[NPMap.config.api].pixelToApi(pixel);
     },
     /**
      * Converts a pixel object to a lat/lng object.

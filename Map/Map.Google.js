@@ -445,18 +445,26 @@ define([
       return new google.maps.LatLngBounds(new google.maps.LatLng(bounds.s, bounds.w), new google.maps.LatLng(bounds.n, bounds.e));
     },
     /**
+     * Centers the map.
+     * @param {Object} latLng The latLng object to center the map on.
+     * @return null
+     */
+    center: function(latLng) {
+      map.setCenter(latLng);
+    },
+    /**
      * Zooms to the center and zoom provided. If zoom isn't provided, the map will zoom to level 17.
      * @param {google.maps.LatLng} latLng
      * @param {Number} zoom
      */
     centerAndZoom: function(latLng, zoom) {
       if (zoom) {
-        map.setZoom(zoom);
+        this.zoom(zoom);
       } else {
-        map.setZoom(17);
+        this.zoom(17);
       }
       
-      map.setCenter(latLng);
+      this.center(latLng);
     },
     /**
      *
@@ -527,6 +535,11 @@ define([
 
       options = options || {};
       options.path = latLngs;
+      line = new google.maps.Polyline(options);
+
+      hookUpShapeClickHandler(line);
+
+      return line;
     },
     /**
      * Creates a google.maps.Marker object.
@@ -925,9 +938,7 @@ define([
      * @param {Number} zoom
      */
     zoom: function(zoom) {
-      map.setView({
-        zoom: zoom
-      });
+      map.setZoom(zoom);
     },
     /**
      * Zooms the map in by one zoom level.

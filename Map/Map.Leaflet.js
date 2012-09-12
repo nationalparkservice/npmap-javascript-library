@@ -8,13 +8,13 @@ define([
 
   var
       // The center {L.LatLng} to initialize the map with.
-      center = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
+      initialCenter = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
+      // The zoom level to initialize the map with.
+      initialZoom = NPMap.config.zoom ? NPMap.config.zoom : 4,
       // The {L.Map} object.
       map,
       // The map config object.
-      mapConfig = {},
-      // The zoom level to initialize the map with.
-      zoom = NPMap.config.zoom ? NPMap.config.zoom : 4;
+      mapConfig = {};
 
   // Simple projection for "flat" maps. - https://github.com/CloudMade/Leaflet/issues/210#issuecomment-3344944
   // TODO: This should be contained in Zoomify layer handler.
@@ -155,8 +155,8 @@ define([
   });
   
   mapConfig.attributionControl = false;
-  mapConfig.center = center;
-  mapConfig.zoom = zoom;
+  mapConfig.center = initialCenter;
+  mapConfig.zoom = initialZoom;
   mapConfig.zoomControl = false;
 
   if (NPMap.config.baseLayers) {
@@ -389,7 +389,8 @@ define([
      * Gets the map element.
      */
     getMapElement: function() {
-      return document.getElementById(NPMap.config.div).childNodes[0];
+      return document.getElementById('npmap-map');
+      //return document.getElementById(NPMap.config.div).childNodes[0];
     },
     /**
      * Gets the maximum zoom level for this map.
@@ -525,11 +526,11 @@ define([
      * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
      * @param {Object} c
      */
-    setInitialCenter: function(c) {
-      center = c;
+    setInitialCenter: function(center) {
+      initialCenter = c;
       NPMap.config.center = {
-        lat: c.lat,
-        lng: c.lng
+        lat: center.lat,
+        lng: center.lng
       };
     },
     /**
@@ -560,7 +561,15 @@ define([
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
-      map.setView(center, zoom);
+      map.setView(initialCenter, initialZoom);
+    },
+    /**
+     * Zooms the map to a zoom level.
+     * @param {Number} zoom
+     * @return null
+     */
+    zoom: function(zoom) {
+      map.setView(this.getCenter(), zoom);
     },
     /**
      * Zooms the map in by one zoom level.

@@ -768,7 +768,7 @@ define([
       };
     },
     /**
-     * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to a {Microsoft.Maps.Location} object.
+     * Converts a NPMap latLng object to a {Microsoft.Maps.Location} object.
      * @param {String/Object} latLng
      * @return {Object}
      */
