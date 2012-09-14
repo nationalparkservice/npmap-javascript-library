@@ -302,7 +302,7 @@ define([
           });
         }
       });
-      NPMap.Map.setAttribution(NPMap.Map.buildAttributionStringForVisibleLayers(attribution.slice(0, attribution.length - 1)));
+      NPMap.Map.setAttribution(NPMap.Map.buildAttributionString(attribution.slice(0, attribution.length - 1)));
     });
     
     NPMap.Event.trigger('NPMap.Map', 'viewchangeend');
@@ -773,19 +773,7 @@ define([
      * @return {Object}
      */
     latLngToApi: function(latLng) {
-      var lat,
-          lng;
-
-      if (typeof latLng === 'string') {
-        latLng = latLng.split(',');
-        lat = latLng[0];
-        lng = latLng[1];
-      } else {
-        lat = latLng.lat;
-        lng = latLng.lng;
-      }
-
-      return new Microsoft.Maps.Location(parseFloat(lat), parseFloat(lng));
+      return new Microsoft.Maps.Location(parseFloat(latLng.lat), parseFloat(latLng.lng));
     },
     /**
      * Converts a {Microsoft.Maps.Location} to a {Microsoft.Maps.Point}.
@@ -999,6 +987,16 @@ define([
       map.setMapType(mapTypeId);
     },
     /**
+     * Zooms the map to a bounding box.
+     * @param {Object} bbox A bbox object with nw and se {Microsoft.Maps.Location} objects.
+     */
+    toBounds: function(bounds) {
+      map.setView({
+        bounds: bounds,
+        padding: 30
+      });
+    },
+    /**
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
@@ -1009,14 +1007,38 @@ define([
       });
     },
     /**
-     *
+     * Zooms the map to the extent of an array of lat/lng objects.
+     * @param {Array} latLngs The array of lat/lng objects.
+     * @return null
+     */
+    toLatLngs: function(latLngs) {
+      this.toBounds(Microsoft.Maps.LocationRect.fromLocations(latLngs));
+    },
+    /**
+     * Zooms the map to the extent of an array of {Microsoft.Map.Pushpin} objects.
+     * @param {Array} markers The array of marker objects.
+     */
+    toMarkers: function(markers) {
+      var latLngs = [],
+          me = this;
+
+      for (var i = 0; i < markers.length; i++) {
+        latLngs.push(me.getMarkerLatLng(markers[i]));
+      }
+
+      this.toLatLngs(latLngs);
+    },
+    /**
+     * Triggers an event using the Microsoft.Maps.Events class.
+     * @param {String} target Currently the only valid target is 'map'.
+     * @return null
      */
     triggerEvent: function(target, name, e) {
       if (target === 'map') {
         e.targetType = 'map';
         target = map;
       }
-
+      
       Microsoft.Maps.Events.invoke(target, name, e);
     },
     /**
@@ -1056,44 +1078,6 @@ define([
       map.setView({
         zoom: map.getZoom() - 1
       });
-    },
-    /**
-     * Zooms the map to a bounding box.
-     * @param {Object} bbox A bbox object with nw and se {Microsoft.Maps.Location} objects.
-     */
-    zoomToBounds: function(bounds) {
-      map.setView({
-        bounds: bounds,
-        padding: 30
-      });
-    },
-    /**
-     * Zooms the map to the extent of an array of {Microsoft.Map.Pushpin} objects.
-     * @param {Array} markers The array of marker objects.
-     */
-    zoomToMarkers: function(markers) {
-      var latLngs = [],
-          me = this;
-
-      for (var i = 0; i < markers.length; i++) {
-        latLngs.push(me.getMarkerLatLng(markers[i]));
-      }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      this.zoomToLatLngs(latLngs);
     }
   };
 });

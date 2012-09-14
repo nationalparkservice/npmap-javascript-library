@@ -5,7 +5,7 @@ define([
   'Util/Util'
 ], function(Event, Map, Util) {
   /* wax.g */
-  wax.g={};wax.g.bwdetect=function(b,d){var d=d||{},e=d.png||".png128",a=d.jpg||".jpg70";if(!b.mapTypes["mb-low"]){for(var c=b.mapTypes.mb,g={tiles:[],scheme:c.options.scheme,blankImage:c.options.blankImage,minzoom:c.minZoom,maxzoom:c.maxZoom,name:c.name,description:c.description},f=0;f<c.options.tiles.length;f++)g.tiles.push(c.options.tiles[f].replace(".png",e).replace(".jpg",a));m.mapTypes.set("mb-low",new wax.g.connector(g))}return wax.bwdetect(d,function(a){b.setMapTypeId(a?"mb":"mb-low")})};wax=wax||{};wax.g=wax.g||{};wax.g.interaction=function(){function b(){d=!0}var d=!1,e,a;return wax.interaction().attach(function(c){if(!arguments.length)return a;a=c;google.maps.event.addListener(a,"tileloaded",b);google.maps.event.addListener(a,"idle",b)}).detach(function(){google.maps.event.removeListener(a,"tileloaded",b);google.maps.event.removeListener(a,"idle",b)}).parent(function(){return a.getDiv()}).grid(function(){if(d||!e){e=[];var c=a.getZoom();wax.u.offset(a.getDiv());var b=function(a){if(a.interactive)for(var b in a.cache)if(b.split("/")[0]==c){var d=wax.u.offset(a.cache[b]);e.push([d.top,d.left,a.cache[b]])}},f;for(f in a.mapTypes)b(a.mapTypes[f]);a.overlayMapTypes.forEach(b)}return e})};
+  wax.g=wax.g||{};wax.g.bwdetect=function(c,b){var b=b||{},f=b.png||".png128",g=b.jpg||".jpg70";if(!c.mapTypes["mb-low"]){for(var a=c.mapTypes.mb,e={tiles:[],scheme:a.options.scheme,blankImage:a.options.blankImage,minzoom:a.minZoom,maxzoom:a.maxZoom,name:a.name,description:a.description},d=0;d<a.options.tiles.length;d++)e.tiles.push(a.options.tiles[d].replace(".png",f).replace(".jpg",g));m.mapTypes.set("mb-low",new wax.g.connector(e))}return wax.bwdetect(b,function(a){c.setMapTypeId(a?"mb":"mb-low")})};wax.g.interaction=function(){function b(){d=!0}var d=!1,c,a;return wax.interaction().attach(function(c){if(!arguments.length)return a;a=c;google.maps.event.addListener(a,"tileloaded",b);google.maps.event.addListener(a,"idle",b)}).detach(function(){google.maps.event.removeListener(a,"tileloaded",b);google.maps.event.removeListener(a,"idle",b)}).parent(function(){return a.getDiv()}).grid(function(){if(d||!c){c=[];var b=a.getZoom();wax.u.offset(a.getDiv());var f=function(a){if(a.interactive)for(var e in a.cache)if(e.split("/")[0]==b){var d=wax.u.offset(a.cache[e]);c.push([d.top,d.left,a.cache[e]])}},g;for(g in a.mapTypes)f(a.mapTypes[g]);a.overlayMapTypes.forEach(f)}return c})};wax.g.connector=function(a){a=a||{};this.options={tiles:a.tiles,scheme:a.scheme||"xyz",blankImage:a.blankImage||"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="};this.minZoom=a.minzoom||0;this.maxZoom=a.maxzoom||22;this.name=a.name||"";this.description=a.description||"";this.interactive=!0;this.tileSize=new google.maps.Size(256,256);this.cache={}};wax.g.connector.prototype.getTile=function(a,c){var b=c+"/"+a.x+"/"+a.y;if(!this.cache[b]){var d=this.cache[b]=new Image(256,256);this.cache[b].src=this.getTileUrl(a,c);this.cache[b].setAttribute("gTileKey",b);this.cache[b].onerror=function(){d.style.display="none"}}return this.cache[b]};wax.g.connector.prototype.releaseTile=function(a){var c=a.getAttribute("gTileKey");this.cache[c]&&delete this.cache[c];a.parentNode&&a.parentNode.removeChild(a)};wax.g.connector.prototype.getTileUrl=function(a,c){var b=Math.pow(2,c),d="tms"===this.options.scheme?b-1-a.y:a.y,e=a.x%b,e=0>e?a.x%b+b:e;return 0>d?this.options.blankImage:this.options.tiles[parseInt(e+d,10)%this.options.tiles.length].replace("{z}",c).replace("{x}",e).replace("{y}",d)};
 
   var
       //
@@ -349,15 +349,17 @@ define([
           divAttribution.style.display = 'none';
           divLogo.style.display = 'none';
           attribution = Util.stripHtmlFromString(divAttribution.innerHTML);
-          
-          NPMap.Map.setAttribution(attribution);
-          
           intHtml = setInterval(function() {
-            var a = Util.stripHtmlFromString(divAttribution.innerHTML);
-            
+            var a = Util.stripHtmlFromString(divAttribution.innerHTML).replace('Map DataMap data', 'Map data').replace(' - Terms of Use', '').replace('Terms of Use - ', '').replace('Terms of Use', ''),
+                elementsNoPrint = Util.getElementsByClass('gmnoprint');
+                
             if (a !== attribution) {
-              NPMap.Map.setAttribution(a);
+              Map.setAttribution(Map.buildAttributionString(a));
               attribution = a;
+            }
+
+            for (var i = 0; i < elementsNoPrint.length; i++) {
+              elementsNoPrint[i].style.display = 'none';
             }
           }, 250);
         }
@@ -419,6 +421,20 @@ define([
       } else {
         map.overlayMapTypes.insertAt(0, layer);
       }
+    },
+    /**
+     * Adds a TileStream layer to the map.
+     * @param {Object} tileJson
+     * return null
+     */
+    addTileStreamLayer: function(tileJson) {
+      for (var i in map.mapTypes) {
+        if (map.mapTypes[i].interactive) {
+          map.overlayMapTypes.insertAt(0, map.mapTypes[i]);
+        }
+      }
+
+      // TODO: Support adding it as a baseLayer: (map.setMapTypeId(tileJson.id)).
     },
     /**
      * Converts an API bounds to a NPMap bounds.
@@ -637,11 +653,25 @@ define([
       });
     },
     /**
+     * Creates a TileStream layer.
+     * @param {Object} tileJson
+     * @return {Object}
+     */
+    createTileStreamLayer: function(tileJson) {
+      map.mapTypes.set(tileJson.id, new wax.g.connector(tileJson));
+    },
+    /**
      * Gets a latLng from an event object.
      * @param {Object} e
      */
     eventGetLatLng: function(e) {
-      return this.pixelToLatLng(new google.maps.Point(e.offsetX, e.offsetY));
+      if (e.latLng) {
+        return e.latLng;
+      } else {
+        var offset = Util.getOffset(document.getElementById('npmap-map'));
+
+        return this.pixelToLatLng(new google.maps.Point(e.pageX - offset.left, e.pageY - offset.top));
+      }
     },
     /**
      * Gets a shape from an event object.
@@ -672,12 +702,13 @@ define([
       return this.getLatLngFromPixel(this.getClickDotPixel());
     },
     /**
-     * Returns the {Microsoft.Mas.Point} for the #npmap-clickdot div.
+     * Returns the {google.maps.Point} for the #npmap-clickdot div.
      */
     getClickDotPixel: function() {
-      var position = Util.getOffset(document.getElementById('npmap-clickdot'));
+      var offset = Util.getOffset(document.getElementById('npmap-map')),
+          position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
-      return new google.maps.Point(position.left, position.top);
+      return new google.maps.Point(position.left - offset.left, position.top - offset.top);
     },
     /**
      * Gets a {google.maps.LatLng} from a {google.maps.Point}.
@@ -896,6 +927,20 @@ define([
       shape.setMap(null);
     },
     /**
+     * Sets the map cursor.
+     * @param {String} cursor
+     * @return null
+     */
+    setCursor: function(cursor) {
+      if (cursor === 'default') {
+        cursor = 'url(http://maps.google.com/mapfiles/openhand.cur), move';
+      }
+
+      map.setOptions({
+        draggableCursor: cursor
+      });
+    },
+    /**
      * Sets the marker's icon.
      * @param {Object} marker
      * @param {String} The url of the marker icon.
@@ -911,10 +956,49 @@ define([
       map.setMapTypeId(google.maps.MapTypeId[baseLayer.code.toUpperCase()]);
     },
     /**
+     * Zooms the map to a bounding box.
+     * @param {Object} bounds
+     * @return null
+     */
+    toBounds: function(bounds) {
+      map.fitBounds(bounds);
+    },
+    /**
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
       this.centerAndZoom(initialCenter, initialZoom);
+    },
+    /**
+     * Zooms the map to the extent of an array of lat/lng objects.
+     * @param {Array} latLngs The array of lat/lng objects.
+     * @return null
+     */
+    toLatLngs: function(latLngs) {
+      var bounds = new google.maps.LatLngBounds();
+
+      for (var i = 0; i < latLngs.length; i++) {
+        var latLng = latLngs[i];
+
+        bounds.extend(new google.maps.LatLng(latLng.lat(), latLng.lng()));
+      }
+
+      this.toBounds(bounds);
+    },
+    /**
+     * Zooms the map to the extent of an array of {google.maps.Marker} objects.
+     * @param {Array} markers The array of marker objects.
+     * @return null
+     */
+    toMarkers: function(markers) {
+      var latLngs = [],
+          me = this;
+
+      for (var i = 0; i < markers.length; i++) {
+        latLngs.push(me.getMarkerLatLng(markers[i]));
+      }
+
+      this.toLatLngs(latLngs);
     },
     /**
      *
@@ -959,14 +1043,6 @@ define([
      */
     zoomOut: function() {
       this.zoom(this.getZoom() - 1);
-    },
-    /**
-     * Zooms the map to a bounding box.
-     * @param {Object} bounds
-     * @return null
-     */
-    zoomToBounds: function(bounds) {
-      map.fitBounds(bounds);
     }
   };
 });

@@ -3,7 +3,7 @@ define([
   'Layer/Layer',
   'Util/Util.Json',
   'Util/Util.Json.GeoJson'
-], function(layer, utilJson, utilGeoJson) {
+], function(Layer, utilJson, utilGeoJson) {
   return NPMap.Layer.GeoJson = {
     /**
      * Handles the click operation for GeoJson layers.
@@ -13,7 +13,7 @@ define([
       var target = NPMap.Map[NPMap.config.api].eventGetShape(e);
 
       if (target && target.npmap && target.npmap.layerType === 'GeoJson') {
-        var config = NPMap.Map.getLayerByName(target.npmap.layerName),
+        var config = Layer.getLayerByName(target.npmap.layerName),
             content,
             data = target.npmap.data,
             shapeType = target.npmap.shapeType,

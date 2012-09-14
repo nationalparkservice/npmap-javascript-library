@@ -22,7 +22,7 @@ define([
    */
   function buildHtmlForLayer(layer) {
     var html = '<ul>',
-        layerConfig = Map.getLayerByName(layer.layerName),
+        layerConfig = Layer.getLayerByName(layer.layerName),
         subLayers = [];
 
     _.each(layer.data.results, function(result, i) {
@@ -265,7 +265,7 @@ define([
           }],
           attributes,
           ids = id.split('-'),
-          layer = Map.getLayerByName(name, NPMap.config.layers),
+          layer = Layer.getLayerByName(name, NPMap.config.layers),
           me = this,
           results,
           subLayer,

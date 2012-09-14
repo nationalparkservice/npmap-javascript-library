@@ -179,8 +179,6 @@ define([
       func: function(e) {
         mouseDownPixel = getMousePixel(e);
 
-        console.log(mouseDownPixel);
-
         if (e.shiftKey) {
           zoombox.style.display = 'block';
           zoombox.style.left = mouseDownPixel.x + 'px';
@@ -224,7 +222,7 @@ define([
             y: coords.s
           });
 
-          NPMap.Map.zoomToBounds({
+          NPMap.Map.toBounds({
             e: se.lng,
             n: nw.lat,
             s: se.lat,
@@ -380,7 +378,10 @@ define([
         attribution.id = 'npmap-attribution';
         elements.push({
           el: attribution,
-          func: setAttributionMaxWidthAndPosition
+          func: function() {
+            me.setAttribution(me.buildAttributionString());
+            setAttributionMaxWidthAndPosition();
+          }
         });
         clickdot.id = 'npmap-clickdot';
         elements.push({
@@ -995,8 +996,9 @@ define([
      * @param {String} attribution An attribution string to add to the visible layer attribution.
      * @return {String}
      */
-    buildAttributionStringForVisibleLayers: function(attribution) {
+    buildAttributionString: function(attribution) {
       var attr = [],
+          disclaimer = '<a href="http://www.nps.gov/npmap/disclaimer.html" target="_blank">NPS Disclaimer</a>',
           me = this;
       
       if (attribution) {
@@ -1005,23 +1007,25 @@ define([
         });
       }
       
-      _.each(me.getVisibleLayers(), function(v) {
-        if (v.attribution) {
-          _.each(v.attribution.split('|'), function(v2) {
-            var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
+      if (NPMap.Layer) {
+        _.each(NPMap.Layer.getVisibleLayers(), function(v) {
+          if (v.attribution) {
+            _.each(v.attribution.split('|'), function(v2) {
+              var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
 
-            if (_.indexOf(attr, credit) === -1) {
-              attr.push(credit);
-            }
-          });
-        }
-      });
+              if (_.indexOf(attr, credit) === -1) {
+                attr.push(credit);
+              }
+            });
+          }
+        });
+      }
 
       if (attr.length > 0) {
         attr.sort();
-        return attr.join(' | ');
+        return attr.join(' | ') + ' | ' + disclaimer;
       } else {
-        return null;
+        return disclaimer;
       }
     },
     /**
@@ -1084,37 +1088,6 @@ define([
       return NPMap.Map[NPMap.config.api].createZoomifyLayer(config);
     },
     /**
-     * Gets the active layer types for both the baseLayers and layers configs.
-     * @return {Array}
-     */
-    getActiveLayerTypes: function() {
-      var types = [];
-      
-      if (NPMap.config.baseLayers) {
-        _.each(NPMap.config.baseLayers, function(baseLayer) {
-          var type = baseLayer.type,
-              visible = baseLayer.visible;
-
-          if ((typeof visible === 'undefined' || visible === true) && _.indexOf(types, type) === -1) {
-            types.push(type);
-          }
-        });
-      }
-
-      if (NPMap.config.layers) {
-        _.each(NPMap.config.layers, function(layer) {
-          var type = layer.type,
-              visible = layer.visible;
-
-          if ((typeof visible === 'undefined' || visible === true) && _.indexOf(types, type) === -1) {
-            types.push(type);
-          }
-        });
-      }
-
-      return types;
-    },
-    /**
      * Gets the map bounds.
      * @return {Object}
      */
@@ -1127,42 +1100,6 @@ define([
      */
     getCenter: function() {
       return this.latLngFromApi(NPMap.Map[NPMap.config.api].getCenter());
-    },
-    /**
-     * Gets a layer config object by layer id.
-     * @param {String} id The id of the layer to search for.
-     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
-     * @return {Object}
-     */
-    getLayerById: function(id, layers) {
-      if (!layers) {
-        layers = NPMap.config.layers;
-      }
-
-      _.each(layers, function(layer) {
-        if (layer.id == id) {
-          return layer;
-        }
-      });
-    },
-    /**
-     * Gets a layer config object by layer name.
-     * @param {String} name The name of the layer to search for.
-     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
-     * @return {Object}
-     */
-    getLayerByName: function(name, layers) {
-      if (!layers) {
-        layers = NPMap.config.layers;
-      }
-
-      for (var i = 0; i < layers.length; i++) {
-        var layer = layers[i];
-
-        if (layer.name === name) {
-          return layer;
-        }
-      }
     },
     /**
      * Gets the map element.
@@ -1211,23 +1148,6 @@ define([
       return NPMap.Map[NPMap.config.api].getMinZoom();
     },
     /**
-     * Gets the layers that are currently visible.
-     * @return {Array}
-     */
-    getVisibleLayers: function() {
-      var layers = [];
-
-      if (NPMap.config.layers) {
-        _.each(NPMap.config.layers, function(layer) {
-          if (layer.visible) {
-            layers.push(layer);
-          }
-        });
-      }
-    
-      return layers;
-    },
-    /**
      * Gets the zoom level of the map.
      * @return {Number}
      */
@@ -1253,15 +1173,12 @@ define([
     hasClusteredLayer: function() {
       hasClustered = false;
       
-      if (NPMap.config.layers) {
-        for (var i = 0; i < NPMap.config.layers.length; i++) {
-          var layer = NPMap.config.layers[i];
-
-          if (layer.type === 'NativeVectors' && layer.clustered === true) {
+      if (NPMap.Layer) {
+        NPMap.Layer.iterateThroughAllLayers(function(l) {
+          if (l.type === 'NativeVectors' && l.clustered === true) {
             hasClustered = true;
-            break;
           }
-        }
+        });
       }
       
       return hasClustered;
@@ -1272,18 +1189,15 @@ define([
      */
     hasTiledLayer: function() {
       hasTiled = false;
-      
-      if (NPMap.config.layers) {
-        for (var i = 0; i < NPMap.config.layers.length; i++) {
-          var layer = NPMap.config.layers[i];
 
-          if ((layer.type === 'NativeVectors' && layer.tiled) || (layer.type === 'ArcGisServerRest' || layer.type === 'CartoDb' || layer.type === 'TileStream')) {
+      if (NPMap.Layer) {
+        NPMap.Layer.iterateThroughAllLayers(function(l) {
+          if ((l.type === 'NativeVectors' && l.tiled) || (l.type === 'ArcGisServerRest' || l.type === 'CartoDb' || l.type === 'TileStream')) {
             hasTiled = true;
-            break;
           }
-        }
+        });
       }
-      
+
       return hasTiled;
     },
     /**
@@ -1530,13 +1444,16 @@ define([
 
       if (divAttribution) {
         divAttribution.innerHTML = attribution;
+        divAttribution.style.display = 'block';
       } else {
         var interval = setInterval(function() {
-          divAttribution = document.getElementsByTagName('npmap-attribution');
+          divAttribution = document.getElementById('npmap-attribution');
 
           if (divAttribution) {
             clearInterval(interval);
+
             divAttribution.innerHTML = attribution;
+            divAttribution.style.display = 'block';
           }
         }, 250);
       }
@@ -1555,13 +1472,17 @@ define([
      * @return null
      */
     setCursor: function(cursor) {
-      var div = this.getMapElement();
+      if (typeof NPMap.Map[NPMap.config.api].setCursor === 'function') {
+        NPMap.Map[NPMap.config.api].setCursor(cursor);
+      } else {
+        var div = this.getMapElement();
 
-      if (div.style.cursor) {
-        div.style.cursor.replace(/cursor:[^;]+/g, '');
+        if (div.style.cursor) {
+          div.style.cursor.replace(/cursor:[^;]+/g, '');
+        }
+
+        div.style.cursor = cursor;
       }
-
-      div.style.cursor = cursor;
     },
     /**
      * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
@@ -1651,6 +1572,14 @@ define([
       divTip.style.bottom = (dimensions.height - position.y) + 'px';
       divTip.style.right = (dimensions.width - position.x) + 'px';
       divTip.style.display = 'block';
+    },
+    /**
+     * Zooms the map to a bounding box.
+     * @param {Object} bounds
+     * @return null
+     */
+    toBounds: function(bounds) {
+      NPMap.Map[NPMap.config.api].toBounds(NPMap.Map[NPMap.config.api].boundsToApi(bounds));
     },
     /**
      * Toggles fullscreen mode on or off.
@@ -1787,6 +1716,48 @@ define([
       NPMap.Map[NPMap.config.api].toInitialExtent();
     },
     /**
+     * Zooms the map to the extent of an array of lat/lng objects.
+     * @param {Array} latLngs The array of lat/lng objects.
+     * @return null
+     */
+    toLatLngs: function(latLngs) {
+      var first = latLngs[0],
+          bounds = {
+            e: first.lng,
+            n: first.lat,
+            s: first.lat,
+            w: first.lng
+          };
+
+      _.each(latLngs, function(latLng) {
+        if (latLng.lat > bounds.n) {
+          bounds.n = latLng.lat;
+        }
+
+        if (latLng.lat < bounds.s) {
+          bounds.s = latLng.lat;
+        }
+
+        if (latLng.lng > bounds.e) {
+          bounds.e = latLng.lng;
+        }
+
+        if (latLng.lng < bounds.w) {
+          bounds.w = latLng.lng;
+        }
+      });
+
+      this.toBounds(bounds);
+    },
+    /**
+     * Zooms the map to the extent of an array of marker objects.
+     * @param {Array} markers The array of marker objects.
+     * @return null
+     */
+    toMarkers: function(markers) {
+      NPMap.Map[NPMap.config.api].toMarkers(markers);
+    },
+    /**
      * Updates the progress bar value.
      * @param {Number} value The value to update the progress bar with.
      * @return null;
@@ -1815,56 +1786,6 @@ define([
      */
     zoomOut: function() {
       NPMap.Map[NPMap.config.api].zoomOut();
-    },
-    /**
-     * Zooms the map to a bounding box.
-     * @param {Object} bounds
-     * @return null
-     */
-    zoomToBounds: function(bounds) {
-      NPMap.Map[NPMap.config.api].zoomToBounds(NPMap.Map[NPMap.config.api].boundsToApi(bounds));
-    },
-    /**
-     * Zooms the map to the extent of an array of lat/lng objects.
-     * @param {Array} latLngs The array of lat/lng objects.
-     * @return null
-     */
-    zoomToLatLngs: function(latLngs) {
-      var first = latLngs[0],
-          bounds = {
-            e: first.lng,
-            n: first.lat,
-            s: first.lat,
-            w: first.lng
-          };
-
-      _.each(latLngs, function(latLng) {
-        if (latLng.lat > bounds.n) {
-          bounds.n = latLng.lat;
-        }
-
-        if (latLng.lat < bounds.s) {
-          bounds.s = latLng.lat;
-        }
-
-        if (latLng.lng > bounds.e) {
-          bounds.e = latLng.lng;
-        }
-
-        if (latLng.lng < bounds.w) {
-          bounds.w = latLng.lng;
-        }
-      });
-
-      me.zoomToBounds(bounds);
-    },
-    /**
-     * Zooms the map to the extent of an array of marker objects.
-     * @param {Array} markers The array of marker objects.
-     * @return null
-     */
-    zoomToMarkers: function(markers) {
-      NPMap.Map[NPMap.config.api].zoomToMarkers(markers);
     }
   };
 });

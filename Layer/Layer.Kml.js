@@ -14,7 +14,7 @@ define([
       var target = NPMap.Map[NPMap.config.api].eventGetShape(e);
 
       if (target && target.npmap && target.npmap.layerType === 'Kml') {
-        var config = NPMap.Map.getLayerByName(target.npmap.layerName),
+        var config = Layer.getLayerByName(target.npmap.layerName),
             content,
             data = target.npmap.data,
             title,

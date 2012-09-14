@@ -16,13 +16,24 @@
         height: 100%;
       }
       body {
+        background: #f9f7f1 url(img/sub_bg.png) no-repeat left bottom;
         margin: 0;
-        overflow: hidden;
         padding: 0;
         width: 100%;
       }
+      a {
+        color: #b28000;
+        text-decoration: none;
+      }
+      a:hover {
+        color: #d39700;
+        text-decoration: underline;
+      }
       .nav-header {
         text-transform: none;
+      }
+      .symbolSummary li {
+        line-height: inherit;
       }
     </style>
     <!--[if lt IE 9]>
@@ -38,12 +49,12 @@
     <div class="container-fluid">
       <div class="row-fluid">
         <div class="span3" style="padding-top:20px;">
-          <div class="well sidebar-nav">
-            <h1>NPMap Tests</h1>
-            <p>NPMap uses <a href="http://pivotal.github.com/jasmine/">Jasmine</a>, a "behavior-driven development framework for testing JavaScript code." Tests are still a work-in-progress. You can run the tests by following the links below:</p>
-            <form>
+          <h1>NPMap Tests</h1>
+            <p>NPMap uses <a href="http://pivotal.github.com/jasmine/">Jasmine</a>, a "behavior-driven development framework for testing JavaScript code."</p>
+            <p>Tests are still a work-in-progress. Running these tests is a good way to check if a Base API supports a particular feature or layer handler.</p>
+            <form style="margin-left:10%;width:80%;">
               <label for="selectBaseApi">Base API</label>
-              <select id="selectBaseApi">
+              <select id="selectBaseApi" style="width:100%;" onchange="changeTest(this);return false;">
                 <option>Bing</option>
                 <option>Esri</option>
                 <option>Google</option>
@@ -51,18 +62,16 @@
                 <option>ModestMaps</option>
               </select>
               <label class="control-label" for="selectModule">Module</label>
-              <select id="selectModule">
+              <select id="selectModule" style="width:100%;" onchange="changeTest(this);return false;">
                 <option>NPMap.Event</option>
                 <option>NPMap.Layer</option>
                 <option>NPMap.Map</option>
                 <option>NPMap.Util</option>
               </select>
-              <button type="submit" class="btn">Test</button>
             </form>
-          </div>
         </div>
         <div class="span9" style="background-color:white;height:100%;">
-          <div style="height:100%;position:relative;width:100%;">
+          <div style="border-left:1px solid #e3e3e3;border-right:1px solid #e3e3e3;height:100%;position:relative;width:100%;">
             <div id="map" style="height:300px;left:0;overflow:none;position:absolute;right:0;top:0;">
             </div>
             <div id="jasmine" style="bottom:0;left:0;overflow:auto;position:absolute;right:0;top:300px;">
@@ -77,32 +86,60 @@
     <script>
       var activeModule = null,
           baseApi = null,
-          params = window.location.search.substring(1).split('?');
+          NPMap = {},
+          params = window.location.search.substring(1).split('&');
+
+      function changeTest(el) {
+        var url = '?baseapi=';
+
+        if (el.id === 'selectBaseApi') {
+          url += el.value;
+        } else {
+          url += baseApi;
+        }
+
+        url += '&module=';
+
+        if (el.id === 'selectBaseApi') {
+          url += activeModule;
+        } else {
+          url += el.value;
+        }
+
+        document.location = window.location.origin + window.location.pathname + url.toLowerCase();
+      }
 
       for (var i = 0; i < params.length; i++) {
         var param = params[i];
 
-        if (param.indexOf('baseApi=') !== -1) {
-          baseApi = param.replace('baseApi=', '');
+        if (param.indexOf('baseapi=') !== -1) {
+          baseApi = param.replace('baseapi=', '');
         } else if (param.indexOf('module=') !== -1) {
           activeModule = param.replace('module=', '');
         }
       }
 
       if (!activeModule) {
-        activeModule = 'npmap.map';
+        activeModule = 'NPMap.Map';
+      } else {
+        var cls = activeModule.split('.')[1];
+
+        activeModule = 'NPMap.' + cls.charAt(0).toUpperCase() + cls.slice(1);
       }
 
       if (!baseApi) {
         baseApi = 'bing';
       }
-    </script>
-    <script src="js/spec/npmap.map.js"></script>
-    <script>
-      var baseApiName,
-          NPMap = NPMap || {};
 
-      document.getElementById(baseApi).className = 'active';
+      document.getElementById('selectBaseApi').value = baseApi === 'modestmaps' ? 'ModestMaps' : baseApi.charAt(0).toUpperCase() + baseApi.slice(1);
+      document.getElementById('selectModule').value = activeModule;
+    
+      (function() {
+        var s = document.createElement('script');
+        s.src = 'js/spec/' + activeModule.toLowerCase() + '.js';
+        document.body.appendChild(s);
+      })();
+
       NPMap.config = {
         server: 'http://localhost:1919',
 
@@ -129,7 +166,6 @@
       (function() {
         var s = document.createElement('script');
         s.src = NPMap.config.server + '/bootstrap.js';
-        s.type = 'text/javascript';
         document.body.appendChild(s);
       })();
     </script>

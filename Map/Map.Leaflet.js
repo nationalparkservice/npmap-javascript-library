@@ -4,7 +4,69 @@ define([
   'Map/Map',
   'Util/Util'
 ], function(Event, Map, Util) {
-  wax.leaf=wax.leaf||{};wax.leaf.interaction=function(){function e(){g=!0}var g=!1,f,c;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.on(d[a],e)}).detach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.off(d[a],e)}).parent(function(){return c._container}).grid(function(){if(!g&&f)return f;var b=c._layers,d=[],a;for(a in b)if(b[a]._tiles)for(var e in b[a]._tiles){var h=wax.u.offset(b[a]._tiles[e]);d.push([h.top,h.left,b[a]._tiles[e]])}return f=d})};
+  wax = wax || {};
+wax.leaf = wax.leaf || {};
+
+wax.leaf.interaction = function() {
+    var dirty = false, _grid, map;
+
+    function setdirty() { dirty = true; }
+
+    function grid() {
+        // TODO: don't build for tiles outside of viewport
+        // Touch interaction leads to intermediate
+        //var zoomLayer = map.createOrGetLayer(Math.round(map.getZoom())); //?what is this doing?
+        // Calculate a tile grid and cache it, by using the `.tiles`
+        // element on this map.
+        if (!dirty && _grid) {
+            return _grid;
+        } else {
+            return (_grid = (function(layers) {
+                var o = [];
+                for (var layerId in layers) {
+                    // This only supports tiled layers
+                    if (layers[layerId]._tiles) {
+                        for (var tile in layers[layerId]._tiles) {
+                            //var offset = wax.u.offset(layers[layerId]._tiles[tile]);
+                            var offset = Util.getOffset(layers[layerId]._tiles[tile]);
+
+                            console.log(offset.left);
+
+                            o.push([offset.top, offset.left, layers[layerId]._tiles[tile]]);
+                        }
+                    }
+                }
+                return o;
+            })(map._layers));
+        }
+    }
+
+    function attach(x) {
+        if (!arguments.length) return map;
+        map = x;
+        var l = ['moveend'];
+        for (var i = 0; i < l.length; i++) {
+            map.on(l[i], setdirty);
+        }
+    }
+
+    function detach(x) {
+        if (!arguments.length) return map;
+        map = x;
+        var l = ['moveend'];
+        for (var i = 0; i < l.length; i++) {
+            map.off(l[i], setdirty);
+        }
+    }
+
+    return wax.interaction()
+        .attach(attach)
+        .detach(detach)
+        .parent(function() {
+          return map._container;
+        })
+        .grid(grid);
+};
 
   var
       // The center {L.LatLng} to initialize the map with.
@@ -381,9 +443,10 @@ define([
      * Returns the {L.Point} for the #npmap-clickdot div.
      */
     getClickDotPixel: function() {
-      var position = Util.getOffset(document.getElementById('npmap-clickdot'));
+      var offset = Util.getOffset(document.getElementById('npmap-map')),
+          position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
-      return new L.Point(position.left, position.top);
+      return new L.Point(position.left - offset.left, position.top - offset.top);
     },
     /**
      * Gets the map element.

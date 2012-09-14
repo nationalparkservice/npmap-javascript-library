@@ -47,6 +47,26 @@ define(function() {
     e.returnValue = false;
     return false;
   }
+  /**
+   * Gets all elements by class.
+   * @param {String} cls
+   * @return {Array}
+   */
+  function getElementsByClass(cls) {
+    var classElements = [],
+        els = document.getElementsByTagName('*'),
+        elsLen = els.length,
+        pattern = new RegExp("(^|\\s)"+searchClass+"(\\s|$)");
+
+    for (i = 0, j = 0; i < elsLen; i++) {
+      if (pattern.test(els[i].className)) {
+        classElements[j] = els[i];
+        j++;
+      }
+    }
+
+    return classElements;
+  }
 
   // TODO: Switch all Array.remove() calls over to splice.
   Array.prototype.remove = function(from, to) {
@@ -57,7 +77,10 @@ define(function() {
 
   return NPMap.Util = {
     /**
-     *
+     * Adds a CSS class to an element.
+     * @param {Object} el
+     * @param {String} cls
+     * @return null
      */
     addClass: function(el, cls) {
       el.className = el.className += ' ' + cls;
@@ -80,6 +103,16 @@ define(function() {
         }
       }
       return true;
+    },
+    /**
+     *
+     */
+    getElementsByClass: function(cls) {
+      if (document.getElementsByClassName) {
+        return document.getElementsByClassName(cls);
+      } else {
+        return getElementsByClass(cls);
+      }
     },
     /**
      * Gets the first property of an object.
@@ -105,17 +138,12 @@ define(function() {
      * @return {Object}
      */
     getOffset: function(el) {
-      /*
+      for (var lx=0, ly=0; el !== null; lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent);
+    
       return {
-        left: el.offsetLeft - el.scrollLeft,
-        top: el.offsetTop - el.scrollTop
+        left: lx,
+        top: ly
       };
-      */
-      // yay readability
-    for (var lx=0, ly=0;
-         el != null;
-         lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent);
-    return {left: lx,top: ly};
     },
     /**
      *

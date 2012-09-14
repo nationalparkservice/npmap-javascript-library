@@ -174,6 +174,60 @@ define([
       }
     }],
     /**
+     * Gets the active layer types for both the baseLayers and layers configs.
+     * @return {Array}
+     */
+    getActiveLayerTypes: function() {
+      var types = [];
+      
+      this.iterateThroughAllLayers(function(l) {
+        var type = l.type,
+            visible = l.visible;
+
+        if ((typeof visible === 'undefined' || visible === true) && _.indexOf(types, type) === -1) {
+          types.push(type);
+        }
+      });
+
+      return types;
+    },
+    /**
+     * Gets a layer config object by layer id.
+     * @param {String} id The id of the layer to search for.
+     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
+     * @return {Object}
+     */
+    getLayerById: function(id, layers) {
+      if (!layers) {
+        layers = NPMap.config.layers;
+      }
+
+      _.each(layers, function(layer) {
+        if (layer.id == id) {
+          return layer;
+        }
+      });
+    },
+    /**
+     * Gets a layer config object by layer name.
+     * @param {String} name The name of the layer to search for.
+     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
+     * @return {Object}
+     */
+    getLayerByName: function(name, layers) {
+      if (!layers) {
+        layers = NPMap.config.layers;
+      }
+
+      for (var i = 0; i < layers.length; i++) {
+        var layer = layers[i];
+
+        if (layer.name === name) {
+          return layer;
+        }
+      }
+    },
+    /**
      * Gets the layer name.
      * @param {Object} config
      */
@@ -186,6 +240,50 @@ define([
      */
     getType: function(config) {
       return config.type;
+    },
+    /**
+     * Gets the layers that are currently visible.
+     * @return {Array}
+     */
+    getVisibleLayers: function() {
+      var layers = [];
+
+      this.iterateThroughAllLayers(function(l) {
+        if (l.visible) {
+          layers.push(l);
+        }
+      });
+      
+      return layers;
+    },
+    /**
+     * Iterates through all the objects in the NPMap.config.baseLayers and NPMap.config.layers configs.
+     * @param {Function} func
+     * @return null
+     */
+    iterateThroughAllLayers: function(func) {
+      this.iterateThroughBaseLayers(func);
+      this.iterateThroughLayers(func);
+    },
+    /**
+     * Iterates through all the objects in the NPMap.config.baseLayers config.
+     * @param {Function} func
+     * @return null
+     */
+    iterateThroughBaseLayers: function(func) {
+      if (NPMap.config.baseLayers) {
+        _.each(NPMap.config.baseLayers, func);
+      }
+    },
+    /**
+     * Iterates through all the objects in the NPMap.config.layers config.
+     * @param {Function} func
+     * @return null
+     */
+    iterateThroughLayers: function(func) {
+      if (NPMap.config.layers) {
+        _.each(NPMap.config.layers, func);
+      }
     }
   };
 });

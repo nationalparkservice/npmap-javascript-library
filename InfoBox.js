@@ -95,12 +95,15 @@ define([
             v: 0
           };
 
+      //console.log(clickDotPixel.x);
+      //console.log(p.left);
+
       if (parent === 'page') {
         var scrollPosition = Util.getScrollPosition();
         p.left = p.left + (mapPosition.west - scrollPosition.x);
         p.top = p.top + (mapPosition.north - scrollPosition.y);
       }
-
+      
       if (pan === 'center') {
         var h = (mapHeight - infoboxDimensions.height) / 2,
             o = Util.getOffset(divMap),

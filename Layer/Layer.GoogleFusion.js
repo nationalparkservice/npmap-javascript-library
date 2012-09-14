@@ -10,7 +10,7 @@ define([
      */
     _handleClick: function(e) {
       if (e.npmap && e.npmap.layerType === 'GoogleFusion') {
-        var config = NPMap.Map.getLayerByName(e.npmap.layerName),
+        var config = Layer.getLayerByName(e.npmap.layerName),
             data = e.npmap.data;
             
         NPMap.InfoBox.show(NPMap.InfoBox._build(config, data, 'content'), NPMap.InfoBox._build(config, data, 'title'), NPMap.InfoBox._build(config, data, 'footer'), null, null, NPMap.Map[NPMap.config.api].latLngFromApi(e.latLng));

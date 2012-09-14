@@ -5,7 +5,14 @@ define([
   'Map/Map',
   'Util/Util'
 ], function(Event, Map, Util) {
-  wax.mm=wax.mm||{};wax.mm.interaction=function(){function e(){h=!0}var h=!1,f,a,c="zoomed panned centered extentset resized drawn".split(" ");return wax.interaction().attach(function(d){if(!arguments.length)return a;a=d;for(var b=0;b<c.length;b++)a.addCallback(c[b],e)}).detach(function(){for(var d=0;d<c.length;d++)a.removeCallback(c[d],e)}).parent(function(){return a.parent}).grid(function(){var d=a.getLayerAt(0).levels[Math.round(a.getZoom())];if(h||!(void 0!==f&&f.length)){var b=a.getLayerAt(0).tiles,c=[],g;for(g in b)if(b[g].parentNode===d){var e=wax.u.offset(b[g]);c.push([e.top,e.left,b[g]])}f=c}return f})};
+  /**
+   * wax - 7.0.0dev10 - v6.0.4-99-gbe8ba88
+   */
+  wax.mm=wax.mm||{};wax.mm.interaction=function(){function e(){a=!0}var a=!1,d,h,b="zoomed panned centered extentset resized drawn".split(" ");return wax.interaction().attach(function(a){if(!arguments.length)return h;h=a;for(var d=0;d<b.length;d++)h.addCallback(b[d],e)}).detach(function(){for(var a=0;a<b.length;a++)h.removeCallback(b[a],e)}).parent(function(){return h.parent}).grid(function(){if(a||!(void 0!==d&&d.length)){for(var b,e=0;e<h.getLayers().length;e++){var g=h.getLayerAt(e).levels,g=g&&g[Math.round(h.zoom())];if(void 0!==g&&(b=h.getLayerAt(e).tileElementsInLevel(g),b.length))break}var e=[],i;for(i in b)if(b[i].parentNode===g){var c=wax.u.offset(b[i]);e.push([c.top,c.left,b[i]])}d=e}return d})};
+  /**
+   * mapbox.markers.js
+   */
+  var mapbox={markers:{}};mapbox.markers.layer=function(){function g(b){b.coord||(b.coord=a.map.locationCoordinate(b.location));var c=a.map.coordinatePoint(b.coord),e,d;0>c.x?(e=new MM.Location(b.location.lat,b.location.lon),e.lon+=360*Math.ceil((o.lon-b.location.lon)/360),d=a.map.locationPoint(e),d.x<a.map.dimensions.x&&(c=d,b.coord=a.map.locationCoordinate(e))):c.x>a.map.dimensions.x&&(e=new MM.Location(b.location.lat,b.location.lon),e.lon-=360*Math.ceil((b.location.lon-p.lon)/360),d=a.map.locationPoint(e),0<d.x&&(c=d,b.coord=a.map.locationCoordinate(e)));c.scale=1;c.width=c.height=0;MM.moveElement(b.element,c)}var a={},d=[],f=[],i=new MM.CallbackManager(a,["drawn","markeradded"]),h=mapbox.markers.simplestyle_factory,l=function(a,c){return c.geometry.coordinates[1]-a.geometry.coordinates[1]},k,o=null,p=null,m=function(){return!0},q=0,n=function(){return++q},j={};a.parent=document.createElement("div");a.parent.style.cssText="position: absolute; top: 0px;left:0px; width:100%; height:100%; margin:0; padding:0; z-index:0;pointer-events:none;";a.name="markers";a.addCallback=function(b,c){i.addCallback(b,c);return a};a.removeCallback=function(b,c){i.removeCallback(b,c);return a};a.draw=function(){if(a.map){o=a.map.pointLocation(new MM.Point(0,0));p=a.map.pointLocation(new MM.Point(a.map.dimensions.x,0));i.dispatchCallback("drawn",a);for(var b=0;b<f.length;b++)g(f[b])}};a.add=function(b){if(!b||!b.element)return null;a.parent.appendChild(b.element);f.push(b);i.dispatchCallback("markeradded",b);return b};a.remove=function(b){if(!b)return null;a.parent.removeChild(b.element);for(var c=0;c<f.length;c++)if(f[c]===b){f.splice(c,1);break}return b};a.markers=function(a){if(!arguments.length)return f};a.add_feature=function(b){return a.features(a.features().concat([b]))};a.sort=function(b){if(!arguments.length)return l;l=b;return a};a.features=function(b){if(!arguments.length)return d;b||(b=[]);d=b.slice();d.sort(l);for(var c=0;c<f.length;c++)f[c].touch=!1;for(c=0;c<d.length;c++)if(m(d[c])){var e=n(d[c]);j[e]?(j[e].location=new MM.Location(d[c].geometry.coordinates[1],d[c].geometry.coordinates[0]),j[e].coord=null,g(j[e])):j[e]=a.add({element:h(d[c]),location:new MM.Location(d[c].geometry.coordinates[1],d[c].geometry.coordinates[0]),data:d[c]});j[e]&&(j[e].touch=!0)}for(c=f.length-1;0<=c;c--)!1===f[c].touch&&a.remove(f[c]);a.map&&a.map.coordinate&&a.map.draw();return a};a.url=function(b,c){function d(b,e){if(b&&c)return c(b);e&&e.features&&a.features(e.features);c&&c(b,e.features,a)}if(!arguments.length)return k;if("undefined"===typeof reqwest)throw"reqwest is required for url loading";"string"===typeof b&&(b=[b]);k=b;reqwest(k[0].match(/geojsonp$/)?{url:k[0]+(~k[0].indexOf("?")?"&":"?")+"callback=grid",type:"jsonp",jsonpCallback:"callback",success:function(a){d(null,a)},error:d}:{url:k[0],type:"json",success:function(a){d(null,a)},error:d});return a};a.id=function(b,c){return a.url("http://a.tiles.mapbox.com/v3/"+b+"/markers.geojsonp",c)};a.csv=function(b){return a.features(mapbox.markers.csv_to_geojson(b))};a.extent=function(){for(var b=[{lat:Infinity,lon:Infinity},{lat:-Infinity,lon:-Infinity}],c=a.features(),d=0;d<c.length;d++){var f=c[d].geometry.coordinates;f[0]<b[0].lon&&(b[0].lon=f[0]);f[1]<b[0].lat&&(b[0].lat=f[1]);f[0]>b[1].lon&&(b[1].lon=f[0]);f[1]>b[1].lat&&(b[1].lat=f[1])}return b};a.key=function(b){if(!arguments.length)return n;n=null===b?function(){return++q}:b;return a};a.factory=function(b){if(!arguments.length)return h;h=b;a.features(a.features());return a};a.filter=function(b){if(!arguments.length)return m;m=b;a.features(a.features());return a};a.destroy=function(){a.parent.parentNode&&a.parent.parentNode.removeChild(a.parent)};a.named=function(b){if(!arguments.length)return a.name;a.name=b;return a};a.enabled=!0;a.enable=function(){this.enabled=!0;this.parent.style.display="";return a};a.disable=function(){this.enabled=!1;this.parent.style.display="none";return a};return a};mmg=mapbox.markers.layer;mapbox.markers.simplestyle_factory=function(g){var a={small:[20,50],medium:[30,70],large:[35,90]},d=g.properties||{},g=d["marker-size"]||"medium",f=d["marker-symbol"]?"-"+d["marker-symbol"]:"",i=d["marker-color"]||"7e7e7e",i=i.replace("#",""),h=document.createElement("img");h.width=a[g][0];h.height=a[g][1];h.className="simplestyle-marker";h.alt=d.title||"";h.src=(mapbox.markers.marker_baseurl||"http://a.tiles.mapbox.com/v3/marker/")+"pin-"+g.charAt(0)+f+"+"+i+(2===window.devicePixelRatio?"@2x":"")+".png";d=h.style;d.position="absolute";d.clip="rect(auto auto "+0.75*a[g][1]+"px auto)";d.marginTop=-(a[g][1]/2)+"px";d.marginLeft=-(a[g][0]/2)+"px";d.cursor="pointer";d.pointerEvents="all";return h};
 
   var
       // The base layer to initialize the map with.
@@ -20,6 +27,8 @@ define([
       initialZoom,
       // The {MM.Map} object.
       map,
+      //
+      markerLayer = mapbox.markers.layer(),
       // Max zoom level of the map.
       max = 17,
       // Min zoom level of the map.
@@ -69,10 +78,10 @@ define([
   
   center = initialCenter = NPMap.config.center ? new MM.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new MM.Location(39, -96);
   map = new MM.Map(NPMap.config.div, [], null, [
-    easey.DragHandler(),
-    easey.TouchHandler(),
-    easey.MouseWheelHandler(),
-    easey.DoubleClickHandler()
+    easey_handlers.DragHandler(),
+    easey_handlers.TouchHandler(),
+    easey_handlers.MouseWheelHandler(),
+    easey_handlers.DoubleClickHandler()
   ]);
   zoom = initialZoom = oldZoom = NPMap.config.zoom || 4;
   
@@ -121,6 +130,7 @@ define([
       NPMap.InfoBox.reposition();
     }
   });
+  map.addLayer(markerLayer);
   MM.addEvent(map.parent, 'mousedown', function(e) {
     viewChanged = false;
   });
@@ -147,18 +157,19 @@ define([
     // The MM.Map object. This reference should be used to access any of the Modest Maps JS functionality that can't be done through NPMap's API.
     map: map,
     /**
+     * Adds a shape to the map.
+     * @param {Object} shape The shape to add to the map.
+     * @return null
+     */
+    addShape: function(shape) {
+      markerLayer.add_feature(shape);
+    },
+    /**
      * Adds a tile layer to the map.
      * @param {Object} layer
      */
     addTileLayer: function(layer) {
       map.insertLayerAt(0, layer);
-    },
-    /**
-     * Sets the bounds of the map.
-     * @param {L.LatLngBounds} bounds
-     */
-    bounds: function(bounds) {
-      
     },
     /**
      * Converts an API bounds to a NPMap bounds.
@@ -179,7 +190,14 @@ define([
      * @return {Object}
      */
     boundsToApi: function(bounds) {
-      return new MM.extent(bound.n, bounds.w, bounds.s, bounds.e);
+      return new MM.Extent(bounds.n, bounds.w, bounds.s, bounds.e);
+    },
+    /**
+     * Centers the map.
+     * @param {Object} latLng
+     */
+    center: function(latLng) {
+      this.centerAndZoom(latLng, this.getZoom());
     },
     /**
      * Sets the center and zoom level of the map.
@@ -189,6 +207,59 @@ define([
      */
     centerAndZoom: function(center, zoom, callback) {
       runEasey(center, zoom, 200, callback);
+    },
+    /**
+     *
+     */
+    convertLineOptions: function(options) {
+
+    },
+    /**
+     *
+     */
+    convertMarkerOptions: function(options) {
+
+    },
+    /**
+     *
+     */
+    convertPolygonOptions: function(options) {
+
+    },
+    /**
+     * Creates a line shape.
+     * @param {Array} latLngs An array of {MM.Location} objects.
+     * @param {Object} options (Optional) Any additional options to apply to the line.
+     * @return {Object}
+     */
+    createLine: function(latLngs, options) {
+      return 'Not yet implemented.';
+    },
+    /**
+     * Creates a marker shape.
+     * @param latLng {MM.Location} Where to place the marker.
+     * @param options {Object} (Optional) Any additional options to apply to the marker.
+     * @return {Object}
+     */
+    createMarker: function(latLng, options) {
+      return {
+        geometry: {
+          coordinates: [
+            latLng.lon,
+            latLng.lat
+          ]
+        },
+        properties: {}
+      };
+    },
+    /**
+     * Creates a polygon shape.
+     * @param latLngs {Array} (Required) An array of {MM.Location} objects.
+     * @param options {Object} (Optional) Any additional options to apply to the polygon.
+     * @return {Object}
+     */
+    createPolygon: function(latLngs, options) {
+      return 'Not yet implemented.';
     },
     /**
      * Creates a tile layer.
@@ -250,7 +321,9 @@ define([
      * @return {Object}
      */
     eventGetLatLng: function(e) {
-      return map.pointLocation(new MM.Point(e.layerX, e.layerY));
+      var offset = Util.getOffset(document.getElementById('npmap-map'));
+
+      return map.pointLocation(new MM.Point(e.pageX - offset.left, e.pageY - offset.top));
     },
     /**
      * Gets a shape from a click event object.
@@ -278,15 +351,13 @@ define([
      * Returns the current MM.Location object of the #npmap-clickdot div. This MM.Location is relative to the upper-lefthand corner of the map.
      */
     getClickDotLatLng: function() {
-      var pixel = this.getClickDotPixel();
-
-      return map.pointLocation(new MM.Point(pixel.x, pixel.y));
+      return this.pixelToLatLng(this.getClickDotPixel());
     },
     /**
      * Returns the {L.Point} for the #npmap-clickdot div. This pixel is relative to the upper-lefthand corner of the map.
      */
     getClickDotPixel: function() {
-      var offset = NPMap.Util.getOffset(document.getElementById('npmap-map')),
+      var offset = Util.getOffset(document.getElementById('npmap-map')),
           position = Util.getOffset(document.getElementById('npmap-clickdot'));
 
       return new MM.Point(position.left - offset.left, position.top - offset.top);
@@ -295,8 +366,18 @@ define([
      * Gets the map element.
      * @return {Object}
      */
-    getContainerDiv: function() {
+    getMapElement: function() {
       return map.parent;
+    },
+    /**
+     * Gets the latLng (MM.Location) of the marker.
+     * @param {Object} marker The marker to get the latLng for.
+     * @return {Object}
+     */
+    getMarkerLatLng: function(marker) {
+      var coordinates = marker.geometry.coordinates;
+
+      return new MM.Location(coordinates[1], coordinates[0]);
     },
     /**
      * Returns the maximum zoom level for this map.
@@ -377,6 +458,14 @@ define([
       return new MM.Location(latLng.lat, latLng.lng);
     },
     /**
+     * Converts a {MM.Location} to a {MM.Point}.
+     * @param {Object} latLng
+     * @return {Object}}
+     */
+    latLngToPixel: function(latLng) {
+      return map.locationPoint(latLng);
+    },
+    /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
      * @param {Function} callback (Optional)
@@ -414,33 +503,28 @@ define([
       return map.pointLocation(pixel);
     },
     /**
-     * Positions the npmap-clickdot div on top of the div that is passed in.
-     * @param to {HTML div} (Required) The div to position the npmap-clickdot div onto.
+     * Positions the npmap-clickdot div.
+     * @param {Object} to The {MM.Location} to position the div to.
+     * @return null
      */
     positionClickDot: function(to) {
-      var clickDot = document.getElementById('npmap-clickdot'),
-          offset = NPMap.Util.getOffset(document.getElementById('npmap-map'));
+      var clickDot = document.getElementById('npmap-clickdot');
 
-      if (typeof to === 'string') {
-        to = to.split(',');
-        to = map.locationPoint(new MM.Location(parseFloat(to[0]), parseFloat(to[1])));
+      if (to.lon) {
+        to = map.locationPoint(to);
       } else {
-        if (to.lon) {
-          to = map.locationPoint(to);
-        } else {
-          to = map.locationPoint(new MM.Location(to.lat, to.lng));
-        }
+        to = map.locationPoint(new MM.Location(to.lat, to.lng));
       }
 
-      clickDot.style.left = offset.left + to.x + 'px';
-      clickDot.style.top = offset.top + to.y + 'px';
+      clickDot.style.left = to.x + 'px';
+      clickDot.style.top = to.y + 'px';
     },
     /**
      * Switches to a new set of layers.
      * @param {String} url The URL of the TileStream layer or layers to switch to.
      */
     refreshLayers: function(url) {
-      var layerTypes = NPMap.Map.getActiveLayerTypes();
+      var layerTypes = NPMap.Layer.getActiveLayerTypes();
 
       NPMap.InfoBox.hide();
 
@@ -472,10 +556,50 @@ define([
       map.setZoomRange(min, max);
     },
     /**
+     * Zooms the map to a bounding box.
+     * @param {Object} bbox A {MM.Extent} object.
+     * @return null
+     */
+    toBounds: function(bounds) {
+      map.setExtent(bounds);
+    },
+    /**
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
+      NPMap.InfoBox.hide();
       runEasey(initialCenter, initialZoom, 400);
+    },
+    /**
+     * Zooms the map to the extent of an array of latLng objects.
+     * @param {Array} latLngs The array of latLng objects.
+     * @return null
+     */
+    toLatLngs: function(latLngs) {
+      map.setExtent(latLngs);
+    },
+    /**
+     * Zooms the map to the extent of an array of markers.
+     * @param {Array} markers The array of marker objects.
+     * @return null
+     */
+    toMarkers: function(markers) {
+      var latLngs = [],
+          me = this;
+
+      for (var i = 0; i < markers.length; i++) {
+        latLngs.push(me.getMarkerLatLng(markers[i]));
+      }
+
+      this.toLatLngs(latLngs);
+    },
+    /**
+     * Zooms the map to a zoom level.
+     * @param {Number} zoom
+     * @return null
+     */
+    zoom: function(zoom) {
+      runEasey(initialCenter, zoom);
     },
     /**
      * Zooms the map in by one zoom level.

@@ -166,18 +166,29 @@ define([
               map = apiMap.map,
               waxShort = null;
 
-          tileLayer = apiMap.createTileLayer(uriConstructor, {
-            subdomains: [
-              'a',
-              'b',
-              'c',
-              'd'
-            ],
-            url: uriTemplate.replace('{{layers}}', layersString),
-            // TODO: You need to work on the zIndex. This is difficult because of compositing.
-            zIndex: typeof baseLayer !== 'undefined' ? 0 : 1
-          });
-          apiMap.addTileLayer(tileLayer);
+          if (typeof apiMap.createTileStreamLayer === 'function') {
+            tileLayer = apiMap.createTileStreamLayer(response);
+
+            if (typeof apiMap.addTileStreamLayer === 'function') {
+              apiMap.addTileStreamLayer(response);
+            } else {
+              apiMap.addTileLayer(tileLayer);
+            }
+          } else {
+            tileLayer = apiMap.createTileLayer(uriConstructor, {
+              subdomains: [
+                'a',
+                'b',
+                'c',
+                'd'
+              ],
+              url: uriTemplate.replace('{{layers}}', layersString),
+              // TODO: You need to work on the zIndex. This is difficult because of compositing.
+              zIndex: typeof baseLayer !== 'undefined' ? 0 : 1
+            });
+
+            apiMap.addTileLayer(tileLayer);
+          }
 
           switch (api) {
             case 'Esri':
