@@ -168,7 +168,7 @@ define(function() {
         if (el.id !== 'npmap' && parentNode) {
           checkDisplay(parentNode);
 
-          while (parentNode.id !== 'npmap' && parentNode.id !== 'npmap-map') {
+          while (parentNode.id && parentNode.id !== 'npmap' && parentNode.id !== 'npmap-map') {
             parentNode = parentNode.parentNode;
 
             if (parentNode) {

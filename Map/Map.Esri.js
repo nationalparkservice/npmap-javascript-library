@@ -372,6 +372,24 @@ define([
       }
     },
     /**
+     *
+     */
+    convertLineOptions: function(options) {
+      return {};
+    },
+    /**
+     *
+     */
+    convertMarkerOptions: function(options) {
+      return {};
+    },
+    /**
+     *
+     */
+    convertPolygonOptions: function(options) {
+      return {};
+    },
+    /**
      * Creates an esri.geometry.Polyline object.
      * @param {Array} latLngs An array of {} objects.
      * @param {} options (Optional) Any additional options to apply to the line.

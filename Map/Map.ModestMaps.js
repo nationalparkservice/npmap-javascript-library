@@ -85,7 +85,7 @@ define([
   ]);
   zoom = initialZoom = oldZoom = NPMap.config.zoom || 4;
   
-  if (!NPMap.config.baseLayers) {
+  if (typeof NPMap.config.baseLayers === 'undefined' || NPMap.config.baseLayers !== false) {
     NPMap.config.baseLayers = [{
       attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
       id: 'mapbox.mapbox-light',
@@ -169,8 +169,17 @@ define([
      * @param {Object} layer
      */
     addTileLayer: function(layer) {
-      map.insertLayerAt(0, layer);
+      map.insertLayerAt(layer.zIndex, layer);
     },
+
+    /**
+     * Removes a tile layer from the map.
+     * @param {Object} layer
+     */
+    removeTileLayer: function(layer) {
+      map.removeLayerAt(layer.zIndex);
+    },
+
     /**
      * Converts an API bounds to a NPMap bounds.
      * @param {Object} bounds
@@ -518,25 +527,6 @@ define([
 
       clickDot.style.left = to.x + 'px';
       clickDot.style.top = to.y + 'px';
-    },
-    /**
-     * Switches to a new set of layers.
-     * @param {String} url The URL of the TileStream layer or layers to switch to.
-     */
-    refreshLayers: function(url) {
-      var layerTypes = NPMap.Layer.getActiveLayerTypes();
-
-      NPMap.InfoBox.hide();
-
-      for (var i = 0; i < layerTypes.length; i++) {
-        var layerType = layerTypes[i];
-        
-        if (layerType === 'TileStream') {
-          NPMap.layers.TileStream.refreshLayers();
-        } else {
-          // TODO: Support other layer refreshes here.
-        }
-      }
     },
     /**
      * Sets zoom restrictions on the map.

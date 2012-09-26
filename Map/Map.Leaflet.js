@@ -5,68 +5,68 @@ define([
   'Util/Util'
 ], function(Event, Map, Util) {
   wax = wax || {};
-wax.leaf = wax.leaf || {};
-
-wax.leaf.interaction = function() {
-    var dirty = false, _grid, map;
-
-    function setdirty() { dirty = true; }
-
-    function grid() {
-        // TODO: don't build for tiles outside of viewport
-        // Touch interaction leads to intermediate
-        //var zoomLayer = map.createOrGetLayer(Math.round(map.getZoom())); //?what is this doing?
-        // Calculate a tile grid and cache it, by using the `.tiles`
-        // element on this map.
-        if (!dirty && _grid) {
-            return _grid;
-        } else {
-            return (_grid = (function(layers) {
-                var o = [];
-                for (var layerId in layers) {
-                    // This only supports tiled layers
-                    if (layers[layerId]._tiles) {
-                        for (var tile in layers[layerId]._tiles) {
-                            //var offset = wax.u.offset(layers[layerId]._tiles[tile]);
-                            var offset = Util.getOffset(layers[layerId]._tiles[tile]);
-
-                            console.log(offset.left);
-
-                            o.push([offset.top, offset.left, layers[layerId]._tiles[tile]]);
-                        }
-                    }
-                }
-                return o;
-            })(map._layers));
-        }
-    }
+  wax.leaf = wax.leaf || {};
+  wax.leaf.interaction = function() {
+    var _grid,
+        dirty = false,
+        map;
 
     function attach(x) {
-        if (!arguments.length) return map;
-        map = x;
-        var l = ['moveend'];
-        for (var i = 0; i < l.length; i++) {
-            map.on(l[i], setdirty);
-        }
+      if (!arguments.length) {
+        return map;
+      }
+      
+      map = x;
+      
+      map.on('moveend', function() {
+        setdirty();
+      });
     }
-
     function detach(x) {
-        if (!arguments.length) return map;
-        map = x;
-        var l = ['moveend'];
-        for (var i = 0; i < l.length; i++) {
-            map.off(l[i], setdirty);
-        }
+      if (!arguments.length) {
+        return map;
+      }
+      
+      map = x;
+      
+      map.off('moveend', setdirty);
+    }
+    function grid() {
+      if (!dirty && typeof _grid !== 'undefined' && _grid.length) {
+        return _grid;
+      } else {
+        dirty = false;
+        return (_grid = (function(layers) {
+          var o = [];
+
+          for (var layerId in layers) {
+            if (layers[layerId]._tiles) {
+              for (var tile in layers[layerId]._tiles) {
+                var el = layers[layerId]._tiles[tile],
+                    offset = Util.getOffset(el);
+
+                o.push([
+                  offset.top,
+                  offset.left,
+                  el
+                ]);
+              }
+            }
+          }
+          
+          return o;
+        })(map._layers));
+      }
+    }
+    function setdirty() {
+      console.log('setdirty');
+      dirty = true;
     }
 
-    return wax.interaction()
-        .attach(attach)
-        .detach(detach)
-        .parent(function() {
-          return map._container;
-        })
-        .grid(grid);
-};
+    return wax.interaction().attach(attach).detach(detach).parent(function() {
+      return map._container;
+    }).grid(grid);
+  };
 
   var
       // The center {L.LatLng} to initialize the map with.
@@ -282,11 +282,21 @@ wax.leaf.interaction = function() {
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
     map: map,
     /**
+     * Adds a shape to the map.
+     * @param {Object} shape The shape to add to the map.
+     * @return null
+     */
+    addShape: function(shape) {
+      shape.addTo(map);
+    },
+    /**
      * Adds a tile layer to the map.
      * @param {Object} layer
      */
     addTileLayer: function(layer) {
-      map.addLayer(layer, false);
+      var insertAtBottom = (layer.zIndex === 0);
+
+      map.addLayer(layer, insertAtBottom);
     },
     /**
      * Sets the bounds of the map.
@@ -333,6 +343,53 @@ wax.leaf.interaction = function() {
      */
     centerAndZoom: function(latLng, zoom) {
       map.setView(latLng, zoom);
+    },
+    /**
+     *
+     */
+    convertLineOptions: function(options) {
+
+    },
+    /**
+     *
+     */
+    convertMarkerOptions: function(options) {
+
+    },
+    /**
+     *
+     */
+    convertPolygonOptions: function(options) {
+
+    },
+    /**
+     * Creates a line shape.
+     * @param {Array} latLngs An array of {L.LatLng} objects.
+     * @param {Object} options (Optional) Any additional options to apply to the line.
+     * @return {Object}
+     */
+    createLine: function(latLngs, options) {
+      return '"Not yet implemented"';
+    },
+    /**
+     * Creates a marker shape.
+     * @param latLng {L.LatLng} Where to place the marker.
+     * @param options {Object} (Optional) Any additional options to apply to the marker.
+     * @return {Object}
+     */
+    createMarker: function(latLng, options) {
+      var marker = new L.Marker(latLng);
+
+      return marker;
+    },
+    /**
+     * Creates a polygon shape.
+     * @param latLngs {Array} (Required) An array of {L.LatLng} objects.
+     * @param options {Object} (Optional) Any additional options to apply to the polygon.
+     * @return {Object}
+     */
+    createPolygon: function(latLngs, options) {
+      return '"Not yet implemented"';
     },
     /**
      * Creates a tile layer.
@@ -385,6 +442,8 @@ wax.leaf.interaction = function() {
           return constructor(xy.x, xy.y, map.getZoom(), options.url ? options.url : null, subdomain);
         };
       }
+
+      console.log(options);
 
       return new L.TileLayer.Simple(uriConstructor, options);
     },
@@ -454,6 +513,14 @@ wax.leaf.interaction = function() {
     getMapElement: function() {
       return document.getElementById('npmap-map');
       //return document.getElementById(NPMap.config.div).childNodes[0];
+    },
+    /**
+     * Gets the latLng (L.LatLng) of the marker.
+     * @param {Object} marker The marker to get the latLng for.
+     * @return {Object}
+     */
+    getMarkerLatLng: function(marker) {
+      return marker.getLatLng();
     },
     /**
      * Gets the maximum zoom level for this map.
@@ -528,7 +595,9 @@ wax.leaf.interaction = function() {
       if (callback) {
         map._rawPanBy(new L.Point(-pixels.x, -pixels.y));
         callback();
+        map.fire('movestart');
         map.fire('move');
+        map.fire('moveend');
       } else {
         map.panBy(new L.Point(-pixels.x, -pixels.y));
       }
@@ -590,7 +659,7 @@ wax.leaf.interaction = function() {
      * @param {Object} c
      */
     setInitialCenter: function(center) {
-      initialCenter = c;
+      initialCenter = center;
       NPMap.config.center = {
         lat: center.lat,
         lng: center.lng
@@ -621,10 +690,41 @@ wax.leaf.interaction = function() {
       // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.
     },
     /**
+     * Zooms the map to a bounding box.
+     * @param {Object} bbox A {L.LatLngBounds} object.
+     * @return null
+     */
+    toBounds: function(bounds) {
+      map.fitBounds(bounds);
+    },
+    /**
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
       map.setView(initialCenter, initialZoom);
+    },
+    /**
+     * Zooms the map to the extent of an array of latLng objects.
+     * @param {Array} latLngs The array of latLng objects.
+     * @return null
+     */
+    toLatLngs: function(latLngs) {
+      map.setExtent(latLngs);
+    },
+    /**
+     * Zooms the map to the extent of an array of markers.
+     * @param {Array} markers The array of marker objects.
+     * @return null
+     */
+    toMarkers: function(markers) {
+      var bounds = new L.LatLngBounds(),
+          me = this;
+
+      for (var i = 0; i < markers.length; i++) {
+        bounds.extend(me.getMarkerLatLng(markers[i]));
+      }
+
+      this.toBounds(bounds);
     },
     /**
      * Zooms the map to a zoom level.

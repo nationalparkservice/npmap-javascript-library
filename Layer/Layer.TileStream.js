@@ -1,9 +1,5 @@
 ﻿// TODO: Change the way you handle TileStream layers. Composited layers should be added as a single layer object to NPMap.config.layers.
 
-
-
-
-
 define([
   'Event',
   'InfoBox',
@@ -11,15 +7,29 @@ define([
   'Map/Map'
 ], function(Event, InfoBox, Layer, Map) {
   var
-      //
-      interaction,
-      //
-      tileJson,
-      // The current TileStream tile layer. Only one of these can be added to the map at a time, although this one layer can contain multiple composited TileStream layers.
-      tileLayer,
+      // The interaction object.
+      interaction = null,
       // The base URI template for a TileStream tile.
       uriTemplate = 'http://{{subdomain}}.tiles.mapbox.com/v3/{{layers}}/{{z}}/{{x}}/{{y}}.png';
 
+  /**
+   * Constructs a URL string for a composited layer.
+   * @param {Array} composited
+   * @return {String}
+   */
+  function constructCompositedString(composited) {
+    var layerString = '';
+
+    _.each(composited, function(composite, i) {
+      layerString += composite.id;
+
+      if (i + 1 !== composited.length) {
+        layerString += ',';
+      }
+    });
+
+    return layerString;
+  }
   /**
    * Checks to see if a layer is visible and is of type 'TileStream'.
    * @param {Object} layer
@@ -48,13 +58,15 @@ define([
   }
 
   Event.add('NPMap.Map', 'zoomstart', function() {
-    InfoBox.hide();
+    if (NPMap.Layer.TileStream._getAllVisibleLayers().length > 0) {
+      InfoBox.hide();
+    }
   });
 
   return NPMap.Layer.TileStream = {
     /**
      * Gets the number of visible TileStream layers.
-     * @return {Number}
+     * @return {Array}
      */
     _getAllVisibleLayers: function() {
       var baseLayers = this._getVisibleBaseLayers(),
@@ -73,7 +85,7 @@ define([
     },
     /**
      * Gets the first visible TileStream baseLayer.
-     * @return {Number}
+     * @return {Array}
      */
     _getVisibleBaseLayers: function() {
       var visible = [];
@@ -93,7 +105,7 @@ define([
     },
     /**
      * Gets the number of visible TileStream layers.
-     * @return {Number}
+     * @return {Array}
      */
     _getVisibleLayers: function() {
       var visible = [];
@@ -113,6 +125,7 @@ define([
     /**
      * Handles the click operation for TileStream layers.
      * @param {Object} e
+     * @return null
      */
     _handleClick: function(e) {
       var latLng = Map[NPMap.config.api].eventGetLatLng(e.e);
@@ -124,39 +137,22 @@ define([
     },
     /**
      * Loads all of the TileStream layers that have been added to the map and are visible.
+     * @param {Object} config
      * @param {Function} callback
+     * @return null
      */
-    create: function(callback) {
+    create: function(config, callback) {
       var baseLayer = this._getVisibleBaseLayers()[0],
-          layers = this._getVisibleLayers(),
-          layersString = '',
-          url = 'http://api.tiles.mapbox.com/v3/';
-      
-      //Event.trigger('NPMap.Layer', 'beforeadd', config);
+          layerString = config.id,
+          url = config.url || 'http://api.tiles.mapbox.com/v3/';
 
-      if (layers.length > 0) {
-        layers.sort(function(a, b) {
-          if (a.zIndex && b.zIndex) {
-            return a.zIndex > b.zIndex;
-          } else {
-            return null;
-          }
-        });
-      }
-      
-      if (typeof baseLayer !== 'undefined') {
-        layers.splice(0, 0, baseLayer);
-      }
-      
-      for (var i = 0; i < layers.length; i++) {
-        layersString += layers[i].id;
+      Event.trigger('NPMap.Layer', 'beforeadd', config);
 
-        if (i + 1 !== layers.length) {
-          layersString += ',';
-        }
+      if (config.composited) {
+        layerString = constructCompositedString(config.composited);
       }
 
-      url += layersString;
+      url += layerString;
 
       reqwest({
         jsonpCallbackName: 'grid',
@@ -164,10 +160,14 @@ define([
           var api = NPMap.config.api,
               apiMap = Map[api],
               map = apiMap.map,
-              waxShort = null;
+              tileLayer,
+              waxShort = null,
+              zIndex = config.zIndex;
 
           if (typeof apiMap.createTileStreamLayer === 'function') {
-            tileLayer = apiMap.createTileStreamLayer(response);
+            tileLayer = apiMap.createTileStreamLayer(response, {
+              zIndex: zIndex
+            });
 
             if (typeof apiMap.addTileStreamLayer === 'function') {
               apiMap.addTileStreamLayer(response);
@@ -182,13 +182,14 @@ define([
                 'c',
                 'd'
               ],
-              url: uriTemplate.replace('{{layers}}', layersString),
-              // TODO: You need to work on the zIndex. This is difficult because of compositing.
-              zIndex: typeof baseLayer !== 'undefined' ? 0 : 1
+              url: uriTemplate.replace('{{layers}}', layerString),
+              zIndex: config.zIndex
             });
 
             apiMap.addTileLayer(tileLayer);
           }
+
+          config.api = tileLayer;
 
           switch (api) {
             case 'Esri':
@@ -207,7 +208,7 @@ define([
               break;
           }
 
-          if (waxShort) {
+          if (!interaction && response.grids && waxShort) {
             interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
               Map.setCursor('pointer');
 
@@ -219,13 +220,47 @@ define([
             });
           }
 
-          tileJson = response;
+          Event.trigger('NPMap.Layer', 'afteradd', config);
 
-          //Event.trigger('NPMap.Layer', 'afteradd', config);
+          if (callback) {
+            callback();
+          }
         },
         type: 'jsonp',
         url: url + '.jsonp'
       });
+    },
+    /**
+     * Refreshes the TileStream layer.
+     * @param {Object} config
+     * @return null
+     */
+    refresh: function(config) {
+
+
+
+
+
+
+
+      //this.remove();
+      //this.create();
+    },
+    /**
+     * Removes a TileStream layer from the map.
+     * @param {Object} config
+     * @return null
+     */
+    remove: function(config) {
+      var apiMap = Map[NPMap.config.api];
+
+      if (typeof apiMap.removeTileStreamLayer === 'function') {
+        apiMap.removeTileStreamLayer(config.api);
+      } else {
+        apiMap.removeTileLayer(config.api);
+      }
+
+      config.api = null;
     }
   };
 });

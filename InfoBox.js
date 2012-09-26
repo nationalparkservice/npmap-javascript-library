@@ -94,10 +94,7 @@ define([
             h: 0,
             v: 0
           };
-
-      //console.log(clickDotPixel.x);
-      //console.log(p.left);
-
+          
       if (parent === 'page') {
         var scrollPosition = Util.getScrollPosition();
         p.left = p.left + (mapPosition.west - scrollPosition.x);

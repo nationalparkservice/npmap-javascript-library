@@ -128,6 +128,12 @@ define([
         return true;
       }
     })(),
+    draggableCursor: 'auto',
+
+
+
+
+
     keyboardShortcuts: (function() {
       if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.keyboard')) {
         return NPMap.config.tools.keyboard;
@@ -486,7 +492,7 @@ define([
      *
      */
     convertLineOptions: function(options) {
-
+      return {};
     },
     /**
      * Valid Google Maps options: animation, clickable, cursor, draggable, flat, icon, map, optimized, position, raiseOnDrag, shadow, shape, title, visible, zIndex
@@ -658,7 +664,14 @@ define([
      * @return {Object}
      */
     createTileStreamLayer: function(tileJson) {
-      map.mapTypes.set(tileJson.id, new wax.g.connector(tileJson));
+      var connector = new wax.g.connector(tileJson);
+
+      console.log(connector);
+      console.log(tileJson);
+
+      map.mapTypes.set(tileJson.id, connector);
+
+      return connector;
     },
     /**
      * Gets a latLng from an event object.
@@ -967,6 +980,7 @@ define([
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
+      NPMap.InfoBox.hide();
       this.centerAndZoom(initialCenter, initialZoom);
     },
     /**

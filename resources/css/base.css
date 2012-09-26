@@ -33,16 +33,18 @@
 #npmap .cursor {cursor:pointer;}
 #npmap .even {background-color:#e0e0e0;}
 #npmap .odd {}
-#npmap .pointer {cursor: pointer;}
+#npmap .pointer {cursor:pointer;}
 #npmap .npmap-container {background:url(../img/textures/npmap-container.jpg);padding-bottom:33px;} /* DEPRECATED? */
 #npmap .padded {padding:5px;}
 #npmap .rounded {-moz-border-radius:3px 0px 0px 3px;-webkit-border-radius:3px 0px 0px 3px;border-radius:3px 0px 0px 3px;}
 #npmap .shadowed {-moz-box-shadow:0 0 15px #888;-webkit-box-shadow:0 0 15px #888;box-shadow:0 0 15px #888;}
 #npmap .transparent {background-color:white;background-color:rgba(255, 255, 255, 0.7);}
 #npmap a {color:#B28000;text-decoration:none;}
-#npmap a.back:before {content: "\00AB ";}
-#npmap a.more:after {content: " \00BB";}
-#npmap a:hover {text-decoration:underline;}
+#npmap a.back:before {content:"\00AB ";}
+#npmap a.more:after {content:" \00BB";}
+#npmap a:hover {color:#d39700;text-decoration:underline;}
+#npmap small, sup {font-size:85% !important;vertical-align:super !important;} /* TODO: small should not be used here */
+#npmap small, sub {font-size:85% !important;vertical-align:sub !important;}
 
 /* Controls */
 #npmap-attribution {-moz-box-shadow:0 0 15px #888;-webkit-box-shadow:0 0 15px #888;bottom:0;box-shadow:0 0 15px #888;background-color:white;background-color:rgba(255, 255, 255, 0.7);color:#333;font-size:11px;line-height:13px;margin:0;max-width:400px;padding:3px 5px;position:absolute;right:0;text-align:right;z-index:30;}

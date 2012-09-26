@@ -1,0 +1,21 @@
+{
+  "bing": {
+    layerHandlers: [{
+      "ArcGisServerRest": {
+        "display": true,
+        "identify": true,
+        "modules: [
+          "edit",
+          "route"
+        ]
+      },
+      "kml": {
+        "display": true,
+        "identify": true,
+        "modules": [
+          "route"
+        ]
+      }
+    }]
+  }
+}

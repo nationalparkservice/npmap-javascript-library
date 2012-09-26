@@ -202,11 +202,13 @@ define([
         layers = NPMap.config.layers;
       }
 
-      _.each(layers, function(layer) {
-        if (layer.id == id) {
+      for (var i = 0; i < layers.length; i++) {
+        var layer = layers[i];
+
+        if (layer.id === id) {
           return layer;
         }
-      });
+      }
     },
     /**
      * Gets a layer config object by layer name.
