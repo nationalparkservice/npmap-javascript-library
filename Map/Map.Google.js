@@ -213,6 +213,7 @@ define([
     if (bounds) {
       clearInterval(interval);
       
+      /*
       var enableKeyDragZoom;
       
       (function() {
@@ -231,6 +232,7 @@ define([
       })();
 
       enableKeyDragZoom();
+      */
       
       if (!initialBounds) {
         initialBounds = map.getBounds();
@@ -290,44 +292,71 @@ define([
         }
       }
       
+      google.maps.event.addListener(map, 'bounds_changed', function() {
+        if (NPMap.InfoBox.visible) {
+          NPMap.InfoBox.reposition();
+        }
+      });
       google.maps.event.addListener(map, 'center_changed', function() {
         if (NPMap.InfoBox.visible) {
           NPMap.InfoBox.reposition();
         }
       });
       google.maps.event.addListener(map, 'click', function(e) {
-        Event.trigger('NPMap.Map', 'click', e);
+        doubleClicked = false;
+
+        setTimeout(function() {
+          if (!doubleClicked) {
+            Event.trigger('NPMap.Map', 'click', e);
+          }
+        }, 350);
       });
       google.maps.event.addListener(map, 'dblclick', function(e) {
         doubleClicked = true;
-        Event.trigger('NPMap.Map', 'doubleclick', e);
+        Event.trigger('NPMap.Map', 'dblclick', e);
       });
       google.maps.event.addListener(map, 'drag', function() {
         if (NPMap.InfoBox.visible) {
           NPMap.InfoBox.reposition();
         }
+
+        Event.trigger('NPMap.Map', 'viewchange');
+      });
+      google.maps.event.addListener(map, 'dragend', function() {
+        Event.trigger('NPMap.Map', 'panend');
+      });
+      google.maps.event.addListener(map, 'dragstart', function() {
+        Event.trigger('NPMap.Map', 'panstart');
+        Event.trigger('NPMap.Map', 'viewchangestart');
+      });
+      google.maps.event.addListener(map, 'idle', function() {
+        Event.trigger('NPMap.Map', 'viewchangeend');
+      });
+      google.maps.event.addListener(map, 'mousedown', function(e) {
+        Event.trigger('NPMap.Map', 'mousedown', e);
+      });
+      google.maps.event.addListener(map, 'mousemove', function(e) {
+        Event.trigger('NPMap.Map', 'mousemove', e);
+      });
+      google.maps.event.addListener(map, 'mouseout', function(e) {
+        Event.trigger('NPMap.Map', 'mouseout', e);
+      });
+      google.maps.event.addListener(map, 'mouseover', function(e) {
+        Event.trigger('NPMap.Map', 'mouseover', e);
+      });
+      google.maps.event.addListener(map, 'mouseup', function(e) {
+        Event.trigger('NPMap.Map', 'mouseup', e);
+      });
+      google.maps.event.addListener(map, 'rightclick', function(e) {
+        Event.trigger('NPMap.Map', 'rightclick', e);
       });
       google.maps.event.addListener(map, 'zoom_changed', function(e) {
         var zoom = map.getZoom();
-        
-        if (zoom !== oldZoom) {
-          if (zoom === max) {
-            map.disableKeyDragZoom();
-          } else {
-            enableKeyDragZoom();
-          }
-          
-          /*
-          if (NPMap.InfoBox.visible) {
-            if (hasClustered || hasTiled) {
-              NPMap.InfoBox.hide();
-            } else {
-              NPMap.InfoBox.reposition();
-            }
-          }
-          */
 
-          Event.trigger('NPMap.Map', 'zoomchanged');
+        if (zoom !== oldZoom) {
+          Event.trigger('NPMap.Map', 'viewchangestart');
+          Event.trigger('NPMap.Map', 'zoomstart');
+          Event.trigger('NPMap.Map', 'zoomend');
         }
         
         oldZoom = zoom;

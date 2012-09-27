@@ -33,20 +33,6 @@ define([
       max = 17,
       // Min zoom level of the map.
       min = 0,
-      //
-      numberZIndexLayers = (function() {
-        var c = 0;
-        
-        if (NPMap.config.layers) {
-          for (var i = 0; i < NPMap.config.layers.length; i++) {
-            if (typeof NPMap.config.layers[i].zIndex !== 'undefined') {
-              c++;
-            }
-          }
-        }
-        
-        return c;
-      })(),
       // The last zoom level.
       oldZoom,
       // Has the view changed since the last mousedown?
@@ -95,12 +81,6 @@ define([
     }];
   }
 
-  if (NPMap.config.layers && (NPMap.config.layers.length === numberZIndexLayers)) {
-    NPMap.config.layers.sort(function(a, b) {
-      return a.zIndex - b.zIndex;
-    });
-  }
-
   if (NPMap.config.restrictZoom) {
     if (NPMap.config.restrictZoom.max) {
       max = NPMap.config.restrictZoom.max;
@@ -123,7 +103,7 @@ define([
         NPMap.InfoBox.hide();
       }
 
-      Event.trigger('NPMap.Map', 'zoomchanged');
+      Event.trigger('NPMap.Map', 'zoomchangeend');
     }
     
     if (NPMap.InfoBox.visible) {
@@ -133,12 +113,15 @@ define([
   map.addLayer(markerLayer);
   MM.addEvent(map.parent, 'mousedown', function(e) {
     viewChanged = false;
+
+    Event.trigger('NPMap.Map', 'mousedown');
   });
   MM.addEvent(map.parent, 'mouseup', function(e) {
     if (e.which === 3) {
       return;
     }
 
+    Event.trigger('NPMap.Map', 'mouseup');
     setTimeout(function() {
       if (!viewChanged ) {
         Event.trigger('NPMap.Map', 'click', e);
@@ -169,9 +152,9 @@ define([
      * @param {Object} layer
      */
     addTileLayer: function(layer) {
-      map.insertLayerAt(layer.zIndex, layer);
+      //map.insertLayerAt(layer.zIndex, layer);
+      map.addLayer(layer);
     },
-
     /**
      * Removes a tile layer from the map.
      * @param {Object} layer

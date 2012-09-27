@@ -1,8 +1,9 @@
 ﻿// TODO: Hook up attribution.
 define([
+  'Event',
   'Map/Map',
   'Util/Util'
-], function(Map, Util) {
+], function(Event, Map, Util) {
   var
       // An array of the default base layers for Bing.
       DEFAULT_BASE_LAYERS = [{
@@ -53,8 +54,12 @@ define([
       oldTarget = null,
       // The old zoom level of the map.
       oldZoom,
+      //
+      panStartReported = false,
       // Has the map view changed?
-      viewChanged = false;
+      viewChanged = false,
+      //
+      zoomStartReported = false;
 
   /**
    * Checks to see if the map is currently zoomed in further out/in than it is supposed to and repositions it, if needed.
@@ -169,7 +174,7 @@ define([
       min: min
     };
   };
-  
+
   Microsoft.Maps.Events.addHandler(map, 'click', function(e) {
     doubleClicked = false;
 
@@ -177,13 +182,13 @@ define([
     setTimeout(function() {
       if (!doubleClicked && !viewChanged && e.isPrimary === true) {
         if (e.targetType === 'map' || e.target.allowClickThrow === true) {
-          NPMap.Event.trigger('NPMap.Map', 'click', e.originalEvent);
+          Event.trigger('NPMap.Map', 'click', e.originalEvent);
         } else {
           if (e.target.clickHandler) {
             e.target.clickHandler(e.target);
           }
 
-          NPMap.Event.trigger('NPMap.Map', 'shapeclick', e.originalEvent);
+          Event.trigger('NPMap.Map', 'shapeclick', e.originalEvent);
         }
       }
     }, 350);
@@ -192,19 +197,17 @@ define([
     doubleClicked = true;
 
     Map.setCursor(oldCursor);
-    NPMap.Event.trigger('NPMap.Map', 'dblclick', e.originalEvent);
+    Event.trigger('NPMap.Map', 'dblclick', e.originalEvent);
   });
   Microsoft.Maps.Events.addHandler(map, 'mousedown', function(e) {
     mouseDown = true;
     viewChanged = false;
 
     Map.setCursor('move');
-    NPMap.Event.trigger('NPMap.Map', 'mousedown', e.originalEvent);
+    Event.trigger('NPMap.Map', 'mousedown', e.originalEvent);
 
     if (e.originalEvent.shiftKey) {
-      //e.handled = true;
-
-      return false;
+      e.handled = true;
     }
   });
   Microsoft.Maps.Events.addHandler(map, 'mousemove', function(e) {
@@ -240,17 +243,26 @@ define([
       oldCursor = map.getRootElement().style.cursor;
     }
 
-    NPMap.Event.trigger('NPMap.Map', 'mousemove', e.originalEvent);
+    Event.trigger('NPMap.Map', 'mousemove', e.originalEvent);
 
     return false;
   });
+  Microsoft.Maps.Events.addHandler(map, 'mouseout', function(e) {
+    Event.trigger('NPMap.Map', 'mouseout', e.originalEvent);
+  });
+  Microsoft.Maps.Events.addHandler(map, 'mouseover', function(e) {
+    Event.trigger('NPMap.Map', 'mouseover', e.originalEvent);
+  });
   Microsoft.Maps.Events.addHandler(map, 'mouseup', function(e) {
-    console.log('mouseup bing');
-
     mouseDown = false;
 
     Map.setCursor(oldCursor);
-    NPMap.Event.trigger('NPMap.Map', 'mouseup', e.originalEvent);
+    Event.trigger('NPMap.Map', 'mouseup', e.originalEvent);
+  });
+  Microsoft.Maps.Events.addHandler(map, 'rightclick', function(e) {
+    Event.trigger('NPMap.Map', 'rightclick', e.originalEvent);
+
+    e.handled = true;
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchange', function() {
     var bounds =  map.getBounds(),
@@ -266,6 +278,18 @@ define([
         se = bounds.getSoutheast(),
         seHemisphere = inEasternOrWesternHemisphere(se.longitude);
 
+    if ((map.getZoom() === oldZoom) && !panStartReported && oldCenter && !NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(oldCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
+      Event.trigger('NPMap.Map', 'panstart');
+
+      panStartReported = true;
+    }
+
+    if ((map.getZoom() !== oldZoom) && !zoomStartReported) {
+      Event.trigger('NPMap.Map', 'zoomstart');
+
+      zoomStartReported = true;
+    }
+
     viewChanged = true;
     
     if (NPMap.InfoBox.visible) {
@@ -273,23 +297,20 @@ define([
     }
     
     checkMaxMinZoom();
-    NPMap.Event.trigger('NPMap.Map', 'viewchange');
-
-    if (map.getZoom() != oldZoom) {
-      NPMap.Event.trigger('NPMap.Map', 'zoomstart');
-    }
-    
-    oldCenter = map.getCenter();
-    oldZoom = map.getZoom();
+    Event.trigger('NPMap.Map', 'viewchange');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function() {
-    if (map.getZoom() != oldZoom) {
-      NPMap.Event.trigger('NPMap.Map', 'zoomend');
+    if (map.getZoom() !== oldZoom) {
+      Event.trigger('NPMap.Map', 'zoomend');
+    } else if (oldCenter && !NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(oldCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
+      Event.trigger('NPMap.Map', 'panend');
     }
-    
+
     oldCenter = map.getCenter();
     oldZoom = map.getZoom();
-    
+    panStartReported = false;
+    zoomStartReported = false;
+
     map.getCopyrights(function(a) {
       var attribution = '';
       
@@ -305,13 +326,15 @@ define([
       NPMap.Map.setAttribution(NPMap.Map.buildAttributionString(attribution.slice(0, attribution.length - 1)));
     });
     
-    NPMap.Event.trigger('NPMap.Map', 'viewchangeend');
+    Event.trigger('NPMap.Map', 'viewchangeend');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangestart', function() {
+    oldCenter = map.getCenter();
+    oldZoom = map.getZoom();
     viewChanged = true;
     
     checkMaxMinZoom();
-    NPMap.Event.trigger('NPMap.Map', 'viewchangestart');
+    Event.trigger('NPMap.Map', 'viewchangestart');
   });
   
   Map._init();

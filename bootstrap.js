@@ -123,195 +123,196 @@ if (typeof bean === 'undefined') {
         }
       }
       
-      NPMap.Event.add('NPMap.Map', 'ready', function() {
-        // TODO: This constant is stored in NPMap.Layer already. Reuse that.
-        var LAYER_TYPES = {
-              arcgisserverrest: 'ArcGisServerRest',
-              cartodb: 'CartoDb',
-              geojson: 'GeoJson',
-              googlefusion: 'GoogleFusion',
-              json: 'Json',
-              kml: 'Kml',
-              nativetiled: 'NativeTiled',
-              nativevectors: 'NativeVectors',
-              tilestream: 'TileStream',
-              xml: 'Xml',
-              zoomify: 'Zoomify'
-            },
-            layerHandlers = [],
-            scripts = [];
-            
-        if (NPMap.config.baseLayers) {
-          for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-            var baseLayerType = NPMap.config.baseLayers[i].type;
-
-            if (baseLayerType && _.indexOf(layerHandlers, baseLayerType) === -1) {
-              layerHandlers.push(baseLayerType);
-            }
-          }
-        }
-        
-        if (NPMap.config.layers) {
-          /**
-           * DOCS:
-           *   NPMap sorts layers automatically here. Layers that have zIndex properties defined always sort first, then layers with no zIndex values defined are assigned a zIndex value,
-           *   in the order they were added to the map.
-           */
-          var needsIncrement = false,
-              startIndex = 1,
-              zIndexes = [];
-
-          for (var i = 0; i < NPMap.config.layers.length; i++) {
-            if (NPMap.config.layers[i].zIndex === 0) {
-              needsIncrement = true;
-              break;
-            }
-          }
-
-          for (var i = 0; i < NPMap.config.layers.length; i++) {
-            var layer = NPMap.config.layers[i];
-
-            if (layer.zIndex) {
-              if (needsIncrement) {
-                layer.zIndex = layer.zIndex + 1;
-              }
-
-              zIndexes.push(layer.zIndex);
-            }
-          }
-
-          zIndexes.sort();
-
-          if (zIndexes.length > 0) {
-            startIndex = zIndexes[zIndexes.length - 1] + 1;
-          }
-
-          for (var i = 0; i < NPMap.config.layers.length; i++) {
-            var layer = NPMap.config.layers[i];
-
-            if (typeof layer.zIndex !== 'number') {
-              layer.zIndex = startIndex;
-              startIndex++;
-            }
-          }
-
-          NPMap.config.layers.sort(function(a, b) {
-            return a.zIndex > b.zIndex;
-          });
-
-          for (var i = 1; i < NPMap.config.layers.length; i++) {
-            var layer = NPMap.config.layers[i];
-
-            if (layer.zIndex - NPMap.config.layers[i - 1].zIndex !== 1) {
-              layer.zIndex = NPMap.config.layers[i - 1].zIndex + 1;
-            }
-          }
-
-          for (var i = 0; i < NPMap.config.layers.length; i++) {
-            var layerType = NPMap.config.layers[i].type;
-
-            if (layerType && _.indexOf(layerHandlers, layerType) === -1) {
-              layerHandlers.push(layerType);
-            }
-          }
-        }
-
-        for (var k = 0; k < layerHandlers.length; k++) {
-          (function() {
-            var layerHandlerType = layerHandlers[k].toLowerCase();
-
-            require([
-              NPMap.config.server + '/Layer/Layer.' + LAYER_TYPES[layerHandlerType] + '.js'
-            ], function(layerHandler) {
-
-              if (NPMap.config.baseLayers) {
-                for (var l = 0; l < NPMap.config.baseLayers.length; l++) {
-                  var baseLayer = NPMap.config.baseLayers[l];
-
-                  if (baseLayer.type && baseLayer.type.toLowerCase() === layerHandlerType) {
-                    baseLayer.type = LAYER_TYPES[layerHandlerType];
-                    baseLayer.zIndex = 0;
-
-                    if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
-                      baseLayer.visible = true;
-
-                      layerHandler.create(baseLayer);
-                      break;
-                    }
-                  }
-                }
-              }
-
-              if (NPMap.config.layers) {
-                for (var m = 0; m < NPMap.config.layers.length; m++) {
-                  var layer = NPMap.config.layers[m];
-
-                  if (layer.type && layer.type.toLowerCase() === layerHandlerType) {
-                    layer.type = LAYER_TYPES[layerHandlerType];
-
-                    if (typeof layer.visible === 'undefined' || layer.visible === true) {
-                      layer.visible = true;
-
-                      layerHandler.create(layer);
-                    }
-                  }
-                }
-              }
-            });
-          })();
-        }
-
-        if (NPMap.config.modules) {
-          for (var n = 0; n < NPMap.config.modules.length; n++) {
-            var name = NPMap.config.modules[n].name.toLowerCase();
-
-            if (name === 'edit' || name === 'route') {
-              scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
-            } else {
-              throw new Error('Invalid module name: "' + name + '".');
-            }
-          }
-        }
-
-        require(scripts, function() {
-          function callback() {
-            var div = document.getElementById('npmap'),
-                divLoading = document.getElementById('npmap-loading'),
-                divMask = document.getElementById('npmap-mask');
-
-            divMask.parentNode.removeChild(divMask);
-            divLoading.parentNode.removeChild(divLoading);
-
-            try {
-              var location = escape(window.top.location),
-                  query = escape(window.top.location.search),
-                  locationUrl = location.replace(query, '');
-
-              if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
-                setTimeout(function() {
-                  reqwest({
-                    type: 'jsonp',
-                    url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?'
-                  });
-                }, 1000);
-              }
-            } catch(e) {
-              
-            }
-          }
-
-          delete NPMap.apiLoaded;
-
-          if (NPMap.config.events && (typeof NPMap.config.events.init === 'function')) {
-            NPMap.config.events.init(callback);
-          } else {
-            callback();
-          }
-        });
-      });
       require([
         NPMap.config.server + '/Map/Map.' + NPMap.config.api + '.js'
-      ]);
+      ], function(MapApi) {
+        NPMap.Event.add('NPMap.Map', 'ready', function() {
+          // TODO: This constant is stored in NPMap.Layer already. Reuse that.
+          var LAYER_TYPES = {
+                arcgisserverrest: 'ArcGisServerRest',
+                cartodb: 'CartoDb',
+                geojson: 'GeoJson',
+                googlefusion: 'GoogleFusion',
+                json: 'Json',
+                kml: 'Kml',
+                nativetiled: 'NativeTiled',
+                nativevectors: 'NativeVectors',
+                tilestream: 'TileStream',
+                xml: 'Xml',
+                zoomify: 'Zoomify'
+              },
+              layerHandlers = [],
+              scripts = [];
+              
+          if (NPMap.config.baseLayers) {
+            for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+              var baseLayerType = NPMap.config.baseLayers[i].type;
+
+              if (baseLayerType && _.indexOf(layerHandlers, baseLayerType) === -1) {
+                layerHandlers.push(baseLayerType);
+              }
+            }
+          }
+          
+          if (NPMap.config.layers) {
+            /**
+             * DOCS:
+             *   NPMap sorts layers automatically here. Layers that have zIndex properties defined always sort first, then layers with no zIndex values defined are assigned a zIndex value,
+             *   in the order they were added to the map.
+             */
+            var needsIncrement = false,
+                startIndex = 1,
+                zIndexes = [];
+
+            for (var i = 0; i < NPMap.config.layers.length; i++) {
+              if (NPMap.config.layers[i].zIndex === 0) {
+                needsIncrement = true;
+                break;
+              }
+            }
+
+            for (var i = 0; i < NPMap.config.layers.length; i++) {
+              var layer = NPMap.config.layers[i];
+
+              if (layer.zIndex) {
+                if (needsIncrement) {
+                  layer.zIndex = layer.zIndex + 1;
+                }
+
+                zIndexes.push(layer.zIndex);
+              }
+            }
+
+            zIndexes.sort();
+
+            if (zIndexes.length > 0) {
+              startIndex = zIndexes[zIndexes.length - 1] + 1;
+            }
+
+            for (var i = 0; i < NPMap.config.layers.length; i++) {
+              var layer = NPMap.config.layers[i];
+
+              if (typeof layer.zIndex !== 'number') {
+                layer.zIndex = startIndex;
+                startIndex++;
+              }
+            }
+
+            NPMap.config.layers.sort(function(a, b) {
+              return a.zIndex > b.zIndex;
+            });
+
+            for (var i = 1; i < NPMap.config.layers.length; i++) {
+              var layer = NPMap.config.layers[i];
+
+              if (layer.zIndex - NPMap.config.layers[i - 1].zIndex !== 1) {
+                layer.zIndex = NPMap.config.layers[i - 1].zIndex + 1;
+              }
+            }
+
+            for (var i = 0; i < NPMap.config.layers.length; i++) {
+              var layerType = NPMap.config.layers[i].type;
+
+              if (layerType && _.indexOf(layerHandlers, layerType) === -1) {
+                layerHandlers.push(layerType);
+              }
+            }
+          }
+
+          for (var k = 0; k < layerHandlers.length; k++) {
+            (function() {
+              var layerHandlerType = layerHandlers[k].toLowerCase();
+
+              require([
+                NPMap.config.server + '/Layer/Layer.' + LAYER_TYPES[layerHandlerType] + '.js'
+              ], function(layerHandler) {
+
+                if (NPMap.config.baseLayers) {
+                  for (var l = 0; l < NPMap.config.baseLayers.length; l++) {
+                    var baseLayer = NPMap.config.baseLayers[l];
+
+                    if (baseLayer.type && baseLayer.type.toLowerCase() === layerHandlerType) {
+                      baseLayer.type = LAYER_TYPES[layerHandlerType];
+                      baseLayer.zIndex = 0;
+
+                      if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
+                        baseLayer.visible = true;
+
+                        layerHandler.create(baseLayer);
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                if (NPMap.config.layers) {
+                  for (var m = 0; m < NPMap.config.layers.length; m++) {
+                    var layer = NPMap.config.layers[m];
+
+                    if (layer.type && layer.type.toLowerCase() === layerHandlerType) {
+                      layer.type = LAYER_TYPES[layerHandlerType];
+
+                      if (typeof layer.visible === 'undefined' || layer.visible === true) {
+                        layer.visible = true;
+
+                        layerHandler.create(layer);
+                      }
+                    }
+                  }
+                }
+              });
+            })();
+          }
+
+          if (NPMap.config.modules) {
+            for (var n = 0; n < NPMap.config.modules.length; n++) {
+              var name = NPMap.config.modules[n].name.toLowerCase();
+
+              if (name === 'edit' || name === 'route') {
+                scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
+              } else {
+                throw new Error('Invalid module name: "' + name + '".');
+              }
+            }
+          }
+
+          require(scripts, function() {
+            function callback() {
+              var div = document.getElementById('npmap'),
+                  divLoading = document.getElementById('npmap-loading'),
+                  divMask = document.getElementById('npmap-mask');
+
+              divMask.parentNode.removeChild(divMask);
+              divLoading.parentNode.removeChild(divLoading);
+
+              try {
+                var location = escape(window.top.location),
+                    query = escape(window.top.location.search),
+                    locationUrl = location.replace(query, '');
+
+                if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
+                  setTimeout(function() {
+                    reqwest({
+                      type: 'jsonp',
+                      url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + locationUrl + '&v=' + NPMap.version + '&callback=?'
+                    });
+                  }, 1000);
+                }
+              } catch(e) {
+                
+              }
+            }
+
+            delete NPMap.apiLoaded;
+
+            if (NPMap.config.events && (typeof NPMap.config.events.init === 'function')) {
+              NPMap.config.events.init(callback);
+            } else {
+              callback();
+            }
+          });
+        });
+      });
     };
 
     /**

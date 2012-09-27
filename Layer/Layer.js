@@ -101,6 +101,12 @@ define([
       func: function(config) {
         if (!config.name) {
           config.name = 'Layer_' + new Date().getTime();
+
+          if (_.indexOf(usedNames, config.name) !== -1) {
+            var random = Math.floor(Math.random() * (999999999 - 0 + 1)) + 0;
+
+            config.name = config.name + random;
+          }
         }
 
         if (_.indexOf(usedNames, config.name) === -1) {

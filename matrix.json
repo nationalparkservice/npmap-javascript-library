@@ -1,15 +1,74 @@
 {
+  "baseApis": [{
+    "bing": {
+      "layerHandlers": [
+        "ArcGisServerRest",
+        "CartoDb",
+        ""
+      ]
+    }
+  }]
   "bing": {
-    layerHandlers: [{
+    "layerHandlers": [{
       "ArcGisServerRest": {
         "display": true,
         "identify": true,
-        "modules: [
+        "modules": [
           "edit",
           "route"
         ]
       },
-      "kml": {
+      "CartoDb": {
+        "display": true,
+        "identify": false,
+        "modules": []
+      },
+      "GeoJson": {
+        "display": true,
+        "identify": true,
+        "modules": [
+          "route"
+        ]
+      },
+      "GoogleFusion": {
+        "display": true,
+        "identify": true,
+        "modules": [
+          "route"
+        ]
+      },
+      "Json": {
+        "display": true,
+        "identify": true,
+        "modules": [
+          "route"
+        ]
+      },
+      "Kml": {
+        "display": true,
+        "identify": true,
+        "modules": [
+          "route"
+        ]
+      },
+      "NativeVectors": {
+        "display": true,
+        "identify": true,
+        "modules": [
+          "route"
+        ]
+      },
+      "Tiled": {
+        "display": true,
+        "identify": false,
+        "modules": []
+      },
+      "TileStream": {
+        "display": true,
+        "identify": true,
+        "modules": []
+      },
+      "Xml": {
         "display": true,
         "identify": true,
         "modules": [

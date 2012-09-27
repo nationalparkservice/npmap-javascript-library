@@ -21,10 +21,14 @@ define([
     var layerString = '';
 
     _.each(composited, function(composite, i) {
-      layerString += composite.id;
+      var visible = composite.visible;
 
-      if (i + 1 !== composited.length) {
-        layerString += ',';
+      if (typeof visible === 'undefined' || visible === true) {
+        layerString += composite.id;
+
+        if (i + 1 !== composited.length) {
+          layerString += ',';
+        }
       }
     });
 
@@ -87,21 +91,16 @@ define([
      * Gets the first visible TileStream baseLayer.
      * @return {Array}
      */
-    _getVisibleBaseLayers: function() {
-      var visible = [];
-      
-      if (NPMap.config.baseLayers) {
-        for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-          var baseLayer = NPMap.config.baseLayers[i];
-          
-          if (isVisibleAndTileStream(baseLayer)) {
-            visible.push(baseLayer);
-            break;
-          }
+    _getVisibleBaseLayer: function() {
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var baseLayer = NPMap.config.baseLayers[i];
+
+        if (isVisibleAndTileStream(baseLayer)) {
+          return baseLayer;
         }
       }
-      
-      return visible;
+
+      return null;
     },
     /**
      * Gets the number of visible TileStream layers.
@@ -142,13 +141,51 @@ define([
      * @return null
      */
     create: function(config, callback) {
-      var baseLayer = this._getVisibleBaseLayers()[0],
+      var baseLayer = this._getVisibleBaseLayer(),
+          composited = config.composited,
           layerString = config.id,
           url = config.url || 'http://api.tiles.mapbox.com/v3/';
 
       Event.trigger('NPMap.Layer', 'beforeadd', config);
 
-      if (config.composited) {
+      if (composited) {
+        // sort composited by z-index, but first assign z-index.
+        var currentIndex,
+            zIndexes = [],
+            zIndexesCreate = [];
+
+        for (var i = 0; i < composited.length; i++) {
+          var composite = composited[i];
+
+          if (typeof composite.visible !== 'boolean') {
+            composite.visible = true;
+          }
+
+          if (typeof composite.zIndex === 'number') {
+            zIndexes.push(composite);
+          } else {
+            zIndexesCreate.push(composite);
+          }
+        }
+
+        if (zIndexes.length > 0) {
+          zIndexes.sort();
+
+          currentIndex = zIndexes[zIndexes.length - 1];
+        } else {
+          currentIndex = -1;
+        }
+
+        for (var j = 0; j < zIndexesCreate.length; j++) {
+          var compositeJ = composited[j];
+
+          currentIndex++;
+
+          compositeJ.zIndex = currentIndex;
+
+          zIndexes.push(compositeJ);
+        }
+
         layerString = constructCompositedString(config.composited);
       }
 
@@ -163,6 +200,10 @@ define([
               tileLayer,
               waxShort = null,
               zIndex = config.zIndex;
+
+          if (!response.id) {
+            response.id = config.id || config.name;
+          }
 
           if (typeof apiMap.createTileStreamLayer === 'function') {
             tileLayer = apiMap.createTileStreamLayer(response, {
@@ -236,7 +277,7 @@ define([
      * @return null
      */
     refresh: function(config) {
-
+      console.log(config);
 
 
 

@@ -1,4 +1,10 @@
 define(function() {
+  var
+      // Contains all the active events.
+      activeEvents = [],
+      // An incrementing integer to use for event ids.
+      id = 0;
+
   return NPMap.Event = {
     /**
      * Add an event to an NPMap class.
@@ -6,48 +12,61 @@ define(function() {
      * @param {String} event The name of the event to add to the class.
      * @param {Function} func The function to call when the event is fired.
      * @param {Boolean} single Should this event only be called once and then disposed?
+     * @return {Number}
      */
     add: function(obj, event, func, single) {
-      var cl = obj.replace('NPMap.', '');
+      var cls = obj.replace('NPMap.', ''),
+          e = {
+            cls: cls,
+            event: event,
+            func: func,
+            id: id,
+            single: single || false
+          };
 
-      if (NPMap[cl]) {
-        NPMap[cl]._events = NPMap[cl]._events || [];
-        
-        NPMap[cl]._events.push({
-          event: event,
-          func: func,
-          single: single || false
-        });
-      } else {
-        var me = this;
+      NPMap[cls]._events = NPMap[cls]._events || [];
+      
+      NPMap[cls]._events.push(e);
+      activeEvents.push(e);
 
-        setTimeout(function() {
-          me.add(obj, event, func);
-        }, 100);
-      }
+      id++;
+
+      return id - 1;
     },
     /**
      * Remove an existing event from an NPMap class.
-     * @param {String} obj The name of the nested class, in "NPMap.ObjectName" format, to remove the event from.
-     * @param {String} event The name of the event to remove to the class.
-     * @param {Function} func The function to remove.
+     * @param {Number} id
+     * @return null
      */
-    remove: function(obj, event, func) {
-      var cl = obj.replace('NPMap.', '');
+    remove: function(id) {
+      var cls,
+          index = -1;
+        
+      for (var i = 0; i < activeEvents.length; i++) {
+        var activeEvent = activeEvents[i];
+
+        if (activeEvent.id === id) {
+          cls = activeEvent.cls;
+          index = i;
+          break;
+        }
+      }
+
+      if (index !== -1) {
+        activeEvents.splice(index, 1);
+      }
+
+      index = -1;
+
+      for (var i = 0; i < NPMap[cls]._events.length; i++) {
+        if (NPMap[cls]._events[i].id === id) {
+          index = i;
+          break;
+        }
+      }
       
-      if (NPMap[cl]) {
-        var index = -1;
-        
-        for (var i = 0; i < NPMap[cl]._events.length; i++) {
-          if (NPMap[cl]._events[i].func === func) {
-            index = i;
-            break;
-          }
-        }
-        
-        if (index !== -1) {
-          NPMap[cl]._events.splice(index, 1);
-        }
+      if (index !== -1) {
+        NPMap[cls]._events.splice(index, 1);
       }
     },
     /**
@@ -55,6 +74,7 @@ define(function() {
      * @param {String} obj The name of the nested class, in "NPMap.ObjectName" format, to trigger the event for.
      * @param {String} event The name of the event to trigger.
      * @param {Object} e (Optional) The event object to pass to the event handler function.
+     * @return null
      */
     trigger: function(obj, event, e) {
       var cl = obj.replace('NPMap.', ''),
