@@ -60,7 +60,7 @@ define([
       z: z
     });
   }
-
+  
   Event.add('NPMap.Map', 'zoomstart', function() {
     if (NPMap.Layer.TileStream._getAllVisibleLayers().length > 0) {
       InfoBox.hide();
@@ -73,12 +73,12 @@ define([
      * @return {Array}
      */
     _getAllVisibleLayers: function() {
-      var baseLayers = this._getVisibleBaseLayers(),
+      var baseLayer = this._getVisibleBaseLayer(),
           layers = this._getVisibleLayers(),
           visible = [];
       
-      if (baseLayers.length > 0) {
-        visible.push(baseLayers);
+      if (baseLayer) {
+        visible.push(baseLayer);
       }
       
       if (layers.length > 0) {
@@ -137,19 +137,23 @@ define([
     /**
      * Loads all of the TileStream layers that have been added to the map and are visible.
      * @param {Object} config
-     * @param {Function} callback
+     * @param {Function} callback (Optional)
+     * @param {Boolean} silent (Optional)
      * @return null
      */
-    create: function(config, callback) {
+    create: function(config, callback, silent) {
       var baseLayer = this._getVisibleBaseLayer(),
           composited = config.composited,
           layerString = config.id,
           url = config.url || 'http://api.tiles.mapbox.com/v3/';
 
-      Event.trigger('NPMap.Layer', 'beforeadd', config);
+      silent = silent || false;
+
+      if (!silent) {
+        Event.trigger('NPMap.Layer', 'beforeadd', config);
+      }
 
       if (composited) {
-        // sort composited by z-index, but first assign z-index.
         var currentIndex,
             zIndexes = [],
             zIndexesCreate = [];
@@ -187,6 +191,15 @@ define([
         }
 
         layerString = constructCompositedString(config.composited);
+      }
+
+      if (config.interaction) {
+        config.interaction = null;
+
+        if (interaction) {
+          interaction.remove();
+          interaction = null;
+        }
       }
 
       url += layerString;
@@ -250,7 +263,7 @@ define([
           }
 
           if (!interaction && response.grids && waxShort) {
-            interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
+            config.interaction = interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
               Map.setCursor('pointer');
 
               if (o.e.type !== 'mousemove') {
@@ -261,7 +274,9 @@ define([
             });
           }
 
-          Event.trigger('NPMap.Layer', 'afteradd', config);
+          if (!silent) {
+            Event.trigger('NPMap.Layer', 'afteradd', config);
+          }
 
           if (callback) {
             callback();
@@ -277,15 +292,8 @@ define([
      * @return null
      */
     refresh: function(config) {
-      console.log(config);
-
-
-
-
-
-
-      //this.remove();
-      //this.create();
+      this.remove(config);
+      this.create(config, null, true);
     },
     /**
      * Removes a TileStream layer from the map.

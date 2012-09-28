@@ -19,6 +19,8 @@ define([
       baseLayer,
       // The current center.
       center,
+      //
+      clicks = 0,
       // The map div.
       divMap = document.getElementById(NPMap.config.div).parentNode,
       // The initial center of the map.
@@ -35,10 +37,14 @@ define([
       min = 0,
       // The last zoom level.
       oldZoom,
+      //
+      panning = false,
       // Has the view changed since the last mousedown?
       viewChanged = false,
       // The current zoom level.
-      zoom;
+      zoom,
+      //
+      zooming = false;
       
   /**
    * Helper function for running easey.
@@ -91,45 +97,105 @@ define([
     }
   }
 
-  map.addCallback('drawn', function(m) {
-    var z = Math.round(m.getZoom());
+  map.addCallback('drawn', function() {
+    var z = Math.round(map.getZoom());
 
     viewChanged = true;
+
+    Event.trigger('NPMap.Map', 'viewchanging');
     
     if (oldZoom !== z) {
+      if (!zooming) {
+        Event.trigger('NPMap.Map', 'viewchangestart');
+        Event.trigger('NPMap.Map', 'zoomstart');
+      }
+
+      Event.trigger('NPMap.Map', 'zooming');
+
       oldZoom = z;
+      zooming = true;
 
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.hide();
       }
 
-      Event.trigger('NPMap.Map', 'zoomchangeend');
+      setTimeout(function() {
+        if (Math.round(map.getZoom()) === oldZoom) {
+          zooming = false;
+
+          Event.trigger('NPMap.Map', 'viewchangeend');
+          Event.trigger('NPMap.Map', 'zoomend');
+        }
+      }, 50);
     }
     
     if (NPMap.InfoBox.visible) {
       NPMap.InfoBox.reposition();
     }
   });
-  map.addLayer(markerLayer);
+  map.addCallback('panned', function() {
+    var center = map.getCenter();
+
+    if (!panning) {
+      Event.trigger('NPMap.Map', 'panstart');
+      Event.trigger('NPMap.Map', 'viewchangestart');
+    }
+
+    Event.trigger('NPMap.Map', 'panning');
+    setTimeout(function() {
+      if (Map.latLngsAreEqual(Map.latLngFromApi(center), Map.latLngFromApi(map.getCenter()))) {
+        Event.trigger('NPMap.Map', 'panend');
+        Event.trigger('NPMap.Map', 'viewchangeend');
+
+        panning = false;
+      }
+    }, 50);
+
+    panning = true;
+  });
   MM.addEvent(map.parent, 'mousedown', function(e) {
     viewChanged = false;
 
-    Event.trigger('NPMap.Map', 'mousedown');
+    Event.trigger('NPMap.Map', 'mousedown', e);
+
+    if (Util.isRightClick(e)) {
+      Event.trigger('NPMap.Map', 'rightclick', e);
+    }
+  });
+  MM.addEvent(map.parent, 'mousemove', function(e) {
+    Event.trigger('NPMap.Map', 'mousemove', e);
+  });
+  MM.addEvent(map.parent, 'mouseover', function(e) {
+    Event.trigger('NPMap.Map', 'mouseover', e);
+  });
+  MM.addEvent(map.parent, 'mouseout', function(e) {
+    Event.trigger('NPMap.Map', 'mouseout', e);
   });
   MM.addEvent(map.parent, 'mouseup', function(e) {
+    clicks++;
+
     if (e.which === 3) {
       return;
     }
 
-    Event.trigger('NPMap.Map', 'mouseup');
+    Event.trigger('NPMap.Map', 'mouseup', e);
     setTimeout(function() {
-      if (!viewChanged ) {
-        Event.trigger('NPMap.Map', 'click', e);
+      if (!viewChanged) {
+        if (clicks === 1) {
+          Event.trigger('NPMap.Map', 'click', e);
+        } else {
+          Event.trigger('NPMap.Map', 'dblclick', e);
+        }
       }
 
+      clicks = 0;
       viewChanged = false;
-    }, 200);
+    }, 350);
   });
+  MM.addEvent(map.parent, 'rightclick', function(e) {
+    Event.trigger('NPMap.Map', 'rightclick', e);
+  });
+  map.addLayer(markerLayer);
   map.setCenterZoom(center, zoom);
   map.setZoomRange(min, max);
   Map._init();
@@ -160,7 +226,8 @@ define([
      * @param {Object} layer
      */
     removeTileLayer: function(layer) {
-      map.removeLayerAt(layer.zIndex);
+      //map.removeLayerAt(layer.zIndex);
+      map.removeLayer(layer);
     },
 
     /**
@@ -501,6 +568,10 @@ define([
      */
     positionClickDot: function(to) {
       var clickDot = document.getElementById('npmap-clickdot');
+
+      clickDot.style.backgroundColor = 'red';
+      clickDot.style.height = '5px';
+      clickDot.style.width = '5px';
 
       if (to.lon) {
         to = map.locationPoint(to);

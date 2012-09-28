@@ -278,16 +278,27 @@ define([
         se = bounds.getSoutheast(),
         seHemisphere = inEasternOrWesternHemisphere(se.longitude);
 
-    if ((map.getZoom() === oldZoom) && !panStartReported && oldCenter && !NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(oldCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
-      Event.trigger('NPMap.Map', 'panstart');
+    if ((map.getZoom() === oldZoom) && oldCenter && !NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(oldCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
+      if (!panStartReported) {
+        Event.trigger('NPMap.Map', 'panstart');
 
-      panStartReported = true;
+        panStartReported = true;
+      }
+
+      Event.trigger('NPMap.Map', 'panning');
     }
 
-    if ((map.getZoom() !== oldZoom) && !zoomStartReported) {
-      Event.trigger('NPMap.Map', 'zoomstart');
+    if (map.getZoom() !== oldZoom) {
+      console.log('here');
 
-      zoomStartReported = true;
+      if (!zoomStartReported) {
+        Event.trigger('NPMap.Map', 'zoomstart');
+
+        zoomStartReported = true;
+      }
+      
+      
+      Event.trigger('NPMap.Map', 'zooming');
     }
 
     viewChanged = true;
@@ -297,7 +308,7 @@ define([
     }
     
     checkMaxMinZoom();
-    Event.trigger('NPMap.Map', 'viewchange');
+    Event.trigger('NPMap.Map', 'viewchanging');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function() {
     if (map.getZoom() !== oldZoom) {

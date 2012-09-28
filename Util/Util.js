@@ -282,6 +282,24 @@ define(function() {
       return n % 1 === 0;
     },
     /**
+     * Detects if a MouseEvent is a right-click event.
+     * @param {Object} e
+     * @return {Boolean}
+     */
+    isRightClick: function(e) {
+      var isRight = false;
+
+      e = e || window.event;
+
+      if ("which" in e) {
+        isRight = e.which === 3;
+      } else if ("button" in e) {
+        isRight = e.button === 2;
+      }
+      
+      return isRight;
+    },
+    /**
      * Iterates through all of the child nodes of an element.
      * @param {Object} el
      * @param {Function} func (Optional)

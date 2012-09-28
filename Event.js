@@ -34,6 +34,30 @@ define(function() {
       return id - 1;
     },
     /**
+     * Gets events.
+     * @param {String} obj (Optional)
+     * @return {Array}
+     */
+    get: function(obj) {
+      var events = [];
+
+      if (!obj) {
+        events = activeEvents;
+      } else {
+        var cls = obj.replace('NPMap.', '');
+
+        for (var i = 0; i < activeEvents.length; i++) {
+          var active = activeEvents[i];
+
+          if (active.cls === cls) {
+            events.push(active);
+          }
+        }
+      }
+
+      return events;
+    },
+    /**
      * Remove an existing event from an NPMap class.
      * @param {Number} id
      * @return null
@@ -41,7 +65,7 @@ define(function() {
     remove: function(id) {
       var cls,
           index = -1;
-        
+
       for (var i = 0; i < activeEvents.length; i++) {
         var activeEvent = activeEvents[i];
 

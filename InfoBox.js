@@ -1,8 +1,9 @@
 // TODO: underscore.js is a requirement. Make sure it is loaded properly.
 // TODO: Auto-pan is working properly except for when parent === 'page' and you've scrolled horizontally/vertically and at least one side of the InfoBox falls off of the page.
 define([
+  'Event',
   'Util/Util'
-], function(Util) {
+], function(Event, Util) {
   var
       // The InfoBox config object from the NPMap.config object.
       config = NPMap.config.infobox || {},
@@ -25,9 +26,9 @@ define([
       //
       divInfoBoxTitle,
       // The map div.
-      divMap = document.getElementById('npmap-map'),
+      divMap,
       // The height of the map div.
-      mapHeight = divMap.offsetHeight,
+      mapHeight,
       // The position of the map on the page in pixels.
       mapPosition = {
         east: 0,
@@ -36,17 +37,17 @@ define([
         west: 0
       },
       // The width of the map div.
-      mapWidth = divMap.offsetWidth,
+      mapWidth,
       // This variable holds the user-defined maxHeight for the #npmapinfobox div.
       maxHeight = null,
       // This variable holds the user-defined maxWidth for the #npmapinfobox div.
       maxWidth = null,
       // The offset of the map div element (NPMap.config.div).
-      offset = Util.getOffset(divMap),
+      offset,
       // The left offset of the map div element, in pixels.
-      offsetLeft = offset.left,
+      offsetLeft,
       // The top offset of the map div element, in pixels.
-      offsetTop = offset.top,
+      offsetTop,
       // The amount of padding, in pixels, to preserve between the edge of the InfoBox and the edge of the map.
       padding = config.padding || 20,
       //
@@ -240,7 +241,7 @@ define([
     if (parent === 'map') {
       bottom = mapHeight - clickDotTop;
       right = mapWidth - clickDotLeft;
-
+      
       if (design === 'basic') {
         bottom = bottom + 30;
         right = right - 69;
@@ -249,6 +250,8 @@ define([
         right = right - (Util.getOuterDimensions(divInfoBox).width / 2) - 8;
       }
     } else if (parent === 'page') {
+      
+
       if (design === 'basic') {
         bottom = (windowHeight - (clickDotTop + offsetTop)) + 30;
         right = (windowWidth - clickDotLeft - offsetLeft - 69);
@@ -257,6 +260,9 @@ define([
         bottom = (windowHeight - (clickDotTop + offsetTop)) + 30;
         right = (windowWidth - clickDotLeft - offsetLeft - 69);
       }
+
+      console.log(mapWidth);
+      console.log(right);
     }
 
     divInfoBox.style.bottom = bottom + 'px';
@@ -459,21 +465,28 @@ define([
   divInfoBox.id = 'npmap-infobox';
   divInfoBox.style.display = 'none';
   divInfoBox.style.position = 'absolute';
-  
-  if (parent === 'map') {
-    divInfoBox.style.zIndex = 1;
 
-    // TODO: Set this up the way a proper circular dependency should be setup.
-    Util.safeLoad('NPMap.Map', function() {
+  // TODO: Set this up the way a proper circular dependency should be setup.
+  Util.safeLoad('NPMap.Map', function() {
+    divMap = NPMap.Map.getMapElement();
+    mapHeight = divMap.offsetHeight;
+    mapWidth = divMap.offsetWidth;
+    offset = Util.getOffset(divMap);
+    offsetLeft = offset.left;
+    offsetTop = offset.top;
+
+    if (parent === 'map') {
+      divInfoBox.style.zIndex = 1;
+
       NPMap.Map.addControl(divInfoBox);
       setupInfoBox();
-    });
-  } else {
-    divInfoBox.style.zIndex = 999999;
-    
-    document.body.appendChild(divInfoBox);
-    setupInfoBox();
-  }
+    } else {
+      divInfoBox.style.zIndex = 999999;
+      
+      document.body.appendChild(divInfoBox);
+      setupInfoBox();
+    }
+  });
 
   return NPMap.InfoBox = {
     // An array of event handler objects that have been added to this class.

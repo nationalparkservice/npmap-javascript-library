@@ -298,6 +298,10 @@ define([
         }
       });
       google.maps.event.addListener(map, 'center_changed', function() {
+        if (map.getZoom() === oldZoom) {
+          Event.trigger('NPMap.Map', 'panning');
+        }
+
         if (NPMap.InfoBox.visible) {
           NPMap.InfoBox.reposition();
         }
@@ -356,6 +360,7 @@ define([
         if (zoom !== oldZoom) {
           Event.trigger('NPMap.Map', 'viewchangestart');
           Event.trigger('NPMap.Map', 'zoomstart');
+          Event.trigger('NPMap.Map', 'zooming');
           Event.trigger('NPMap.Map', 'zoomend');
         }
         

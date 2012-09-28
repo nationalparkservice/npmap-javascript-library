@@ -33,6 +33,8 @@ define([
       isFullScreen = false,
       //
       mouseDownPixel = null,
+      // The id of the active mousemove handler.
+      mouseMoveId,
       // The zoombox.
       zoombox = document.createElement('div'),
       // The zoom level to scale in meters.
@@ -188,24 +190,22 @@ define([
           zoombox.style.display = 'block';
           zoombox.style.left = mouseDownPixel.x + 'px';
           zoombox.style.top = mouseDownPixel.y + 'px';
-
-          NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+          mouseMoveId = NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+          
           NPMap.Map.setCursor('crosshair');
         }
       }
     },{
       event: 'mouseup',
       func: function(e) {
-        console.log(e);
-
         if (e.shiftKey) {
           var pixel = getMousePixel(e),
               coords = {},
               nw,
               se;
 
-          console.log(mouseDownPixel.x);
-          console.log(pixel.x);
+          //console.log(mouseDownPixel.x);
+          //console.log(pixel.x);
 
           if (pixel.x > mouseDownPixel.x) {
             coords.e = pixel.x;
@@ -245,18 +245,11 @@ define([
           zoombox.style.height = '0px';
           zoombox.style.width = '0px';
 
-          NPMap.Event.remove('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+          NPMap.Event.remove(mouseMoveId);
         }
       }
     },{
       event: 'zoomstart',
-      func: function() {
-        if (!NPMap.InfoBox.marker) {
-          NPMap.InfoBox.hide();
-        }
-      }
-    },{
-      event: 'zoomend',
       func: function() {
         if (!NPMap.InfoBox.marker) {
           NPMap.InfoBox.hide();
