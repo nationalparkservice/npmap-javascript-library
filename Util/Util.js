@@ -18,6 +18,20 @@ define(function() {
       ];
 
   /**
+   * Adds an event listener to an element.
+   * @param {Object} el
+   * @param {String} name
+   * @param {Function} handler
+   * @return null
+   */
+  function bindEvent(el, name, handler) {
+    if (el.addEventListener){
+      el.addEventListener(name, handler, false);
+    } else if (el.attachEvent){
+      el.attachEvent('on' + name, handler);
+    }
+  }
+  /**
    * Cross-browser cancel event propagation.
    * @param {Object} e
    */
@@ -66,6 +80,13 @@ define(function() {
     }
 
     return classElements;
+  }
+
+  if (!LazyLoader) {
+    /**
+     * https://github.com/LukeTheDuke/Lazyloader
+     */
+    var LazyLoader=function(i,j){function k(a){var a=a.toLowerCase(),b=a.indexOf("js"),a=a.indexOf("css");return-1==b&&-1==a?!1:b>a?"js":"css"}function m(a){var b=document.createElement("link");b.href=a;b.rel="stylesheet";b.type="text/css";b.onload=c;b.onreadystatechange=function(){("loaded"==this.readyState||"complete"==this.readyState)&&c()};document.getElementsByTagName("head")[0].appendChild(b)}function f(a){try{document.styleSheets[a].cssRules?c():document.styleSheets[a].rules&&document.styleSheets[a].rules.length?c():setTimeout(function(){f(a)},250)}catch(b){setTimeout(function(){f(a)},250)}}function c(){g--;0==g&&j&&j()}for(var g=0,d,l=document.styleSheets.length-1,h=0;h<i.length;h++)if(g++,d=i[h],"css"==k(d)&&(m(d),l++,!window.opera&&-1==navigator.userAgent.indexOf("MSIE")&&f(l)),"js"==k(d)){var e=document.createElement("script");e.type="text/javascript";e.src=d;e.onload=c;document.getElementsByTagName("head")[0].appendChild(e)}};
   }
 
   // TODO: Switch all Array.remove() calls over to splice.
@@ -193,6 +214,35 @@ define(function() {
       };
     },
     /**
+     * Gets the width of the browser's vertical scrollbar.
+     * @return {Number}
+     */
+    getScrollBarWidth: function() {
+      var inner = document.createElement('p');
+      inner.style.width = "100%";
+      inner.style.height = "200px";
+
+      var outer = document.createElement('div');
+      outer.style.position = "absolute";
+      outer.style.top = "0px";
+      outer.style.left = "0px";
+      outer.style.visibility = "hidden";
+      outer.style.width = "200px";
+      outer.style.height = "150px";
+      outer.style.overflow = "hidden";
+      outer.appendChild (inner);
+
+      document.body.appendChild(outer);
+      var w1 = inner.offsetWidth;
+      outer.style.overflow = 'scroll';
+      var w2 = inner.offsetWidth;
+      if (w1 == w2) w2 = outer.clientWidth;
+
+      document.body.removeChild (outer);
+
+      return (w1 - w2);
+    },
+    /**
      * Gets the current scroll position of the browser window.
      */
     getScrollPosition: function() {
@@ -245,19 +295,17 @@ define(function() {
     },
     /**
      * Injects a CSS stylesheet into the page.
-     * @param {String} location The path to the CSS stylesheet.
+     * @param {String/Array} location The path to the CSS stylesheet.
+     * @param {Function} callback (Optional)
      */
-    injectCss: function(location) {
-      if (document.createStyleSheet) {
-        document.createStyleSheet(location);
-      } else {
-        var c = document.createElement('link');
-        c.type = 'text/css';
-        c.rel = 'stylesheet';
-        c.href = location;
-        c.media = 'screen';
-        document.getElementsByTagName("head")[0].appendChild(c);
+    injectCss: function(locations, callback) {
+      if (typeof locations === 'string') {
+        locations = [
+          locations
+        ];
       }
+
+      LazyLoader(locations, callback);
     },
     /**
      * Returns true if the test number falls between the start and end numbers.
@@ -398,9 +446,9 @@ define(function() {
         var propagationEvent = propagationEvents[i];
 
         if (propagationEvent === 'mousewheel') {
-          el.addEventListener('mousewheel', cancelMouseWheel, false);
+          bindEvent(el, 'mousewheel', cancelMouseWheel, false);
         } else {
-          el.addEventListener(propagationEvent, cancelEventPropagation, false);
+          bindEvent(el, propagationEvent, cancelEventPropagation, false);
         }
       }
     },

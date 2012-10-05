@@ -106,34 +106,30 @@ define([
     }
   } else {
     NPMap.config.baseLayers = [];
+
+    if (typeof NPMap.config.baseLayers !== 'undefined') {
+      mapTypeId = 'blank';
+
+      NPMap.config.baseLayers.push({
+        code: 'blank',
+        visible: true
+      });
+    }
   }
 
   if (!mapTypeId) {
     mapTypeId = google.maps.MapTypeId.TERRAIN;
-    //mapTypeId = google.maps.MapTypeId.ROADMAP;
-
+    
     NPMap.config.baseLayers.push({
       code: 'terrain',
-      //code: 'roadmap',
       visible: true
     });
   }
   
   mapConfig = {
     disableDefaultUI: true,
-    draggable: (function() {
-      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.mouse.draggable')) {
-        return NPMap.config.tools.mouse.draggable;
-      } else {
-        return true;
-      }
-    })(),
-    draggableCursor: 'auto',
-
-
-
-
-
+    draggableCursor: 'default',
+    draggingCursor: 'move',
     keyboardShortcuts: (function() {
       if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.keyboard')) {
         return NPMap.config.tools.keyboard;
@@ -170,7 +166,7 @@ define([
   };
 
   mapConfig.center = initialCenter = (NPMap.config.center ? new google.maps.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new google.maps.LatLng(39, -96));
-  mapConfig.zoom = initialZoom = (NPMap.config.zoom ? NPMap.config.zoom : 4);
+  mapConfig.zoom = initialZoom = oldZoom = (NPMap.config.zoom ? NPMap.config.zoom : 4);
   map = new google.maps.Map(document.getElementById(NPMap.config.div), mapConfig);
 
   if (mapTypeId === 'blank') {
@@ -299,6 +295,7 @@ define([
       });
       google.maps.event.addListener(map, 'center_changed', function() {
         if (map.getZoom() === oldZoom) {
+          Event.trigger('NPMap.Map', 'viewchanging');
           Event.trigger('NPMap.Map', 'panning');
         }
 
@@ -360,6 +357,7 @@ define([
         if (zoom !== oldZoom) {
           Event.trigger('NPMap.Map', 'viewchangestart');
           Event.trigger('NPMap.Map', 'zoomstart');
+          Event.trigger('NPMap.Map', 'viewchanging');
           Event.trigger('NPMap.Map', 'zooming');
           Event.trigger('NPMap.Map', 'zoomend');
         }
@@ -700,9 +698,6 @@ define([
     createTileStreamLayer: function(tileJson) {
       var connector = new wax.g.connector(tileJson);
 
-      console.log(connector);
-      console.log(tileJson);
-
       map.mapTypes.set(tileJson.id, connector);
 
       return connector;
@@ -715,9 +710,11 @@ define([
       if (e.latLng) {
         return e.latLng;
       } else {
-        var offset = Util.getOffset(document.getElementById('npmap-map'));
+        var offset = Util.getOffset(document.getElementById('npmap-map')),
+            x = e.pageX || e.clientX,
+            y = e.pageY || e.clientY;
 
-        return this.pixelToLatLng(new google.maps.Point(e.pageX - offset.left, e.pageY - offset.top));
+        return this.pixelToLatLng(new google.maps.Point(x - offset.left, y - offset.top));
       }
     },
     /**
@@ -979,10 +976,6 @@ define([
      * @return null
      */
     setCursor: function(cursor) {
-      if (cursor === 'default') {
-        cursor = 'url(http://maps.google.com/mapfiles/openhand.cur), move';
-      }
-
       map.setOptions({
         draggableCursor: cursor
       });

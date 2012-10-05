@@ -2,8 +2,25 @@
 // TODO: Auto-pan is working properly except for when parent === 'page' and you've scrolled horizontally/vertically and at least one side of the InfoBox falls off of the page.
 define([
   'Event',
+  'Map/Map',
   'Util/Util'
-], function(Event, Util) {
+], function(Event, Map, Util) {
+  /*
+  return function(Map) {
+    return require('Map/Map');
+  }
+  */
+
+  console.log(Map);
+
+  return function(title) {
+    return require('Map/Map').doSomething();
+  };
+
+
+
+
+
   var
       // The InfoBox config object from the NPMap.config object.
       config = NPMap.config.infobox || {},
@@ -13,17 +30,17 @@ define([
       anchorPosition = 'right',
       // The design to use for the InfoBox.
       design = config.design || 'basic',
-      // The infobox div.
+      // The main InfoBox div.
       divInfoBox = document.createElement('div'),
-      //
+      // The bottom div of the InfoBox.
       divInfoBoxBottom,
-      //
+      // The content div of the InfoBox.
       divInfoBoxContent,
-      //
+      // The content wrapper div of the InfoBox.
       divInfoBoxContentWrapper,
-      //
+      // The footer div of the InfoBox.
       divInfoBoxFooter,
-      //
+      // The title div of the InfoBox.
       divInfoBoxTitle,
       // The map div.
       divMap,
@@ -50,7 +67,7 @@ define([
       offsetTop,
       // The amount of padding, in pixels, to preserve between the edge of the InfoBox and the edge of the map.
       padding = config.padding || 20,
-      //
+      // Preserving the initial padding setting here. This will not be over-written.
       paddingSetting = padding,
       // The pan configuration.
       pan = config.pan || 'map',
@@ -60,7 +77,7 @@ define([
       skipBoundsCheck = false,
       // An object with CSS key-value pairs.
       styles = config.styles || {},
-      //
+      // The window dimensions.
       windowDimensions = Util.getWindowDimensions(),
       // The height of the browser window, in pixels.
       windowHeight = windowDimensions.height,
@@ -84,8 +101,10 @@ define([
   function checkBounds(callback) {
     if (NPMap.InfoBox && NPMap.InfoBox.visible) {
       var clickDotPixel = NPMap.Map[NPMap.config.api].pixelFromApi(NPMap.Map[NPMap.config.api].getClickDotPixel()),
+          divNavigation = document.getElementById('npmap-navigation'),
           infoboxBottomDimensions = Util.getOuterDimensions(divInfoBoxBottom),
           infoboxDimensions = Util.getOuterDimensions(divInfoBox),
+          navigationWidth = Util.getOuterDimensions(divNavigation).width + parseInt(divNavigation.style.left.replace('px', ''), null),
           p = {
             left: clickDotPixel.x - infoboxDimensions.width + 69,
             top: clickDotPixel.y - infoboxDimensions.height - infoboxBottomDimensions.height
@@ -95,7 +114,7 @@ define([
             h: 0,
             v: 0
           };
-          
+
       if (parent === 'page') {
         var scrollPosition = Util.getScrollPosition();
         p.left = p.left + (mapPosition.west - scrollPosition.x);
@@ -207,12 +226,18 @@ define([
                 }
               }
 
+              // Take into account navigation controls width.
+              if (r.h > 0) {
+                r.h = r.h + navigationWidth;
+              } else if (p.left < navigationWidth) {
+                r.h = (navigationWidth + paddingHalved) - p.left;
+              }
+
               break;
           }
         }
       }
 
-      // TODO: MAYBE??? Get the height and width of the InfoBox, and verify that there is enough space to reposition it. If there isn't, don't reposition it.
       if ((r.h !== 0 && r.h < mapWidth) || (r.v !== 0 && r.v < mapHeight)) {
         NPMap.Map.panByPixels({
           x: r.h,
@@ -241,7 +266,7 @@ define([
     if (parent === 'map') {
       bottom = mapHeight - clickDotTop;
       right = mapWidth - clickDotLeft;
-      
+
       if (design === 'basic') {
         bottom = bottom + 30;
         right = right - 69;
@@ -254,15 +279,12 @@ define([
 
       if (design === 'basic') {
         bottom = (windowHeight - (clickDotTop + offsetTop)) + 30;
-        right = (windowWidth - clickDotLeft - offsetLeft - 69);
+        right = (windowWidth - clickDotLeft - offsetLeft - 69) - Util.getScrollBarWidth();
       } else if (design === 'nps' || design === 'pyv') {
         // TODO: You need to test this. You'll have to adjust it.
         bottom = (windowHeight - (clickDotTop + offsetTop)) + 30;
         right = (windowWidth - clickDotLeft - offsetLeft - 69);
       }
-
-      console.log(mapWidth);
-      console.log(right);
     }
 
     divInfoBox.style.bottom = bottom + 'px';

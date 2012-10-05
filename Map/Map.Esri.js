@@ -90,6 +90,10 @@ define([
       }
     } else {
       NPMap.config.baseLayers = [];
+
+      if (typeof NPMap.config.baseLayers !== 'undefined') {
+        baseLayer = true;
+      }
     }
     
     if (!baseLayer) {

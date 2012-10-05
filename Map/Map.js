@@ -382,7 +382,6 @@ define([
         elements.push({
           el: attribution,
           func: function() {
-            me.setAttribution(me.buildAttributionString());
             setAttributionMaxWidthAndPosition();
           }
         });
@@ -918,9 +917,10 @@ define([
 
         var interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
-            // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding.
+            // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding. Right now this is hardcoded in NPMap.Infobox module.
 
             clearInterval(interval);
+            me.setAttribution(me.buildAttributionString()); // TODO: This is being called before NPMap.Layer exists, so attribution isn't getting built properly.
             Util.monitorResize(divNpmap, function() {
               setAttributionMaxWidthAndPosition();
               me.handleResize();
@@ -1006,14 +1006,27 @@ define([
           me = this;
       
       if (attribution) {
-        _.each(attribution.split('|'), function(v) {
+        _.each(attribution.split(' | '), function(v) {
           attr.push(v);
         });
       }
-      
+
+
+
+
+
+
+
+
+
+
+
+
       if (NPMap.Layer) {
         _.each(NPMap.Layer.getVisibleLayers(), function(v) {
-          if (v.attribution) {
+          if (typeof NPMap.Layer[v.type] !== 'undefined' && typeof NPMap.Layer[v.type].buildAttribution === 'function') {
+            attr.push(NPMap.Layer[v.type].buildAttribution(v));
+          } else if (v.attribution) {
             _.each(v.attribution.split('|'), function(v2) {
               var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
 

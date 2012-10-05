@@ -69,6 +69,8 @@ define([
   };
 
   var
+      //
+      dblClick = false,
       // The center {L.LatLng} to initialize the map with.
       initialCenter = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
       // The zoom level to initialize the map with.
@@ -235,7 +237,7 @@ define([
         break;
       }
     }
-  } else {
+  } else if (typeof NPMap.config.baseLayers === 'undefined') {
     NPMap.config.baseLayers = [{
       attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
       id: 'mapbox.mapbox-light',
@@ -243,6 +245,8 @@ define([
       type: 'TileStream',
       visible: true
     }];
+  } else {
+    NPMap.config.baseLayers = [];
   }
   
   if (typeof NPMap.config.restrictZoom !== 'undefined') {
@@ -261,15 +265,52 @@ define([
   map = new L.Map(NPMap.config.div, mapConfig);
 
   map.on('click', function(e) {
-    Event.trigger('NPMap.Map', 'click', e);
+    dblClick = false;
+
+    setTimeout(function() {
+      if (!dblClick) {
+        Event.trigger('NPMap.Map', 'click', e);
+      }
+    }, 350);
+  });
+  map.on('contextmenu', function(e) {
+    Event.trigger('NPMap.Map', 'rightclick', e);
+  });
+  map.on('dblclick', function(e) {
+    dblClick = true;
+
+    Event.trigger('NPMap.Map', 'dblclick', e);
+  });
+  map.on('dragend', function() {
+    Map.setCursor('default');
+  });
+  map.on('dragstart', function() {
+    Map.setCursor('move');
+  });
+  map.on('mousedown', function(e) {
+    Event.trigger('NPMap.Map', 'mousedown', e);
+  });
+  map.on('mouseenter', function(e) {
+    Event.trigger('NPMap.Map', 'mouseover', e);
+  });
+  map.on('mouseleave', function(e) {
+    Event.trigger('NPMap.Map', 'mouseout', e);
+  });
+  map.on('mousemove', function(e) {
+    Event.trigger('NPMap.Map', 'mousemove', e);
+  });
+  map.on('mouseup', function(e) {
+    Event.trigger('NPMap.Map', 'mouseup', e);
   });
   map.on('move', function(e) {
     if (NPMap.InfoBox.visible) {
       NPMap.InfoBox.reposition();
     }
+
+    NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
-  map.on('zoomstart', function(e) {
-    NPMap.Event.trigger('NPMap.Map', 'zoomstart', e);
+  map.on('zoomstart', function() {
+    NPMap.Event.trigger('NPMap.Map', 'zoomstart');
   });
   Map._init();
   Util.safeLoad('NPMap.Map.Leaflet', function() {

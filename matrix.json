@@ -7,7 +7,7 @@
         ""
       ]
     }
-  }]
+  }],
   "bing": {
     "layerHandlers": [{
       "ArcGisServerRest": {

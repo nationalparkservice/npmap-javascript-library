@@ -1,6 +1,4 @@
-﻿// TODO: Change the way you handle TileStream layers. Composited layers should be added as a single layer object to NPMap.config.layers.
-
-define([
+﻿define([
   'Event',
   'InfoBox',
   'Layer/Layer',
@@ -133,6 +131,28 @@ define([
       InfoBox.latLng = latLng;
       Map[NPMap.config.api].positionClickDot(latLng);
       InfoBox.show(NPMap.InfoBox._build(null, e.data, 'content'), NPMap.InfoBox._build(null, e.data, 'title'));
+    },
+    /**
+     * Builds an attribution string for a layer config, including all composited layers.
+     * @param {Object} config
+     * @param {String}
+     */
+    buildAttribution: function(config) {
+      var attribution = [];
+
+      if (config.composited) {
+        for (var i = 0; i < config.composited.length; i++) {
+          var a = config.composited[i].attribution;
+
+          if (a && _.indexOf(attribution, a) === -1) {
+            attribution.push(a);
+          }
+        }
+      } else if (config.attribution) {
+        attribution.push(config.attribution);
+      }
+
+      return attribution;
     },
     /**
      * Loads all of the TileStream layers that have been added to the map and are visible.

@@ -109,8 +109,17 @@ define([
         break;
       }
     }
-  } else {
+  } else if (typeof NPMap.config.baseLayers === 'undefined') {
     NPMap.config.baseLayers = [];
+  } else {
+    activeBaseLayer = {
+      code: 'mercator',
+      visible: true
+    };
+
+    NPMap.config.baseLayers = [
+      activeBaseLayer
+    ];
   }
 
   if (!activeBaseLayer) {
@@ -289,8 +298,6 @@ define([
     }
 
     if (map.getZoom() !== oldZoom) {
-      console.log('here');
-
       if (!zoomStartReported) {
         Event.trigger('NPMap.Map', 'zoomstart');
 
@@ -634,7 +641,10 @@ define([
      * @return {Object}
      */
     eventGetLatLng: function(e) {
-      return this.pixelToLatLng(new Microsoft.Maps.Point(e.pageX, e.pageY), Microsoft.Maps.PixelReference.page);
+      var x = e.pageX || e.clientX,
+          y = e.pageY || e.clientY;
+
+      return this.pixelToLatLng(new Microsoft.Maps.Point(x, y), Microsoft.Maps.PixelReference.page);
     },
     /**
      * Gets a shape from a click event object.

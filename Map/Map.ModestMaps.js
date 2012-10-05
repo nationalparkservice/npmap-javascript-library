@@ -380,9 +380,11 @@ define([
      * @return {Object}
      */
     eventGetLatLng: function(e) {
-      var offset = Util.getOffset(document.getElementById('npmap-map'));
+      var offset = Util.getOffset(document.getElementById('npmap-map')),
+          x = e.pageX || e.clientX,
+          y = e.pageY || e.clientY;
 
-      return map.pointLocation(new MM.Point(e.pageX - offset.left, e.pageY - offset.top));
+      return map.pointLocation(new MM.Point(x - offset.left, y - offset.top));
     },
     /**
      * Gets a shape from a click event object.
@@ -568,10 +570,6 @@ define([
      */
     positionClickDot: function(to) {
       var clickDot = document.getElementById('npmap-clickdot');
-
-      clickDot.style.backgroundColor = 'red';
-      clickDot.style.height = '5px';
-      clickDot.style.width = '5px';
 
       if (to.lon) {
         to = map.locationPoint(to);
