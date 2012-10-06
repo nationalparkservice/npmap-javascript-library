@@ -1,5 +1,4 @@
-﻿// TODO: This is Google Maps-specific.
-define([
+﻿define([
   'Event',
   'Layer/Layer'
 ], function(Event, Layer) {
@@ -56,43 +55,5 @@ define([
         Event.trigger('NPMap.Map', 'shapeclick', e);
       });
     }
-
-    /*
-    buildInfoBox: function(data, layer) {
-      var content,
-          title;
-
-      if (!data) {
-        content = 'No information is available for this resource.';
-        title = 'Sorry!';
-      } else {
-        title = '<h2>';
-
-        if (typeof(layer.identify.content) === 'function') {
-          content = layer.identify.content(data);
-        } else {
-          content = layer.identify.content;
-        }
-
-        if (typeof(layer.identify.title) === 'function') {
-          title = layer.identify.title(data);
-        } else {
-          title = layer.identify.title;
-        }
-
-        title += '</h2>';
-
-        _.each(data, function(v, i) {
-          // TODO: These should be regular expressions that replace multiple instances if they exist.
-          content = content.replace('{' + v.columnName + '}', v.value);
-          title = title.replace('{' + v.columnName + '}', v.value);
-        });
-      }
-
-      NPMap.InfoBox.show(content, title);
-    }
-    */
   };
 });
-
-

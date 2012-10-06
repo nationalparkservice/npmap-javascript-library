@@ -14,7 +14,7 @@ define([
       // The combined pixel height of all the active notification messages.
       activeNotificationMessagesHeight = 0,
       // The map div.
-      divMap = document.getElementById('npmap-map'),
+      divMap = document.getElementById(NPMap.config.div),
       // The notify div.
       divNotify,
       // The npmap div.
@@ -917,10 +917,28 @@ define([
 
         var interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
+            var hasType = false;
+
             // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding. Right now this is hardcoded in NPMap.Infobox module.
 
             clearInterval(interval);
-            me.setAttribution(me.buildAttributionString()); // TODO: This is being called before NPMap.Layer exists, so attribution isn't getting built properly.
+
+            /*
+            NPMap.Util.safeLoad('NPMap.Layer', function() {
+              me.setAttribution(me.buildAttributionString());
+            });
+            */
+
+            /*
+            for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+              var baseLayer = NPMap.config.baseLayers[i];
+
+              if (baseLayer.type) {
+              
+              }
+            }
+            */
+
             Util.monitorResize(divNpmap, function() {
               setAttributionMaxWidthAndPosition();
               me.handleResize();
@@ -994,56 +1012,6 @@ define([
      */
     boundsToApi: function(bounds) {
       return NPMap.Map[NPMap.config.api].boundsToApi(bounds);
-    },
-    /**
-     * Builds the attribution string for all of the visible layers.
-     * @param {String} attribution An attribution string to add to the visible layer attribution.
-     * @return {String}
-     */
-    buildAttributionString: function(attribution) {
-      var attr = [],
-          disclaimer = '<a href="http://www.nps.gov/npmap/disclaimer.html" target="_blank">NPS Disclaimer</a>',
-          me = this;
-      
-      if (attribution) {
-        _.each(attribution.split(' | '), function(v) {
-          attr.push(v);
-        });
-      }
-
-
-
-
-
-
-
-
-
-
-
-
-      if (NPMap.Layer) {
-        _.each(NPMap.Layer.getVisibleLayers(), function(v) {
-          if (typeof NPMap.Layer[v.type] !== 'undefined' && typeof NPMap.Layer[v.type].buildAttribution === 'function') {
-            attr.push(NPMap.Layer[v.type].buildAttribution(v));
-          } else if (v.attribution) {
-            _.each(v.attribution.split('|'), function(v2) {
-              var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
-
-              if (_.indexOf(attr, credit) === -1) {
-                attr.push(credit);
-              }
-            });
-          }
-        });
-      }
-
-      if (attr.length > 0) {
-        attr.sort();
-        return attr.join(' | ') + ' | ' + disclaimer;
-      } else {
-        return disclaimer;
-      }
     },
     /**
      * Centers the map.
@@ -1452,30 +1420,6 @@ define([
       NPMap.Map[NPMap.config.api].removeShape(shape);
     },
     /**
-     * Sets the attribution string for the map.
-     * @param {String} attribution
-     * @return null
-     */
-    setAttribution: function(attribution) {
-      var divAttribution = document.getElementById('npmap-attribution');
-
-      if (divAttribution) {
-        divAttribution.innerHTML = attribution;
-        divAttribution.style.display = 'block';
-      } else {
-        var interval = setInterval(function() {
-          divAttribution = document.getElementById('npmap-attribution');
-
-          if (divAttribution) {
-            clearInterval(interval);
-
-            divAttribution.innerHTML = attribution;
-            divAttribution.style.display = 'block';
-          }
-        }, 250);
-      }
-    },
-    /**
      * Sets the map bounds.
      * @param {Object} bounds
      * @return null
@@ -1773,6 +1717,52 @@ define([
      */
     toMarkers: function(markers) {
       NPMap.Map[NPMap.config.api].toMarkers(markers);
+    },
+    /**
+     * Updates the map attribution.
+     * @return null
+     */
+    updateAttribution: function() {
+      var attribution,
+          attrs = [],
+          disclaimer = '<a href="http://www.nps.gov/npmap/disclaimer.html" target="_blank">Disclaimer</a>',
+          divAttribution = document.getElementById('npmap-attribution'),
+          me = this;
+
+      if (NPMap.Map[NPMap.config.api]._attribution) {
+        _.each(NPMap.Map[NPMap.config.api]._attribution, function(v) {
+          attrs.push(v);
+        });
+      }
+
+      if (NPMap.Layer) {
+        _.each(NPMap.Layer.getVisibleLayers(), function(v) {
+          if (typeof NPMap.Layer[v.type] !== 'undefined' && typeof NPMap.Layer[v.type].buildAttribution === 'function') {
+            _.each(NPMap.Layer[v.type].buildAttribution(v), function(a) {
+              attrs.push(a);
+            });
+          } else if (v.attribution) {
+            _.each(v.attribution.split('|'), function(v2) {
+              var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
+
+              if (_.indexOf(attrs, credit) === -1) {
+                attrs.push(credit);
+              }
+            });
+          }
+        });
+      }
+
+      if (attrs.length > 0) {
+        attrs.sort();
+
+        attribution = attrs.join(' | ') + ' | ' + disclaimer;
+      } else {
+        attribution = disclaimer;
+      }
+
+      divAttribution.innerHTML = attribution;
+      divAttribution.style.display = 'block';
     },
     /**
      * Updates the progress bar value.

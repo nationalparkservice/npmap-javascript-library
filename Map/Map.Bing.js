@@ -330,18 +330,21 @@ define([
     zoomStartReported = false;
 
     map.getCopyrights(function(a) {
-      var attribution = '';
+      var attribution = [];
       
       _.each(a, function(v, i) {
         if (!_.isArray(v)) {
-          attribution += v + '|';
+          attribution.push(v);
         } else {
           _.each(v, function(v2, i2) {
-            attribution += v2 + '|';
+            attribution.push(v2);
           });
         }
       });
-      NPMap.Map.setAttribution(NPMap.Map.buildAttributionString(attribution.slice(0, attribution.length - 1)));
+
+      NPMap.Map.Bing._attribution = attribution;
+
+      NPMap.Map.updateAttribution();
     });
     
     Event.trigger('NPMap.Map', 'viewchangeend');
@@ -358,6 +361,8 @@ define([
   Map._init();
 
   return NPMap.Map.Bing = {
+    //
+    _attribution: null,
     // Is the map loaded and ready to be interacted with programatically.
     _isReady: true,
     // The Microsoft.Maps.Map object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.

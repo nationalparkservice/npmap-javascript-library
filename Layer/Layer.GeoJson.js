@@ -3,7 +3,7 @@ define([
   'Layer/Layer',
   'Util/Util.Json',
   'Util/Util.Json.GeoJson'
-], function(Layer, utilJson, utilGeoJson) {
+], function(Layer, UtilJson, UtilGeoJson) {
   return NPMap.Layer.GeoJson = {
     /**
      * Handles the click operation for GeoJson layers.
@@ -59,8 +59,8 @@ define([
 
       config.shapes = [];
 
-      utilJson.load(config.url, function(response) {
-        var features = utilGeoJson.parse(response);
+      UtilJson.load(config.url, function(response) {
+        var features = UtilGeoJson.parse(response);
 
         for (var i = 0; i < features.length; i++) {
           var feature = features[i],

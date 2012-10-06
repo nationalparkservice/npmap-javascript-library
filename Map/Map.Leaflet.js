@@ -59,7 +59,6 @@ define([
       }
     }
     function setdirty() {
-      console.log('setdirty');
       dirty = true;
     }
 
@@ -239,7 +238,6 @@ define([
     }
   } else if (typeof NPMap.config.baseLayers === 'undefined') {
     NPMap.config.baseLayers = [{
-      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
       id: 'mapbox.mapbox-light',
       maxZoom: 17,
       type: 'TileStream',
@@ -484,8 +482,6 @@ define([
         };
       }
 
-      console.log(options);
-
       return new L.TileLayer.Simple(uriConstructor, options);
     },
     /**
@@ -633,6 +629,7 @@ define([
      * @param {Function} callback (Optional)
      */
     panByPixels: function(pixels, callback) {
+      /*
       if (callback) {
         map._rawPanBy(new L.Point(-pixels.x, -pixels.y));
         callback();
@@ -642,6 +639,18 @@ define([
       } else {
         map.panBy(new L.Point(-pixels.x, -pixels.y));
       }
+      */
+
+      map.panBy(new L.Point(-pixels.x, -pixels.y));
+
+      if (callback) {
+        callback();
+      }
+
+
+      map.fire('moveend');
+
+
     },
     /**
      *

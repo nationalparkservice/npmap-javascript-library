@@ -91,6 +91,7 @@ define([
       event: 'added',
       func: function(config) {
         usedNames.push(config.name);
+        NPMap.Map.updateAttribution();
       }
     },{
       event: 'beforeadd',
@@ -173,6 +174,7 @@ define([
       event: 'removed',
       func: function(config) {
         usedNames.splice(_.indexOf(usedNames, config.name), 1);
+        NPMap.Map.updateAttribution();
       }
     }],
     /**

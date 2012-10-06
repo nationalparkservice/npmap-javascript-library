@@ -1,26 +1,9 @@
-// TODO: underscore.js is a requirement. Make sure it is loaded properly.
 // TODO: Auto-pan is working properly except for when parent === 'page' and you've scrolled horizontally/vertically and at least one side of the InfoBox falls off of the page.
 define([
   'Event',
   'Map/Map',
   'Util/Util'
 ], function(Event, Map, Util) {
-  /*
-  return function(Map) {
-    return require('Map/Map');
-  }
-  */
-
-  console.log(Map);
-
-  return function(title) {
-    return require('Map/Map').doSomething();
-  };
-
-
-
-
-
   var
       // The InfoBox config object from the NPMap.config object.
       config = NPMap.config.infobox || {},
@@ -407,9 +390,26 @@ define([
     }
   }
   /**
-   *
+   * Called once to setup the InfoBox.
    */
   function setupInfoBox() {
+    divMap = NPMap.Map.getMapElement();
+    mapHeight = divMap.offsetHeight;
+    mapWidth = divMap.offsetWidth;
+    offset = Util.getOffset(divMap);
+    offsetLeft = offset.left;
+    offsetTop = offset.top;
+
+    if (parent === 'map') {
+      divInfoBox.style.zIndex = 1;
+
+      NPMap.Map.addControl(divInfoBox);
+    } else {
+      divInfoBox.style.zIndex = 999999;
+      
+      document.body.appendChild(divInfoBox);
+    }
+
     for (var property in styles) {
       if (property === 'max-height' || property === 'maxHeight') {
         if (typeof styles[property] === 'string') {
@@ -487,28 +487,6 @@ define([
   divInfoBox.id = 'npmap-infobox';
   divInfoBox.style.display = 'none';
   divInfoBox.style.position = 'absolute';
-
-  // TODO: Set this up the way a proper circular dependency should be setup.
-  Util.safeLoad('NPMap.Map', function() {
-    divMap = NPMap.Map.getMapElement();
-    mapHeight = divMap.offsetHeight;
-    mapWidth = divMap.offsetWidth;
-    offset = Util.getOffset(divMap);
-    offsetLeft = offset.left;
-    offsetTop = offset.top;
-
-    if (parent === 'map') {
-      divInfoBox.style.zIndex = 1;
-
-      NPMap.Map.addControl(divInfoBox);
-      setupInfoBox();
-    } else {
-      divInfoBox.style.zIndex = 999999;
-      
-      document.body.appendChild(divInfoBox);
-      setupInfoBox();
-    }
-  });
 
   return NPMap.InfoBox = {
     // An array of event handler objects that have been added to this class.
@@ -630,7 +608,11 @@ define([
           hasFooterContent = false,
           me = this,
           mH;
-      
+          
+      if (!divInfoBoxBottom) {
+        setupInfoBox();
+      }
+
       actions = actions || [];
 
       if (target) {

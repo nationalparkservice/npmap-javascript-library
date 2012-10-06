@@ -88,21 +88,16 @@ define([
           }
         }
       }
-    } else {
-      NPMap.config.baseLayers = [];
-
-      if (typeof NPMap.config.baseLayers !== 'undefined') {
-        baseLayer = true;
-      }
-    }
-    
-    if (!baseLayer) {
-      NPMap.config.baseLayers.push({
+    } else if (typeof NPMap.config.baseLayers === 'undefined') {
+      NPMap.config.baseLayers = [{
         tiled: true,
         type: 'ArcGisServerRest',
         url: 'http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer',
         visible: true
-      });
+      }];
+    } else {
+      baseLayer = true;
+      NPMap.config.baseLayers = [];
     }
     
     dojo.connect(map, 'onClick', function(e) {

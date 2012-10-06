@@ -2,9 +2,9 @@
 // TODO: Add support for all types: http://www.nps.gov/npmap/support/examples/data/kml-samples.kml
 define([
   'Layer/Layer',
-  'Util/Util.Xml',
-  'Util/Util.Xml.Kml'
-], function(Layer, utilXml, utilKml) {
+  'Util/Util.Xml.Kml',
+  'Util/Util.Xml'
+], function(Layer, UtilKml, UtilXml) {
   return NPMap.Layer.Kml = {
     /**
      * Handles the click operation for ArcGisServerRest layers.
@@ -59,8 +59,8 @@ define([
 
       config.shapes = [];
 
-      utilXml.load(config.url, function(response) {
-        var features = utilKml.parse(response);
+      UtilXml.load(config.url, function(response) {
+        var features = UtilKml.parse(response);
 
         for (var i = 0; i < features.length; i++) {
           var feature = features[i],

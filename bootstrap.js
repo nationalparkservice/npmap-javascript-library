@@ -226,7 +226,6 @@ if (typeof bean === 'undefined') {
               require([
                 NPMap.config.server + '/Layer/Layer.' + LAYER_TYPES[layerHandlerType] + '.js'
               ], function(layerHandler) {
-
                 if (NPMap.config.baseLayers) {
                   for (var l = 0; l < NPMap.config.baseLayers.length; l++) {
                     var baseLayer = NPMap.config.baseLayers[l];
@@ -318,8 +317,7 @@ if (typeof bean === 'undefined') {
     /**
      * DomReady code borrowed from jQuery.
      */
-    if(document.addEventListener)DOMContentLoaded=function(){document.removeEventListener("DOMContentLoaded",DOMContentLoaded,false);callback()};else if(document.attachEvent)DOMContentLoaded=function(){if(document.readyState==="complete"){document.detachEvent("onreadystatechange",DOMContentLoaded);callback()}};if(document.readyState==="complete")setTimeout(callback,1);
-    if(document.addEventListener){document.addEventListener("DOMContentLoaded",DOMContentLoaded,false);window.addEventListener("load",callback,false)}else if(document.attachEvent){document.attachEvent("onreadystatechange",DOMContentLoaded);window.attachEvent("onload",callback)};
+    if(document.addEventListener)DOMContentLoaded=function(){document.removeEventListener("DOMContentLoaded",DOMContentLoaded,false);callback()};else if(document.attachEvent)DOMContentLoaded=function(){if(document.readyState==="complete"){document.detachEvent("onreadystatechange",DOMContentLoaded);callback()}};if(document.readyState==="complete")setTimeout(callback,1);if(document.addEventListener){document.addEventListener("DOMContentLoaded",DOMContentLoaded,false);window.addEventListener("load",callback,false)}else if(document.attachEvent){document.attachEvent("onreadystatechange",DOMContentLoaded);window.attachEvent("onload",callback)};
   }
   /**
    * Called after requirejs has been loaded.

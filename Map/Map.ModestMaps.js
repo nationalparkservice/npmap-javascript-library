@@ -79,7 +79,6 @@ define([
   
   if (typeof NPMap.config.baseLayers === 'undefined' || NPMap.config.baseLayers !== false) {
     NPMap.config.baseLayers = [{
-      attribution: '<a href="http://mapbox.com/about/maps" target="_blank">Terms & Feedback</a>',
       id: 'mapbox.mapbox-light',
       name: 'MapBox Light',
       type: 'TileStream',

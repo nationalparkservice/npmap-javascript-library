@@ -104,26 +104,18 @@ define([
         break;
       }
     }
-  } else {
-    NPMap.config.baseLayers = [];
-
-    if (typeof NPMap.config.baseLayers !== 'undefined') {
-      mapTypeId = 'blank';
-
-      NPMap.config.baseLayers.push({
-        code: 'blank',
-        visible: true
-      });
-    }
-  }
-
-  if (!mapTypeId) {
+  } else if (typeof NPMap.config.baseLayers === 'undefined') {
     mapTypeId = google.maps.MapTypeId.TERRAIN;
-    
-    NPMap.config.baseLayers.push({
+    NPMap.config.baseLayers = [{
       code: 'terrain',
       visible: true
-    });
+    }];
+  } else {
+    mapTypeId = 'blank';
+    NPMap.config.baseLayers = [{
+      code: 'blank',
+      visible: true
+    }];
   }
   
   mapConfig = {
@@ -392,8 +384,17 @@ define([
                 elementsNoPrint = Util.getElementsByClass('gmnoprint');
                 
             if (a !== attribution) {
-              Map.setAttribution(Map.buildAttributionString(a));
+              if (a === 'Map Data') {
+                NPMap.Map.Google._attribution = null;
+              } else {
+                NPMap.Map.Google._attribution = [
+                  a
+                ];
+              }
+
               attribution = a;
+
+              Map.updateAttribution();
             }
 
             for (var i = 0; i < elementsNoPrint.length; i++) {
@@ -423,6 +424,8 @@ define([
   }, 1000);
 
   return NPMap.Map.Google = {
+    //
+    _attribution: null,
     // Is the map loaded and ready to be interacted with programatically?
     _isReady: false,
     // The google.maps.Map object.

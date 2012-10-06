@@ -295,7 +295,7 @@
           }
 
           if (!silent) {
-            Event.trigger('NPMap.Layer', 'afteradd', config);
+            Event.trigger('NPMap.Layer', 'added', config);
           }
 
           if (callback) {
