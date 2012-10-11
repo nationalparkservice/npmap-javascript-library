@@ -59,9 +59,7 @@ define([
         
     time = time || 200;
 
-    easey().map(map)
-      .to(map.locationCoordinate(latLng).zoomTo(zoom))
-      .run(time);
+    easey().map(map).to(map.locationCoordinate(latLng).zoomTo(zoom)).run(time);
 
     if (callback) {
       setTimeout(callback, time);

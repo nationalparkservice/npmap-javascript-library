@@ -1,4 +1,4 @@
-NPMap.version = '1.0';
+NPMap.version = '1.0.0';
 
 if (!NPMap.config) {
   throw new Error('The NPMap.config object does not exist!');
@@ -114,7 +114,7 @@ if (typeof bean === 'undefined') {
       
       if (NPMap.config.api === 'Leaflet') {
         NPMap.Util.injectCss('http://www.nps.gov/npmap/libs/leaflet/0.4.4/leaflet.css');
-            
+        
         // http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
         var ie=function(){for(var a=3,b=document.createElement("div"),c=b.getElementsByTagName("i");b.innerHTML="<\!--[if gt IE "+ ++a+"]><i></i><![endif]--\>",c[0];);return 4<a?a:void 0}();
         
