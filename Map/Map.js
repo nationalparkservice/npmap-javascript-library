@@ -958,8 +958,8 @@ define([
      */
     addControl: function(el, callback, stopPropagation) {
       var div = NPMap.Map[NPMap.config.api].getMapElement();
-
-      if (el.style.cssText.indexOf('z-index') === -1) {
+      
+      if (el.style.zIndex === '' && el.style.cssText.indexOf('z-index') === -1) {
         el.style.zIndex = '1';
       }
 

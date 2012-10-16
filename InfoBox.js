@@ -501,7 +501,7 @@ define([
     _build: function(config, attributes, element) {
       var html = null,
           template;
-          
+
       if (!config) {
         if (typeof NPMap.config.identify !== 'undefined' && typeof NPMap.config.identify[element] !== 'undefined') {
           if (typeof NPMap.config.identify[element] === 'function') {

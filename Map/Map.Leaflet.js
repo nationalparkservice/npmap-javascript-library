@@ -623,6 +623,9 @@ define([
     latLngToPixel: function(latLng) {
       return map.latLngToContainerPoint(latLng);
     },
+
+
+
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels

@@ -4,6 +4,10 @@ NPMap is a JavaScript astraction library developed, maintained, and used by the 
 
 For more information, including API documentation and examples, take a look at the [support documentation](http://www.nps.gov/npmap/support/).
 
+# Current Status
+
+Migration of some modules from pre-1.0.0 is ongoing, and should be completed in the next few months. Once the migration is completed, 1.0.0 will be tagged, and development will continue.
+
 # License
 
 This project constitutes a work of the United States Government and is not subject to domestic copyright protection under 17 USC § 105.
