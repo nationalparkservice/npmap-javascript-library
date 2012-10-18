@@ -502,14 +502,12 @@ define([
       var html = null,
           template;
 
-      if (!config) {
-        if (typeof NPMap.config.identify !== 'undefined' && typeof NPMap.config.identify[element] !== 'undefined') {
-          if (typeof NPMap.config.identify[element] === 'function') {
-            html = NPMap.config.identify[element](attributes);
-          } else {
-            template = _.template(NPMap.config.identify[element]);
-            html = template(attributes);
-          }
+      if (typeof NPMap.config.identify !== 'undefined' && typeof NPMap.config.identify[element] !== 'undefined') {
+        if (typeof NPMap.config.identify[element] === 'function') {
+          html = NPMap.config.identify[element](attributes);
+        } else {
+          template = _.template(NPMap.config.identify[element]);
+          html = template(attributes);
         }
       } else {
         if (typeof config.identify !== 'undefined' && typeof config.identify[element] !== 'undefined') {

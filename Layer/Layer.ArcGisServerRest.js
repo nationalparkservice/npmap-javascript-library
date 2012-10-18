@@ -54,6 +54,9 @@ define([
       layerName: layer.layerName,
       results: subLayers
     });
+
+    // Check for layerconfig.identify.clusterTitle ???
+
     _.each(subLayers, function(subLayer, i) {
       var titles = [];
           
@@ -62,34 +65,47 @@ define([
       }
 
       _.each(subLayer.results, function(result, i2) {
-        var t;
+        var title,
+            type = 'cluster';
 
-        if (layerConfig.identify && layerConfig.identify.title) {
-          t = InfoBox._build(layerConfig, result, 'title');
-              
-          if (!t) {
-            t = result[subLayer.displayFieldName];
+        if (layerConfig.identify && (layerConfig.identify.cluster || layerConfig.identify.title)) {
+          if (!layerConfig.identify.cluster) {
+            type = 'title';
+          }
+
+          title = InfoBox._build(layerConfig, result, type);
+          
+          if (!title) {
+            title = result[subLayer.displayFieldName];
           }
         } else {
-          t = result[subLayer.displayFieldName];
+          title = result[subLayer.displayFieldName];
         }
-            
-        t = NPMap.Util.stripHtmlFromString(t);
-            
+        
+        if (type !== 'cluster') {
+          title = NPMap.Util.stripHtmlFromString(t);
+        }
+        
         titles.push({
-          r: result,
-          t: t
+          result: result,
+          title: title,
+          type: type
         });
       });
 
       titles.sort(function(a, b) {
-        var A = a.t.toUpperCase(),
-            B = b.t.toUpperCase();
+        var A = a.title.toUpperCase(),
+            B = b.title.toUpperCase();
             
         return (A < B) ? -1 : (A > B) ? 1 : 0;
       });
-      _.each(titles, function(t, i2) {
-        html += '<li><a href="javascript:void(0)" onclick="NPMap.Layer.ArcGisServerRest._infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, t.r['OBJECTID']) + '\',\'' + layer.layerName + '\',this);return false;">' + t.t + '</a></li>';
+      _.each(titles, function(title, i2) {
+        if (title.type === 'title') {
+          html += '<li><a href="javascript:void(0)" onclick="NPMap.Layer.ArcGisServerRest._infoBoxMoreInfo(\'' + constructId(layer.layerName, subLayer.layerId, title.result['OBJECTID']) + '\',\'' + layer.layerName + '\',this);return false;">' + title.title + '</a></li>';
+        } else {
+          // TODO: Right now you're assuming that if layerConfig.identify.cluster is specified, they don't want the "more info" behavior. What if they still do?
+          html += '<li>' + title.title + '</li>';
+        }
       });
 
       if (!layerConfig.identify || !layerConfig.identify.simpleTree) {
