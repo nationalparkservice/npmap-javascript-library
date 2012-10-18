@@ -83,7 +83,7 @@ define([
         }
         
         if (type !== 'cluster') {
-          title = NPMap.Util.stripHtmlFromString(t);
+          title = NPMap.Util.stripHtmlFromString(title);
         }
         
         titles.push({
