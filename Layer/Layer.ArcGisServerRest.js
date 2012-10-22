@@ -54,9 +54,6 @@ define([
       layerName: layer.layerName,
       results: subLayers
     });
-
-    // Check for layerconfig.identify.clusterTitle ???
-
     _.each(subLayers, function(subLayer, i) {
       var titles = [];
           
