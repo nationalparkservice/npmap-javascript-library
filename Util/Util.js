@@ -34,6 +34,7 @@ define(function() {
   /**
    * Cross-browser cancel event propagation.
    * @param {Object} e
+   * @return null
    */
   function cancelEventPropagation(e) {
     if (e.stopPropagation) {
@@ -45,6 +46,7 @@ define(function() {
   /**
    * Cancels the mouse wheel event.
    * @param {Object} e
+   * @return {Boolean}
    */
   function cancelMouseWheel(e) {
     e = e || window.event;
@@ -59,6 +61,7 @@ define(function() {
 
     e.cancelBubble = true;
     e.returnValue = false;
+
     return false;
   }
   /**
@@ -89,7 +92,7 @@ define(function() {
     var LazyLoader=function(i,j){function k(a){var a=a.toLowerCase(),b=a.indexOf("js"),a=a.indexOf("css");return-1==b&&-1==a?!1:b>a?"js":"css"}function m(a){var b=document.createElement("link");b.href=a;b.rel="stylesheet";b.type="text/css";b.onload=c;b.onreadystatechange=function(){("loaded"==this.readyState||"complete"==this.readyState)&&c()};document.getElementsByTagName("head")[0].appendChild(b)}function f(a){try{document.styleSheets[a].cssRules?c():document.styleSheets[a].rules&&document.styleSheets[a].rules.length?c():setTimeout(function(){f(a)},250)}catch(b){setTimeout(function(){f(a)},250)}}function c(){g--;0==g&&j&&j()}for(var g=0,d,l=document.styleSheets.length-1,h=0;h<i.length;h++)if(g++,d=i[h],"css"==k(d)&&(m(d),l++,!window.opera&&-1==navigator.userAgent.indexOf("MSIE")&&f(l)),"js"==k(d)){var e=document.createElement("script");e.type="text/javascript";e.src=d;e.onload=c;document.getElementsByTagName("head")[0].appendChild(e)}};
   }
 
-  // TODO: Switch all Array.remove() calls over to splice.
+  // TODO: Switch all Array.remove() calls over to splice and get rid of this.
   Array.prototype.remove = function(from, to) {
     var rest = this.slice((to || from) + 1 || this.length);
     this.length = from < 0 ? this.length + from : from;
@@ -107,9 +110,20 @@ define(function() {
       el.className = el.className += ' ' + cls;
     },
     /**
+     * Binds an event to an HTML element.
+     * @param {Object} el
+     * @param {String} name
+     * @param {Function} handler
+     * @return null
+     */
+    bindEventToElement: function(el, name, handler) {
+      bindEvent(el, name, handler);
+    },
+    /**
      * Given an object, does a property exist.
      * @param {Object} obj The object to test.
      * @param {String} prop The property to look for. Ex: 'NPMap.config.tools.keyboard'.
+     * @return {Boolean}
      */
     doesPropertyExist: function(obj, prop) {
       var parts = prop.split('.');
@@ -123,10 +137,13 @@ define(function() {
           return false;
         }
       }
+
       return true;
     },
     /**
-     *
+     * Gets elements by class name.
+     * @param {String} cls
+     * @return {Array}
      */
     getElementsByClass: function(cls) {
       if (document.getElementsByClassName) {
@@ -138,6 +155,7 @@ define(function() {
     /**
      * Gets the first property of an object.
      * @param {Object} obj The object to get the first property of.
+     * @return {Array} OR {Boolean} OR {Function} OR {Object}
      */
     getFirstPropertyOfObject: function(obj) {
       for (var key in obj) {
@@ -146,6 +164,11 @@ define(function() {
         }
       }
     },
+    /**
+     * Gets the next sibling element.
+     * @param {Object} el
+     * @return {Object}
+     */
     getNextElement: function(el) {
       do {
         el = el.nextSibling;
@@ -167,7 +190,9 @@ define(function() {
       };
     },
     /**
-     *
+     * Gets the outer dimensions of an HTML element.
+     * @param {Object} el
+     * @return {Object}
      */
     getOuterDimensions: function(el) {
       var height = 0,
@@ -177,6 +202,7 @@ define(function() {
         var changed = [],
             parentNode = el.parentNode;
 
+        // TODO: Clean this up, function declarations should not be placed in blocks.
         function checkDisplay(node) {
           if (node.style && node.style.display === 'none') {
             changed.push(node);
@@ -244,6 +270,7 @@ define(function() {
     },
     /**
      * Gets the current scroll position of the browser window.
+     * @return {Object}
      */
     getScrollPosition: function() {
       var position = {
@@ -265,7 +292,8 @@ define(function() {
       return position;
     },
     /**
-     *
+     * Gets the current window dimensions.
+     * @return {Object}
      */
     getWindowDimensions: function() {
       var height = 0,
@@ -288,15 +316,23 @@ define(function() {
       };
     },
     /**
-     *
+     * Checks to see if an HTML element has a CSS class.
+     * @param {Object} el
+     * @param {String} cls
+     * @return {Boolean}
      */
     hasClass: function(el, cls) {
-      return el.className.indexOf(cls) !== -1;
+      if (!el.className) {
+        return false;
+      } else {
+        return el.className.indexOf(cls) !== -1;
+      }
     },
     /**
      * Injects a CSS stylesheet into the page.
      * @param {String/Array} location The path to the CSS stylesheet.
      * @param {Function} callback (Optional)
+     * @return null
      */
     injectCss: function(locations, callback) {
       if (typeof locations === 'string') {
@@ -351,6 +387,7 @@ define(function() {
      * Iterates through all of the child nodes of an element.
      * @param {Object} el
      * @param {Function} func (Optional)
+     * @return null
      */
     iterateThroughChildNodes: function(el, func) {
       if (el && el.childNodes) {
@@ -366,7 +403,10 @@ define(function() {
       }
     },
     /**
-     *
+     * Monitors a div and calls the handler when its size has changed.
+     * @param {Object} el
+     * @param {Function} handler
+     * @return null
      */
     monitorResize: function(el, handler) {
       var dimensions = this.getOuterDimensions(el),
@@ -396,12 +436,16 @@ define(function() {
       }
     },
     /**
-     *
+     * Removes a CSS class from an HTML element.
+     * @param {Object} el
+     * @param {String} cls
+     * @return null
      */
     removeClass: function(el, cls) {
       el.className = el.className.replace(cls, '');
     },
     /**
+     * DEPRECATED
      * Replaces "bad characters" that have been inserted by NPMap into strings.
      * @param {String} html The HTML string to perform the replace operation on.
      * @return {String}
@@ -413,33 +457,35 @@ define(function() {
      * Checks to make sure a module has been loaded before calling callback function. This function assumes that the module resides in the NPMap namespace.
      * @param module {String} (Required) The full name of the module, including namespace, that must be loaded before callback is called.
      * @param callback {Function} (Required) The callback function to call once the module has been loaded.
+     * @return null
      */
     safeLoad: function(module, callback) {
-      module = module.replace('NPMap.', '');
-      
-      var partition = module.split('.'),
-          interval = setInterval(function() {
-            try {
-              var obj = NPMap;
+      var interval,
+          partition = module.replace('NPMap.', '').split('.');
+          
+      interval = setInterval(function() {
+        try {
+          var obj = NPMap;
 
-              for (var i = 0; i < partition.length; i++) {
-                obj = obj[partition[i]];
-                
-                if (typeof obj === 'undefined') {
-                  break;
-                } else if ((i + 1) === partition.length) {
-                  clearInterval(interval);
-                  callback();
-                }
-              }
-            } catch (e) {
-
+          for (var i = 0; i < partition.length; i++) {
+            obj = obj[partition[i]];
+            
+            if (typeof obj === 'undefined') {
+              break;
+            } else if ((i + 1) === partition.length) {
+              clearInterval(interval);
+              callback();
             }
-          }, 250);
+          }
+        } catch (e) {
+
+        }
+      }, 250);
     },
     /**
      * Stops the propagation of all events.
      * @param {Object} el
+     * @return null
      */
     stopAllPropagation: function(el) {
       for (var i = 0; i < propagationEvents.length; i++) {
@@ -463,7 +509,9 @@ define(function() {
       return div.textContent || div.innerText || "";
     },
     /**
-     *
+     * Trims whitespace from the beginning and end of a string.
+     * @param {String} string
+     * @return {String}
      */
     trimString: function(string) {
       string = string.replace(/^\s+/, '');
