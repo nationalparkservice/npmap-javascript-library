@@ -170,7 +170,10 @@ define([
       right = divOverviewMapWidth;
     }
     
-    divAttribution.style.maxWidth = max + 'px';
+    if (max > 0) {
+      divAttribution.style.maxWidth = max + 'px';
+    }
+    
     divAttribution.style.right = right + 'px';
   }
 
@@ -436,9 +439,9 @@ define([
               Util.monitorResize(document.getElementById('npmap-logos'), function() {
                 setAttributionMaxWidthAndPosition();
               });
-              //setAttributionMaxWidthAndPosition();
+              setAttributionMaxWidthAndPosition();
             }
-          })
+          });
         }
 
         if (toolsConfig.navigation) {
