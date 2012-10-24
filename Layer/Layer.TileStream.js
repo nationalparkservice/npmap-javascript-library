@@ -234,7 +234,7 @@
               waxShort = null,
               zIndex = config.zIndex;
 
-          if (!response.id) {
+          if (typeof response.id === 'undefined') {
             response.id = config.id || config.name;
           }
 
