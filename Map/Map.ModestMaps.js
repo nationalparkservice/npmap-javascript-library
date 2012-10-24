@@ -6,9 +6,9 @@ define([
   'Util/Util'
 ], function(Event, Map, Util) {
   /**
-   * wax - 7.0.0dev10 - v6.0.4-99-gbe8ba88
+   * wax - 7.0.0dev11 - v6.0.4-113-g6b1c56c
    */
-  wax.mm=wax.mm||{};wax.mm.interaction=function(){function e(){a=!0}var a=!1,d,h,b="zoomed panned centered extentset resized drawn".split(" ");return wax.interaction().attach(function(a){if(!arguments.length)return h;h=a;for(var d=0;d<b.length;d++)h.addCallback(b[d],e)}).detach(function(){for(var a=0;a<b.length;a++)h.removeCallback(b[a],e)}).parent(function(){return h.parent}).grid(function(){if(a||!(void 0!==d&&d.length)){for(var b,e=0;e<h.getLayers().length;e++){var g=h.getLayerAt(e).levels,g=g&&g[Math.round(h.zoom())];if(void 0!==g&&(b=h.getLayerAt(e).tileElementsInLevel(g),b.length))break}var e=[],i;for(i in b)if(b[i].parentNode===g){var c=wax.u.offset(b[i]);e.push([c.top,c.left,b[i]])}d=e}return d})};
+  wax.mm=wax.mm||{};wax.mm.interaction=function(){function f(){h=!0}var h=!1,g,c,d="zoomed panned centered extentset resized drawn".split(" ");return wax.interaction().attach(function(a){if(!arguments.length)return c;c=a;for(var b=0;b<d.length;b++)c.addCallback(d[b],f)}).detach(function(){for(var a=0;a<d.length;a++)c.removeCallback(d[a],f)}).parent(function(){return c.parent}).grid(function(){if(h||!(void 0!==g&&g.length)){for(var a,b=0;b<c.getLayers().length;b++){var e=c.getLayerAt(b).levels,e=e&&e[Math.round(c.zoom())];if(void 0!==e&&(a=c.getLayerAt(b).tileElementsInLevel(e),a.length))break}var b=[],d;for(d in a)if(a[d].parentNode===e){var f=wax.u.offset(a[d]);b.push([f.top,f.left,a[d]])}g=b}return g})};
   /**
    * mapbox.markers.js
    */

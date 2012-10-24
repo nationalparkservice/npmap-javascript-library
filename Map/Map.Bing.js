@@ -344,7 +344,9 @@ define([
 
       NPMap.Map.Bing._attribution = attribution;
 
-      NPMap.Map.updateAttribution();
+      if (document.getElementById('npmap-attribution')) {
+        NPMap.Map.updateAttribution();
+      }
     });
     
     Event.trigger('NPMap.Map', 'viewchangeend');

@@ -4,69 +4,11 @@ define([
   'Map/Map',
   'Util/Util'
 ], function(Event, Map, Util) {
-  wax = wax || {};
-  wax.leaf = wax.leaf || {};
-  wax.leaf.interaction = function() {
-    var _grid,
-        dirty = false,
-        map;
-
-    function attach(x) {
-      if (!arguments.length) {
-        return map;
-      }
-      
-      map = x;
-      
-      map.on('moveend', function() {
-        setdirty();
-      });
-    }
-    function detach(x) {
-      if (!arguments.length) {
-        return map;
-      }
-      
-      map = x;
-      
-      map.off('moveend', setdirty);
-    }
-    function grid() {
-      if (!dirty && typeof _grid !== 'undefined' && _grid.length) {
-        return _grid;
-      } else {
-        dirty = false;
-        return (_grid = (function(layers) {
-          var o = [];
-
-          for (var layerId in layers) {
-            if (layers[layerId]._tiles) {
-              for (var tile in layers[layerId]._tiles) {
-                var el = layers[layerId]._tiles[tile],
-                    offset = Util.getOffset(el);
-
-                o.push([
-                  offset.top,
-                  offset.left,
-                  el
-                ]);
-              }
-            }
-          }
-          
-          return o;
-        })(map._layers));
-      }
-    }
-    function setdirty() {
-      dirty = true;
-    }
-
-    return wax.interaction().attach(attach).detach(detach).parent(function() {
-      return map._container;
-    }).grid(grid);
-  };
-
+  /**
+   * wax - 7.0.0dev11 - v6.0.4-113-g6b1c56c
+   */
+  wax.leaf={};wax.leaf.interaction=function(){function e(){g=!0}var g=!1,f,c;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.on(d[a],e)}).detach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.off(d[a],e)}).parent(function(){return c._container}).grid(function(){if(!g&&f)return f;var b=c._layers,d=[],a;for(a in b)if(b[a]._tiles)for(var e in b[a]._tiles){var h=wax.u.offset(b[a]._tiles[e]);d.push([h.top,h.left,b[a]._tiles[e]])}return f=d})};
+  
   var
       //
       dblClick = false,
