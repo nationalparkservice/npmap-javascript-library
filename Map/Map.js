@@ -414,7 +414,13 @@ define([
         }
         
         if (!NPMap.config.hideNpmapLogo) {
-          logosHtml += '<span style="display:block;float:right;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+          if (logosHtml.length > 0) {
+            logosHtml += '<span style="display:block;float:right;">';
+          } else {
+            logosHtml += '<span style="display:block;float:left;">';
+          }
+
+          logosHtml += '<a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
         }
 
         if (logosHtml.length > 0) {
@@ -430,7 +436,7 @@ define([
               Util.monitorResize(document.getElementById('npmap-logos'), function() {
                 setAttributionMaxWidthAndPosition();
               });
-              setAttributionMaxWidthAndPosition();
+              //setAttributionMaxWidthAndPosition();
             }
           })
         }

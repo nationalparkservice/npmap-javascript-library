@@ -411,22 +411,34 @@ define([
     }
 
     for (var property in styles) {
+      var value = styles[property];
+
       if (property === 'max-height' || property === 'maxHeight') {
-        if (typeof styles[property] === 'string') {
-          styles[property] = styles[property].replace('px', '');
+        if (typeof value === 'string') {
+          value = value.replace('px', '');
         }
 
-        maxHeight = parseFloat(styles[property]);
-        divInfoBox.style.maxHeight = maxHeight + 'px !important';
+        maxHeight = parseFloat(value);
+        property = 'maxHeight';
+        value = maxHeight + 'px';
       } else if (property === 'max-width' || property === 'maxWidth') {
-        if (typeof styles[property] === 'string') {
-          styles[property] = styles[property].replace('px', '');
+        if (typeof value === 'string') {
+          value = value.replace('px', '');
         }
 
-        maxWidth = parseFloat(styles[property]);
-        divInfoBox.style.maxWidth = maxWidth + 'px !important';
-      } else {
-        divInfoBox.style[property] = styles[property] + ' !important';
+        maxWidth = parseFloat(value);
+        property = 'maxWidth';
+        value = maxWidth + 'px';
+      }
+
+      try {
+        divInfoBox.style[property] = value + ' !important';
+      } catch(_ie78) {
+        try {
+          divInfoBox.style[property] = value;
+        } catch (_ie7) {
+
+        }
       }
     }
     
