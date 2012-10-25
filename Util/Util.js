@@ -165,6 +165,29 @@ define(function() {
       }
     },
     /**
+     * Gets the mouse position, in pixels, for a MouseEvent object. Taken from mapbox/wax - https://github.com/mapbox/wax.
+     * @param {Object} e
+     * @return {Object}
+     */
+    getMousePositionPage: function(e) {
+      if (e.pageX || e.pageY) {
+        return {
+          x: e.pageX,
+          y: e.pageY
+        };
+      } else if (e.clientX || e.clientY) {
+        return {
+          x: e.clientX,
+          y: e.clientY
+        };
+      } else if (e.touches && e.touches.length === 1) {
+        return {
+          x: e.touches[0].pageX,
+          y: e.touches[0].pageY
+        };
+      }
+    },
+    /**
      * Gets the next sibling element.
      * @param {Object} el
      * @return {Object}

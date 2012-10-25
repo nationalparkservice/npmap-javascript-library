@@ -185,19 +185,24 @@ define([
   };
 
   Microsoft.Maps.Events.addHandler(map, 'click', function(e) {
+    var cloned = _.clone(e.originalEvent);
+
     doubleClicked = false;
+
+    cloned.pageX = e.pageX;
+    cloned.pageY = e.pageY;
 
     Map.setCursor(oldCursor);
     setTimeout(function() {
       if (!doubleClicked && !viewChanged && e.isPrimary === true) {
         if (e.targetType === 'map' || e.target.allowClickThrow === true) {
-          Event.trigger('NPMap.Map', 'click', e.originalEvent);
+          Event.trigger('NPMap.Map', 'click', cloned);
         } else {
           if (e.target.clickHandler) {
             e.target.clickHandler(e.target);
           }
 
-          Event.trigger('NPMap.Map', 'shapeclick', e.originalEvent);
+          Event.trigger('NPMap.Map', 'shapeclick', cloned);
         }
       }
     }, 350);
@@ -648,10 +653,9 @@ define([
      * @return {Object}
      */
     eventGetLatLng: function(e) {
-      var x = e.pageX || e.clientX,
-          y = e.pageY || e.clientY;
+      var pixel = Util.getMousePositionPage(e);
 
-      return this.pixelToLatLng(new Microsoft.Maps.Point(x, y), Microsoft.Maps.PixelReference.page);
+      return this.pixelToLatLng(new Microsoft.Maps.Point(pixel.x, pixel.y), Microsoft.Maps.PixelReference.page);
     },
     /**
      * Gets a shape from a click event object.
