@@ -202,7 +202,7 @@ define([
             e.target.clickHandler(e.target);
           }
 
-          Event.trigger('NPMap.Map', 'shapeclick', cloned);
+          Event.trigger('NPMap.Map', 'shapeclick', e);
         }
       }
     }, 350);
