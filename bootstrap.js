@@ -265,12 +265,10 @@ if (typeof bean === 'undefined') {
 
           if (NPMap.config.modules) {
             for (var n = 0; n < NPMap.config.modules.length; n++) {
-              var name = NPMap.config.modules[n].name.toLowerCase();
+              var name = NPMap.config.modules[n].name;
 
-              if (name === 'edit' || name === 'route') {
-                scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
-              } else {
-                throw new Error('Invalid module name: "' + name + '".');
+              if (name === 'Edit' || name === 'Route') {
+                scripts.push(NPMap.config.server + '/Module/Module.' + name + '.js');
               }
             }
           }

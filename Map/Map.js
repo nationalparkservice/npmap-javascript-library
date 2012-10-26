@@ -605,30 +605,35 @@ define([
         }
 
         if (NPMap.config.modules && NPMap.config.modules.length > 0) {
-          var count = 0;
+          var build = [];
 
           for (var i = 0; i < NPMap.config.modules.length; i++) {
-            var name = NPMap.config.modules[i].name.toLowerCase();
+            var module = NPMap.config.modules[i],
+                name = module.name;
 
-            if (name !== 'edit' && name !== 'route') {
-              count++;
+            if (name) {
+              var id = name.toLowerCase();
+
+              module.id = id.split(' ').join('_');
+
+              if (id !== 'edit' && id !== 'route') {
+                build.push(module);
+              }
             }
           }
 
-          if (count > 0) {
+          if (build.length) {
             var modules = document.createElement('div'),
                 modulesHtml = '',
                 tabs = document.createElement('div'),
                 tabsHtml = '';
 
-            for (var j = 0; j < NPMap.config.modules.length; j++) {
-              var module = NPMap.config.modules[j],
-                  nameLower = module.name.toLowerCase();
+            for (var i = 0; i < build.length; i++) {
+              var module = NPMap.config.modules[i],
+                  id = module.id;
 
-              if (nameLower !== 'edit' && nameLower !== 'route') {
-                modulesHtml += '<div id="npmap-modules-' + nameLower + '">Test</div>';
-                tabsHtml += '<div id="npmap-module-tab-' + nameLower + '" class="npmap-module-tab" onclick="NPMap.Map.handleModuleTabClick(this);return false;"><div class="npmap-module-tab-' + nameLower + '"></div></div>';
-              }
+              modulesHtml += '<div id="npmap-modules-' + id + '">' + module.html + '</div>';
+              tabsHtml += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.handleModuleTabClick(this);return false;"><div class="npmap-module-tab-' + id + '"></div></div>';
             }
 
             modules.id = 'npmap-modules';
@@ -639,7 +644,7 @@ define([
             elements.push({
               el: tabs,
               func: function() {
-
+                
               }
             });
 
