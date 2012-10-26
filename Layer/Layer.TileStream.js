@@ -125,12 +125,14 @@
      * @return null
      */
     _handleClick: function(e) {
-      var latLng = Map[NPMap.config.api].eventGetLatLng(e.e);
-
-      InfoBox.hide();
-      InfoBox.latLng = latLng;
-      Map[NPMap.config.api].positionClickDot(latLng);
-      InfoBox.show(NPMap.InfoBox._build(null, e.data, 'content'), NPMap.InfoBox._build(null, e.data, 'title'));
+      if (e.e) {
+        var latLng = Map[NPMap.config.api].eventGetLatLng(e.e);
+        
+        InfoBox.hide();
+        InfoBox.latLng = latLng;
+        Map[NPMap.config.api].positionClickDot(latLng);
+        InfoBox.show(NPMap.InfoBox._build(null, e.data, 'content'), NPMap.InfoBox._build(null, e.data, 'title'));
+      }
     },
     /**
      * Builds an attribution string for a layer config, including all composited layers.
