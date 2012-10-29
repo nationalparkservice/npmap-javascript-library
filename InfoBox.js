@@ -80,6 +80,7 @@ define([
   /**
    * Checks to see if the InfoBox is overlapping beyond the edges of the InfoBox's parent element.
    * @param {Function} callback
+   * @return null
    */
   function checkBounds(callback) {
     if (NPMap.InfoBox && NPMap.InfoBox.visible) {
@@ -238,6 +239,7 @@ define([
   /**
    * Positions the InfoBox.
    * @param {Function} callback (Optional)
+   * @return null
    */
   function position(callback) {
     var bottom,
@@ -258,8 +260,6 @@ define([
         right = right - (Util.getOuterDimensions(divInfoBox).width / 2) - 8;
       }
     } else if (parent === 'page') {
-      
-
       if (design === 'basic') {
         bottom = (windowHeight - (clickDotTop + offsetTop)) + 30;
         right = (windowWidth - clickDotLeft - offsetLeft - 69) - Util.getScrollBarWidth();
@@ -281,6 +281,7 @@ define([
   }
   /**
    * Refreshes the dimensions of the map.
+   * @return null
    */
   function refreshDimensions() {
     var offset = Util.getOffset(divMap),
@@ -294,6 +295,7 @@ define([
   }
   /**
    * Updates the mapPosition object, sets the max-height/width dimensions of the InfoBox, and checks the bounds of the InfoBox.
+   * @return null
    */
   function refreshDimensionsAndHeightWidth() {
     refreshDimensions();
@@ -305,15 +307,10 @@ define([
     if (!maxWidth) {
       setMaxWidth();
     }
-    
-    /*
-    if (NPMap.InfoBox && NPMap.InfoBox.visible) {
-      checkBounds();
-    }
-    */
   }
   /**
    * Refreshes the map div offsets and width.
+   * @return null
    */
   function refreshOffsetsAndWidth() {
     windowDimensions = Util.getWindowDimensions();
@@ -332,6 +329,7 @@ define([
    * @param {Object} obj The object to resize.
    * @param {Number} mH The max-height.
    * @param {Number} mW The max-width.
+   * @return null
    */
   function resizeObjectForContent(obj, mH, mW) {
     var dimensions = Util.getOuterDimensions(obj),
@@ -357,6 +355,7 @@ define([
   }
   /**
    * Sets the maxHeight of the InfoBox based on the height of the map div.
+   * @return null
    */
   function setMaxHeight() {
     // TODO: If parent is set to 'page', you need to set maxHeight based on available height. This should probably update when the page is scrolled vertically?
@@ -374,6 +373,7 @@ define([
   }
   /**
    * Sets the maxWidth of the InfoBox based on the height of the map div.
+   * @return null
    */
   function setMaxWidth() {
     // TODO: If parent is set to 'page', you need to set maxWidth based on available width. This should probably update when the page is scrolled horizontally?
@@ -391,6 +391,7 @@ define([
   }
   /**
    * Called once to setup the InfoBox.
+   * @return null
    */
   function setupInfoBox() {
     divMap = NPMap.Map.getMapElement();
@@ -642,7 +643,7 @@ define([
       divInfoBoxContentWrapper.style.width = (design === 'basic' ? '250px' : '381px');
       divInfoBoxFooter.style.display = 'none';
       divInfoBoxTitle.innerHTML = title;
-      
+
       if (config.skipActions) {
         actions = [];
       } else {
@@ -655,11 +656,11 @@ define([
               if (action === 'zoomable') {
                 var max = NPMap.Map[NPMap.config.api].getMaxZoom();
 
-                if (NPMap.Map[NPMap.config.api].getZoom() < max - 2) {
+                if (NPMap.Map[NPMap.config.api].getZoom() < max) {
                   add.push({
                     handler: function() {
                       //NPMap.InfoBox.removeAction(this);
-                      NPMap.Map.centerAndZoom(me.latLng, max - 2);
+                      NPMap.Map.centerAndZoom(me.latLng, max);
                     },
                     text: 'Zoom to this location'
                   });

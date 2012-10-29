@@ -15,6 +15,12 @@ define([
       activeNotificationMessagesHeight = 0,
       // The map div.
       divMap = document.getElementById(NPMap.config.div),
+      // The modules div.
+      divModules,
+      // The modules close div.
+      divModulesClose,
+      // The module tabs div.
+      divModuleTabs,
       // The notify div.
       divNotify,
       // The npmap div.
@@ -297,18 +303,6 @@ define([
       }
 
       return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
-    },
-    /**
-     * The click handler for the module close button.
-     */
-    _handleModuleCloseClick: function() {
-      this.toggleModule('search', false);
-    },
-    /**
-     * The click handler for the module tabs.
-     */
-    _handleModuleTabClick: function(el) {
-      this.toggleModule(el.id.replace('npmap-module-tab-', ''), true);
     },
     /**
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
@@ -605,6 +599,26 @@ define([
         }
 
         if (NPMap.config.modules && NPMap.config.modules.length > 0) {
+          /**
+                Support two use cases: 1) modules built into the library, 2) custom modules included in NPMap.config.
+
+                1) Modules built into the library
+
+                - Match the "name" property up, and use the built-in module
+                - Configuration should be done via the NPMap.config.modules['ModuleName'] object
+                - Icon and content should be 
+
+                2) Custom modules included in NPMap.config
+
+                - If the "name" property doesn't match up to a built-in module, it is a custom module
+                - If "html" property isn't specified, it isn't valid so skip it
+                - If icon isn't specified, use a generic icon
+
+                Available config properties:
+
+                - expanded {Boolean} Defaults to false
+           */
+
           var build = [];
 
           for (var i = 0; i < NPMap.config.modules.length; i++) {
@@ -616,39 +630,53 @@ define([
 
               module.id = id.split(' ').join('_');
 
-              if (id !== 'edit' && id !== 'route') {
+              if (typeof module.html === 'string' && id !== 'edit' && id !== 'route') {
                 build.push(module);
               }
             }
           }
 
           if (build.length) {
-            var modules = document.createElement('div'),
-                modulesHtml = '',
-                tabs = document.createElement('div'),
-                tabsHtml = '';
+            var htmlModules = '',
+                htmlTabs = '';
+
+            divModules = document.createElement('div');
+            divModulesClose = document.createElement('div');
+            divModuleTabs = document.createElement('div');
 
             for (var i = 0; i < build.length; i++) {
               var module = NPMap.config.modules[i],
                   id = module.id;
 
-              modulesHtml += '<div id="npmap-modules-' + id + '">' + module.html + '</div>';
-              tabsHtml += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.handleModuleTabClick(this);return false;"><div class="npmap-module-tab-' + id + '"></div></div>';
+              htmlModules += '<div id="npmap-modules-' + id + '" class="npmap-module">' + module.html + '</div>';
+              htmlTabs += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.openModule(this);return false;">';
+
+              if (typeof module.icon === 'string') {
+                htmlTabs += '<div class="npmap-module-tab-' + module.icon + '"></div>';
+              } else {
+                // TODO: Need to replace with a generic tab icon.
+                htmlTabs += '<div class="npmap-module-tab-route"></div>';
+              }
+
+              htmlTabs += '</div>';
             }
 
-            modules.id = 'npmap-modules';
-            modules.innerHTML = '<div id="npmap-modules-close" class="npmap-module-tab" style="position:absolute;right:-29px;top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';z-index:1;" onclick="NPMap.Map.handleModuleCloseClick();return false;"><div class="npmap-module-tab-close"></div></div>';
-            tabs.id = 'npmap-modules-tabs';
-            tabs.innerHTML = tabsHtml;
+            divModules.id = 'npmap-modules';
+            divModules.innerHTML = htmlModules;
+            divModulesClose.className = 'npmap-module-tab';
+            divModulesClose.id = 'npmap-modules-close';
+            divModulesClose.innerHTML = '<div class="npmap-module-tab-close" style="margin-left:-1px;margin-top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';"></div>';
+            divModuleTabs.id = 'npmap-modules-tabs';
+            divModuleTabs.innerHTML = htmlTabs;
 
             elements.push({
-              el: tabs,
-              func: function() {
-                
-              }
+              el: divModuleTabs
             });
-
-            divNpmap.insertBefore(modules, divMap);
+            divNpmap.insertBefore(divModules, divMap);
+            divNpmap.insertBefore(divModulesClose, divMap);
+            bean.add(document.getElementById('npmap-modules-close'), 'click', function() {
+              NPMap.Map.closeModules();
+            });
           }
         }
 
@@ -947,7 +975,7 @@ define([
             }
             */
 
-            Util.monitorResize(divNpmap, function() {
+            Util.monitorResize(divMap, function() {
               setAttributionMaxWidthAndPosition();
               me.handleResize();
               Event.trigger('NPMap.Map', 'resized');
@@ -1038,6 +1066,16 @@ define([
      */
     centerAndZoom: function(latLng, zoom, callback) {
       NPMap.Map[NPMap.config.api].centerAndZoom(NPMap.Map[NPMap.config.api].latLngToApi(latLng), zoom, callback);
+    },
+    /**
+     * Closes the modules panel.
+     * @return null
+     */
+    closeModules: function() {
+      divModulesClose.style.display = 'none';
+      divModules.style.display = 'none';
+      divModuleTabs.style.display = 'block';
+      divMap.style.left = '0';
     },
     /**
      * Creates a line using the base API's line class.
@@ -1349,6 +1387,62 @@ define([
       activeNotificationMessagesHeight = activeNotificationMessagesHeight + height;
     },
     /**
+     * Opens the UI for a module.
+     * @param {Object} el
+     * @return null
+     */
+    openModule: function(el) {
+      var id = el.id.replace('npmap-module-tab-', ''),
+          module;
+
+      for (var i = 0; i < NPMap.config.modules.length; i++) {
+        var m = NPMap.config.modules[i];
+
+        if (m.id === id) {
+          module = m;
+          break;
+        }
+      }
+
+      if (divModules.style.display === '' || divModules.style.display === 'none') {
+        divModuleTabs.style.display = 'none';
+        divMap.style.left = '200px';
+        divModules.style.display = 'block';
+        divModulesClose.style.display = 'block';
+      }
+
+      /*
+      console.log(module);
+      
+      var $module = $('#npmap-modules-' + module),
+          $modules = $('#npmap-modules');
+
+      if (on) {
+        $('#npmap-modules-tabs').hide();
+        $module.show();
+        $modules.show();
+        $('#npmap-map').css({
+          left: $modules.outerWidth() + 'px'
+        });
+        $('#npmap-toolbar').css({
+          left: $modules.outerWidth() + 'px'
+        });
+      } else {
+        console.log('here');
+
+        $modules.hide();
+        $('#npmap-map').css({
+          left: '0'
+        });
+        $('#npmap-toolbar').css({
+          left: '0'
+        });
+        $module.hide();
+        $('#npmap-modules-tabs').show();
+      }
+      */
+    },
+    /**
      * Pans the map horizontally and/or vertically based on the pixels passed in.
      * @param {Object} pixels
      * @param {Function} callback (Optional)
@@ -1638,44 +1732,6 @@ define([
           isFullScreen = true;
         }
       //}
-    },
-    /**
-     * Toggles a module on or off.
-     * @param {String} module
-     * @param {Boolean} on
-     * @return null
-     */
-    toggleModule: function(module, on) {
-      /*
-      console.log(module);
-      
-      var $module = $('#npmap-modules-' + module),
-          $modules = $('#npmap-modules');
-
-      if (on) {
-        $('#npmap-modules-tabs').hide();
-        $module.show();
-        $modules.show();
-        $('#npmap-map').css({
-          left: $modules.outerWidth() + 'px'
-        });
-        $('#npmap-toolbar').css({
-          left: $modules.outerWidth() + 'px'
-        });
-      } else {
-        console.log('here');
-
-        $modules.hide();
-        $('#npmap-map').css({
-          left: '0'
-        });
-        $('#npmap-toolbar').css({
-          left: '0'
-        });
-        $module.hide();
-        $('#npmap-modules-tabs').show();
-      }
-      */
     },
     /**
      * Zooms and/or pans the map to its initial extent.

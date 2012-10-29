@@ -1,0 +1,41 @@
+.tab-close {
+  background: url(tabs.png) 0px 0px no-repeat;
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+}
+
+.tab-itinerary {
+  background: url(tabs.png) -30px 0px no-repeat;
+  display: inline-block;
+  width: 28px;
+  height: 24px;
+}
+
+.tab-photo {
+  background: url(tabs.png) 0px -30px no-repeat;
+  display: inline-block;
+  width: 28px;
+  height: 24px;
+}
+
+.tab-play {
+  background: url(tabs.png) -30px -30px no-repeat;
+  display: inline-block;
+  width: 28px;
+  height: 24px;
+}
+
+.tab-route {
+  background: url(tabs.png) -60px 0px no-repeat;
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+}
+
+.tab-search {
+  background: url(tabs.png) -60px -30px no-repeat;
+  display: inline-block;
+  width: 28px;
+  height: 24px;
+}

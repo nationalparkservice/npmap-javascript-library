@@ -44,27 +44,6 @@ define(function() {
     }
   }
   /**
-   * Cancels the mouse wheel event.
-   * @param {Object} e
-   * @return {Boolean}
-   */
-  function cancelMouseWheel(e) {
-    e = e || window.event;
-
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
-
-    e.cancelBubble = true;
-    e.returnValue = false;
-
-    return false;
-  }
-  /**
    * Gets all elements by class.
    * @param {String} cls
    * @return {Array}
@@ -139,6 +118,27 @@ define(function() {
       }
 
       return true;
+    },
+    /**
+     * Cancels the mouse wheel event.
+     * @param {Object} e
+     * @return {Boolean}
+     */
+    eventCancelMouseWheel: function(e) {
+      e = e || window.event;
+
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      e.cancelBubble = true;
+      e.returnValue = false;
+
+      return false;
     },
     /**
      * Gets elements by class name.
@@ -511,11 +511,13 @@ define(function() {
      * @return null
      */
     stopAllPropagation: function(el) {
+      var me = this;
+
       for (var i = 0; i < propagationEvents.length; i++) {
         var propagationEvent = propagationEvents[i];
 
         if (propagationEvent === 'mousewheel') {
-          bindEvent(el, 'mousewheel', cancelMouseWheel, false);
+          bindEvent(el, 'mousewheel', this.eventCancelMouseWheel, false);
         } else {
           bindEvent(el, propagationEvent, cancelEventPropagation, false);
         }
