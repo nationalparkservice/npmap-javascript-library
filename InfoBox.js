@@ -620,6 +620,10 @@ define([
           me = this,
           mH;
           
+      if (this.visible) {
+        this.hide();
+      }
+
       if (!divInfoBoxBottom) {
         setupInfoBox();
       }
@@ -836,24 +840,16 @@ define([
         }
       });
 
-      if (this.visible) {
-        position(function() {
-          if (panActivated && !skipBoundsCheck) {
-            checkBounds();
-          }
-        });
-      } else {
-        this.visible = true;
+      this.visible = true;
 
-        position(function() {
-          if (panActivated && !skipBoundsCheck) {
-            checkBounds(function() {
-              divInfoBox.style.display = 'block';
-              NPMap.Event.trigger('InfoBox', 'show');
-            });
-          }
-        });
-      }
+      position(function() {
+        if (panActivated && !skipBoundsCheck) {
+          checkBounds(function() {
+            divInfoBox.style.display = 'block';
+            NPMap.Event.trigger('InfoBox', 'show');
+          });
+        }
+      });
     }
   };
 });

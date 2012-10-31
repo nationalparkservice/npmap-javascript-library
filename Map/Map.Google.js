@@ -909,7 +909,7 @@ define([
       map.panBy(pixels.x, pixels.y);
 
       if (callback) {
-        callback();
+        google.maps.event.addListenerOnce(map, 'idle', callback);
       }
     },
     /**
@@ -1081,7 +1081,7 @@ define([
         
         this.centerAndZoom(latLng.lat() + ',' + latLng.lng(), map.getZoom() + 1);
       } else {
-        map.setZoom(map.getZoom() + 1);
+        this.zoom(map.getZoom() + 1);
       }
     },
     /**

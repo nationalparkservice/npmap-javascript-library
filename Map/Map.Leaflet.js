@@ -565,37 +565,22 @@ define([
     latLngToPixel: function(latLng) {
       return map.latLngToContainerPoint(latLng);
     },
-
-
-
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
      * @param {Function} callback (Optional)
      */
     panByPixels: function(pixels, callback) {
-      /*
-      if (callback) {
-        map._rawPanBy(new L.Point(-pixels.x, -pixels.y));
-        callback();
-        map.fire('movestart');
-        map.fire('move');
-        map.fire('moveend');
-      } else {
-        map.panBy(new L.Point(-pixels.x, -pixels.y));
-      }
-      */
-
       map.panBy(new L.Point(-pixels.x, -pixels.y));
 
       if (callback) {
-        callback();
+        function callbackPanByPixels() {
+          map.off('moveend', callbackPanByPixels);
+          callback();
+        }
+
+        map.on('moveend', callbackPanByPixels);
       }
-
-
-      map.fire('moveend');
-
-
     },
     /**
      *
@@ -696,6 +681,9 @@ define([
      * Zooms and/or pans the map to its initial extent.
      */
     toInitialExtent: function() {
+      if (NPMap.InfoBox.visible) {
+        NPMap.InfoBox.hide();
+      }
       map.setView(initialCenter, initialZoom);
     },
     /**
