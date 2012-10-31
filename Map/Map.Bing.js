@@ -862,13 +862,17 @@ define([
      */
     panByPixels: function(pixels, callback) {
       map.setView({
-        animate: !callback,
         center: map.getCenter(),
         centerOffset: new Microsoft.Maps.Point(pixels.x, pixels.y)
       });
-
+      
       if (callback) {
-        callback();
+        function callbackPanByPixels() {
+          Microsoft.Maps.Events.removeHandler(map, 'viewchangeend', callbackPanByPixels);
+          callback();
+        }
+
+        Microsoft.Maps.Events.addHandler(map, 'viewchangeend', callbackPanByPixels);
       }
     },
     /**
