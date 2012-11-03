@@ -43,28 +43,28 @@ define([
       mouseMoveId,
       // The zoombox.
       zoombox = document.createElement('div'),
-      // The zoom level to scale in meters.
+      // General scales for zoom levels, in meters.
       zoomScales = [
-        [0, 295829355],
-        [1, 147914668],
-        [2, 73957339],
-        [3, 36978669],
-        [4, 18489335],
-        [5, 9244667],
-        [6, 4622334],
-        [7, 2311166],
-        [8, 1155583],
-        [9, 577792],
-        [10, 288896],
-        [11, 144448],
-        [12, 72224],
-        [13, 36112],
-        [14, 18056],
-        [15, 9028],
-        [16, 4514],
-        [17, 2257],
-        [18, 1128],
-        [19, 564]
+        295829355,
+        147914668,
+        73957339,
+        36978669,
+        18489335,
+        9244667,
+        4622334,
+        2311166,
+        1155583,
+        577792,
+        288896,
+        144448,
+        72224,
+        36112,
+        18056,
+        9028,
+        4514,
+        2257,
+        1128,
+        564
       ];
 
   /**
@@ -212,10 +212,7 @@ define([
               coords = {},
               nw,
               se;
-
-          //console.log(mouseDownPixel.x);
-          //console.log(pixel.x);
-
+              
           if (pixel.x > mouseDownPixel.x) {
             coords.e = pixel.x;
             coords.w = mouseDownPixel.x;
@@ -308,9 +305,7 @@ define([
      * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
      */
     _init: function() {
-      var 
-          // Self-reference.
-          me = this;
+      var me = this;
 
       Util.safeLoad('NPMap.Map.' + NPMap.config.api, function() {
         var
@@ -677,6 +672,14 @@ define([
             bean.add(document.getElementById('npmap-modules-close'), 'click', function() {
               NPMap.Map.closeModules();
             });
+
+            for (var i = 0; i < divModules.childNodes.length; i++) {
+              bean.add(divModules.childNodes[i], 'mousewheel', function(e) {
+                if ((this.scrollTop === 0 && e.wheelDeltaY > 0) || ((this.scrollTop === (this.scrollHeight - this.offsetHeight)) && e.wheelDeltaY < 0)) {
+                  Util.eventCancelMouseWheel(e);
+                }
+              });
+            }
           }
         }
 
@@ -816,133 +819,104 @@ define([
         }
 
         if (NPMap.config.baseLayers && NPMap.config.baseLayers.length > 1) {
-          /*
-          var divSwitcher = document.createElement('div'),
-              divSwitcherMenu = document.createElement('div');
+          var activeIcon,
+              activeLabel,
+              items = [];
 
-          // TODO: Write this yourself.
-          (function(b){var d=function(){b(".jdropdown-menu").css({display:"none"});b(".jdropdown-anchor").removeClass("jdropdown-active");b(this).trigger("jdropdown.close")},f={init:function(a){return this.each(function(){var c=b(this),e=c.data("items");c.data("jdropdown")||(b(a.container).addClass("jdropdown-menu"),b(this).addClass("jdropdown-anchor").data("jdropdown",{items:"object"===typeof e?e:a.items,anchor:b(this),menu:b(a.container),options:a}).on({click:h}));return this})},destroy:function(){}},h=function(a){a.preventDefault();
-          if(b(this).hasClass("jdropdown-active"))d();else{d();var a=b(this).data("jdropdown"),c=b(this).position(),e=a.menu;e.data("jdropdown",a).empty();(b.isFunction(a.renderMenu)?b.isFunction(a.renderItem)?a.renderItem(a.renderMenu(),a.items):g(a.renderMenu(),a.items):b.isFunction(a.renderItem)?a.renderItem(b("<ul></ul>"),a.items):g(b("<ul></ul>"),a.items)).appendTo(e);"left"==a.options.orientation?a.menu.css({display:"block",left:c.left,position:"absolute",top:c.top+b(this).outerHeight()}):a.menu.css({display:"block",
-          left:c.left-e.outerWidth()+b(this).outerWidth(),position:"absolute",top:c.top+b(this).outerHeight()});b(this).addClass("jdropdown-active").trigger("jdropdown.open")}},g=function(a,c){b.each(c,function(e,d){b("<li"+(e===c.length-1?"":' style="border-bottom:solid 1px #F2F1EF;"')+"></li>").data("jdropdown.item",d).append(b("<a></a>").attr({href:"javascript:void(0)","class":d["class"]}).html('<div style="color:#818177;height:28px;line-height:28px;vertical-align:middle;"><div style="float:left;text-align:center;width:35px;"><img src="'+
-          d.icon+'" style="height:22px;margin-top:3px;" /></div><div style="float:right;width:105px;">'+d.label+"</div></div>").on({click:i})).appendTo(a)});return a},i=function(){d();b(this).trigger("jdropdown.selectItem")};b(document).on("click",function(a){a=b(a.target);!a.parents().hasClass("jdropdown-menu")&&!a.parents().hasClass("jdropdown-anchor")&&!a.hasClass("jdropdown-menu")&&!a.hasClass("jdropdown-anchor")&&d()});b.fn.jdropdown=function(a){if(f[a])return f[a].apply(this,Array.prototype.slice.call(arguments,
-          1));if("object"===typeof a||!a)return f.init.apply(this,arguments)}})(jQuery);
-          
-          divSwitcher.className = 'npmap-switcher-dropdown';
-          divSwitcher.id = 'npmap-switcher';
-          divSwitcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
-          divSwitcherMenu.id = 'npmap-switcher-menu';
-          
-          elements.push({
-            el: divSwitcher
-          }, {
-            el: divSwitcherMenu,
-            func: function() {
-              var activeIcon,
-                  activeLabel,
-                  items = [];
-              
-              function setIcon(url) {
-                document.getElementById('npmap-switcher-dropdown-icon').innerHTML = '<img src="' + url + '" style="height:15px;margin-top:4.5px;" />';
-              }
-              function setLabel(text) {
-                document.getElementById('npmap-switcher-dropdown-text').innerHTML = text.toUpperCase();
-              }
-              
-              _.each(NPMap.config.baseLayers, function(baseLayer) {
-                var icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png', // TODO: Specify generic icon url.
-                    label = baseLayer.code,
-                    match = NPMap.Map[NPMap.config.api].matchBaseLayer(baseLayer),
-                    type = baseLayer.type;
-                
-                if (match) {
-                  label = null;
-                  
-                  if (baseLayer.name) {
-                    label = baseLayer.name;
-                  } else if (match.name) {
-                    label = match.name;
-                  }
-                  
-                  type = match.type;
-                  
-                  switch (match.type) {
-                    case 'Aerial':
-                      if (!label) {
-                        label = 'Aerial View';
-                      }
-                      
-                      icon = NPMap.config.server + '/resources/img/tools/switcher/aerial-large.png';
-                      
-                      break;
-                    case 'NPS':
-                      if (!label) {
-                        label = 'NPS View';
-                      }
-                      
-                      icon = NPMap.config.server + '/resources/img/tools/switcher/nps-large.png';
-                      
-                      break;
-                    case 'Street':
-                      if (!label) {
-                        label = 'Street View';
-                      }
-                      
-                      icon = NPMap.config.server + '/resources/img/tools/switcher/street-large.png';
-                      
-                      break;
-                    case 'Topo':
-                      if (!label) {
-                        label = 'Topo View';
-                      }
-                      
-                      icon = NPMap.config.server + '/resources/img/tools/switcher/topo-large.png';
-                      
-                      break;
-                  }
+          _.each(NPMap.config.baseLayers, function(baseLayer) {
+            var type = baseLayer.type.toLowerCase();
+
+            if (type === 'aerial' || type === 'blank' || type === 'hybrid' || type === 'streets' || type === 'terrain') {
+              baseLayer = NPMap.Map[NPMap.config.api].getBaseLayer(baseLayer);
+
+              if (baseLayer) {
+                if (baseLayer.icon.length > 0) {
+                  baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/' + baseLayer.icon + '-small.png';
                 } else {
-                  if (baseLayer.icon) {
-                    icon = baseLayer.icon;
-                  }
-                  
-                  if (baseLayer.name) {
-                    label = baseLayer.name;
-                  }
+                  baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/blank-small.png';
+                }
+
+                if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
+                  activeIcon = baseLayer.icon;
+                  activeLabel = baseLayer.name;
                 }
                 
-                if (typeof baseLayer.visible !== undefined && baseLayer.visible === true) {
-                  activeIcon = icon;
-                  activeLabel = label;
-                }
-                
-                items.push({
-                  baseLayer: baseLayer,
-                  icon: icon,
-                  label: label
-                });
-              });
-              
-              setIcon(activeIcon);
-              setLabel(activeLabel);
-              
-              items.sort(function(a, b) {
-                return a.label > b.label;
-              });
-              $('.npmap-switcher-dropdown').jdropdown({
-                container: '#npmap-switcher-menu',
-                items: items,
-                orientation: 'right'
-              });
-              $(document).on('jdropdown.selectItem', '#npmap-switcher-menu a', function(e, event) {
-                var data = $(this).parent().data('jdropdown.item');
-                
-                e.preventDefault();
-                setIcon(data.icon.replace('large', 'small'));
-                setLabel(data.label);
-                NPMap.Map[NPMap.config.api].switchBaseLayer(data.baseLayer);
-              });
+                items.push(baseLayer);
+              }
             }
           });
-          */
+
+          if (items.length) {
+            var divSwitcher = document.createElement('div'),
+                divSwitcherMenu = document.createElement('div');
+            
+            function setIcon(url) {
+              document.getElementById('npmap-switcher-dropdown-icon').innerHTML = '<img src="' + url + '" style="height:15px;margin-top:4.5px;" />';
+            }
+            function setLabel(text) {
+              document.getElementById('npmap-switcher-dropdown-text').innerHTML = text.toUpperCase();
+            }
+
+            items.sort(function(a, b) {
+              return a.name > b.name;
+            });
+
+            divSwitcher.className = 'npmap-switcher-dropdown';
+            divSwitcher.id = 'npmap-switcher';
+            divSwitcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
+            divSwitcherMenu.id = 'npmap-switcher-menu';
+            divSwitcherMenu.style.cssText = 'display:none;position:absolute;right:16px;top:38px;';
+            
+            elements.push({
+              el: divSwitcher
+            }, {
+              el: divSwitcherMenu,
+              func: function() {
+                var htmlMenu = '<ul>';
+
+                if (activeIcon.length > 0) {
+                  setIcon(activeIcon);
+                }
+
+                if (activeLabel.length > 0) {
+                  setLabel(activeLabel);
+                }
+
+                _.each(items, function(item, i) {
+                  htmlMenu += '<li class="npmap-switcher-menu-item" style="list-style-type:none;"><a href="javascript:void(0)"><div style="color:#818177;height:28px;line-height:28px;vertical-align:middle;"><div style="float:left;text-align:center;width:35px;"><img src="' + item.icon.replace('small', 'large') + '" style="height:22px;margin-top:3px;"></div><div style="float:right;margin-left:5px;width:100px;">' + item.name + '</div></div></a></li>';
+                });
+                bean.add(divSwitcher, 'click', function(e) {
+                  var display = divSwitcherMenu.style.display;
+
+                  if (display === '' || display === 'none') {
+                    divSwitcherMenu.style.display = 'block';
+                  } else {
+                    divSwitcherMenu.style.display = 'none';
+                  }
+                });
+
+                divSwitcherMenu.innerHTML = htmlMenu + '</ul>';
+
+                _.each(Util.getElementsByClass('npmap-switcher-menu-item'), function(el, i) {
+                  bean.add(el, 'click', function(e) {
+                    var clicked,
+                        me = this;
+
+                    for (var i = 0; i < items.length; i++) {
+                      var item = items[i];
+
+                      if (item.name === me.firstChild.firstChild.childNodes[1].innerHTML) {
+                        setIcon(item.icon.replace('large', 'small'));
+                        setLabel(item.name);
+                        NPMap.Map[NPMap.config.api].switchBaseLayer(item);
+                        divSwitcherMenu.style.display = 'none';
+                      }
+                    }
+                  });
+                });
+              }
+            });
+          }
         }
 
         for (var i = 0; i < elements.length; i++) {
@@ -1238,6 +1212,7 @@ define([
     hideProgressBar: function() {
       divProgressBar.childNodes[0].style.width = '100%';
 
+      /*
       morpheus(divProgressBar, {
         complete: function() {
           divProgressBar.style.display = 'none';
@@ -1246,6 +1221,10 @@ define([
         duration: 1000,
         opacity: 0
       });
+      */
+
+      divProgressBar.style.display = 'none';
+      divProgressBar.style.opacity = 1;
     },
     /**
      * Hides a shape.
@@ -1318,19 +1297,19 @@ define([
       var z;
 
       for (var i = 0; i < zoomScales.length; i++) {
-        var zoom = zoomScales[i][0];
+        var zoom = i;
         
-        if (meters >= zoomScales[i][1]) {
+        if (meters >= zoomScales[i]) {
           if (zoomScales[i - 1]) {
-            if (meters < zoomScales[i - 1][1]) {
-              z = zoomScales[i + 1][0];
+            if (meters < zoomScales[i - 1]) {
+              z = i + 1;
               break;
             }
           } else {
             z = zoom;
             break;
           }
-        } else if (meters < zoomScales[zoomScales.length - 1][1]) {
+        } else if (meters < zoomScales[zoomScales.length - 1]) {
           z = zoom;
           break;
         }
@@ -1410,37 +1389,6 @@ define([
         divModules.style.display = 'block';
         divModulesClose.style.display = 'block';
       }
-
-      /*
-      console.log(module);
-      
-      var $module = $('#npmap-modules-' + module),
-          $modules = $('#npmap-modules');
-
-      if (on) {
-        $('#npmap-modules-tabs').hide();
-        $module.show();
-        $modules.show();
-        $('#npmap-map').css({
-          left: $modules.outerWidth() + 'px'
-        });
-        $('#npmap-toolbar').css({
-          left: $modules.outerWidth() + 'px'
-        });
-      } else {
-        console.log('here');
-
-        $modules.hide();
-        $('#npmap-map').css({
-          left: '0'
-        });
-        $('#npmap-toolbar').css({
-          left: '0'
-        });
-        $module.hide();
-        $('#npmap-modules-tabs').show();
-      }
-      */
     },
     /**
      * Pans the map horizontally and/or vertically based on the pixels passed in.
