@@ -10,6 +10,8 @@ define([
       backContent = null,
       // The preserved HTML string from the #npmap-infobox-title div.
       backTitle = null,
+      // The last scroll position of the clustered view.
+      clusterPosition = 0,
       // The number of identifiable layers that are visible.
       identifyLayers = 0,
       // An array of results for the current identify operation.
@@ -56,18 +58,18 @@ define([
     });
     _.each(subLayers, function(subLayer, i) {
       var titles = [];
-          
+
       if (!layerConfig.identify || !layerConfig.identify.simpleTree) {
         html += '<li>' + subLayer.layerName.replace(/_/g, ' ') + '<ul>';
       }
 
       _.each(subLayer.results, function(result, i2) {
         var title,
-            type = 'cluster';
+            type = 'title';
 
         if (layerConfig.identify && (layerConfig.identify.cluster || layerConfig.identify.title)) {
-          if (!layerConfig.identify.cluster) {
-            type = 'title';
+          if (layerConfig.identify.cluster) {
+            type = 'cluster';
           }
 
           title = InfoBox._build(layerConfig, result, type);
@@ -89,7 +91,6 @@ define([
           type: type
         });
       });
-
       titles.sort(function(a, b) {
         var A = a.title.toUpperCase(),
             B = b.title.toUpperCase();
@@ -178,40 +179,40 @@ define([
           results = [],
           value = 0.1;
 
-      function onSuccess(response) {
-        if (response.results && response.results.length > 0) {
-          results.push({
-            data: response,
-            layerName: layer.name
-          });
-        }
-
-        count--;
-      }
-
       for (var i = 0; i < NPMap.config.layers.length; i++) {
-        var layer = NPMap.config.layers[i];
+        (function() {
+          var layer = NPMap.config.layers[i];
         
-        if (layer.type === 'ArcGisServerRest' && layer.visible === true) {
-          count++;
+          if (layer.type === 'ArcGisServerRest' && layer.visible === true) {
+            count++;
 
-          reqwest({
-            data: {
-              f: 'json',
-              geometry: latLng.lng + ',' + latLng.lat,
-              geometryType: 'esriGeometryPoint',
-              imageDisplay: divWidth + ',' + divHeight + ',' + 96,
-              layers: 'visible' + (layer.layersStatus && layer.layersStatus !== 'all' ? ':' + layer.layersStatus : ''),
-              mapExtent: bounds.w + ',' + bounds.s + ',' + bounds.e + ',' + bounds.n,
-              returnGeometry: false,
-              sr: 4326,
-              tolerance: 10
-            },
-            success: onSuccess,
-            type: 'jsonp',
-            url: layer.url + '/identify?callback=?'
-          });
-        }
+            reqwest({
+              data: {
+                f: 'json',
+                geometry: latLng.lng + ',' + latLng.lat,
+                geometryType: 'esriGeometryPoint',
+                imageDisplay: divWidth + ',' + divHeight + ',' + 96,
+                layers: 'visible' + (layer.layersStatus && layer.layersStatus !== 'all' ? ':' + layer.layersStatus : ''),
+                mapExtent: bounds.w + ',' + bounds.s + ',' + bounds.e + ',' + bounds.n,
+                returnGeometry: false,
+                sr: 4326,
+                tolerance: 10
+              },
+              success: function(response) {
+                if (response.results && response.results.length > 0) {
+                  results.push({
+                    data: response,
+                    layerName: layer.name
+                  });
+                }
+
+                count--;
+              },
+              type: 'jsonp',
+              url: layer.url + '/identify?callback=?'
+            });
+          }
+        })();
       }
       
       if (count > 0) {
@@ -233,11 +234,15 @@ define([
               
               Map.hideProgressBar(value);
               InfoBox.show(infobox.content, infobox.title);
+              clusterPosition = 0;
+              InfoBox.scrollTo(0);
             }
           } else {
             clearInterval(interval);
             Map.hideProgressBar();
             InfoBox.show('The identify operation is taking too long. Zoom in further and try again.', 'Sorry!');
+            clusterPosition = 0;
+            InfoBox.scrollTo(0);
           }
         }, 5);
       }
@@ -262,6 +267,7 @@ define([
      */
     _infoBoxBack: function() {
       InfoBox.show(backContent, backTitle);
+      InfoBox.scrollTo(clusterPosition);
 
       this._identifyResult = identifyResults;
     },
@@ -283,7 +289,7 @@ define([
           results,
           subLayer,
           title = el.innerHTML;
-      
+
       for (var i = 0; i < identifyResults.length; i++) {
         if (identifyResults[i].layerName === name) {
           results = identifyResults[i].results;
@@ -291,17 +297,17 @@ define([
         }
       }
 
-      for (var j = 0; j < results.length; j++) {
-        if (results[j].layerId === parseInt(ids[1], 0)) {
-          subLayer = results[j];
-          results = results[j].results;
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].layerId === parseInt(ids[1], 0)) {
+          subLayer = results[i];
+          results = subLayer.results;
           break;
         }
       }
 
-      for (var k = 0; k < results.length; k++) {
-        if (results[k].OBJECTID === ids[2]) {
-          attributes = results[k];
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].OBJECTID === ids[2]) {
+          attributes = results[i];
           break;
         }
       }
@@ -358,17 +364,23 @@ define([
         actions = [];
       }
 
+      clusterPosition = InfoBox.getScrollPosition();
+
+      InfoBox.scrollTo(0);
       InfoBox.show(InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
     },
     /**
      * Creates a GeoJson layer.
      * @param {Object} config
+     * @param {Boolean} silent (Optional) If true, the NPMap.Layer events will not be called.
      */
-    create: function(config) {
+    create: function(config, silent) {
       var tileLayer,
           uriConstructor = config.url + '/tile/{{z}}/{{y}}/{{x}}';
-          
-      Event.trigger('NPMap.Layer', 'beforeadd', config);
+
+      if (!silent) {
+        Event.trigger('NPMap.Layer', 'beforeadd', config);
+      }
 
       if (!config.tiled) {
         uriConstructor = function(x, y, z) {
@@ -406,7 +418,10 @@ define([
       };
 
       Map.addTileLayer(tileLayer);
-      Event.trigger('NPMap.Layer', 'added', config);
+
+      if (!silent) {
+        Event.trigger('NPMap.Layer', 'added', config);
+      }
     },
     /**
      * Hides the layer.
@@ -433,7 +448,7 @@ define([
 
       config.visible = true;
 
-      this.create(config);
+      this.create(config, true);
     },
     /**
      *
