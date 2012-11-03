@@ -12,7 +12,7 @@
 /* Core elements */
 #npmap {background-color:#EBF2DA;border:solid 1px #e0e0e0;font-size:13px;line-height:16px;}
 #npmap-map {z-index:0;}
-#npmap-modules {background-color:#F9F7F1;bottom:0;display:none;left:0;overflow:auto;overflow-x:hidden;position:absolute;top:0;width:200px;z-index:1;}
+#npmap-modules {background-color:#F9F7F1;bottom:0;display:none;left:0;position:absolute;top:0;width:200px;z-index:1;}
 #npmap-toolbar {background-color:#908D7C;left:0;height:28px;position:absolute;right:0;top:0;z-index:2;} /*border-bottom-left-radius:3px;border-bottom-right-radius:3px;*/
 
 /* Buttons */
@@ -50,7 +50,7 @@
 #npmap-attribution {-moz-box-shadow:0 0 15px #888;-webkit-box-shadow:0 0 15px #888;bottom:0;box-shadow:0 0 15px #888;background-color:white;background-color:rgba(255, 255, 255, 0.7);color:#333;font-size:11px;line-height:13px;margin:0;max-width:400px;padding:3px 5px;position:absolute;right:0;text-align:right;z-index:30;}
 #npmap-clickdot {background-color:transparent;display:block;height:1px;position:absolute;width:1px;z-index:30;}
 #npmap-modules-tabs {left:0;position:absolute;top:15px;width:28px;z-index:31;}
-#npmap .npmap-module {height:100%;margin:0;padding:0;position:absolute;width:100%;z-index:0;}
+#npmap .npmap-module {height:100%;margin:0;overflow:auto;overflow-x:hidden;padding:0;position:absolute;width:100%;z-index:0;}
 #npmap-modules-close {background:url("../img/modules/right-shadow.png") repeat-y scroll 0 0;display:none;height:100%;left:199px;margin-left:0 !important;position:absolute;z-index:2;}
 #npmap .npmap-module-tab {cursor:pointer;margin-left:-2px;}
 .npmap-module-tab-close {background: url(../img/modules/tabs.png) 0px 0px no-repeat;display:inline-block;width:28px;height:28px;}
@@ -110,6 +110,7 @@
 #npmap-switcher-dropdown-icon {float:left;left:0;padding-left:2px;position:absolute;text-align:center;top:0;center;width:24px;}
 #npmap-switcher-dropdown-text {position:absolute;margin-left:30px;top:0;}
 #npmap-switcher-menu {background:#FFFFFF none repeat scroll 0 0;border:1px solid #EDECE8;color:#6E6C5F;display:none;font-size:12px;font-weight:bold;padding:0;}
+.npmap-switcher-menu-item {border-bottom:solid 1px #F2F1EF;}
 #npmap-switcher-menu ul {list-style:none;margin:0;padding:0;}
 #npmap-switcher-menu a {display:block;overflow:hidden;padding:8px;text-align:left;text-decoration:none;}
 #npmap-switcher-menu a:hover {background:#F1F1EF;text-decoration:none;}
