@@ -24,7 +24,7 @@ if (typeof NPMap.config.server === 'undefined') {
   NPMap.config.server = 'http://www.nps.gov/npmap/' + NPMap.version;
 }
 
-document.getElementById(NPMap.config.div).innerHTML = '<div id="npmap" style="height:100%;left:0;position:absolute;top:0;width:100%;"><div id="npmap-mask" style="background-color:#F0F0F0;display:block;height:100%;left:0;position:absolute;top:0;width:100%;z-index:2;"><div id="npmap-loading" style="-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-moz-box-shadow:0 0 3px 3px #CA702D;-webkit-box-shadow:0 0 3px 3px #CA702D;box-shadow:0 0 3px 3px #CA702D;background-color:black;border:solid black 2px;height:60px;left:50%;margin-left:-30px;margin-top:-30px;position:absolute;top:50%;width:60px;z-index:3;"><img src="' + NPMap.config.server + '/resources/img/loader.gif" /></div></div><div id="npmap-map" style="bottom:0;left:0;position:absolute !important;right:0;top:0;z-index:0;"></div></div>';
+document.getElementById(NPMap.config.div).innerHTML = '<div id="npmap" style="border:solid 1px #e0e0e0;height:100%;left:0;position:absolute;top:0;width:100%;"><div id="npmap-mask" style="background-color:#F0F0F0;display:block;height:100%;left:0;position:absolute;top:0;width:100%;z-index:2;"><div id="npmap-loading" style="-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-moz-box-shadow:0 0 3px 3px #CA702D;-webkit-box-shadow:0 0 3px 3px #CA702D;box-shadow:0 0 3px 3px #CA702D;background-color:black;border:solid black 2px;height:60px;left:50%;margin-left:-30px;margin-top:-30px;position:absolute;top:50%;width:60px;z-index:3;"><img src="' + NPMap.config.server + '/resources/img/loader.gif" /></div></div><div id="npmap-map" style="bottom:0;left:0;position:absolute !important;right:0;top:0;z-index:0;"></div></div>';
 
 NPMap.config.div = 'npmap-map';
 
@@ -146,9 +146,10 @@ if (typeof bean === 'undefined') {
               
           if (NPMap.config.baseLayers) {
             for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-              var baseLayerType = NPMap.config.baseLayers[i].type;
+              var baseLayerType = NPMap.config.baseLayers[i].type,
+                  lower = baseLayerType.toLowerCase();
 
-              if (baseLayerType && _.indexOf(layerHandlers, baseLayerType) === -1) {
+              if (_.indexOf(layerHandlers, baseLayerType) === -1 && lower !== 'aerial' && lower !== 'blank' && lower !== 'hybrid' && lower !== 'streets' && lower !== 'terrain') {
                 layerHandlers.push(baseLayerType);
               }
             }
@@ -230,10 +231,10 @@ if (typeof bean === 'undefined') {
                   for (var l = 0; l < NPMap.config.baseLayers.length; l++) {
                     var baseLayer = NPMap.config.baseLayers[l];
 
-                    if (baseLayer.type && baseLayer.type.toLowerCase() === layerHandlerType) {
+                    if (baseLayer.type.toLowerCase() === layerHandlerType) {
                       baseLayer.type = LAYER_TYPES[layerHandlerType];
                       baseLayer.zIndex = 0;
-
+                      
                       if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
                         baseLayer.visible = true;
 
