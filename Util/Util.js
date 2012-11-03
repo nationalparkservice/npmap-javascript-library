@@ -11,10 +11,7 @@ define(function() {
         'dblclick',
         'mousedown',
         'mouseover',
-        'mouseup',
-        'mousewheel',
-        'scroll',
-        'wheel'
+        'mouseup'
       ];
 
   /**
@@ -29,18 +26,6 @@ define(function() {
       el.addEventListener(name, handler, false);
     } else if (el.attachEvent){
       el.attachEvent('on' + name, handler);
-    }
-  }
-  /**
-   * Cross-browser cancel event propagation.
-   * @param {Object} e
-   * @return null
-   */
-  function cancelEventPropagation(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    } else if (window.event) {
-      window.event.cancelBubble = true;
     }
   }
   /**
@@ -120,7 +105,7 @@ define(function() {
       return true;
     },
     /**
-     * Cancels the mouse wheel event.
+     * Cancels the mousewheel event.
      * @param {Object} e
      * @return {Boolean}
      */
@@ -139,6 +124,18 @@ define(function() {
       e.returnValue = false;
 
       return false;
+    },
+    /**
+     * Cross-browser cancel event propagation.
+     * @param {Object} e
+     * @return null
+     */
+    eventCancelPropagation: function(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      } else if (window.event) {
+        window.event.cancelBubble = true;
+      }
     },
     /**
      * Gets elements by class name.
@@ -514,13 +511,7 @@ define(function() {
       var me = this;
 
       for (var i = 0; i < propagationEvents.length; i++) {
-        var propagationEvent = propagationEvents[i];
-
-        if (propagationEvent === 'mousewheel') {
-          bindEvent(el, 'mousewheel', this.eventCancelMouseWheel, false);
-        } else {
-          bindEvent(el, propagationEvent, cancelEventPropagation, false);
-        }
+        bindEvent(el, propagationEvents[i], me.eventCancelPropagation, false);
       }
     },
     /**
