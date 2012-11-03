@@ -5,23 +5,39 @@ define([
   'Util/Util'
 ], function(Event, Map, Util) {
   var
-      // An array of the default base layers for Bing.
-      DEFAULT_BASE_LAYERS = [{
-        code: 'aerial',
-        type: 'Aerial'
-      },{
-        code: 'auto',
-        type: 'Generic'
-      },{
-        code: 'birdseye',
-        type: 'Generic'
-      },{
-        code: 'mercator',
-        type: 'Generic'
-      },{
-        code: 'road',
-        type: 'Street'
-      }],
+      // The default base layers for Bing.
+      DEFAULT_BASE_LAYERS = {
+        aerial: {
+          icon: 'aerial',
+          mapTypeId: 'aerial',
+          name: 'Aerial View'
+        },
+        blank: {
+          icon: 'blank',
+          mapTypeId: 'mercator',
+          name: 'Blank View'
+        },
+        /*
+        hybrid: {
+          icon: 'aerial',
+          mapTypeId: 'HYBRID',
+          name: 'Hybrid View'
+        },
+        */
+        streets: {
+          icon: 'street',
+          mapTypeId: 'road',
+          name: 'Street View'
+        }
+        /*
+        ,
+        terrain: {
+          icon: 'topo',
+          mapTypeId: 'TERRAIN',
+          name: 'Terrain View'
+        }
+        */
+      },
       // The activeBaseLayer object.
       activeBaseLayer,
       // Has the map been double-clicked?
@@ -98,7 +114,12 @@ define([
     
     return rgb;
   }
-  
+
+
+  // TODO: Don't use activeBaseLayer
+
+
+  /*
   if (NPMap.config.baseLayers) {
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
       var baseLayer = NPMap.config.baseLayers[i],
@@ -130,7 +151,40 @@ define([
     
     NPMap.config.baseLayers.push(activeBaseLayer);
   }
+  */
 
+  if (NPMap.config.baseLayers) {
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var baseLayer = NPMap.config.baseLayers[i],
+          type = baseLayer.type.toLowerCase(),
+          visible = baseLayer.visible;
+
+      if (typeof visible === 'undefined' || visible === true) {
+        if (type === 'aerial' || type === 'hybrid' || type === 'streets' || type === 'terrain') {
+          mapTypeId = Microsoft.Maps.MapTypeId[DEFAULT_BASE_LAYERS[type].mapTypeId];
+        } else {
+          mapTypeId = Microsoft.Maps.MapTypeId.mercator;
+        }
+
+        break;
+      }
+    }
+  } else if (typeof NPMap.config.baseLayers === 'undefined') {
+    mapTypeId = Microsoft.Maps.MapTypeId.road;
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['streets']
+    ];
+  } else {
+    mapTypeId = Microsoft.Maps.MapTypeId.mercator;
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['blank']
+    ];
+  }
+
+  console.log(mapTypeId);
+  console.log(NPMap.config.baseLayers);
+
+  /*
   if (activeBaseLayer.code === 'aerial' || activeBaseLayer.code === 'auto' || activeBaseLayer.code === 'birdseye' || activeBaseLayer.code === 'mercator' || activeBaseLayer.code === 'road') {
     mapTypeId = Microsoft.Maps.MapTypeId[activeBaseLayer.code];
   } else {
@@ -140,10 +194,11 @@ define([
 
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
   }
+  */
   
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
     center: NPMap.config.center ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new Microsoft.Maps.Location(39, -96),
-    credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
+    credentials: NPMap.config.credentials ? NPMap.config.credentials : 'Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65',
     disableKeyboardInput: NPMap.config.tools && !NPMap.config.tools.keyboard ? true : false,
     mapTypeId: mapTypeId,
     showCopyright: false,
@@ -799,18 +854,39 @@ define([
         visible: false
       });
     },
+
+
+
+
+
+
+
+
+
+
     /**
      * Tests to see if a marker is within the map's current bounds.
      * @param latLng {Object/String} {Required} The latitude/longitude, either a Microsoft.Maps.Location object or a string in "latitude,longitude" format, to test.
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
-      if (typeof(latLng) === 'string') {
-        latLng = NPMap.bing.map.latLngToApi(latLng);
+      if (!map.getBounds().contains(latLng)) {
+        console.log(map.getBounds());
+        console.log(NPMap.Map.getBounds());
+        console.log(latLng);
       }
       
-      return map.getBounds().contains(latLng);
+      return this.getBounds().contains(latLng);
     },
+
+
+
+
+
+
+
+
+
     /**
      * Converts a Bing Maps Location object to the NPMap representation of a latitude/longitude string.
      * @param latLng {Microsoft.Maps.Location} The Location object to convert to a string.
@@ -861,11 +937,13 @@ define([
      * @param {Function} callback (Optional)
      */
     panByPixels: function(pixels, callback) {
+      console.log(pixels);
+
       map.setView({
         center: map.getCenter(),
         centerOffset: new Microsoft.Maps.Point(pixels.x, pixels.y)
       });
-      
+
       if (callback) {
         function callbackPanByPixels() {
           Microsoft.Maps.Events.removeHandler(map, 'viewchangeend', callbackPanByPixels);
