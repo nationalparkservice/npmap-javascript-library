@@ -451,12 +451,6 @@ define([
       setMaxWidth();
     }
 
-    Util.iterateThroughChildNodes(divInfoBox, function(el) {
-      if (el.id !== 'npmap-infobox-bottom') {
-        Util.stopAllPropagation(el);
-      }
-    });
-
     divInfoBoxBottom = document.getElementById('npmap-infobox-bottom');
     divInfoBoxContent = document.getElementById('npmap-infobox-content');
     divInfoBoxContentWrapper = document.getElementById('npmap-infobox-content-wrapper');
@@ -481,8 +475,20 @@ define([
       };
     }
     
+    bean.add(divInfoBoxContentWrapper, 'mousewheel', function(e) {
+      if ((this.scrollTop === 0 && e.wheelDeltaY > 0) || ((this.scrollTop === (this.scrollHeight - this.offsetHeight)) && e.wheelDeltaY < 0)) {
+        Util.eventCancelMouseWheel(e);
+      } else {
+        Util.eventCancelPropagation(e);
+      }
+    });
     refreshDimensions();
     refreshOffsetsAndWidth();
+    Util.iterateThroughChildNodes(divInfoBox, function(el) {
+      if (el.id !== 'npmap-infobox-bottom') {
+        Util.stopAllPropagation(el);
+      }
+    });
   }
   
   if (design === 'basic') {
@@ -554,6 +560,13 @@ define([
     // Is the InfoBox currently visible?
     visible: false,
     /**
+     * Gets the current scroll position of the InfoBox content wrapper div.
+     * @return {Number}
+     */
+    getScrollPosition: function() {
+      return divInfoBoxContentWrapper.scrollTop;
+    },
+    /**
      * Hides the InfoBox.
      */
     hide: function() {
@@ -602,6 +615,16 @@ define([
       } else {
         // TODO: This should only hide if 'parent' is 'page'. Right now, however, the baseApi code doesn't support negative positioning of #npmap-clickdot.
         this.hide();
+      }
+    },
+    /**
+     * Scrolls the InfoBox content wrapper div to a position.
+     * @param {Number} y
+     * @return null
+     */
+    scrollTo: function(y) {
+      if (typeof divInfoBoxContentWrapper !== 'undefined') {
+        divInfoBoxContentWrapper.scrollTop = y;
       }
     },
     /**
