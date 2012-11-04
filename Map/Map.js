@@ -819,8 +819,8 @@ define([
         }
 
         if (NPMap.config.baseLayers && NPMap.config.baseLayers.length > 1) {
-          var activeIcon,
-              activeLabel,
+          var activeIcon = null,
+              activeLabel = null,
               items = [];
 
           _.each(NPMap.config.baseLayers, function(baseLayer) {
@@ -836,7 +836,7 @@ define([
                   baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/blank-small.png';
                 }
 
-                if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
+                if (!activeIcon && (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true)) {
                   activeIcon = baseLayer.icon;
                   activeLabel = baseLayer.name;
                 }
