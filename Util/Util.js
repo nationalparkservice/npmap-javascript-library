@@ -349,6 +349,21 @@ define(function() {
       }
     },
     /**
+     * Converts a HEX color to RGB.
+     * @param {String} hex The HEX string to convert.
+     * @return {String}
+     */
+    hexToRgb: function(hex) {
+      var i = 3,
+          rgb = hex.replace('#', '').match(/(.{2})/g);
+          
+      while (i--) {
+        rgb[i] = parseInt(rgb[i], 16);
+      }
+      
+      return rgb;
+    },
+    /**
      * Injects a CSS stylesheet into the page.
      * @param {String/Array} location The path to the CSS stylesheet.
      * @param {Function} callback (Optional)
