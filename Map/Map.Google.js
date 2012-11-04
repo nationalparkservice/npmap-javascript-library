@@ -1,5 +1,4 @@
-﻿// TODO: Hook up attribution.
-define([
+﻿define([
   'Event',
   'Map/Map',
   'Util/Util'
@@ -19,7 +18,7 @@ define([
         getTileUrl: function(coord, zoom) {
           return NPMap.config.server + '/resources/img/blank-tile.png';
         },
-        maxZoom: 22,
+        maxZoom: 19,
         minZoom: 0,
         name: 'BLANK',
         tileSize: new google.maps.Size(256, 256)
@@ -56,16 +55,14 @@ define([
       },
       // Helps handle map single and double-click events.
       doubleClicked = false,
-      // Is there at least one clustered layer in the map?
-      hasClustered = NPMap.Map.hasClusteredLayer(),
-      // Is there at least one tiled layer in the map?
-      hasTiled = NPMap.Map.hasTiledLayer(),
       // The initial bounds of the map.
       initialBounds,
       // The initial center latitude/longitude of the map.
       initialCenter,
       // The initial zoom level of the map.
       initialZoom,
+      //
+      interval,
       // The map object.
       map,
       // The map config object.
@@ -84,6 +81,7 @@ define([
   /**
    * Converts a 0-255 opacity to 0-1.0.
    * @param {Number} opacity
+   * @return {Number}
    */
   function convertOpacity(opacity) {
     return (opacity / 25.5) * 0.1;
@@ -91,6 +89,7 @@ define([
   /**
    * Hooks up a google.maps.event click handler to a shape.
    * @param {Object} shape
+   * @return null
    */
   function hookUpShapeClickHandler(shape) {
     google.maps.event.addListener(shape, 'click', function(e) {
@@ -101,6 +100,7 @@ define([
   /**
    * Is the longitude in the eastern or western hemisphere?
    * @param {Number} lng
+   * @return {String}
    */
   function inEasternOrWesternHemisphere(lng) {
     if (lng < 0) {
@@ -190,14 +190,17 @@ define([
     map.setMapTypeId(mapTypeId);
   }
   
-  var interval = setInterval(function() {
+  interval = setInterval(function() {
     bounds = map.getBounds();
 
     if (bounds) {
+      var intervalAttribution,
+          intervalOverlay;
+
       clearInterval(interval);
 
       if (!initialBounds) {
-        initialBounds = map.getBounds();
+        initialBounds = bounds;
       }
       
       if (!initialCenter) {
@@ -208,7 +211,7 @@ define([
         initialZoom = map.getZoom();
       }
       
-      if (NPMap.config.restrictToBoundingBox) {
+      if (NPMap.config.restrictBounds) {
         google.maps.event.addListener(map, 'center_changed', function() {
           if (!bounds.contains(map.getCenter())) {
             var c = map.getCenter(),
@@ -331,7 +334,7 @@ define([
         oldZoom = zoom;
       });
 
-      var intervalAttribution = setInterval(function() {
+      intervalAttribution = setInterval(function() {
         var divLogo,
             links = document.getElementsByTagName('a');
 
@@ -380,7 +383,7 @@ define([
         }
       }, 250);
 
-      var intOverlay = setInterval(function() {
+      intervalOverlay = setInterval(function() {
         if (!overlay) {
           try {
             overlay = new google.maps.OverlayView();
@@ -390,7 +393,7 @@ define([
             
           }
         } else {
-          clearInterval(intOverlay);
+          clearInterval(intervalOverlay);
         }
       }, 250);
 
@@ -409,6 +412,7 @@ define([
     /**
      * Adds a shape to the map.
      * @param {Object} shape The shape to add to the map. This can be a google.maps.Marker, Polyline, Polygon, Rectangle, or Circle object.
+     * @return null
      */
     addShape: function(shape) {
       shape.setMap(map);
@@ -417,6 +421,7 @@ define([
      * Adds a tile layer to the map.
      * @param {Object} layer
      * @param {Boolean} baseLayer (Optional)
+     * @return null
      */
     addTileLayer: function(layer, baseLayer) {
       baseLayer = baseLayer || false;
@@ -430,7 +435,7 @@ define([
     },
     /**
      * Adds a TileStream layer to the map.
-     * return null
+     * @return null
      */
     addTileStreamLayer: function() {
       for (var i in map.mapTypes) {
@@ -488,13 +493,18 @@ define([
       this.center(latLng);
     },
     /**
-     *
+     * Converts NPMap line options to Google Maps line options.
+     * @param {Object} options
+     * @return {Object}
      */
     convertLineOptions: function(options) {
       return {};
     },
     /**
-     * Valid Google Maps options: animation, clickable, cursor, draggable, flat, icon, map, optimized, position, raiseOnDrag, shadow, shape, title, visible, zIndex
+     * Converts NPMap marker options to Google Maps marker options.
+     * @param {Object} options
+     * @return {Object}
+     * Notes: Valid Google Maps options: animation, clickable, cursor, draggable, flat, icon, map, optimized, position, raiseOnDrag, shadow, shape, title, visible, zIndex
      */
     convertMarkerOptions: function(options) {
       var o = {};
@@ -511,14 +521,16 @@ define([
           };
         }
 
-        // TODO: If you don't have the height/width here, you need to load image and calculate height/width before moving on.
         o.icon = new google.maps.MarkerImage(options.url, new google.maps.Size(width, height), null, new google.maps.Point(anchor.x, anchor.y));
       }
 
       return o;
     },
     /**
-     * Valid Google Maps options: clickable, editable, fillColor, fillOpacity, geodesic, map, paths, strokeColor, strokeOpacity, strokeWeight, visible, zIndex
+     * Converts NPMap polygon options to Google Maps polygon options.
+     * @param {Object} options
+     * @return {Object}
+     * Notes: Valid Google Maps options: clickable, editable, fillColor, fillOpacity, geodesic, map, paths, strokeColor, strokeOpacity, strokeWeight, visible, zIndex
      */
     convertPolygonOptions: function(options) {
       var o = {};
@@ -578,7 +590,7 @@ define([
      * Creates a google.maps.Polyline object.
      * @param {Array} latLngs An array of google.maps.LatLng objects.
      * @param {Object} options (Optional) Any additional options to apply to the polygon.
-     * @return {google.maps.Polygon}
+     * @return {Object}
      */
     createLine: function(latLngs, options) {
       var line;
@@ -595,7 +607,7 @@ define([
      * Creates a google.maps.Marker object.
      * @param {Object} latLng Where to place the marker.
      * @param {Object} options (Optional) Any additional options to apply to the marker.
-     * @return {google.maps.Marker}
+     * @return {Object}
      */
     createMarker: function(latLng, options) {
       var marker;
@@ -612,7 +624,7 @@ define([
      * Creates a google.maps.Polygon object.
      * @param {Array} latLngs An array of google.maps.LatLng objects.
      * @param {Object} options Any additional options to apply to the polygon.
-     * @return {google.maps.Polygon}
+     * @return {Object}
      */
     createPolygon: function(latLngs, options) {
       var polygon;
@@ -629,6 +641,7 @@ define([
      * Creates a tile layer.
      * @param {String/Function} constructor
      * @param {Object} options (Optional)
+     * @return {Object}
      */
     createTileLayer: function(constructor, options) {
       var getSubdomain = null,
@@ -701,6 +714,7 @@ define([
     /**
      * Gets a latLng from an event object.
      * @param {Object} e
+     * @return {Object}
      */
     eventGetLatLng: function(e) {
       if (e.latLng) {
@@ -716,6 +730,7 @@ define([
     /**
      * Gets a shape from an event object.
      * @param {Object} e
+     * @return {Object}
      */
     eventGetShape: function(e) {
       return e.shape;
@@ -741,20 +756,21 @@ define([
     },
     /**
      * Gets the center {google.maps.LatLng} of the map.
-     * @return {google.maps.LatLng}
+     * @return {Object}
      */
     getCenter: function() {
       return map.getCenter();
     },
     /**
      * Gets the latLng (google.maps.LatLng) of the #npmap-clickdot div element.
-     * @return {google.maps.LatLng}
+     * @return {Object}
      */
     getClickDotLatLng: function() {
       return this.getLatLngFromPixel(this.getClickDotPixel());
     },
     /**
      * Returns the {google.maps.Point} for the #npmap-clickdot div.
+     * @return {Object}
      */
     getClickDotPixel: function() {
       var offset = Util.getOffset(document.getElementById('npmap-map')),
@@ -764,8 +780,8 @@ define([
     },
     /**
      * Gets a {google.maps.LatLng} from a {google.maps.Point}.
-     * @param {google.maps.Point} point
-     * @return {google.maps.LatLng}
+     * @param {Object} point
+     * @return {Object}
      */
     getLatLngFromPixel: function(point) {
       return overlay.getProjection().fromContainerPixelToLatLng(point);
@@ -779,14 +795,16 @@ define([
     },
     /**
      * Gets the anchor of a marker.
-     * @param {} (Required) The Pushpin to get the anchor for.
-     * @return {Object} An object with x and y properties.
+     * @param {Object} marker The Pushpin to get the anchor for.
+     * @return {Object}
      */
     getMarkerAnchor: function(marker) {
       
     },
     /**
      * Gets the icon for a marker.
+     * @param {Object} marker
+     * @return {Object}
      */
     getMarkerIcon: function(marker) {
       
@@ -815,13 +833,14 @@ define([
     },
     /**
      * Gets the zoom level of the map.
-     * @return {Float}
+     * @return {Number}
      */
     getZoom: function() {
       return map.getZoom();
     },
     /**
      * Handles any necessary sizing and positioning for the map when its div is resized.
+     * @return null
      */
     handleResize: function() {
       google.maps.event.trigger(map, 'resize');
@@ -836,8 +855,8 @@ define([
     },
     /**
      * Tests the equivalency of two {google.maps.LatLng} objects.
-     * @param latLng1 {google.maps.LatLng} The first Location object.
-     * @param latLng2 {google.maps.LatLng) The second Location object.
+     * @param latLng1 {Object} The first {google.maps.LatLng} object.
+     * @param latLng2 {Object) The second {google.maps.LatLng} object.
      * @returns {Boolean}
      */
     latLngsAreEqual: function(latLng1, latLng2) {
@@ -845,7 +864,7 @@ define([
     },
     /**
      * Converts an API latLng object to an NPMap latLng object.
-     * @param latLng {google.maps.LatLng} The object to convert.
+     * @param latLng {Object} The object to convert.
      * @return {Object}
      */
     latLngFromApi: function(latLng) {
@@ -855,35 +874,24 @@ define([
       };
     },
     /**
-     * Converts a lat/lng string ("latitude/longitude") or object ({x:lng,y:lat}) to an API latLng object.
-     * @param {String/Object} latLng
+     * Converts a latLng object ({x:lng,y:lat}) to an API latLng object.
+     * @param {Object} latLng
      * @return {Object}
      */
     latLngToApi: function(latLng) {
-      var lat,
-          lng;
-
-      if (typeof latLng === 'string') {
-        latLng = latLng.split(',');
-        lat = latLng[0];
-        lng = latLng[1];
-      } else {
-        lat = latLng.lat;
-        lng = latLng.lng;
-      }
-      
-      return new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
+      return new google.maps.LatLng(latLng.lat, latLng.lng);
     },
     /**
      * Returns a google.maps.Point object for a given latLng.
-     * @param latLng {google.maps.LatLng} (Required)
+     * @param {Object} latLng
+     * @return {Object}
      */
     latLngToPixel: function(latLng) {
       return overlay.getProjection().fromLatLngToContainerPixel(latLng);
     },
     /**
      * Iterates through the default base layers and returns a match if it exists.
-     * @param {Object} baseLayer The baseLayer object.
+     * @param {Object} baseLayer
      * @return {Object}
      */
     matchBaseLayer: function(baseLayer) {
@@ -899,6 +907,7 @@ define([
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
      * @param {Function} callback (Optional)
+     * @return null
      */
     panByPixels: function(pixels, callback) {
       if (pixels.x !== 0) {
@@ -916,7 +925,9 @@ define([
       }
     },
     /**
-     *
+     * Turns an API pixel object to a NPMap pixel object.
+     * @param {Object} pixel
+     * @return {Object}
      */
     pixelFromApi: function(pixel) {
       return {
@@ -925,7 +936,9 @@ define([
       };
     },
     /**
-     *
+     * Turns a NPMap pixel object to an API pixel object.
+     * @param {Object} pixel
+     * @return {Object}
      */
     pixelToApi: function(pixel) {
       return new google.maps.Point(pixel.x, pixel.y);
@@ -941,6 +954,7 @@ define([
     /**
      * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
      * @param {google.maps.Marker} OR {google.maps.LatLng} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
+     * @return null
      */
     positionClickDot: function(to) {
       var divClickDot = document.getElementById('npmap-clickdot'),
@@ -968,12 +982,13 @@ define([
       divClickDot.style.top = pixel.y + 'px';
     },
     /**
-     * A google.maps.MapCanvasProjection object.
+     * A {google.maps.MapCanvasProjection} object.
      */
     projection: null,
     /**
-     * Removes a shape to the map.
-     * @param {Object} shape The shape to remove from the map. This can be a google.maps.Marker, Polyline, Polygon, Rectangle, or Circle object.
+     * Removes a shape from the map.
+     * @param {Object} shape The shape to remove from the map. This can be a {google.maps}.Marker, Polyline, Polygon, Rectangle, or Circle object.
+     * @return null
      */
     removeShape: function(shape) {
       shape.setMap(null);
@@ -982,6 +997,7 @@ define([
      * Removes a tile layer from the map.
      * @param {Object} layer
      * @param {Boolean} baseLayer (Optional)
+     * @return null
      */
     removeTileLayer: function(layer, baseLayer) {
       var overlayMapTypes = map.overlayMapTypes;
@@ -1013,6 +1029,7 @@ define([
      * Sets the marker's icon.
      * @param {Object} marker
      * @param {String} The url of the marker icon.
+     * @return null
      */
     setMarkerIcon: function(marker, url) {
       
@@ -1020,6 +1037,7 @@ define([
     /**
      * Switches the base map.
      * @param {Object} type The base layer to switch to. Currently only the default Google Maps base maps are supported here.
+     * @return null
      */
     switchBaseLayer: function(baseLayer) {
       baseLayer = DEFAULT_BASE_LAYERS[baseLayer.type.toLowerCase()];
@@ -1040,6 +1058,7 @@ define([
     },
     /**
      * Zooms and/or pans the map to its initial extent.
+     * @return null
      */
     toInitialExtent: function() {
       NPMap.InfoBox.hide();
@@ -1077,7 +1096,11 @@ define([
       this.toLatLngs(latLngs);
     },
     /**
-     *
+     * Triggers an event.
+     * @param {Object/String} target
+     * @param {String} name
+     * @param {Object} e
+     * @return null
      */
     triggerEvent: function(target, name, e) {
       /*
@@ -1096,13 +1119,15 @@ define([
     /**
      * Zooms the map to a zoom level.
      * @param {Number} zoom
+     * @return null
      */
     zoom: function(zoom) {
       map.setZoom(zoom);
     },
     /**
      * Zooms the map in by one zoom level.
-     * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on #npmap-clickdot location.
+     * @param {Boolean} toDot (Optional) If true, centerAndZoom will be called. Center is based on #npmap-clickdot location.
+     * @return null
      */
     zoomIn: function(toDot) {
       if (toDot) {
@@ -1116,6 +1141,7 @@ define([
     },
     /**
      * Zooms the map out by one zoom level.
+     * @return null
      */
     zoomOut: function() {
       this.zoom(this.getZoom() - 1);
