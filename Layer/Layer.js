@@ -90,7 +90,6 @@ define([
     _events: [{
       event: 'added',
       func: function(config) {
-        usedNames.push(config.name);
         NPMap.Map.updateAttribution();
       }
     },{
