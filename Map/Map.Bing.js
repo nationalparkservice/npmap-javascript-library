@@ -1,5 +1,4 @@
-﻿// TODO: Hook up attribution.
-define([
+﻿define([
   'Event',
   'Map/Map',
   'Util/Util'
@@ -8,38 +7,40 @@ define([
       // The default base layers for Bing.
       DEFAULT_BASE_LAYERS = {
         aerial: {
+          cls: 'aerial',
           icon: 'aerial',
-          mapTypeId: 'aerial',
-          name: 'Aerial View'
+          mapTypeId: Microsoft.Maps.MapTypeId.birdseye,
+          name: 'Aerial View',
+          type: 'Api'
         },
         blank: {
+          cls: 'blank',
           icon: 'blank',
-          mapTypeId: 'mercator',
-          name: 'Blank View'
+          mapTypeId: Microsoft.Maps.MapTypeId.mercator,
+          name: 'Blank View',
+          type: 'Api'
         },
-        /*
         hybrid: {
+          cls: 'hybrid',
           icon: 'aerial',
-          mapTypeId: 'HYBRID',
-          name: 'Hybrid View'
+          mapTypeId: Microsoft.Maps.MapTypeId.birdseye,
+          name: 'Hybrid View',
+          type: 'Api'
         },
-        */
         streets: {
+          cls: 'streets',
           icon: 'street',
-          mapTypeId: 'road',
-          name: 'Street View'
-        }
-        /*
-        ,
+          mapTypeId: Microsoft.Maps.MapTypeId.road,
+          name: 'Street View',
+          type: 'Api'
+        },
         terrain: {
           icon: 'topo',
-          mapTypeId: 'TERRAIN',
-          name: 'Terrain View'
+          id: 'nps.map-lj6szvbq',
+          name: 'Terrain View',
+          type: 'TileStream'
         }
-        */
       },
-      // The activeBaseLayer object.
-      activeBaseLayer,
       // Has the map been double-clicked?
       doubleClicked = false,
       // Is there at least one clustered layer in the map?
@@ -50,6 +51,14 @@ define([
       initialCenter,
       // The initial zoom of the map.
       initialZoom,
+      //
+      labelOverlay = Microsoft.Maps.LabelOverlay.visible,
+      // The last baseLayer of the map.
+      lastBaseLayer,
+      // The last center latLng of the map.
+      lastCenter,
+      // The last zoom level of the map.
+      lastZoom,
       // The map object.
       map,
       // The mapTypeId to initialize the map with.
@@ -60,16 +69,12 @@ define([
       min = 0,
       // Is the left mouse button currently being pressed?
       mouseDown = false,
-      // The old center latLng of the map.
-      oldCenter,
       // The old cursor.
       oldCursor,
       // The old icon used for the last marker that the mouse moved over.
       oldIcon = null,
       // The old "target" that the mouse moved over.
       oldTarget = null,
-      // The old zoom level of the map.
-      oldZoom,
       //
       panStartReported = false,
       // Has the map view changed?
@@ -79,6 +84,7 @@ define([
 
   /**
    * Checks to see if the map is currently zoomed in further out/in than it is supposed to and repositions it, if needed.
+   * @return null
    */
   function checkMaxMinZoom() {
     var range = map.getZoomRange(),
@@ -88,80 +94,31 @@ define([
     if (map.getZoom() < min) {
       map.setView({
         animate: false,
-        center: oldCenter,
+        center: lastCenter,
         zoom: min
       });
     } else if (map.getZoom() > max && map.getMapTypeId() != 'be') {
       map.setView({
         animate: false,
-        center: oldCenter,
+        center: lastCenter,
         zoom: max
       });
     }
   }
-  /**
-   * Converts a HEX color to RGB.
-   * @param {String} hex The HEX string to convert.
-   * @returns {String}
-   */
-  function hexToRgb(hex) {
-    var i = 3,
-        rgb = hex.replace('#', '').match(/(.{2})/g);
-        
-    while (i--) {
-      rgb[i] = parseInt(rgb[i], 16);
-    }
-    
-    return rgb;
-  }
-
-
-  // TODO: Don't use activeBaseLayer
-
-
-  /*
-  if (NPMap.config.baseLayers) {
-    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var baseLayer = NPMap.config.baseLayers[i],
-          visible = baseLayer.visible;
-
-      if (typeof visible === 'undefined' || visible === true) {
-        activeBaseLayer = baseLayer;
-        break;
-      }
-    }
-  } else if (typeof NPMap.config.baseLayers === 'undefined') {
-    NPMap.config.baseLayers = [];
-  } else {
-    activeBaseLayer = {
-      code: 'mercator',
-      visible: true
-    };
-
-    NPMap.config.baseLayers = [
-      activeBaseLayer
-    ];
-  }
-
-  if (!activeBaseLayer) {
-    activeBaseLayer = {
-      code: 'auto',
-      visible: true
-    };
-    
-    NPMap.config.baseLayers.push(activeBaseLayer);
-  }
-  */
 
   if (NPMap.config.baseLayers) {
-    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var baseLayer = NPMap.config.baseLayers[i],
-          type = baseLayer.type.toLowerCase(),
-          visible = baseLayer.visible;
+    Map._matchBaseLayers(DEFAULT_BASE_LAYERS);
 
-      if (typeof visible === 'undefined' || visible === true) {
-        if (type === 'aerial' || type === 'hybrid' || type === 'streets' || type === 'terrain') {
-          mapTypeId = Microsoft.Maps.MapTypeId[DEFAULT_BASE_LAYERS[type].mapTypeId];
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var baseLayer = NPMap.config.baseLayers[i];
+
+      if (baseLayer.visible) {
+        if (baseLayer.type === 'Api') {
+          if (baseLayer.cls === 'aerial') {
+            labelOverlay = Microsoft.Maps.LabelOverlay.hidden;
+          }
+
+          mapTypeId = Microsoft.Maps.MapTypeId[DEFAULT_BASE_LAYERS[baseLayer.cls].mapTypeId];
         } else {
           mapTypeId = Microsoft.Maps.MapTypeId.mercator;
         }
@@ -174,32 +131,20 @@ define([
     NPMap.config.baseLayers = [
       DEFAULT_BASE_LAYERS['streets']
     ];
+    NPMap.config.baseLayers[0].visible = true;
   } else {
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
     NPMap.config.baseLayers = [
       DEFAULT_BASE_LAYERS['blank']
     ];
+    NPMap.config.baseLayers[0].visible = true;
   }
-
-  console.log(mapTypeId);
-  console.log(NPMap.config.baseLayers);
-
-  /*
-  if (activeBaseLayer.code === 'aerial' || activeBaseLayer.code === 'auto' || activeBaseLayer.code === 'birdseye' || activeBaseLayer.code === 'mercator' || activeBaseLayer.code === 'road') {
-    mapTypeId = Microsoft.Maps.MapTypeId[activeBaseLayer.code];
-  } else {
-    if (!activeBaseLayer.zIndex) {
-      activeBaseLayer.zIndex = 0;
-    }
-
-    mapTypeId = Microsoft.Maps.MapTypeId.mercator;
-  }
-  */
   
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
     center: NPMap.config.center ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new Microsoft.Maps.Location(39, -96),
     credentials: NPMap.config.credentials ? NPMap.config.credentials : 'Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65',
     disableKeyboardInput: NPMap.config.tools && !NPMap.config.tools.keyboard ? true : false,
+    labelOverlay: labelOverlay,
     mapTypeId: mapTypeId,
     showCopyright: false,
     showDashboard: false,
@@ -207,8 +152,8 @@ define([
     showScalebar: false,
     zoom: NPMap.config.zoom || 4
   });
-  initialCenter = map.getCenter();
-  initialZoom = map.getZoom();
+  initialCenter = lastCenter = map.getCenter();
+  initialZoom = lastZoom = map.getZoom();
 
   if (NPMap.config.restrictZoom) {
     if (NPMap.config.restrictZoom.max) {
@@ -347,7 +292,7 @@ define([
         se = bounds.getSoutheast(),
         seHemisphere = inEasternOrWesternHemisphere(se.longitude);
 
-    if ((map.getZoom() === oldZoom) && oldCenter && !NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(oldCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
+    if ((map.getZoom() === lastZoom) && !NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(lastCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
       if (!panStartReported) {
         Event.trigger('NPMap.Map', 'panstart');
 
@@ -357,7 +302,7 @@ define([
       Event.trigger('NPMap.Map', 'panning');
     }
 
-    if (map.getZoom() !== oldZoom) {
+    if (map.getZoom() !== lastZoom) {
       if (!zoomStartReported) {
         Event.trigger('NPMap.Map', 'zoomstart');
 
@@ -378,14 +323,14 @@ define([
     Event.trigger('NPMap.Map', 'viewchanging');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function() {
-    if (map.getZoom() !== oldZoom) {
+    if (map.getZoom() !== lastZoom) {
       Event.trigger('NPMap.Map', 'zoomend');
-    } else if (oldCenter && !NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(oldCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
+    } else if (!NPMap.Map.latLngsAreEqual(NPMap.Map.latLngFromApi(lastCenter), NPMap.Map.latLngFromApi(map.getCenter()))) {
       Event.trigger('NPMap.Map', 'panend');
     }
 
-    oldCenter = map.getCenter();
-    oldZoom = map.getZoom();
+    lastCenter = map.getCenter();
+    lastZoom = map.getZoom();
     panStartReported = false;
     zoomStartReported = false;
 
@@ -412,8 +357,8 @@ define([
     Event.trigger('NPMap.Map', 'viewchangeend');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangestart', function() {
-    oldCenter = map.getCenter();
-    oldZoom = map.getZoom();
+    lastCenter = map.getCenter();
+    lastZoom = map.getZoom();
     viewChanged = true;
     
     checkMaxMinZoom();
@@ -425,13 +370,16 @@ define([
   return NPMap.Map.Bing = {
     //
     _attribution: null,
+    //
+    _DEFAULT_BASE_LAYERS: DEFAULT_BASE_LAYERS,
     // Is the map loaded and ready to be interacted with programatically.
     _isReady: true,
-    // The Microsoft.Maps.Map object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.
+    // The {Microsoft.Maps.Map} object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.
     map: map,
     /**
      * Adds a shape to the map.
      * @param {Object} shape The shape to add to the map. This can be a Microsoft.Maps.Pushpin, Polygon, or Polyline object.
+     * @return null
      */
     addShape: function(shape) {
       map.entities.push(shape);
@@ -439,6 +387,7 @@ define([
     /**
      * Adds a tile layer to the map.
      * @param {Object} layer
+     * @return null
      */
     addTileLayer: function(layer) {
       map.entities.push(layer);
@@ -467,6 +416,7 @@ define([
     /**
      * Centers the map.
      * @param {Object} latLng
+     * @return null
      */
     center: function(latLng) {
       map.setView({
@@ -475,9 +425,10 @@ define([
     },
     /**
      * Centers then zooms the map.
-     * @param {Microsoft.Maps.Location} latLng The latLng to center the map on.
-     * @param {Integer} zoom The zoom level to zoom the map to.
+     * @param {Object} latLng The {Microsoft.Maps.Location} to center the map on.
+     * @param {Number} zoom The zoom level to zoom the map to.
      * @param {Function} callback (Optional) A callback function to call after the map has been centered and zoomed.
+     * @return null
      */
     centerAndZoom: function(latLng, zoom, callback) {
       var currentLatLng = this.latLngFromApi(map.getCenter()),
@@ -500,9 +451,8 @@ define([
               center: latLng,
               zoom: parseInt(zoom, 0)
             };
-            
-        /*
-        if (NPMap.InfoBox && NPMap.InfoBox.visible) {
+
+        if (NPMap.InfoBox.visible) {
           var infoBoxLatLng = (function() {
                 if (NPMap.InfoBox.marker) {
                   return NPMap.InfoBox.marker.getLocation();
@@ -519,22 +469,25 @@ define([
             o.centerOffset = new Microsoft.Maps.Point(pixel.x, pixel.y);
           }
         }
-        */
 
         map.setView(o);
       }
     },
     /**
-     *
+     * Converts NPMap line options to Bing Maps line options.
+     * @param {Object} options
+     * @return {Object}
      */
     convertLineOptions: function(options) {
 
     },
     /**
-     *
+     * Converts NPMap marker options to Bing Maps marker options.
+     * @param {Object} options
+     * @return {Object}
+     * Notes: Valid Bing Maps options: anchor, draggable, height, icon, infobox, text, textOffset, typeName, visible, width, zIndex
      */
     convertMarkerOptions: function(options) {
-      // Valid Bing Maps options: anchor, draggable, height, icon, infobox, text, textOffset, typeName, visible, width, zIndex
       var o = {};
 
       if (options.height) {
@@ -552,21 +505,23 @@ define([
       return o;
     },
     /**
-     *
+     * Converts NPMap polygon options to Bing Maps polygon options.
+     * @param {Object} options
+     * @return {Object}
+     * Notes: Valid Bing Maps options: fillColor (a (opacity), r, g, b), infobox, strokeColor (a (opacity), r, g, b), strokeDashArray, strokeThickness, visible
      */
     convertPolygonOptions: function(options) {
-      // Valid Bing Maps options: fillColor (a (opacity), r, g, b), infobox, strokeColor (a (opacity), r, g, b), strokeDashArray, strokeThickness, visible
       var o = {};
 
       if (options.fillColor) {
-        var fillColor = hexToRgb(options.fillColor),
+        var fillColor = Util.hexToRgb(options.fillColor),
             fillOpacity = options.fillOpacity || 255;
 
         o.fillColor = new Microsoft.Maps.Color(fillOpacity, fillColor[0], fillColor[1], fillColor[2]);
       }
 
       if (options.strokeColor) {
-        var strokeColor = hexToRgb(options.strokeColor),
+        var strokeColor = Util.hexToRgb(options.strokeColor),
             strokeOpacity = options.strokeOpacity || 255;
 
         o.strokeColor = new Microsoft.Maps.Color(strokeOpacity, strokeColor[0], strokeColor[1], strokeColor[2]);
@@ -593,7 +548,7 @@ define([
      * Creates a Microsoft.Maps.Pushpin object.
      * @param latLng {Microsoft.Maps.Location} (Required) Where to place the marker.
      * @param options {Microsoft.Maps.PushpinOptions} (Optional) Any additional options to apply to the marker.
-     * @return {Microsoft.Maps.Pushpin}
+     * @return {Object}
      */
     createMarker: function(latLng, options) {
       options = options || {};
@@ -636,7 +591,7 @@ define([
      * Creates a Microsoft.Maps.Polygon object.
      * @param latLngs {Array} (Required) An array of Microsoft.Maps.Location objects.
      * @param options {Microsoft.Maps.PolygonOptions} (Optional) Any additional options to apply to the polygon.
-     * @return {Microsoft.Maps.Polygon}
+     * @return {Object}
      */
     createPolygon: function(latLngs, options) {
       options = options || {};
@@ -647,6 +602,7 @@ define([
      * Creates a tile layer.
      * @param {String/Function} constructor
      * @param {Object} options (Optional)
+     * @return {Object}
      */
     createTileLayer: function(constructor, options) {
       var getSubdomain = null,
@@ -721,6 +677,22 @@ define([
       return e.target;
     },
     /**
+     * Gets a default base layer, per type, for this base API.
+     * @param {Object} baseLayer
+     * @return {Object}
+     */
+    getBaseLayer: function(baseLayer) {
+      var obj = DEFAULT_BASE_LAYERS[baseLayer.type.toLowerCase()];
+
+      if (obj) {
+        _.extend(obj, baseLayer);
+
+        return obj;
+      } else {
+        return null;
+      }
+    },
+    /**
      * Gets the current bounds of the map.
      * @return {Object}
      */
@@ -729,20 +701,21 @@ define([
     },
     /**
      * Gets the center {Microsoft.Maps.Location} of the map.
-     * @return {Microsoft.Maps.Location}
+     * @return {Object}
      */
     getCenter: function() {
       return map.getCenter();
     },
     /**
      * Gets the latLng (Microsoft.Maps.Location) of the npmap-clickdot div element.
-     * @return {Microsoft.Maps.Location}
+     * @return {Object}
      */
     getClickDotLatLng: function() {
       return this.pixelToLatLng(this.getClickDotPixel());
     },
     /**
      * Returns the {Microsoft.Mas.Point} for the npmap-clickdot div.
+     * @return {Object}
      */
     getClickDotPixel: function() {
       var offset = Util.getOffset(document.getElementById('npmap-map')),
@@ -759,8 +732,8 @@ define([
     },
     /**
      * Gets the anchor of a marker.
-     * @param {Microsoft.Maps.Pushpin} (Required) The Pushpin to get the anchor for.
-     * @return {Object} An object with x and y properties.
+     * @param {Object} The Pushpin to get the anchor for.
+     * @return {Object}
      */
     getMarkerAnchor: function(marker) {
       var anchor = marker.getAnchor();
@@ -772,6 +745,8 @@ define([
     },
     /**
      * Gets the icon for a marker.
+     * @param {Object} marker
+     * @return {Object}
      */
     getMarkerIcon: function(marker) {
       return marker.getIcon();
@@ -788,6 +763,7 @@ define([
      * Gets a marker option.
      * @param {Object} marker The marker object.
      * @param {String} option The option to get. Currently the valid options are: 'icon'.
+     * @return {Object}
      */
     getMarkerOption: function(marker, option) {
       if (option === 'icon') {
@@ -799,6 +775,7 @@ define([
     /**
      * Gets the visibility property of a marker.
      * @param {Object} marker The marker to check the visibility for.
+     * @return {Boolean}
      */
     getMarkerVisibility: function(marker) {
       return marker.getVisible();
@@ -819,13 +796,14 @@ define([
     },
     /**
      * Gets the zoom level of the map.
-     * @return {Float}
+     * @return {Number}
      */
     getZoom: function() {
       return Math.round(map.getZoom());
     },
     /**
      * Handles any necessary sizing and positioning for the map when its div is resized.
+     * @return null
      */
     handleResize: function() {
       var dimensions = Util.getOuterDimensions(document.getElementById(NPMap.config.div));
@@ -838,6 +816,7 @@ define([
     /**
      * Hides a shape.
      * @param {Microsoft.Maps.Pushpin} or {Microsoft.Maps.Polygon} or {Microsoft.Maps.Polyline} shape The shape to hide.
+     * @return null
      */
     hideShape: function(shape) {
       if (shape.getVisible() === true) {
@@ -854,16 +833,6 @@ define([
         visible: false
       });
     },
-
-
-
-
-
-
-
-
-
-
     /**
      * Tests to see if a marker is within the map's current bounds.
      * @param latLng {Object/String} {Required} The latitude/longitude, either a Microsoft.Maps.Location object or a string in "latitude,longitude" format, to test.
@@ -878,19 +847,10 @@ define([
       
       return this.getBounds().contains(latLng);
     },
-
-
-
-
-
-
-
-
-
     /**
-     * Converts a Bing Maps Location object to the NPMap representation of a latitude/longitude string.
-     * @param latLng {Microsoft.Maps.Location} The Location object to convert to a string.
-     * @return {String} A latitude/longitude string in "latitude,longitude" format.
+     * Converts a {Microsoft.Maps.Location} object to an NPMap latLng object.
+     * @param {Object} latLng
+     * @return {Object}
      */
     latLngFromApi: function(latLng) {
       return {
@@ -900,7 +860,7 @@ define([
     },
     /**
      * Converts a NPMap latLng object to a {Microsoft.Maps.Location} object.
-     * @param {String/Object} latLng
+     * @param {Object} latLng
      * @return {Object}
      */
     latLngToApi: function(latLng) {
@@ -916,20 +876,6 @@ define([
       reference = reference || Microsoft.Maps.PixelReference.viewport;
 
       return map.tryLocationToPixel(latLng, reference);
-    },
-    /**
-     * Iterates through the default base layers and returns a match if it exists.
-     * @param {Object} baseLayer The baseLayer object.
-     * @return {Object}
-     */
-    matchBaseLayer: function(baseLayer) {
-      for (var i = 0; i < DEFAULT_BASE_LAYERS.length; i++) {
-        if (DEFAULT_BASE_LAYERS[i].code === baseLayer.code) {
-          return DEFAULT_BASE_LAYERS[i];
-        }
-      }
-      
-      return null;
     },
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
@@ -954,7 +900,9 @@ define([
       }
     },
     /**
-     *
+     * Turns an API pixel object to a NPMap pixel object.
+     * @param {Object} pixel
+     * @return {Object}
      */
     pixelFromApi: function(pixel) {
       return {
@@ -963,15 +911,17 @@ define([
       };
     },
     /**
-     *
+     * Turns a NPMap pixel object to an API pixel object.
+     * @param {Object} pixel
+     * @return {Object}
      */
     pixelToApi: function(pixel) {
       return new Microsoft.Maps.Point(pixel.x, pixel.y);
     },
     /**
      * Converts a {Microsoft.Maps.Point} to a {Microsoft.Maps.Location}.
-     * @param {Microsoft.Maps.Point} pixel
-     * @param {Microsoft.Maps.PixelReference} reference (Optional)
+     * @param {Object} pixel
+     * @param {Object} reference (Optional) The {Microsoft.Maps.PixelReference} to use.
      * @return {Microsoft.Maps.Location}
      */
     pixelToLatLng: function(pixel, reference) {
@@ -982,6 +932,7 @@ define([
     /**
      * Positions the npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
      * @param {Microsoft.Maps.Pushpin} OR {Microsoft.Maps.Location} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
+     * @return null
      */
     positionClickDot: function(to) {
       var anchorY = 0,
@@ -1005,34 +956,27 @@ define([
       divClickDot.style.left = pixel.x + 'px';
       divClickDot.style.top = pixel.y - anchorY + 'px';
     },
-    // TODO: Not implemented yet, as this is handled by Layer.ArcGisServerRest. Will be needed when you handle another layer type.
-    reloadTileLayer: function(config) {
-
-    },
     /**
      * Removes a shape from the map.
      * @param {Object} shape
+     * @return null
      */
     removeShape: function(shape) {
       map.entities.removeAt(map.entities.indexOf(shape));
     },
     /**
-     *
+     * Removes a tile layer from the map.
+     * @param {Object} layer
+     * @return null
      */
-    removeTileLayer: function(config) {
-      map.entities.removeAt(map.entities.indexOf(config.api));
-    },
-    /**
-     * Sets the map's baseLayer.
-     * @param baseLayer An object with code, name, and visible properties.
-     */
-    setBaseLayer: function(baseLayer) {
-      
+    removeTileLayer: function(layer) {
+      map.entities.removeAt(map.entities.indexOf(layer));
     },
     /**
      * DEPRECATED: Sets the marker's icon.
      * @param {Object} marker
      * @param {String} The url of the marker icon.
+     * @return null
      */
     setMarkerIcon: function(marker, url) {
       if (typeof(url) === 'function') {
@@ -1047,6 +991,7 @@ define([
      * Sets a marker's options.
      * @param {Microsoft.Maps.Pushpin} marker
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
+     * @return null
      */
     setMarkerOptions: function(marker, options) {
       var valid = {};
@@ -1076,6 +1021,7 @@ define([
     /**
      * Shows a shape.
      * @param {Microsoft.Maps.Pushpin} or {Microsoft.Maps.Polygon} or {Microsoft.Maps.Polyline} shape The shape to show.
+     * @return null
      */
     showShape: function(shape) {
       if (shape.getVisible() === false) {
@@ -1085,7 +1031,9 @@ define([
       }
     },
     /**
-     *
+     * Shows a tile layer.
+     * @param {Object} config
+     * @return null
      */
     showTileLayer: function(config) {
       map.entities.get(map.entities.indexOf(config.api)).setOptions({
@@ -1094,38 +1042,66 @@ define([
     },
     /**
      * Switches the base map.
-     * @param {Object} type The base layer to switch to. Currently only the default Bing Maps base maps are supported here.
+     * @param {Object} baseLayer The base layer to switch to.
+     * @return null
      */
     switchBaseLayer: function(baseLayer) {
-      var mapTypeId = null;
-      
-      switch (baseLayer.code) {
-        case 'aerial':
-          mapTypeId = Microsoft.Maps.MapTypeId.birdseye;
-          break;
-        case 'auto':
-          mapTypeId = Microsoft.Maps.MapTypeId.auto;
-          break;
-        case 'birdseye':
-          mapTypeId = Microsoft.Maps.MapTypeId.birdseye;
-          break;
-        case 'mercator':
-          mapTypeId = Microsoft.Maps.MapTypeId.mercator;
-          break;
-        case 'road':
-          mapTypeId = Microsoft.Maps.MapTypeId.road;
-          break;
-        default:
-          mapTypeId = Microsoft.Maps.MapTypeId.mercator;
-          // TODO: Now need to load tiled layer.
-          break;
+      var activeBaseLayer,
+          api,
+          cls = baseLayer.cls,
+          mapTypeId;
+
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var bl = NPMap.config.baseLayers[i];
+
+        if (bl.visible) {
+          activeBaseLayer = bl;
+        }
+
+        bl.visible = false;
       }
-      
-      map.setMapType(mapTypeId);
+
+      if (activeBaseLayer.type !== 'Api') {
+        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+      }
+
+      if (cls) {
+        cls = cls.toLowerCase();
+      }
+
+      api = DEFAULT_BASE_LAYERS[cls];
+
+      if (api) {
+        if (cls === 'aerial') {
+          labelOverlay = Microsoft.Maps.LabelOverlay.hidden;
+        } else {
+          labelOverlay = Microsoft.Maps.LabelOverlay.visible;
+        }
+
+        if (api.mapTypeId) {
+          mapTypeId = api.mapTypeId;
+        } else {
+          mapTypeId = Microsoft.Maps.MapTypeId.mercator;
+
+          NPMap.Layer[baseLayer.type].create(baseLayer);
+        }
+      } else {
+        NPMap.Layer[baseLayer.type].create(baseLayer);
+
+        mapTypeId = Microsoft.Maps.MapTypeId.mercator;
+      }
+
+      map.setView({
+        labelOverlay: labelOverlay,
+        mapTypeId: mapTypeId
+      });
+
+      baseLayer.visible = true;
     },
     /**
      * Zooms the map to a bounding box.
      * @param {Object} bbox A bbox object with nw and se {Microsoft.Maps.Location} objects.
+     * @return null
      */
     toBounds: function(bounds) {
       map.setView({
@@ -1135,6 +1111,7 @@ define([
     },
     /**
      * Zooms and/or pans the map to its initial extent.
+     * @return null
      */
     toInitialExtent: function() {
       NPMap.InfoBox.hide();
@@ -1154,6 +1131,7 @@ define([
     /**
      * Zooms the map to the extent of an array of {Microsoft.Map.Pushpin} objects.
      * @param {Array} markers The array of marker objects.
+     * @return null
      */
     toMarkers: function(markers) {
       var latLngs = [],
@@ -1181,6 +1159,7 @@ define([
     /**
      * Zooms the map to a zoom level.
      * @param {Number} zoom
+     * @return null
      */
     zoom: function(zoom) {
       map.setView({
@@ -1190,6 +1169,7 @@ define([
     /**
      * Zooms the map in by one zoom level.
      * @param toDot {Boolean} (Optional) If true, center and zoom will be called. Center is based on the location of the npmap-clickdot div.
+     * @return null
      */
     zoomIn: function(toDot) {
       var zoom = map.getZoom();
@@ -1210,6 +1190,7 @@ define([
     },
     /**
      * Zooms the map out by one zoom level.
+     * @return null
      */
     zoomOut: function() {
       map.setView({

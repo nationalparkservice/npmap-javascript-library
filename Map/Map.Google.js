@@ -28,29 +28,39 @@
       // An array of the default base layers for the Google baseAPI.
       DEFAULT_BASE_LAYERS = {
         aerial: {
+          cls: 'aerial',
           icon: 'aerial',
           mapTypeId: 'SATELLITE',
-          name: 'Aerial View'
+          name: 'Aerial View',
+          type: 'Api'
         },
         blank: {
+          cls: 'blank',
           icon: 'blank',
           mapTypeId: 'BLANK',
-          name: 'Blank View'
+          name: 'Blank View',
+          type: 'Api'
         },
         hybrid: {
+          cls: 'hybrid',
           icon: 'aerial',
           mapTypeId: 'HYBRID',
-          name: 'Hybrid View'
+          name: 'Hybrid View',
+          type: 'Api'
         },
         streets: {
+          cls: 'streets',
           icon: 'street',
           mapTypeId: 'ROADMAP',
-          name: 'Street View'
+          name: 'Street View',
+          type: 'Api'
         },
         terrain: {
+          cls: 'terrain',
           icon: 'topo',
           mapTypeId: 'TERRAIN',
-          name: 'Terrain View'
+          name: 'Terrain View',
+          type: 'Api'
         }
       },
       // Helps handle map single and double-click events.
@@ -111,14 +121,14 @@
   }
 
   if (NPMap.config.baseLayers) {
-    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var baseLayer = NPMap.config.baseLayers[i],
-          type = baseLayer.type.toLowerCase(),
-          visible = baseLayer.visible;
+    Map._matchBaseLayers(DEFAULT_BASE_LAYERS);
 
-      if (typeof visible === 'undefined' || visible === true) {
-        if (type === 'aerial' || type === 'hybrid' || type === 'streets' || type === 'terrain') {
-          mapTypeId = google.maps.MapTypeId[DEFAULT_BASE_LAYERS[type].mapTypeId];
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var baseLayer = NPMap.config.baseLayers[i];
+
+      if (baseLayer.visible) {
+        if (baseLayer.type === 'Api') {
+          mapTypeId = google.maps.MapTypeId[baseLayer.mapTypeId];
         } else {
           mapTypeId = 'BLANK';
         }
@@ -128,16 +138,16 @@
     }
   } else if (typeof NPMap.config.baseLayers === 'undefined') {
     mapTypeId = google.maps.MapTypeId.TERRAIN;
-    NPMap.config.baseLayers = [{
-      type: 'terrain',
-      visible: true
-    }];
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['terrain']
+    ];
+    NPMap.config.baseLayers[0].visible = true;
   } else {
     mapTypeId = 'BLANK';
-    NPMap.config.baseLayers = [{
-      type: 'blank',
-      visible: true
-    }];
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['blank']
+    ];
+    NPMap.config.baseLayers[0].visible = true;
   }
 
   mapConfig = {
@@ -743,9 +753,13 @@
     getBaseLayer: function(baseLayer) {
       var obj = DEFAULT_BASE_LAYERS[baseLayer.type.toLowerCase()];
 
-      _.extend(obj, baseLayer);
+      if (obj) {
+        _.extend(obj, baseLayer);
 
-      return obj;
+        return obj;
+      } else {
+        return null;
+      }
     },
     /**
      * Gets the current bounds of the map.
@@ -890,20 +904,6 @@
       return overlay.getProjection().fromLatLngToContainerPixel(latLng);
     },
     /**
-     * Iterates through the default base layers and returns a match if it exists.
-     * @param {Object} baseLayer
-     * @return {Object}
-     */
-    matchBaseLayer: function(baseLayer) {
-      for (var i = 0; i < DEFAULT_BASE_LAYERS.length; i++) {
-        if (DEFAULT_BASE_LAYERS[i].code === baseLayer.code) {
-          return DEFAULT_BASE_LAYERS[i];
-        }
-      }
-      
-      return null;
-    },
-    /**
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
      * @param {Function} callback (Optional)
@@ -1026,7 +1026,7 @@
       });
     },
     /**
-     * Sets the marker's icon.
+     * DEPRECATED: Sets the marker's icon.
      * @param {Object} marker
      * @param {String} The url of the marker icon.
      * @return null
@@ -1036,17 +1036,52 @@
     },
     /**
      * Switches the base map.
-     * @param {Object} type The base layer to switch to. Currently only the default Google Maps base maps are supported here.
+     * @param {Object} baseLayer The base layer to switch to.
      * @return null
      */
     switchBaseLayer: function(baseLayer) {
-      baseLayer = DEFAULT_BASE_LAYERS[baseLayer.type.toLowerCase()];
+      var activeBaseLayer,
+          api,
+          cls = baseLayer.cls,
+          mapTypeId;
 
-      if (baseLayer) {
-        map.setMapTypeId(google.maps.MapTypeId[baseLayer.mapTypeId]);
-      } else {
-        // TODO: Add the ability to specify a non-base API base layer.
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var bl = NPMap.config.baseLayers[i];
+
+        if (bl.visible) {
+          activeBaseLayer = bl;
+        }
+
+        bl.visible = false;
       }
+
+      if (activeBaseLayer.type !== 'Api') {
+        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+      }
+
+      if (cls) {
+        cls = cls.toLowerCase();
+      }
+
+      api = DEFAULT_BASE_LAYERS[cls];
+
+      if (api) {
+        if (api.mapTypeId) {
+          mapTypeId = api.mapTypeId;
+        } else {
+          mapTypeId = 'BLANK';
+
+          NPMap.Layer[baseLayer.type].create(baseLayer);
+        }
+      } else {
+        NPMap.Layer[baseLayer.type].create(baseLayer);
+
+        mapTypeId = 'BLANK';
+      }
+
+      map.setMapTypeId(google.maps.MapTypeId[baseLayer.mapTypeId]);
+
+      baseLayer.visible = true;
     },
     /**
      * Zooms the map to a bounding box.

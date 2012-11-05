@@ -824,25 +824,23 @@ define([
               items = [];
 
           _.each(NPMap.config.baseLayers, function(baseLayer) {
-            var type = baseLayer.type.toLowerCase();
+            var icon = baseLayer.icon,
+                label = baseLayer.name;
 
-            if (type === 'aerial' || type === 'blank' || type === 'hybrid' || type === 'streets' || type === 'terrain') {
-              baseLayer = NPMap.Map[NPMap.config.api].getBaseLayer(baseLayer);
-
-              if (baseLayer) {
-                if (baseLayer.icon.length > 0) {
-                  baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/' + baseLayer.icon + '-small.png';
-                } else {
-                  baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/blank-small.png';
-                }
-
-                if (!activeIcon && (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true)) {
-                  activeIcon = baseLayer.icon;
-                  activeLabel = baseLayer.name;
-                }
-                
-                items.push(baseLayer);
+            if (typeof baseLayer.name === 'string') {
+              if (typeof icon === 'string') {
+                baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/' + icon + '-small.png';
+              } else {
+                // TODO: Come up with a default icon.
+                baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/blank-small.png';
               }
+
+              if (!activeIcon && (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true)) {
+                activeIcon = baseLayer.icon;
+                activeLabel = baseLayer.name;
+              }
+              
+              items.push(baseLayer);
             }
           });
 
@@ -927,28 +925,9 @@ define([
 
         var interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
-            var hasType = false;
-
             // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding. Right now this is hardcoded in NPMap.Infobox module.
 
             clearInterval(interval);
-
-            /*
-            NPMap.Util.safeLoad('NPMap.Layer', function() {
-              me.setAttribution(me.buildAttributionString());
-            });
-            */
-
-            /*
-            for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-              var baseLayer = NPMap.config.baseLayers[i];
-
-              if (baseLayer.type) {
-              
-              }
-            }
-            */
-
             Util.monitorResize(divMap, function() {
               setAttributionMaxWidthAndPosition();
               me.handleResize();
@@ -956,8 +935,48 @@ define([
             });
             Event.trigger('NPMap.Map', 'ready');
           }
-        }, 0);
+        }, 250);
       });
+    },
+    /**
+     * Iterates through baseLayers config, setting up visibility and matching baseLayers with an API's default baseLayers.
+     * @param {Object} DEFAULT_BASE_LAYERS
+     * @return null
+     */
+    _matchBaseLayers: function(DEFAULT_BASE_LAYERS) {
+      var baseLayersMatched = [],
+          visibleSet = false
+
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var baseLayer = NPMap.config.baseLayers[i],
+            matched = DEFAULT_BASE_LAYERS[baseLayer.type.toLowerCase()];
+
+        if (!visibleSet) {
+          if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
+            if (matched) {
+              matched.visible = true;
+            } else {
+              baseLayer.visible = true;
+            }
+
+            visibleSet = true;
+          }
+        } else {
+          if (matched) {
+            matched.visible = false;
+          } else {
+            baseLayer.visible = false;
+          }
+        }
+
+        if (matched) {
+          baseLayersMatched.push(matched);
+        } else {
+          baseLayersMatched.push(baseLayer);
+        }
+      }
+
+      NPMap.config.baseLayers = baseLayersMatched;
     },
     /**
      * Adds an HTML element to the npmap-controls div.
