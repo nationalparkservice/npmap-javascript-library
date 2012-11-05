@@ -13,16 +13,22 @@ define([
       activeNotificationMessages = [],
       // The combined pixel height of all the active notification messages.
       activeNotificationMessagesHeight = 0,
+      // The current API, in lowercase.
+      apiLower = NPMap.config.api.toLowerCase(),
+      // The attribution div.
+      divAttribution = document.createElement('div'),
+      // The clickdot div.
+      divClickdot = document.createElement('div'),
       // The map div.
       divMap = document.getElementById(NPMap.config.div),
       // The modules div.
-      divModules,
+      divModules = document.createElement('div'),
       // The modules close div.
-      divModulesClose,
+      divModulesClose = document.createElement('div'),
       // The module tabs div.
-      divModuleTabs,
+      divModuleTabs = document.createElement('div'),
       // The notify div.
-      divNotify,
+      divNotify = document.createElement('div'),
       // The npmap div.
       divNpmap = document.getElementById('npmap'),
       // The npmap-controls div.
@@ -30,19 +36,19 @@ define([
       // The parent div.
       divNpmapParent = document.getElementById('npmap').parentNode,
       // The npmap-progressbar div.
-      divProgressBar,
+      divProgressBar = document.createElement('div'),
       // The tip div.
-      divTip,
+      divTip = document.createElement('div'),
+      // The zoombox.
+      divZoombox = document.createElement('div'),
       // Does the map have active tile layers?
       hasTiled = false,
       // Is the map in fullscreen mode?
       isFullScreen = false,
-      //
-      mouseDownPixel = null,
       // The id of the active mousemove handler.
       mouseMoveId,
-      // The zoombox.
-      zoombox = document.createElement('div'),
+      // The pixel object for the current mousedown.
+      pixelMouseDown = null,
       // General scales for zoom levels, in meters.
       zoomScales = [
         295829355,
@@ -137,33 +143,32 @@ define([
         pixel = getMousePixel(e),
         top;
 
-    zoombox.style.display = 'block';
+    divZoombox.style.display = 'block';
 
-    if (pixel.x < mouseDownPixel.x) {
+    if (pixel.x < pixelMouseDown.x) {
       left = pixel.x;
     } else {
-      left = mouseDownPixel.x;
+      left = pixelMouseDown.x;
     }
 
-    zoombox.style.left = left + 'px';
-    zoombox.style.width = Math.abs(pixel.x - mouseDownPixel.x) + 'px';
+    divZoombox.style.left = left + 'px';
+    divZoombox.style.width = Math.abs(pixel.x - pixelMouseDown.x) + 'px';
 
-    if (pixel.y < mouseDownPixel.y) {
+    if (pixel.y < pixelMouseDown.y) {
       top = pixel.y;
     } else {
-      top = mouseDownPixel.y;
+      top = pixelMouseDown.y;
     }
 
-    zoombox.style.height = Math.abs(pixel.y - mouseDownPixel.y) + 'px';
-    zoombox.style.top = top + 'px';
+    divZoombox.style.height = Math.abs(pixel.y - pixelMouseDown.y) + 'px';
+    divZoombox.style.top = top + 'px';
   }
   /**
    * Sets the width of the attribution control based on the width of the map and logos and positions it.
    * @return null
    */
   function setAttributionMaxWidthAndPosition() {
-    var divAttribution = document.getElementById('npmap-attribution'),
-        divOverviewMap = document.getElementById('npmap-overviewmap'),
+    var divOverviewMap = document.getElementById('npmap-overviewmap'),
         max = Util.getOuterDimensions(divMap).width - Util.getOuterDimensions(document.getElementById('npmap-logos')).width - 40,
         right = 0;
 
@@ -184,19 +189,19 @@ define([
   /**
    * @class NPMap.Map
    *
-   * The base class for all map objects. No "baseApi" specific code lives here.
+   * The base class for all map objects. No "baseApi"-specific code lives here.
    */
   return NPMap.Map = {
     // An array of event handler objects that have been added to this class.
     _events: [{
       event: 'mousedown',
       func: function(e) {
-        mouseDownPixel = getMousePixel(e);
+        pixelMouseDown = getMousePixel(e);
 
         if (e.shiftKey) {
-          zoombox.style.display = 'block';
-          zoombox.style.left = mouseDownPixel.x + 'px';
-          zoombox.style.top = mouseDownPixel.y + 'px';
+          divZoombox.style.display = 'block';
+          divZoombox.style.left = pixelMouseDown.x + 'px';
+          divZoombox.style.top = pixelMouseDown.y + 'px';
           mouseMoveId = NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
           
           NPMap.Map.setCursor('crosshair');
@@ -211,19 +216,19 @@ define([
               nw,
               se;
               
-          if (pixel.x > mouseDownPixel.x) {
+          if (pixel.x > pixelMouseDown.x) {
             coords.e = pixel.x;
-            coords.w = mouseDownPixel.x;
+            coords.w = pixelMouseDown.x;
           } else {
-            coords.e = mouseDownPixel.x;
+            coords.e = pixelMouseDown.x;
             coords.w = pixel.x;
           }
 
-          if (pixel.y > mouseDownPixel.y) {
+          if (pixel.y > pixelMouseDown.y) {
             coords.n = pixel.y;
-            coords.s = mouseDownPixel.y;
+            coords.s = pixelMouseDown.y;
           } else {
-            coords.n = mouseDownPixel.y;
+            coords.n = pixelMouseDown.y;
             coords.s = pixel.y;
           }
 
@@ -244,10 +249,10 @@ define([
           });
           NPMap.Map.setCursor('auto');
 
-          mouseDownPixel = null;
-          zoombox.style.display = 'none';
-          zoombox.style.height = '0px';
-          zoombox.style.width = '0px';
+          pixelMouseDown = null;
+          divZoombox.style.display = 'none';
+          divZoombox.style.height = '0px';
+          divZoombox.style.width = '0px';
 
           NPMap.Event.remove(mouseMoveId);
         }
@@ -264,6 +269,7 @@ define([
      * Creates a line using the baseApi's line class, if it exists.
      * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
      * @param {Object} options (Optional) Line options.
+     * @return {Object}
      */
     _createLine: function(latLngs, options) {
       var apiLatLngs = [],
@@ -279,6 +285,7 @@ define([
      * Creates a marker using the baseApi's marker class, if it exists.
      * @param {String} latLng The latitude/longitude string, in "latitude,longitude" format, to use to create the marker.
      * @param {Object} options (Optional) Marker options.
+     * @return {Object}
      */
     _createMarker: function(latLng, options) {
       return NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), options);
@@ -300,29 +307,20 @@ define([
       return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
     },
     /**
-     * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created and should never be called manually.
+     * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created. You should never call this manually.
+     * @return null
      */
     _init: function() {
       var me = this;
 
       Util.safeLoad('NPMap.Map.' + NPMap.config.api, function() {
         var
-            // The attribution control div.
-            attribution = document.createElement('div'),
-            // The "clickdot" div.
-            clickdot = document.createElement('div'),
             // An array of elements to add to the map div.
             elements = [],
             // HTML for the logos div.
             logosHtml = '',
             // The config object for NPMap's modules.
             modulesConfig = NPMap.config.modules || null,
-            // The notify div.
-            notify = document.createElement('div'),
-            // The progress div.
-            progress = document.createElement('div'),
-            // The tip div.
-            tip = document.createElement('div'),
             // The config object for NPMap's tools. Supports legacy config information too.
             toolsConfig = (function() {
               if (NPMap.config.tools) {
@@ -354,6 +352,12 @@ define([
               }
             })();
 
+        /**
+         * Hooks mouseevents up to navigation controls.
+         * @param {String} id
+         * @param {Function} handler
+         * @return {Object}
+         */
         function hookUpNavigationControl(id, handler) {
           var el = document.getElementById(id);
 
@@ -368,39 +372,39 @@ define([
           return el;
         }
 
-        attribution.id = 'npmap-attribution';
+        divAttribution.id = 'npmap-attribution';
         elements.push({
-          el: attribution,
+          el: divAttribution,
           func: function() {
             setAttributionMaxWidthAndPosition();
           }
         });
-        clickdot.id = 'npmap-clickdot';
+        divClickdot.id = 'npmap-clickdot';
         elements.push({
-          el: clickdot
+          el: divClickdot
         });
-        notify.id = 'npmap-notify';
+        divNotify.id = 'npmap-notify';
         elements.push({
-          el: notify
+          el: divNotify
         });
-        progress.id = 'npmap-progressbar';
-        progress.innerHTML = '<div></div>';
+        divProgressBar.id = 'npmap-progressbar';
+        divProgressBar.innerHTML = '<div></div>';
         elements.push({
-          el: progress
+          el: divProgressBar
         });
-        tip.className = 'padded rounded shadowed transparent';
-        tip.id = 'npmap-tip';
+        divTip.className = 'padded rounded shadowed transparent';
+        divTip.id = 'npmap-tip';
         elements.push({
-          el: tip
+          el: divTip
         });
-        zoombox.id = 'npmap-zoombox';
+        divZoombox.id = 'npmap-zoombox';
         elements.push({
-          el: zoombox,
+          el: divZoombox,
           stop: false
         });
         
-        if (NPMap.config.api.toLowerCase() !== 'leaflet' && NPMap.config.api.toLowerCase() !== 'modestmaps') {
-          logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + NPMap.config.api.toLowerCase() + 'logo.png" /></span>';
+        if (apiLower !== 'leaflet' && apiLower !== 'modestmaps') {
+          logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + apiLower + 'logo.png" /></span>';
         }
         
         if (!NPMap.config.hideNpmapLogo) {
@@ -417,7 +421,7 @@ define([
           elements.push({
             el: logos,
             func: function() {
-              Util.monitorResize(document.getElementById('npmap-logos'), function() {
+              Util.monitorResize(logos, function() {
                 setAttributionMaxWidthAndPosition();
               });
               setAttributionMaxWidthAndPosition();
@@ -633,10 +637,6 @@ define([
             var htmlModules = '',
                 htmlTabs = '';
 
-            divModules = document.createElement('div');
-            divModulesClose = document.createElement('div');
-            divModuleTabs = document.createElement('div');
-
             for (var i = 0; i < build.length; i++) {
               var module = NPMap.config.modules[i],
                   id = module.id;
@@ -687,7 +687,7 @@ define([
 
           divOverview.id = 'npmap-overview';
           divOverview.innerHTML = '<div id="npmap-overview-title" style="color:#454545;display:none;padding:8px;position:absolute;">Overview Map</div><div id="npmap-overview-map" style="bottom:0px;left:0px;position:absolute;right:0px;top:0px;"></div>';
-          divOverview.style.bottom = Util.getOuterDimensions(document.getElementById('npmap-attribution')).height + 'px';
+          divOverview.style.bottom = Util.getOuterDimensions(divAttribution).height + 'px';
           
           elements.push({
             el: divOverview,
@@ -1755,7 +1755,6 @@ define([
       var attribution,
           attrs = [],
           disclaimer = '<a href="http://www.nps.gov/npmap/disclaimer.html" target="_blank">Disclaimer</a>',
-          divAttribution = document.getElementById('npmap-attribution'),
           me = this;
 
       if (NPMap.Map[NPMap.config.api]._attribution) {
