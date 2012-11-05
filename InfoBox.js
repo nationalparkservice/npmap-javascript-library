@@ -580,7 +580,7 @@ define([
         divInfoBox.style.width = 'auto';
         divInfoBoxContentWrapper.style.height = 'auto';
         divInfoBoxContentWrapper.style.width = '250px';
-        document.getElementById('npmap-infobox-footer').style.display = 'none';
+        divInfoBoxFooter.style.display = 'none';
         this.actions = [];
         this.visible = false;
         this.latLng = null;

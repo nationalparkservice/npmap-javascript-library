@@ -314,7 +314,7 @@
     }
 
     viewChanged = true;
-    
+
     if (NPMap.InfoBox.visible) {
       NPMap.InfoBox.reposition();
     }
@@ -839,12 +839,6 @@
      * @return {Boolean}
      */
     isLatLngWithinMapBounds: function(latLng) {
-      if (!map.getBounds().contains(latLng)) {
-        console.log(map.getBounds());
-        console.log(NPMap.Map.getBounds());
-        console.log(latLng);
-      }
-      
       return this.getBounds().contains(latLng);
     },
     /**
@@ -883,20 +877,16 @@
      * @param {Function} callback (Optional)
      */
     panByPixels: function(pixels, callback) {
-      console.log(pixels);
-
       map.setView({
         center: map.getCenter(),
         centerOffset: new Microsoft.Maps.Point(pixels.x, pixels.y)
       });
-
+      
       if (callback) {
-        function callbackPanByPixels() {
-          Microsoft.Maps.Events.removeHandler(map, 'viewchangeend', callbackPanByPixels);
+        var handlerId = Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function() {
+          Microsoft.Maps.Events.removeHandler(handlerId);
           callback();
-        }
-
-        Microsoft.Maps.Events.addHandler(map, 'viewchangeend', callbackPanByPixels);
+        });
       }
     },
     /**
