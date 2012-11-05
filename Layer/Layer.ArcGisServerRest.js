@@ -143,7 +143,7 @@ define([
           title = '';
 
       identifyResults = [];
-      
+
       if (!data || data.length === 0) {
         content = 'No information is available for this location.';
         title = 'Sorry!';
@@ -172,6 +172,7 @@ define([
      * @param {Number} divHeight
      * @param {Number} divWidth
      * @param {Object} bounds
+     * @return null
      */
     _doIdentify: function(latLng, divHeight, divWidth, bounds) {
       var count = 0,
@@ -216,9 +217,11 @@ define([
       }
       
       if (count > 0) {
+        var interval;
+
         Map.showProgressBar(value);
 
-        var interval = setInterval(function() {
+        interval = setInterval(function() {
           value = value + 0.1;
 
           Map.updateProgressBar(value);
@@ -250,6 +253,7 @@ define([
     /**
      * Handles the click operation for ArcGisServerRest layers.
      * @param {Object} e
+     * @return null
      */
     _handleClick: function(e) {
       if (identifyLayers > 0) {
@@ -264,6 +268,7 @@ define([
     },
     /**
      * Called when the user hits the "<<Back to List" link in an InfoBox.
+     * @return null
      */
     _infoBoxBack: function() {
       InfoBox.show(backContent, backTitle);
@@ -276,6 +281,7 @@ define([
      * @param {String} id The id of the geometry.
      * @param {String} name The name of the layer.
      * @param {String} el The HTML element.
+     * @return null
      */
     _infoBoxMoreInfo: function(id, name, el) {
       var actions = [{
@@ -373,6 +379,7 @@ define([
      * Creates a GeoJson layer.
      * @param {Object} config
      * @param {Boolean} silent (Optional) If true, the NPMap.Layer events will not be called.
+     * @return null
      */
     create: function(config, silent) {
       var tileLayer,
@@ -426,6 +433,7 @@ define([
     /**
      * Hides the layer.
      * @param {Object} config
+     * @return null
      */
     hide: function(config) {
       InfoBox.hide();
@@ -441,6 +449,7 @@ define([
     /**
      * Reloads the layer. Can be used after an edit operation or after a subLayer has been toggled on or off.
      * @param {Object} config
+     * @return null
      */
     reload: function(config) {
       InfoBox.hide();
@@ -451,11 +460,13 @@ define([
       this.create(config, true);
     },
     /**
-     *
+     * Removes the layer.
+     * @param {Object} config
+     * @return null
      */
     remove: function(config) {
       InfoBox.hide();
-      Map[NPMap.config.api].removeTileLayer(config);
+      Map[NPMap.config.api].removeTileLayer(config.api);
 
       if (config.identifiable === true) {
         identifyLayers--;
@@ -471,6 +482,7 @@ define([
     /**
      * Shows the layer.
      * @param {Object} config
+     * @return null
      */
     show: function(config) {
       InfoBox.hide();
@@ -488,6 +500,7 @@ define([
      * @param {Object} config The layer config object.
      * @param {Integer} subLayerIndex The index of the sublayer.
      * @param {Boolean} on Toggle this layer on?
+     * @return null
      */
     toggleSubLayer: function(config, subLayerIndex, on) {
       var changed = false,
