@@ -142,14 +142,13 @@ if (typeof bean === 'undefined') {
               },
               layerHandlers = [],
               scripts = [];
-              
+
           if (NPMap.config.baseLayers) {
             for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-              var baseLayerType = NPMap.config.baseLayers[i].type,
-                  lower = baseLayerType.toLowerCase();
+              var type = NPMap.config.baseLayers[i].type;
 
-              if (_.indexOf(layerHandlers, baseLayerType) === -1 && lower !== 'aerial' && lower !== 'blank' && lower !== 'hybrid' && lower !== 'streets' && lower !== 'terrain') {
-                layerHandlers.push(baseLayerType);
+              if (type !== 'Api' && _.indexOf(layerHandlers, type) === -1) {
+                layerHandlers.push(type);
               }
             }
           }
