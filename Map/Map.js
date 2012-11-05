@@ -896,18 +896,22 @@ define([
                 _.each(Util.getElementsByClass('npmap-switcher-menu-item'), function(el, i) {
                   bean.add(el, 'click', function(e) {
                     var clicked,
-                        me = this;
+                        me = this,
+                        currentLabel = me.firstChild.firstChild.childNodes[1].innerHTML;
 
-                    for (var i = 0; i < items.length; i++) {
-                      var item = items[i];
+                    if (document.getElementById('npmap-switcher-dropdown-text').innerHTML.toLowerCase() !== currentLabel.toLowerCase()) {
+                      for (var i = 0; i < items.length; i++) {
+                        var item = items[i];
 
-                      if (item.name === me.firstChild.firstChild.childNodes[1].innerHTML) {
-                        setIcon(item.icon.replace('large', 'small'));
-                        setLabel(item.name);
-                        NPMap.Map[NPMap.config.api].switchBaseLayer(item);
-                        divSwitcherMenu.style.display = 'none';
+                        if (item.name === currentLabel) {
+                          setIcon(item.icon.replace('large', 'small'));
+                          setLabel(item.name);
+                          NPMap.Map[NPMap.config.api].switchBaseLayer(item);
+                        }
                       }
                     }
+
+                    divSwitcherMenu.style.display = 'none';
                   });
                 });
               }
