@@ -134,8 +134,8 @@ if (typeof bean === 'undefined') {
                 googlefusion: 'GoogleFusion',
                 json: 'Json',
                 kml: 'Kml',
-                nativetiled: 'NativeTiled',
                 nativevectors: 'NativeVectors',
+                tiled: 'Tiled',
                 tilestream: 'TileStream',
                 xml: 'Xml',
                 zoomify: 'Zoomify'
