@@ -47,6 +47,7 @@
    * @param {Number} z
    * @param {String} url
    * @param {String} subdomain
+   * Return {String}
    */
   function uriConstructor(x, y, z, url, subdomain) {
     var template = _.template(url);
@@ -331,7 +332,10 @@
         apiMap.removeTileLayer(config.api);
       }
 
-      config.api = null;
+      delete config.api;
+      delete config.style;
+
+      Event.trigger('NPMap.Layer', 'removed', config);
     }
   };
 });
