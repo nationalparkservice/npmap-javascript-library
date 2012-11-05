@@ -15,7 +15,7 @@
   var
       // A map type that is used when no base layer is desired.
       blankMapType = new google.maps.ImageMapType({
-        getTileUrl: function(coord, zoom) {
+        getTileUrl: function() {
           return NPMap.config.server + '/resources/img/blank-tile.png';
         },
         maxZoom: 19,
@@ -107,18 +107,6 @@
       Event.trigger('NPMap.Map', 'shapeclick', e);
     });
   }
-  /**
-   * Is the longitude in the eastern or western hemisphere?
-   * @param {Number} lng
-   * @return {String}
-   */
-  function inEasternOrWesternHemisphere(lng) {
-    if (lng < 0) {
-      return 'western';
-    } else {
-      return 'eastern';
-    }
-  }
 
   if (NPMap.config.baseLayers) {
     Map._matchBaseLayers(DEFAULT_BASE_LAYERS);
@@ -154,37 +142,13 @@
     disableDefaultUI: true,
     draggableCursor: 'default',
     draggingCursor: 'move',
-    keyboardShortcuts: (function() {
-      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.keyboard')) {
-        return NPMap.config.tools.keyboard;
-      } else {
-        return true;
-      }
-    })(),
+    keyboardShortcuts: true,
     mapTypeControl: false,
     noClear: true,
     panControl: false,
-    scaleControl: (function() {
-      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.controls.scaleBar')) {
-        if (NPMap.config.tools.controls.scaleBar === true) {
-          mapConfig.scaleControlOptions = {
-            position: google.maps.ControlPosition.RIGHT_BOTTOM,
-            style: google.maps.ScaleControlStyle.DEFAULT
-          };
-        }
-
-        return NPMap.config.tools.controls.scaleBar;
-      } else {
-        return false;
-      }
-    })(),
-    scrollWheel: (function() {
-      if (NPMap.Util.doesPropertyExist(NPMap, 'NPMap.config.tools.mouse.scrollWheel')) {
-        return NPMap.config.tools.mouse.scrollWheel;
-      } else {
-        return true;
-      }
-    })(),
+    // TODO: Make this configurable.
+    scaleControl: false,
+    scrollWheel: true,
     streetViewControl: false,
     zoomControl: false
   };
