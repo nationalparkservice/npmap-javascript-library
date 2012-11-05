@@ -123,9 +123,7 @@ define([
     var el = document.getElementById(id);
     
     Util.stopAllPropagation(el);
-    bean.add(el, 'mouseup', function(e) {
-      func();
-    });
+    bean.add(el, 'mouseup', func);
 
     return el;
   }
