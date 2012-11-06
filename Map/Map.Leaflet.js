@@ -1,11 +1,8 @@
 /**
-           Is the fundamental problem that you store the events with the modules themselves? If you stored them in a central place in the NPMap.Event class, would that solve your problem?
-
-           That way, events could be added even before a module was loaded, and events could still get called correctly once the modules loaded.
-       */
-
-
-
+ * @module NPMap.Map.Leaflet
+ *
+ * The module for the Leaflet base API.
+ */
 define([
   'Event',
   'Map/Map',
@@ -490,7 +487,7 @@ define([
   handleResize();
   
   return NPMap.Map.Leaflet = {
-    // The current attribution {Array}.
+    // The current attribution for the map {Array}.
     _attribution: [],
     // Is the map loaded and ready to be interacted with programatically?
     _isReady: true,

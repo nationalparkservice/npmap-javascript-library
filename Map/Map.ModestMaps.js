@@ -1,5 +1,8 @@
-﻿// TODO: You need to re-add support for full screen maps.
-// TODO: Hook up attribution.
+﻿/**
+ * @module NPMap.Map.ModestMaps
+ *
+ * The module for the ModestMaps base API.
+ */
 define([
   'Event',
   'Map/Map',

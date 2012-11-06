@@ -1,9 +1,16 @@
-﻿define([
+﻿/**
+ * @module NPMap.Map.Bing
+ *
+ * The module for the Bing base API.
+ */
+define([
   'Event',
   'Map/Map',
   'Util/Util'
 ], function(Event, Map, Util) {
   var
+      // The currently active baseLayer config.
+      activeBaseLayer,
       // The default base layers for Bing.
       DEFAULT_BASE_LAYERS = {
         aerial: {
@@ -35,6 +42,7 @@
           type: 'Api'
         },
         terrain: {
+          attribution: 'MapBox | @ OpenStreetMap Contributors',
           icon: 'topo',
           id: 'nps.map-lj6szvbq',
           name: 'Terrain View',
@@ -105,6 +113,29 @@
       });
     }
   }
+  /**
+   * Updates the Bing copyright text.
+   * @return null
+   */
+  function updateBingCopyright() {
+    map.getCopyrights(function(a) {
+      var attribution = [];
+      
+      _.each(a, function(v, i) {
+        if (!_.isArray(v)) {
+          attribution.push(v);
+        } else {
+          _.each(v, function(v2, i2) {
+            attribution.push(v2);
+          });
+        }
+      });
+
+      activeBaseLayer.attribution = attribution;
+
+      Map.updateAttribution();
+    });
+  }
 
   if (NPMap.config.baseLayers) {
     Map._matchBaseLayers(DEFAULT_BASE_LAYERS);
@@ -113,12 +144,14 @@
       var baseLayer = NPMap.config.baseLayers[i];
 
       if (baseLayer.visible) {
+        activeBaseLayer = baseLayer;
+
         if (baseLayer.type === 'Api') {
           if (baseLayer.cls === 'aerial') {
             labelOverlay = Microsoft.Maps.LabelOverlay.hidden;
           }
 
-          mapTypeId = Microsoft.Maps.MapTypeId[DEFAULT_BASE_LAYERS[baseLayer.cls].mapTypeId];
+          mapTypeId = baseLayer.mapTypeId;
         } else {
           mapTypeId = Microsoft.Maps.MapTypeId.mercator;
         }
@@ -132,12 +165,14 @@
       DEFAULT_BASE_LAYERS['streets']
     ];
     NPMap.config.baseLayers[0].visible = true;
+    activeBaseLayer = NPMap.config.baseLayers[0];
   } else {
     mapTypeId = Microsoft.Maps.MapTypeId.mercator;
     NPMap.config.baseLayers = [
       DEFAULT_BASE_LAYERS['blank']
     ];
     NPMap.config.baseLayers[0].visible = true;
+    activeBaseLayer = NPMap.config.baseLayers[0];
   }
   
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
@@ -154,6 +189,8 @@
   });
   initialCenter = lastCenter = map.getCenter();
   initialZoom = lastZoom = map.getZoom();
+
+  NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
 
   if (NPMap.config.restrictZoom) {
     if (NPMap.config.restrictZoom.max) {
@@ -334,25 +371,9 @@
     panStartReported = false;
     zoomStartReported = false;
 
-    map.getCopyrights(function(a) {
-      var attribution = [];
-      
-      _.each(a, function(v, i) {
-        if (!_.isArray(v)) {
-          attribution.push(v);
-        } else {
-          _.each(v, function(v2, i2) {
-            attribution.push(v2);
-          });
-        }
-      });
-
-      NPMap.Map.Bing._attribution = attribution;
-
-      if (document.getElementById('npmap-attribution')) {
-        NPMap.Map.updateAttribution();
-      }
-    });
+    if (activeBaseLayer.type === 'Api') {
+      updateBingCopyright();
+    }
     
     Event.trigger('NPMap.Map', 'viewchangeend');
   });
@@ -364,13 +385,10 @@
     checkMaxMinZoom();
     Event.trigger('NPMap.Map', 'viewchangestart');
   });
-  
   Map._init();
 
   return NPMap.Map.Bing = {
-    // The default base layers CONSTANT.
-    _DEFAULT_BASE_LAYERS: DEFAULT_BASE_LAYERS,
-    // The current attribution {Array}.
+    // The current attribution for the map {Array}.
     _attribution: null,
     // Is the map loaded and ready to be interacted with programatically.
     _isReady: true,
@@ -1036,8 +1054,7 @@
      * @return null
      */
     switchBaseLayer: function(baseLayer) {
-      var activeBaseLayer,
-          api,
+      var api,
           cls = baseLayer.cls,
           mapTypeId;
 
@@ -1054,6 +1071,8 @@
       if (activeBaseLayer.type !== 'Api') {
         NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
       }
+
+      activeBaseLayer = baseLayer;
 
       if (cls) {
         cls = cls.toLowerCase();
@@ -1087,6 +1106,12 @@
       });
 
       baseLayer.visible = true;
+
+      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
+
+      if (api && api.mapTypeId) {
+        updateBingCopyright();
+      }
     },
     /**
      * Zooms the map to a bounding box.

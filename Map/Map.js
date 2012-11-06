@@ -6,7 +6,7 @@ var html4={atype:{NONE:0,URI:1,URI_FRAGMENT:11,SCRIPT:2,STYLE:3,ID:4,IDREF:5,IDR
 /**
  * @module NPMap.Map
  *
- * The module class for all map objects. No "baseApi"-specific code lives here.
+ * The module for all map objects. No "baseApi"-specific code lives here.
  */
 define([
   'Event',
@@ -924,10 +924,15 @@ define([
         }
 
         interval = setInterval(function() {
-          if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
+          var Api = NPMap.Map[NPMap.config.api];
+
+          if (typeof Api !== 'undefined' && Api._isReady === true) {
             // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding. Right now this is hardcoded in NPMap.Infobox module.
 
             clearInterval(interval);
+
+            delete Api._isReady;
+
             Util.monitorResize(divMap, function() {
               setAttributionMaxWidthAndPosition();
               me.handleResize();

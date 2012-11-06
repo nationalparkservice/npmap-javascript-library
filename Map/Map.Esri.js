@@ -1,4 +1,8 @@
-﻿// TODO: Hook up attribution.
+﻿/**
+ * @module NPMap.Map.Esri
+ *
+ * The module for the Esri base API.
+ */
 define([
   'Event',
   'Map/Map'
