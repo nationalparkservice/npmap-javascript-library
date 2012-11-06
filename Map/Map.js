@@ -3,6 +3,11 @@
  */
 var html4={atype:{NONE:0,URI:1,URI_FRAGMENT:11,SCRIPT:2,STYLE:3,ID:4,IDREF:5,IDREFS:6,GLOBAL_NAME:7,LOCAL_NAME:8,CLASSES:9,FRAME_TARGET:10},ATTRIBS:{"*::class":9,"*::dir":0,"*::id":4,"*::lang":0,"*::onclick":2,"*::ondblclick":2,"*::onkeydown":2,"*::onkeypress":2,"*::onkeyup":2,"*::onload":2,"*::onmousedown":2,"*::onmousemove":2,"*::onmouseout":2,"*::onmouseover":2,"*::onmouseup":2,"*::style":3,"*::title":0,"a::accesskey":0,"a::coords":0,"a::href":1,"a::hreflang":0,"a::name":7,"a::onblur":2,"a::onfocus":2,"a::rel":0,"a::rev":0,"a::shape":0,"a::tabindex":0,"a::target":10,"a::type":0,"area::accesskey":0,"area::alt":0,"area::coords":0,"area::href":1,"area::nohref":0,"area::onblur":2,"area::onfocus":2,"area::shape":0,"area::tabindex":0,"area::target":10,"bdo::dir":0,"blockquote::cite":1,"br::clear":0,"button::accesskey":0,"button::disabled":0,"button::name":8,"button::onblur":2,"button::onfocus":2,"button::tabindex":0,"button::type":0,"button::value":0,"canvas::height":0,"canvas::width":0,"caption::align":0,"col::align":0,"col::char":0,"col::charoff":0,"col::span":0,"col::valign":0,"col::width":0,"colgroup::align":0,"colgroup::char":0,"colgroup::charoff":0,"colgroup::span":0,"colgroup::valign":0,"colgroup::width":0,"del::cite":1,"del::datetime":0,"dir::compact":0,"div::align":0,"dl::compact":0,"font::color":0,"font::face":0,"font::size":0,"form::accept":0,"form::action":1,"form::autocomplete":0,"form::enctype":0,"form::method":0,"form::name":7,"form::onreset":2,"form::onsubmit":2,"form::target":10,"h1::align":0,"h2::align":0,"h3::align":0,"h4::align":0,"h5::align":0,"h6::align":0,"hr::align":0,"hr::noshade":0,"hr::size":0,"hr::width":0,"iframe::align":0,"iframe::frameborder":0,"iframe::height":0,"iframe::marginheight":0,"iframe::marginwidth":0,"iframe::width":0,"img::align":0,"img::alt":0,"img::border":0,"img::height":0,"img::hspace":0,"img::ismap":0,"img::name":7,"img::src":1,"img::usemap":11,"img::vspace":0,"img::width":0,"input::accept":0,"input::accesskey":0,"input::align":0,"input::alt":0,"input::autocomplete":0,"input::checked":0,"input::disabled":0,"input::ismap":0,"input::maxlength":0,"input::name":8,"input::onblur":2,"input::onchange":2,"input::onfocus":2,"input::onselect":2,"input::readonly":0,"input::size":0,"input::src":1,"input::tabindex":0,"input::type":0,"input::usemap":11,"input::value":0,"ins::cite":1,"ins::datetime":0,"label::accesskey":0,"label::for":5,"label::onblur":2,"label::onfocus":2,"legend::accesskey":0,"legend::align":0,"li::type":0,"li::value":0,"map::name":7,"menu::compact":0,"ol::compact":0,"ol::start":0,"ol::type":0,"optgroup::disabled":0,"optgroup::label":0,"option::disabled":0,"option::label":0,"option::selected":0,"option::value":0,"p::align":0,"pre::width":0,"q::cite":1,"select::disabled":0,"select::multiple":0,"select::name":8,"select::onblur":2,"select::onchange":2,"select::onfocus":2,"select::size":0,"select::tabindex":0,"table::align":0,"table::bgcolor":0,"table::border":0,"table::cellpadding":0,"table::cellspacing":0,"table::frame":0,"table::rules":0,"table::summary":0,"table::width":0,"tbody::align":0,"tbody::char":0,"tbody::charoff":0,"tbody::valign":0,"td::abbr":0,"td::align":0,"td::axis":0,"td::bgcolor":0,"td::char":0,"td::charoff":0,"td::colspan":0,"td::headers":6,"td::height":0,"td::nowrap":0,"td::rowspan":0,"td::scope":0,"td::valign":0,"td::width":0,"textarea::accesskey":0,"textarea::cols":0,"textarea::disabled":0,"textarea::name":8,"textarea::onblur":2,"textarea::onchange":2,"textarea::onfocus":2,"textarea::onselect":2,"textarea::readonly":0,"textarea::rows":0,"textarea::tabindex":0,"tfoot::align":0,"tfoot::char":0,"tfoot::charoff":0,"tfoot::valign":0,"th::abbr":0,"th::align":0,"th::axis":0,"th::bgcolor":0,"th::char":0,"th::charoff":0,"th::colspan":0,"th::headers":6,"th::height":0,"th::nowrap":0,"th::rowspan":0,"th::scope":0,"th::valign":0,"th::width":0,"thead::align":0,"thead::char":0,"thead::charoff":0,"thead::valign":0,"tr::align":0,"tr::bgcolor":0,"tr::char":0,"tr::charoff":0,"tr::valign":0,"ul::compact":0,"ul::type":0},eflags:{OPTIONAL_ENDTAG:1,EMPTY:2,CDATA:4,RCDATA:8,UNSAFE:16,FOLDABLE:32,SCRIPT:64,STYLE:128},ELEMENTS:{a:0,abbr:0,acronym:0,address:0,applet:16,area:2,b:0,base:18,basefont:18,bdo:0,big:0,blockquote:0,body:49,br:2,button:0,canvas:0,caption:0,center:0,cite:0,code:0,col:2,colgroup:1,dd:1,del:0,dfn:0,dir:0,div:0,dl:0,dt:1,em:0,fieldset:0,font:0,form:0,frame:18,frameset:16,h1:0,h2:0,h3:0,h4:0,h5:0,h6:0,head:49,hr:2,html:49,i:0,iframe:4,img:2,input:2,ins:0,isindex:18,kbd:0,label:0,legend:0,li:1,link:18,map:0,menu:0,meta:18,nobr:0,noembed:4,noframes:20,noscript:20,object:16,ol:0,optgroup:0,option:1,p:1,param:18,pre:0,q:0,s:0,samp:0,script:84,select:0,small:0,span:0,strike:0,strong:0,style:148,sub:0,sup:0,table:0,tbody:1,td:1,textarea:8,tfoot:1,th:1,thead:1,title:24,tr:1,tt:0,u:0,ul:0,"var":0},ueffects:{NOT_LOADED:0,SAME_DOCUMENT:1,NEW_DOCUMENT:2},URIEFFECTS:{"a::href":2,"area::href":2,"blockquote::cite":0,"body::background":1,"del::cite":0,"form::action":2,"img::src":1,"input::src":1,"ins::cite":0,"q::cite":0},ltypes:{UNSANDBOXED:2,SANDBOXED:1,DATA:0},LOADERTYPES:{"a::href":2,"area::href":2,"blockquote::cite":2,"body::background":1,"del::cite":2,"form::action":2,"img::src":1,"input::src":1,"ins::cite":2,"q::cite":2}},html=function(a){function c(a,b){var d;d=e(b);if(j.hasOwnProperty(d))d=j[d];else{var c=d.match(p);d=c?String.fromCharCode(parseInt(c[1],10)):(c=d.match(l))?String.fromCharCode(parseInt(c[1],16)):""}return d}function f(a){return a.replace(t,c)}function b(a){return a.replace(s,"&amp;").replace(m,"&lt;").replace(v,"&gt;").replace(w,"&#34;").replace(x,"&#61;")}function g(a){return a.replace(i,"&amp;$1").replace(m,"&lt;").replace(v,"&gt;")}function d(b){return function(d,c){var d=String(d),i=null,h=!1,j=[],q=void 0,l=void 0,u=void 0;for(b.startDoc&&b.startDoc(c);d;){var k=d.match(h?y:z),d=d.substring(k[0].length);if(h)if(k[1]){var m=e(k[1]);if(k[2]){k=k[3];switch(k.charCodeAt(0)){case 34:case 39:k=k.substring(1,k.length-1)}k=f(k.replace(r,""))}else k=m;j.push(m,k)}else k[4]&&(void 0!==l&&(u?b.startTag&&b.startTag(q,j,c):b.endTag&&b.endTag(q,c)),u&&l&(a.eflags.CDATA|a.eflags.RCDATA)&&(i=null===i?e(d):i.substring(i.length-d.length),h=i.indexOf("</"+q),0>h&&(h=d.length),h&&(l&a.eflags.CDATA?b.cdata&&b.cdata(d.substring(0,h),c):b.rcdata&&b.rcdata(g(d.substring(0,h)),c),d=d.substring(h))),q=l=u=void 0,j.length=0,h=!1);else k[1]?b.pcdata&&b.pcdata(k[0],c):k[3]?(u=!k[2],h=!0,q=e(k[3]),l=a.ELEMENTS.hasOwnProperty(q)?a.ELEMENTS[q]:void 0):k[4]?b.pcdata&&b.pcdata(k[4],c):k[5]&&b.pcdata&&(m=k[5],b.pcdata("<"===m?"&lt;":">"===m?"&gt;":"&amp;",c))}b.endDoc&&b.endDoc(c)}}function h(c){var i,f;return d({startDoc:function(){i=[];f=!1},startTag:function(d,h,g){if(!f&&a.ELEMENTS.hasOwnProperty(d)){var e=a.ELEMENTS[d];if(!(e&a.eflags.FOLDABLE))if(e&a.eflags.UNSAFE)f=!(e&a.eflags.EMPTY);else if(h=c(d,h)){e&a.eflags.EMPTY||i.push(d);g.push("<",d);d=0;for(e=h.length;d<e;d+=2){var l=h[d],j=h[d+1];null!==j&&void 0!==j&&g.push(" ",l,'="',b(j),'"')}g.push(">")}}},endTag:function(b,d){if(f)f=!1;else if(a.ELEMENTS.hasOwnProperty(b)){var c=a.ELEMENTS[b];if(!(c&(a.eflags.UNSAFE|a.eflags.EMPTY|a.eflags.FOLDABLE))){if(c&a.eflags.OPTIONAL_ENDTAG)for(c=i.length;0<=--c;){var h=i[c];if(h===b)break;if(!(a.ELEMENTS[h]&a.eflags.OPTIONAL_ENDTAG))return}else for(c=i.length;0<=--c&&i[c]!==b;);if(!(0>c)){for(var e=i.length;--e>c;)h=i[e],a.ELEMENTS[h]&a.eflags.OPTIONAL_ENDTAG||d.push("</",h,">");i.length=c;d.push("</",b,">")}}}},pcdata:function(a,b){f||b.push(a)},rcdata:function(a,b){f||b.push(a)},cdata:function(a,b){f||b.push(a)},endDoc:function(a){for(var b=i.length;0<=--b;)a.push("</",i[b],">");i.length=0}})}var e;e=function(a){return a.toLowerCase()};var j={lt:"<",gt:">",amp:"&",nbsp:"\u00a0",quot:'"',apos:"'"},n=/^(?:https?|mailto|data)$/i,p=/^#(\d+)$/,l=/^#x([0-9A-Fa-f]+)$/,r=/\0/g,t=/&(#\d+|#x[0-9A-Fa-f]+|\w+);/g,s=/&/g,i=/&([^a-z#]|#(?:[^0-9x]|x(?:[^0-9a-f]|$)|$)|$)/gi,m=/</g,v=/>/g,w=/\"/g,x=/\=/g,y=RegExp("^\\s*(?:(?:([a-z][a-z-]*)(\\s*=\\s*(\"[^\"]*\"|'[^']*'|(?=[a-z][a-z-]*\\s*=)|[^>\"'\\s]*))?)|(/?>)|[\\s\\S][^a-z\\s>]*)","i"),z=RegExp("^(?:&(\\#[0-9]+|\\#[x][0-9a-f]+|\\w+);|<\!--[\\s\\S]*?--\>|<!\\w[^>]*>|<\\?[^>*]*>|<(/)?([a-z][a-z0-9]*)|([^<&>]+)|([<&>]))","i"),A=/^(?:([^:/?#]+):)?/;return{escapeAttrib:b,makeHtmlSanitizer:h,makeSaxParser:d,normalizeRCData:g,sanitize:function(b,d,c){var i=[];h(function(b,i){for(var h=0;h<i.length;h+=2){var f=i[h],e=i[h+1],g=null,j;if((j=b+"::"+f,a.ATTRIBS.hasOwnProperty(j))||(j="*::"+f,a.ATTRIBS.hasOwnProperty(j)))g=a.ATTRIBS[j];if(null!==g)switch(g){case a.atype.NONE:break;case a.atype.SCRIPT:case a.atype.STYLE:e=null;break;case a.atype.ID:case a.atype.IDREF:case a.atype.IDREFS:case a.atype.GLOBAL_NAME:case a.atype.LOCAL_NAME:case a.atype.CLASSES:e=c?c(e):e;break;case a.atype.URI:e=(f=(""+e).match(A))?!f[1]||n.test(f[1])?d&&d(e):null:null;break;case a.atype.URI_FRAGMENT:e&&"#"===e.charAt(0)?(e=c?c(e):e)&&(e="#"+e):e=null;break;default:e=null}else e=null;i[h+1]=e}return i})(b,i);return i.join("")},unescapeEntities:f}}(html4),html_sanitize=html.sanitize;"undefined"!==typeof window&&(window.html=html,window.html_sanitize=html_sanitize);html4.ATTRIBS["*::style"]=0;html4.ELEMENTS.style=0;html4.ATTRIBS["a::target"]=0;html4.ELEMENTS.video=0;html4.ATTRIBS["video::src"]=0;html4.ATTRIBS["video::poster"]=0;html4.ATTRIBS["video::controls"]=0;html4.ELEMENTS.audio=0;html4.ATTRIBS["audio::src"]=0;html4.ATTRIBS["video::autoplay"]=0;html4.ATTRIBS["video::controls"]=0;var wax={};wax.formatter=function(a){var c={},f;if(a&&"string"===typeof a)try{eval("f = "+a)}catch(b){console&&console.log(b)}else f=a&&"function"===typeof a?a:function(){};c.format=function(a,b){try{return wax.u.sanitize(f(a,b))}catch(c){console&&console.log(c)}};return c};wax.gi=function(a,c){var c=c||{},f={},b=c.resolution||4,g=c.tileSize||256;f.grid_tile=function(){return a};f.getKey=function(d,c){if(a&&a.grid&&!(0>c||0>d))if(!(Math.floor(c)>=g||Math.floor(d)>=g)){var e=a.grid[Math.floor(c/b)].charCodeAt(Math.floor(d/b));93<=e&&e--;35<=e&&e--;return e-32}};f.gridFeature=function(b,c){var e=this.getKey(b,c),f=a.keys;if(f&&f[e]&&a.data[f[e]])return a.data[f[e]]};f.tileFeature=function(b,c,e){if(a)return e=wax.u.offset(e),feature=this.gridFeature(b-e.left,c-e.top)};return f};wax.gm=function(){var a=4,c={},f,b,g=function(a){if(a)return a.replace(/(\.png|\.jpg|\.jpeg)(\d*)/,".grid.json")};c.formatter=function(a){if(!arguments.length)return b;b=wax.formatter(a);return c};c.template=function(a){if(!arguments.length)return b;b=wax.template(a);return c};c.gridUrl=function(a){if(!arguments.length)return g;if(a){var b;if("function"===typeof a)b=a;else{var e=a;"string"===typeof e&&(e=[e]);b=function(a){if(a&&(a=/\/(\d+)\/(\d+)\/(\d+)\.[\w\._]+/.exec(a)))return e[parseInt(a[2],10)%e.length].replace(/\{z\}/g,a[1]).replace(/\{x\}/g,a[2]).replace(/\{y\}/g,a[3])}}g=b}else g=function(){return null};return c};c.getGrid=function(d,f){var e=g(d);if(!b||!e)return f(null,null);wax.request.get(e,function(c,d){if(c)return f(c,null);f(null,wax.gi(d,{formatter:b,resolution:a}))});return c};c.tilejson=function(d){if(!arguments.length)return f;d.template?c.template(d.template):d.formatter?c.formatter(d.formatter):b=void 0;c.gridUrl(d.grids);d.resolution&&(a=d.resolution);f=d;return c};return c};wax.interaction=function(){function a(a){var e;d?(window.clearTimeout(d),d=null,e=!0):e=!1;e||(g=!0,h=wax.u.eventoffset(a),"mousedown"===a.type?(bean.add(document.body,"click",c),bean.add(document.body,"mouseup",c)):"touchstart"===a.type&&1===a.touches.length&&(bean.fire(b,"off"),bean.add(a.srcElement,s)))}function c(a){var f={},l=wax.u.eventoffset(a);g=!1;for(var j in a)f[j]=a[j];bean.remove(document.body,"mouseup",c);bean.remove(a.srcElement,s);"touchend"===a.type?b.click(a,h):Math.round(l.y/e)===Math.round(h.y/e)&&Math.round(l.x/e)===Math.round(h.x/e)&&(d=window.setTimeout(function(){d=null;b.click(f,l)},300));return c}var f=wax.gm(),b={},g=!1,d=!1,h,e=4,j,n,p,l,r,t={mousemove:function(a){if(!g){var c=wax.u.eventoffset(a);b.screen_feature(c,function(c){c?bean.fire(b,"on",{parent:l(),data:c,formatter:f.formatter().format,e:a}):bean.fire(b,"off")})}},touchstart:a,mousedown:a},s={touchend:c,touchmove:c,touchcancel:function(a){bean.remove(a.srcElement,s);g=!1}};b.click=function(a,c){b.screen_feature(c,function(c){c&&bean.fire(b,"on",{parent:l(),data:c,formatter:f.formatter().format,e:a})})};b.screen_feature=function(a,b){var c;a:{for(var d=j(),e=0;e<d.length;e++)if(d[e][0]<a.y&&d[e][0]+256>a.y&&d[e][1]<a.x&&d[e][1]+256>a.x){c=d[e][2];break a}c=!1}c||b(null);f.getGrid(c.src,function(d,e){if(d||!e)return b(null);var f=e.tileFeature(a.x,a.y,c);b(f)})};b.attach=function(a){if(!arguments.length)return n;n=a;return b};b.detach=function(a){if(!arguments.length)return p;p=a;return b};b.map=function(c){if(!arguments.length)return r;r=c;n&&n(r);bean.add(l(),t);bean.add(l(),"touchstart",a);return b};b.grid=function(a){if(!arguments.length)return j;j=a;return b};b.remove=function(){p&&p(r);bean.remove(l(),t);bean.fire(b,"remove");return b};b.tilejson=function(a){if(!arguments.length)return f.tilejson();f.tilejson(a);return b};b.formatter=function(){return f.formatter()};b.on=function(a,c){bean.add(b,a,c);return b};b.off=function(a,c){bean.remove(b,a,c);return b};b.gridmanager=function(a){if(!arguments.length)return f;f=a;return b};b.parent=function(a){l=a;return b};return b};wax.request={cache:{},locks:{},promises:{},get:function(a,c){if(this.cache[a])return c(this.cache[a][0],this.cache[a][1]);this.promises[a]=this.promises[a]||[];this.promises[a].push(c);if(!this.locks[a]){var f=this;this.locks[a]=!0;reqwest({url:a+(~a.indexOf("?")?"&":"?")+"callback=grid",type:"jsonp",jsonpCallback:"callback",success:function(b){f.locks[a]=!1;f.cache[a]=[null,b];for(b=0;b<f.promises[a].length;b++)f.promises[a][b](f.cache[a][0],f.cache[a][1])},error:function(b){f.locks[a]=!1;f.cache[a]=[b,null];for(b=0;b<f.promises[a].length;b++)f.promises[a][b](f.cache[a][0],f.cache[a][1])}})}}};wax.template=function(a){return{format:function(c,f){var b={},g;for(g in f)b[g]=f[g];c.format&&(b["__"+c.format+"__"]=!0);return wax.u.sanitize(Mustache.to_html(a,b))}}};wax.u={offset:function(a){var c=a.offsetWidth||parseInt(a.style.width,10),f=a.offsetHeight||parseInt(a.style.height,10),b=document.body,g=0,d=0,h=function(a){if(!(a===b||a===document.documentElement))if(g+=a.offsetTop,d+=a.offsetLeft,a=a.style.transform||a.style.WebkitTransform||a.style.OTransform||a.style.MozTransform||a.style.msTransform){var c;if(c=a.match(/translate\((.+)[px]?, (.+)[px]?\)/))g+=parseInt(c[2],10),d+=parseInt(c[1],10);else if(c=a.match(/translate3d\((.+)[px]?, (.+)[px]?, (.+)[px]?\)/))g+=parseInt(c[2],10),d+=parseInt(c[1],10);else if(c=a.match(/matrix3d\(([\-\d,\s]+)\)/))a=c[1].split(","),g+=parseInt(a[13],10),d+=parseInt(a[12],10);else if(c=a.match(/matrix\(.+, .+, .+, .+, (.+), (.+)\)/))g+=parseInt(c[2],10),d+=parseInt(c[1],10)}};if("undefined"!==typeof a.getBoundingClientRect)var e=document.body,j=a.ownerDocument.documentElement,h=document.clientTop||e.clientTop||0,e=document.clientLeft||e.clientLeft||0,n=window.pageYOffset||j.scrollTop,j=window.pageXOffset||j.scrollLeft,a=a.getBoundingClientRect(),g=a.top+n-h,d=a.left+j-e;else{h(a);try{for(;a=a.offsetParent;)h(a)}catch(p){}}g+=b.offsetTop;d+=b.offsetLeft;g+=b.parentNode.offsetTop;d+=b.parentNode.offsetLeft;a=document.defaultView?window.getComputedStyle(b.parentNode,null):b.parentNode.currentStyle;b.parentNode.offsetTop!==parseInt(a.marginTop,10)&&!isNaN(parseInt(a.marginTop,10))&&(g+=parseInt(a.marginTop,10),d+=parseInt(a.marginLeft,10));return{top:g,left:d,height:f,width:c}},$:function(a){return"string"===typeof a?document.getElementById(a):a},eventoffset:function(a){a||(a=window.event);if(a.pageX||a.pageY)return{x:a.pageX,y:a.pageY};if(a.clientX||a.clientY)return{x:a.clientX,y:a.clientY};if(a.touches&&1===a.touches.length)return{x:a.touches[0].pageX,y:a.touches[0].pageY}},limit:function(a,c,f){var b;return function(){var g=this,d=arguments,h=function(){b=null;a.apply(g,d)};f&&clearTimeout(b);if(f||!b)b=setTimeout(h,c)}},throttle:function(a,c){return this.limit(a,c,!1)},sanitize:function(a){return!a?"":html_sanitize(a,function(a){if(/^(https?:\/\/|data:image)/.test(a))return a},function(a){return a})}};
 
+/**
+ * @module NPMap.Map
+ *
+ * The module class for all map objects. No "baseApi"-specific code lives here.
+ */
 define([
   'Event',
   'InfoBox',
@@ -186,85 +191,76 @@ define([
     divAttribution.style.right = right + 'px';
   }
 
-  /**
-   * @class NPMap.Map
-   *
-   * The base class for all map objects. No "baseApi"-specific code lives here.
-   */
-  return NPMap.Map = {
-    // An array of event handler objects that have been added to this class.
-    _events: [{
-      event: 'mousedown',
-      func: function(e) {
-        pixelMouseDown = getMousePixel(e);
+  Event.add('NPMap.Map', 'baselayerchanged', function() {
+    NPMap.Map.updateAttribution();
+  });
+  Event.add('NPMap.Map', 'mousedown', function(e) {
+    pixelMouseDown = getMousePixel(e);
 
-        if (e.shiftKey) {
-          divZoombox.style.display = 'block';
-          divZoombox.style.left = pixelMouseDown.x + 'px';
-          divZoombox.style.top = pixelMouseDown.y + 'px';
-          mouseMoveId = NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+    if (e.shiftKey) {
+      divZoombox.style.display = 'block';
+      divZoombox.style.left = pixelMouseDown.x + 'px';
+      divZoombox.style.top = pixelMouseDown.y + 'px';
+      mouseMoveId = NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+      
+      NPMap.Map.setCursor('crosshair');
+    }
+  });
+  Event.add('NPMap.Map', 'mouseup', function(e) {
+    if (e.shiftKey) {
+      var pixel = getMousePixel(e),
+          coords = {},
+          nw,
+          se;
           
-          NPMap.Map.setCursor('crosshair');
-        }
+      if (pixel.x > pixelMouseDown.x) {
+        coords.e = pixel.x;
+        coords.w = pixelMouseDown.x;
+      } else {
+        coords.e = pixelMouseDown.x;
+        coords.w = pixel.x;
       }
-    },{
-      event: 'mouseup',
-      func: function(e) {
-        if (e.shiftKey) {
-          var pixel = getMousePixel(e),
-              coords = {},
-              nw,
-              se;
-              
-          if (pixel.x > pixelMouseDown.x) {
-            coords.e = pixel.x;
-            coords.w = pixelMouseDown.x;
-          } else {
-            coords.e = pixelMouseDown.x;
-            coords.w = pixel.x;
-          }
 
-          if (pixel.y > pixelMouseDown.y) {
-            coords.n = pixel.y;
-            coords.s = pixelMouseDown.y;
-          } else {
-            coords.n = pixelMouseDown.y;
-            coords.s = pixel.y;
-          }
-
-          nw = NPMap.Map.pixelToLatLng({
-            x: coords.w,
-            y: coords.n
-          });
-          se = NPMap.Map.pixelToLatLng({
-            x: coords.e,
-            y: coords.s
-          });
-
-          NPMap.Map.toBounds({
-            e: se.lng,
-            n: nw.lat,
-            s: se.lat,
-            w: nw.lng
-          });
-          NPMap.Map.setCursor('auto');
-
-          pixelMouseDown = null;
-          divZoombox.style.display = 'none';
-          divZoombox.style.height = '0px';
-          divZoombox.style.width = '0px';
-
-          NPMap.Event.remove(mouseMoveId);
-        }
+      if (pixel.y > pixelMouseDown.y) {
+        coords.n = pixel.y;
+        coords.s = pixelMouseDown.y;
+      } else {
+        coords.n = pixelMouseDown.y;
+        coords.s = pixel.y;
       }
-    },{
-      event: 'zoomstart',
-      func: function() {
-        if (!NPMap.InfoBox.marker) {
-          NPMap.InfoBox.hide();
-        }
-      }
-    }],
+
+      nw = NPMap.Map.pixelToLatLng({
+        x: coords.w,
+        y: coords.n
+      });
+      se = NPMap.Map.pixelToLatLng({
+        x: coords.e,
+        y: coords.s
+      });
+
+      NPMap.Map.toBounds({
+        e: se.lng,
+        n: nw.lat,
+        s: se.lat,
+        w: nw.lng
+      });
+      NPMap.Map.setCursor('auto');
+
+      pixelMouseDown = null;
+      divZoombox.style.display = 'none';
+      divZoombox.style.height = '0px';
+      divZoombox.style.width = '0px';
+
+      NPMap.Event.remove(mouseMoveId);
+    }
+  });
+  Event.add('NPMap.Map', 'zoomstart', function() {
+    if (!NPMap.InfoBox.marker) {
+      NPMap.InfoBox.hide();
+    }
+  });
+
+  return NPMap.Map = {
     /**
      * Creates a line using the baseApi's line class, if it exists.
      * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
@@ -317,6 +313,8 @@ define([
         var
             // An array of elements to add to the map div.
             elements = [],
+            //
+            interval,
             // HTML for the logos div.
             logosHtml = '',
             // The config object for NPMap's modules.
@@ -816,7 +814,7 @@ define([
           });
         }
 
-        if (NPMap.config.baseLayers && NPMap.config.baseLayers.length > 1) {
+        if (NPMap.config.baseLayers && NPMap.config.baseLayers.length) {
           var activeIcon = null,
               activeLabel = null,
               items = [];
@@ -842,7 +840,7 @@ define([
             }
           });
 
-          if (items.length) {
+          if (items.length > 1) {
             var divSwitcher = document.createElement('div'),
                 divSwitcherMenu = document.createElement('div');
             
@@ -925,7 +923,7 @@ define([
           me.addControl(element.el, element.func, element.stop);
         }
 
-        var interval = setInterval(function() {
+        interval = setInterval(function() {
           if (NPMap.Map[NPMap.config.api] && NPMap.Map[NPMap.config.api]._isReady === true) {
             // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding. Right now this is hardcoded in NPMap.Infobox module.
 
@@ -934,6 +932,9 @@ define([
               setAttributionMaxWidthAndPosition();
               me.handleResize();
               Event.trigger('NPMap.Map', 'resized');
+            });
+            Event.add('NPMap.Layer', 'ready', function() {
+              me.updateAttribution();
             });
             Event.trigger('NPMap.Map', 'ready');
           }
@@ -1752,7 +1753,7 @@ define([
       NPMap.Map[NPMap.config.api].toMarkers(markers);
     },
     /**
-     * Updates the map attribution.
+     * Updates the map attribution. Looks at the NPMap.Map[NPMap.config.api]._attribution property and iterates through all of the visible baseLayers and layers and looks at their attribution property, as well.
      * @return null
      */
     updateAttribution: function() {
@@ -1761,20 +1762,29 @@ define([
           disclaimer = '<a href="http://www.nps.gov/npmap/disclaimer.html" target="_blank">Disclaimer</a>',
           me = this;
 
-      if (NPMap.Map[NPMap.config.api]._attribution) {
+      if (typeof NPMap.Map[NPMap.config.api] !== 'undefined' && typeof NPMap.Map[NPMap.config.api]._attribution !== 'undefined') {
         _.each(NPMap.Map[NPMap.config.api]._attribution, function(v) {
           attrs.push(v);
         });
       }
 
+
+
+      
+      // Should you load NPMap.Layer as a requirement for NPMap.Map?
+      // No, just manually iterate through baseLayers and layers here. It's dirty, but Layer/Layer should not be added to the map unless a layer has been added.
+      // Better yet, figure out a way to signal to only call updateAttribution when the map is finished loading and all baseLayers and layers have been processed.
+
       if (NPMap.Layer) {
-        _.each(NPMap.Layer.getVisibleLayers(), function(v) {
-          if (typeof NPMap.Layer[v.type] !== 'undefined' && typeof NPMap.Layer[v.type].buildAttribution === 'function') {
-            _.each(NPMap.Layer[v.type].buildAttribution(v), function(a) {
-              attrs.push(a);
-            });
-          } else if (v.attribution) {
-            _.each(v.attribution.split('|'), function(v2) {
+        _.each(NPMap.Layer.getVisibleLayers(), function(layer) {
+          if (layer.attribution) {
+            var layerAttribution = layer.attribution;
+
+            if (typeof layer.attribution === 'string') {
+              layerAttribution = layer.attribution.split('|');
+            }
+
+            _.each(layerAttribution, function(v2) {
               var credit = v2.replace(/^\s*/, '').replace(/\s*$/, '');
 
               if (_.indexOf(attrs, credit) === -1) {

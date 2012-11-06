@@ -303,58 +303,49 @@ define([
         }
       }
 
-      for (var i = 0; i < results.length; i++) {
-        if (results[i].layerId === parseInt(ids[1], 0)) {
-          subLayer = results[i];
+      for (var j = 0; j < results.length; j++) {
+        if (results[j].layerId === parseInt(ids[1], 0)) {
+          subLayer = results[j];
           results = subLayer.results;
           break;
         }
       }
 
-      for (var i = 0; i < results.length; i++) {
-        if (results[i].OBJECTID === ids[2]) {
-          attributes = results[i];
+      for (var k = 0; k < results.length; k++) {
+        if (results[k].OBJECTID === ids[2]) {
+          attributes = results[k];
           break;
         }
       }
 
-      // layer.edit.userRole is a way of restricting the edit UI.
+      // TODO: Document userRole: layer.edit.userRole is a way of restricting the edit UI.
       if (layer.edit && layer.edit.userRole !== 'Reader') {
-        var editable = layer.edit.layers.split(',');
+        var editable = layer.edit.layers.split(','),
+            editAttributes = {
+              globalId: attributes.GlobalID,
+              name: name,
+              objectId: attributes.OBJECTID,
+              subLayerId: subLayer.layerId
+            };
 
         for (var l = 0; l < editable.length; l++) {
           if (parseInt(editable[l], 0) === subLayer.layerId) {
             actions.push({
               group: 'Edit',
               handler: function() {
-                layer.edit.handlers['delete']({
-                  globalId: attributes.GlobalID,
-                  name: name,
-                  objectId: attributes.OBJECTID,
-                  subLayerId: subLayer.layerId
-                });
+                layer.edit.handlers['delete'](editAttributes);
               },
               text: 'Delete feature'
             },{
               group: 'Edit',
               handler: function() {
-                layer.edit.handlers.updateAttributes({
-                  globalId: attributes.GlobalID,
-                  name: name,
-                  objectId: attributes.OBJECTID,
-                  subLayerId: subLayer.layerId
-                });
+                layer.edit.handlers.updateAttributes(editAttributes);
               },
               text: 'Update feature attributes'
             },{
               group: 'Edit',
               handler: function() {
-                layer.edit.handlers.updateGeometry({
-                  globalId: attributes.GlobalID,
-                  name: name,
-                  objectId: attributes.OBJECTID,
-                  subLayerId: subLayer.layerId
-                });
+                layer.edit.handlers.updateGeometry(editAttributes);
               },
               text: 'Update feature geometry'
             });
@@ -376,7 +367,7 @@ define([
       InfoBox.show(InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
     },
     /**
-     * Creates a GeoJson layer.
+     * Creates an ArcGisServerRest layer.
      * @param {Object} config
      * @param {Boolean} silent (Optional) If true, the NPMap.Layer events will not be called.
      * @return null

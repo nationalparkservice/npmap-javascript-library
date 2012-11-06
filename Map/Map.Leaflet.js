@@ -1,4 +1,11 @@
-﻿// TODO: Hook up attribution.
+/**
+           Is the fundamental problem that you store the events with the modules themselves? If you stored them in a central place in the NPMap.Event class, would that solve your problem?
+
+           That way, events could be added even before a module was loaded, and events could still get called correctly once the modules loaded.
+       */
+
+
+
 define([
   'Event',
   'Map/Map',
@@ -10,8 +17,48 @@ define([
   wax.leaf={};wax.leaf.interaction=function(){function e(){g=!0}var g=!1,f,c;return wax.interaction().attach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.on(d[a],e)}).detach(function(b){if(!arguments.length)return c;c=b;for(var d=["moveend"],a=0;a<d.length;a++)c.off(d[a],e)}).parent(function(){return c._container}).grid(function(){if(!g&&f)return f;var b=c._layers,d=[],a;for(a in b)if(b[a]._tiles)for(var e in b[a]._tiles){var h=wax.u.offset(b[a]._tiles[e]);d.push([h.top,h.left,b[a]._tiles[e]])}return f=d})};
   
   var
-      //
-      dblClick = false,
+      // The currently active baseLayer config.
+      activeBaseLayer,
+      // An array of the default base layers for the Leaflet baseAPI.
+      DEFAULT_BASE_LAYERS = {
+        aerial: {
+          cls: 'aerial',
+          icon: 'aerial',
+          mapTypeId: 'Aerial',
+          name: 'Aerial View',
+          type: 'Api'
+        },
+        blank: {
+          cls: 'blank',
+          icon: 'blank',
+          mapTypeId: 'Blank',
+          name: 'Blank View',
+          type: 'Api'
+        },
+        hybrid: {
+          cls: 'hybrid',
+          icon: 'aerial',
+          mapTypeId: 'AerialWithLabels',
+          name: 'Hybrid View',
+          type: 'Api'
+        },
+        streets: {
+          cls: 'streets',
+          icon: 'street',
+          mapTypeId: 'Road',
+          name: 'Street View',
+          type: 'Api'
+        },
+        terrain: {
+          attribution: 'MapBox | @ OpenStreetMap Contributors',
+          icon: 'topo',
+          id: 'nps.map-lj6szvbq',
+          name: 'Terrain View',
+          type: 'TileStream'
+        }
+      },
+      // Helps handle map single and double-click events.
+      doubleClicked = false,
       // The center {L.LatLng} to initialize the map with.
       initialCenter = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
       // The zoom level to initialize the map with.
@@ -19,23 +66,174 @@ define([
       // The {L.Map} object.
       map,
       // The map config object.
-      mapConfig = {};
+      mapConfig = {
+        attributionControl: false,
+        center: initialCenter,
+        zoom: initialZoom,
+        zoomControl: false
+      };
 
-  // Simple projection for "flat" maps. - https://github.com/CloudMade/Leaflet/issues/210#issuecomment-3344944
-  // TODO: This should be contained in Zoomify layer handler.
-  L.Projection.NoWrap = {
-    project: function (latlng) {
-      return new L.Point(latlng.lng, latlng.lat);
+  /**
+   * Handles the map resize.
+   * @return null
+   */
+  function handleResize() {
+    map.invalidateSize();
+  }
+
+  /**
+   * Bing Maps layer. - https://github.com/shramov/leaflet-plugins
+   */
+  L.TileLayer.Bing = L.TileLayer.extend({
+    options: {
+      attribution: 'Bing',
+      subdomains: [
+        0,
+        1,
+        2,
+        3
+      ],
+      type: 'Aerial'
     },
-    unproject: function (point, unbounded) {
-      return new L.LatLng(point.y, point.x, true);
+    _update: function() {
+      if (this._url === null || !this._map) {
+        return;
+      }
+
+      this._update_attribution();
+      L.TileLayer.prototype._update.apply(this, []);
+    },
+    _update_attribution: function() {
+      var bounds = this._map.getBounds(),
+          zoom = this._map.getZoom();
+
+      for (var i = 0; i < this._providers.length; i++) {
+        var p = this._providers[i];
+        
+        if ((zoom <= p.zoomMax && zoom >= p.zoomMin) && bounds.intersects(p.bounds)) {
+          if (!p.active) {
+            activeBaseLayer.attribution.push(p.attrib);
+          }
+
+          p.active = true;
+        } else {
+          if (p.active) {
+            activeBaseLayer.attribution.splice(_.indexOf(activeBaseLayer.attribution, p.attrib), 1);
+          }
+
+          p.active = false;
+        }
+      }
+      
+      Map.updateAttribution();
+    },
+    getTileUrl: function(p, z) {
+      var subdomains = this.options.subdomains,
+          s = this.options.subdomains[Math.abs((p.x + p.y) % subdomains.length)];
+
+      z = this._getZoomForUrl();
+
+      return this._url.replace('{subdomain}', s).replace('{quadkey}', this.tile2quad(p.x, p.y, z));
+    },
+    initialize: function(key, options) {
+      L.Util.setOptions(this, options);
+
+      activeBaseLayer.attribution = [];
+      this._key = key;
+      this._url = null;
+      this.meta = {};
+      this.loadMetadata();
+    },
+    initMetadata: function() {
+      var r = this.meta.resourceSets[0].resources[0];
+      
+      this.options.subdomains = r.imageUrlSubdomains;
+      this._providers = [];
+      this._url = r.imageUrl;
+      
+      for (var i = 0; i < r.imageryProviders.length; i++) {
+        var p = r.imageryProviders[i];
+        
+        for (var j = 0; j < p.coverageAreas.length; j++) {
+          var c = p.coverageAreas[j],
+              coverage = {zoomMin: c.zoomMin, zoomMax: c.zoomMax, active: false},
+              bounds = new L.LatLngBounds(
+                new L.LatLng(c.bbox[0] + 0.01, c.bbox[1] + 0.01),
+                new L.LatLng(c.bbox[2] - 0.01, c.bbox[3] - 0.01)
+              );
+          
+          coverage.bounds = bounds;
+          coverage.attrib = p.attribution;
+
+          this._providers.push(coverage);
+        }
+      }
+
+      this._update();
+    },
+    loadMetadata: function() {
+      var _this = this,
+          cbid = '_bing_metadata_' + L.Util.stamp(this),
+          script = document.createElement('script');
+
+      window[cbid] = function(meta) {
+        var e = document.getElementById(cbid);
+
+        _this.meta = meta;
+        window[cbid] = undefined;
+
+        e.parentNode.removeChild(e);
+
+        if (meta.errorDetails) {
+          return;
+        }
+
+        _this.initMetadata();
+      };
+
+      script.id = cbid;
+      script.src = 'http://dev.virtualearth.net/REST/v1/Imagery/Metadata/' + this.options.type + '?include=ImageryProviders&jsonp=' + cbid + '&key=' + this._key;
+      script.type = 'text/javascript';
+
+      document.getElementsByTagName('head')[0].appendChild(script);
+    },
+    onRemove: function(map) {
+      for (var i = 0; i < this._providers.length; i++) {
+        var p = this._providers[i];
+        
+        if (p.active) {
+          p.active = false;
+        }
+      }
+
+      activeBaseLayer.attribution = [];
+      
+      L.TileLayer.prototype.onRemove.apply(this, [map]);
+    },
+    tile2quad: function(x, y, z) {
+      var quad = '';
+      
+      for (var i = z; i > 0; i--) {
+        var digit = 0,
+            mask = 1 << (i - 1);
+        
+        if ((x & mask) !== 0) {
+          digit += 1;
+        }
+
+        if ((y & mask) !== 0) {
+          digit += 2;
+        }
+
+        quad = quad + digit;
+      }
+
+      return quad;
     }
-  };
-  L.CRS.Direct = L.Util.extend({}, L.CRS, {
-    code: 'Direct',
-    projection: L.Projection.NoWrap,
-    transformation: new L.Transformation(1, 0, 1, 0)
   });
+  /**
+   * Simple tile layer.
+   */
   L.TileLayer.Simple = L.TileLayer.extend({
     getTileUrl: function(xy, z) {
       return this._url(xy, z);
@@ -48,6 +246,9 @@ define([
       L.Util.setOptions(this, options);
     }
   });
+  /**
+   * Zoomify layer.
+   */
   L.TileLayer.Zoomify = L.TileLayer.extend({
     options: {
       continuousWorld: true,
@@ -76,6 +277,10 @@ define([
   
       return -1;
     },
+    _createTileProto: function () {
+      var img = this._tileImg = L.DomUtil.create('img', 'leaflet-tile');
+      img.galleryimg = 'no';
+    },
     // Taken from Modest Maps JS
     _zoomBy: function(coordinate, distance) {
       var power = Math.pow(2, distance);
@@ -98,7 +303,7 @@ define([
     },
     // Taken from https://github.com/migurski/canvas-warp
     getTileUrl: function(xy) {
-      var zoom = NPMap.Map.getZoom();
+      var zoom = Map.getZoom();
 
       return this._url + 'TileGroup' + this._coordinateGroup({
         column: xy.x,
@@ -151,27 +356,32 @@ define([
       }
       
       this._groups = groups;
-    },
-    // Override _createTileProto, as we don't want to set CSS height/width to 256x256.
-    _createTileProto: function () {
-      var img = this._tileImg = L.DomUtil.create('img', 'leaflet-tile');
-      img.galleryimg = 'no';
     }
   });
-  
-  mapConfig.attributionControl = false;
-  mapConfig.center = initialCenter;
-  mapConfig.zoom = initialZoom;
-  mapConfig.zoomControl = false;
 
   if (NPMap.config.baseLayers) {
+    Map._matchBaseLayers(DEFAULT_BASE_LAYERS);
+
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-      var baseLayer = NPMap.config.baseLayers[i];
+      var baseLayerI = NPMap.config.baseLayers[i];
       
-      if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
+      if (baseLayerI.visible) {
+        activeBaseLayer = baseLayerI;
+
         // TODO: This should be contained in Zoomify layer handler.
-        if (baseLayer.type === 'Zoomify') {
-          mapConfig.crs = L.CRS.Direct;
+        if (baseLayerI.type === 'Zoomify') {
+          mapConfig.crs = L.Util.extend({}, L.CRS, {
+            code: 'Direct',
+            projection: {
+              project: function(latlng) {
+                return new L.Point(latlng.lng, latlng.lat);
+              },
+              unproject: function(point, unbounded) {
+                return new L.LatLng(point.y, point.x, true);
+              }
+            },
+            transformation: new L.Transformation(1, 0, 1, 0)
+          });
           mapConfig.worldCopyJump = false;
         }
         
@@ -179,14 +389,17 @@ define([
       }
     }
   } else if (typeof NPMap.config.baseLayers === 'undefined') {
-    NPMap.config.baseLayers = [{
-      id: 'mapbox.mapbox-light',
-      maxZoom: 17,
-      type: 'TileStream',
-      visible: true
-    }];
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['streets']
+    ];
+    NPMap.config.baseLayers[0].visible = true;
+    activeBaseLayer = NPMap.config.baseLayers[0];
   } else {
-    NPMap.config.baseLayers = [];
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['blank']
+    ];
+    NPMap.config.baseLayers[0].visible = true;
+    activeBaseLayer = NPMap.config.baseLayers[0];
   }
   
   if (typeof NPMap.config.restrictZoom !== 'undefined') {
@@ -198,17 +411,38 @@ define([
       mapConfig.minZoom = NPMap.config.restrictZoom.min;
     }
   } else {
-    mapConfig.maxZoom = 17;
+    mapConfig.maxZoom = 19;
     mapConfig.minZoom = 0;
   }
   
   map = new L.Map(NPMap.config.div, mapConfig);
 
+  for (var j = 0; j < NPMap.config.baseLayers.length; j++) {
+    var baseLayerJ = NPMap.config.baseLayers[j];
+
+    if (baseLayerJ.visible) {
+      if (baseLayerJ.type === 'Api') {
+        if (baseLayerJ.mapTypeId !== 'Blank') {
+          // TODO: Switch this API key over to the key that is set in NPMap.config.
+          baseLayerJ.api = new L.TileLayer.Bing('Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65', {
+            type: baseLayerJ.mapTypeId
+          });
+          map.addLayer(baseLayerJ.api);
+        }
+      } else {
+        NPMap.Layer[baseLayerJ.type].create(baseLayerJ);
+      }
+
+      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
+      break;
+    }
+  }
+
   map.on('click', function(e) {
-    dblClick = false;
+    doubleClicked = false;
 
     setTimeout(function() {
-      if (!dblClick) {
+      if (!doubleClicked) {
         Event.trigger('NPMap.Map', 'click', e);
       }
     }, 350);
@@ -217,7 +451,7 @@ define([
     Event.trigger('NPMap.Map', 'rightclick', e);
   });
   map.on('dblclick', function(e) {
-    dblClick = true;
+    doubleClicked = true;
 
     Event.trigger('NPMap.Map', 'dblclick', e);
   });
@@ -253,11 +487,11 @@ define([
     NPMap.Event.trigger('NPMap.Map', 'zoomstart');
   });
   Map._init();
-  Util.safeLoad('NPMap.Map.Leaflet', function() {
-    NPMap.Map.Leaflet.handleResize();
-  });
+  handleResize();
   
   return NPMap.Map.Leaflet = {
+    // The current attribution {Array}.
+    _attribution: [],
     // Is the map loaded and ready to be interacted with programatically?
     _isReady: true,
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
@@ -273,15 +507,15 @@ define([
     /**
      * Adds a tile layer to the map.
      * @param {Object} layer
+     * @return null
      */
     addTileLayer: function(layer) {
-      var insertAtBottom = (layer.zIndex === 0);
-
-      map.addLayer(layer, insertAtBottom);
+      map.addLayer(layer, layer.zIndex === 0);
     },
     /**
      * Sets the bounds of the map.
      * @param {L.LatLngBounds} bounds
+     * @return null
      */
     bounds: function(bounds) {
       map.fitBounds(bounds);
@@ -313,6 +547,7 @@ define([
     /**
      * Centers the map.
      * @param {Object} latLng
+     * @return null
      */
     center: function(latLng) {
       this.centerAndZoom(latLng, this.getZoom());
@@ -321,27 +556,34 @@ define([
      * Zooms to the center and zoom provided. If zoom isn't provided, the map will zoom to level 17.
      * @param {L.LatLng} latLng
      * @param {Number} zoom
+     * @return null
      */
     centerAndZoom: function(latLng, zoom) {
       map.setView(latLng, zoom);
     },
     /**
-     *
+     * Converts NPMap line options to Leaflet line options.
+     * @param {Object} options
+     * @return {Object}
      */
     convertLineOptions: function(options) {
-
+      return '"Not yet implemented"';
     },
     /**
-     *
+     * Converts NPMap marker options to Leaflet marker options.
+     * @param {Object} options
+     * @return {Object}
      */
     convertMarkerOptions: function(options) {
-
+      return '"Not yet implemented"';
     },
     /**
-     *
+     * Converts NPMap polygon options to Leaflet polygon options.
+     * @param {Object} options
+     * @return {Object}
      */
     convertPolygonOptions: function(options) {
-
+      return '"Not yet implemented"';
     },
     /**
      * Creates a line shape.
@@ -359,9 +601,7 @@ define([
      * @return {Object}
      */
     createMarker: function(latLng, options) {
-      var marker = new L.Marker(latLng);
-
-      return marker;
+      return new L.Marker(latLng);
     },
     /**
      * Creates a polygon shape.
@@ -376,6 +616,7 @@ define([
      * Creates a tile layer.
      * @param {String/Function} constructor
      * @param {Object} options (Optional)
+     * @return {Object}
      */
     createTileLayer: function(constructor, options) {
       var getSubdomain = null,
@@ -465,20 +706,22 @@ define([
       return map.getBounds();
     },
     /**
-     *
-     * @return {L.LatLng}
+     * Gets the center {L.LatLng} of the map.
+     * @return {Object}
      */
     getCenter: function() {
       return map.getCenter();
     },
     /**
      * Returns the {L.LatLng} for the #npmap-clickdot div.
+     * @return {Object}
      */
     getClickDotLatLng: function() {
       return this.pixelToLatLng(this.getClickDotPixel());
     },
     /**
      * Returns the {L.Point} for the #npmap-clickdot div.
+     * @return {Object}
      */
     getClickDotPixel: function() {
       var offset = Util.getOffset(document.getElementById('npmap-map')),
@@ -488,10 +731,10 @@ define([
     },
     /**
      * Gets the map element.
+     * @return {Object}
      */
     getMapElement: function() {
       return document.getElementById('npmap-map');
-      //return document.getElementById(NPMap.config.div).childNodes[0];
     },
     /**
      * Gets the latLng (L.LatLng) of the marker.
@@ -516,7 +759,7 @@ define([
       return mapConfig.minZoom;
     },
     /**
-     *
+     * Gets the zoom level of the map.
      * @return {Number}
      */
     getZoom: function() {
@@ -524,9 +767,11 @@ define([
     },
     /**
      * Handles any necessary sizing and positioning for the map when its div is resized.
+     * @param {Function} callback
+     * @return null
      */
     handleResize: function(callback) {
-      map.invalidateSize();
+      handlResize();
       
       if (callback) {
         callback();
@@ -560,7 +805,9 @@ define([
       return new L.LatLng(latLng.lat, latLng.lng);
     },
     /**
-     *
+     * Converts a {L.LatLng} to a {L.Point}.
+     * @param {Object} latLng
+     * @return {Object}
      */
     latLngToPixel: function(latLng) {
       return map.latLngToContainerPoint(latLng);
@@ -569,6 +816,7 @@ define([
      * Pans the map horizontally and vertically based on the pixels passed in.
      * @param {Object} pixels
      * @param {Function} callback (Optional)
+     * @return null
      */
     panByPixels: function(pixels, callback) {
       map.panBy(new L.Point(-pixels.x, -pixels.y));
@@ -583,7 +831,9 @@ define([
       }
     },
     /**
-     *
+     * Turns a {L.Point} to a NPMap pixel object.
+     * @param {Object} pixel
+     * @return {Object}
      */
     pixelFromApi: function(pixel) {
       return {
@@ -602,14 +852,15 @@ define([
     /**
      * Converts a {L.Point} to a {L.LatLng}.
      * @param {L.Point} pixel
-     * @return {L.LatLng}
+     * @return {Object}
      */
     pixelToLatLng: function(pixel) {
       return map.containerPointToLatLng(pixel);
     },
     /**
-     * Positions the #npmap-clickdot div on top of the pushpin, lat/lng object, or lat/lng string that is passed in.
-     * @param {google.maps.Marker} OR {google.maps.LatLng} OR {String} to The Pushpin, Location, or latitude/longitude string to position the div onto.
+     * Positions the #npmap-clickdot div on top of the {L.Marker} or {L.LatLng} that is passed in.
+     * @param {Object} to The {L.Marker} or {L.LatLng} to position the div onto.
+     * @return null
      */
     positionClickDot: function(to) {
       var clickDot = document.getElementById('npmap-clickdot'),
@@ -635,8 +886,17 @@ define([
       clickDot.style.top = pixel.y + 'px';
     },
     /**
-     * Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.
-     * @param {Object} c
+     * Removes a tile layer from the map.
+     * @param {Object} layer
+     * @return null
+     */
+    removeTileLayer: function(layer) {
+      map.removeLayer(layer);
+    },
+    /**
+     * Sets the initial center of the map.
+     * @param {Object} center
+     * @return null
      */
     setInitialCenter: function(center) {
       initialCenter = center;
@@ -646,8 +906,9 @@ define([
       };
     },
     /**
-     * Sets the initial zoom of the map. This initial zoom is stored with the map, and is used by the setInitialExtent method, among other things.
+     * Sets the initial zoom of the map.
      * @param {Number} zoom
+     * @return null
      */
     setInitialZoom: function(zoom) {
       zoom = NPMap.config.zoom = zoom;
@@ -655,6 +916,7 @@ define([
     /**
      * Sets zoom restrictions on the map.
      * @param {Object} restrictions
+     * @return null
      */
     setZoomRestrictions: function(restrictions) {
       NPMap.config.restrictZoom = NPMap.config.restrictZoom || {};
@@ -670,8 +932,60 @@ define([
       // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.
     },
     /**
-     * Zooms the map to a bounding box.
-     * @param {Object} bbox A {L.LatLngBounds} object.
+     * Switches the base map.
+     * @param {Object} baseLayer The base layer to switch to.
+     * @return null
+     */
+    switchBaseLayer: function(baseLayer) {
+      var api,
+          cls = baseLayer.cls,
+          mapTypeId,
+          me = this,
+          removeAttribution = [];
+
+      for (var k = 0; k < NPMap.config.baseLayers.length; k++) {
+        var bl = NPMap.config.baseLayers[k];
+
+        if (bl.visible) {
+          activeBaseLayer = bl;
+        }
+
+        bl.visible = false;
+      }
+
+      if (activeBaseLayer.type === 'Api') {
+        if (activeBaseLayer.mapTypeId !== 'Blank') {
+          map.removeLayer(activeBaseLayer.api);
+          delete activeBaseLayer.api;
+        }
+      } else {
+        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+      }
+
+      activeBaseLayer = baseLayer;
+
+      if (cls) {
+        cls = cls.toLowerCase();
+      }
+
+      if (baseLayer.type === 'Api') {
+        if (baseLayer.mapTypeId !== 'blank') {
+          baseLayer.api = new L.TileLayer.Bing('Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65', {
+            type: baseLayer.mapTypeId
+          });
+          map.addLayer(baseLayer.api);
+        }
+      } else {
+        NPMap.Layer[baseLayer.type].create(baseLayer);
+      }
+
+      baseLayer.visible = true;
+
+      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
+    },
+    /**
+     * Zooms the map to a {L.LatLngBounds}.
+     * @param {Object} bounds
      * @return null
      */
     toBounds: function(bounds) {
@@ -679,6 +993,7 @@ define([
     },
     /**
      * Zooms and/or pans the map to its initial extent.
+     * @return null
      */
     toInitialExtent: function() {
       if (NPMap.InfoBox.visible) {
@@ -719,12 +1034,14 @@ define([
     },
     /**
      * Zooms the map in by one zoom level.
+     * @return null
      */
     zoomIn: function() {
       map.zoomIn();
     },
     /**
      * Zooms the map out by one zoom level.
+     * @return null
      */
     zoomOut: function() {
       map.zoomOut();

@@ -11,8 +11,6 @@
   return NPMap.Edit = {
     // The module config object.
     config: config,
-    // An array of event handler objects that have been added to this class.
-    events: [],
     /**
      * Removes all of the shapes that have been created by the edit module from the map.
      */

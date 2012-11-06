@@ -1,6 +1,9 @@
+/**
+ * @module NPMap.Event
+ */
 define(function() {
   var
-      // Contains all the active events.
+      // Contains all of the active events.
       activeEvents = [],
       // An incrementing integer to use for event ids.
       id = 0;
@@ -15,26 +18,20 @@ define(function() {
      * @return {Number}
      */
     add: function(obj, event, func, single) {
-      var cls = obj.replace('NPMap.', ''),
-          e = {
-            cls: cls,
-            event: event,
-            func: func,
-            id: id,
-            single: single || false
-          };
-
-      NPMap[cls]._events = NPMap[cls]._events || [];
-      
-      NPMap[cls]._events.push(e);
-      activeEvents.push(e);
+      activeEvents.push({
+        cls: obj.replace('NPMap.', ''),
+        event: event,
+        func: func,
+        id: id,
+        single: single || false
+      });
 
       id++;
 
       return id - 1;
     },
     /**
-     * Gets events.
+     * Gets all the events, and optionally just the events that have been added to a modulezs.
      * @param {String} obj (Optional)
      * @return {Array}
      */
@@ -58,7 +55,7 @@ define(function() {
       return events;
     },
     /**
-     * Remove an existing event from an NPMap class.
+     * Removes an existing event from a NPMap module.
      * @param {Number} id
      * @return null
      */
@@ -81,17 +78,6 @@ define(function() {
       }
 
       index = -1;
-
-      for (var i = 0; i < NPMap[cls]._events.length; i++) {
-        if (NPMap[cls]._events[i].id === id) {
-          index = i;
-          break;
-        }
-      }
-      
-      if (index !== -1) {
-        NPMap[cls]._events.splice(index, 1);
-      }
     },
     /**
      * Triggers an event.
@@ -101,14 +87,14 @@ define(function() {
      * @return null
      */
     trigger: function(obj, event, e) {
-      var cl = obj.replace('NPMap.', ''),
+      var cls = obj.replace('NPMap.', ''),
           remove = [];
 
-      if (typeof NPMap[cl] !== 'undefined' && typeof NPMap[cl]._events !== 'undefined') {
-        for (var i = 0; i < NPMap[cl]._events.length; i++) {
-          var v = NPMap[cl]._events[i];
+      if (typeof NPMap[cls] !== 'undefined') {
+        for (var i = 0; i < activeEvents.length; i++) {
+          var v = activeEvents[i];
 
-          if (v.event === event) {
+          if (cls === v.cls && v.event === event) {
             if (!e) {
               v.func();
             } else {
@@ -116,13 +102,13 @@ define(function() {
             }
 
             if (v.single === true) {
-              remove.push(v);
+              remove.push(i);
             }
           }
         }
 
-        _.each(remove, function(handler) {
-          NPMap[cl]._events.splice(NPMap[cl]._events.indexOf(handler), 1);
+        _.each(remove, function(index) {
+          activeEvents.splice(index, 1);
         });
       } else {
         var me = this;

@@ -277,7 +277,7 @@ if (typeof bean === 'undefined') {
               var div = document.getElementById('npmap'),
                   divLoading = document.getElementById('npmap-loading'),
                   divMask = document.getElementById('npmap-mask');
-
+                  
               divMask.parentNode.removeChild(divMask);
               divLoading.parentNode.removeChild(divLoading);
 

@@ -508,8 +508,6 @@ define([
   divInfoBox.style.position = 'absolute';
 
   return NPMap.InfoBox = {
-    // An array of event handler objects that have been added to this class.
-    _events: [],
     /**
      * Builds a HTML string for the InfoBox.
      * @param {Object} config The layer config object.

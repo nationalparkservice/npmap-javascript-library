@@ -368,10 +368,10 @@
   Map._init();
 
   return NPMap.Map.Bing = {
-    //
-    _attribution: null,
-    //
+    // The default base layers CONSTANT.
     _DEFAULT_BASE_LAYERS: DEFAULT_BASE_LAYERS,
+    // The current attribution {Array}.
+    _attribution: null,
     // Is the map loaded and ready to be interacted with programatically.
     _isReady: true,
     // The {Microsoft.Maps.Map} object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.
