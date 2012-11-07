@@ -426,8 +426,6 @@ define([
           });
           map.addLayer(baseLayerJ.api);
         }
-      } else {
-        NPMap.Layer[baseLayerJ.type].create(baseLayerJ);
       }
 
       NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
@@ -768,7 +766,7 @@ define([
      * @return null
      */
     handleResize: function(callback) {
-      handlResize();
+      handleResize();
       
       if (callback) {
         callback();
