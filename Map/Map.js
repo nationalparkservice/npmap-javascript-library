@@ -1091,7 +1091,7 @@ define([
     },
     /**
      * Creates a marker using the base API's marker class.
-     * @param {String} latLng The latitude/longitude object to use to create the marker.
+     * @param {Object} latLng The latitude/longitude object to use to create the marker.
      * @param {Object} options (Optional) Marker options.
      * @return {Object}
      */
