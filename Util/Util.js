@@ -37,7 +37,7 @@ define(function() {
     var classElements = [],
         els = document.getElementsByTagName('*'),
         elsLen = els.length,
-        pattern = new RegExp("(^|\\s)"+searchClass+"(\\s|$)");
+        pattern = new RegExp("(^|\\s)"+cls+"(\\s|$)");
 
     for (i = 0, j = 0; i < elsLen; i++) {
       if (pattern.test(els[i].className)) {
