@@ -640,7 +640,7 @@ define([
           hasFooterContent = false,
           me = this,
           mH;
-          
+
       if (this.visible) {
         this.hide();
       }
@@ -661,7 +661,7 @@ define([
           NPMap.InfoBox.marker = target;
         }
       }
-
+      
       NPMap.Map.hideTip();
 
       divInfoBoxContentWrapper.style.height = 'auto';
@@ -679,24 +679,18 @@ define([
           _.each(actions, function(action, i) {
             if (typeof action === 'string') {
               if (action === 'zoomable') {
-                var max = NPMap.Map[NPMap.config.api].getMaxZoom();
-
-                if (NPMap.Map[NPMap.config.api].getZoom() < max) {
-                  add.push({
-                    handler: function() {
-                      //NPMap.InfoBox.removeAction(this);
-                      NPMap.Map.centerAndZoom(me.latLng, max);
-                    },
-                    text: 'Zoom to this location'
-                  });
-                }
-
+                add.push({
+                  handler: function() {
+                    NPMap.Map.centerAndZoom(me.latLng, NPMap.Map[NPMap.config.api].getMaxZoom());
+                  },
+                  text: 'Zoom to this location'
+                });
                 remove.push(i);
               }
             }
           });
-          _.each(remove, function(action) {
-            actions.remove(action);
+          _.each(remove, function(index) {
+            actions.splice(index, 1);
           });
           _.each(add, function(action) {
             actions.push(action);

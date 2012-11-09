@@ -32,6 +32,7 @@ define([
         if (target.npmap.shapeType === 'Marker') {
           to = target;
         } else {
+          // TODO: If a polygon or line shape is passed in as eventOrTarget parameter, you need a way to get its center lat/lng. You should do that here.
           to = NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].eventGetLatLng(e));
         }
 
