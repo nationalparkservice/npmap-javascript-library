@@ -859,7 +859,8 @@ define([
             divSwitcher.id = 'npmap-switcher';
             divSwitcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
             divSwitcherMenu.id = 'npmap-switcher-menu';
-            divSwitcherMenu.style.cssText = 'display:none;position:absolute;right:16px;top:38px;';
+            // TODO: Both menus should be able to expand in width up to a set number (maybe 250px?).
+            divSwitcherMenu.style.cssText = 'display:none;max-width:160px;position:absolute;right:16px;top:38px;';
             
             elements.push({
               el: divSwitcher
