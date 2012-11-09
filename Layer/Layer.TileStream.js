@@ -59,12 +59,6 @@
       z: z
     });
   }
-  
-  Event.add('NPMap.Map', 'zoomstart', function() {
-    if (NPMap.Layer.TileStream._getAllVisibleLayers().length > 0) {
-      InfoBox.hide();
-    }
-  });
 
   return NPMap.Layer.TileStream = {
     /**

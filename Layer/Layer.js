@@ -196,6 +196,11 @@ define([
       }
     }
   });
+  Event.add('NPMap.Map', 'zoomstart', function() {
+    if (!NPMap.InfoBox.marker) {
+      NPMap.InfoBox.hide();
+    }
+  });
 
   interval = setInterval(function() {
     var Layer = NPMap.Layer;
