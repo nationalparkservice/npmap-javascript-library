@@ -1,7 +1,11 @@
 ﻿define(function() {
-  // A queue of layers to load when the JSON files are loaded and ready to go.
-  var queue = [];
+  var 
+      // A queue of layers to load when the JSON files are loaded and ready to go.
+      queue = [];
   
+  /**
+   *
+   */
   function createGeometries(layer, json) {
     layer.geometries = [];
 
@@ -71,23 +75,13 @@
     });
   }
 
-  NPMap.layers = NPMap.layers || {};
-  
-  return NPMap.layers.Json = {
-    /**
-     * Adds a Json layer to the map.
-     */
-    addLayer: function(layer) {
-      queue.push(layer);
-      require([
-        layer.url
-      ]);
-    },
+  return NPMap.Layer.Json = {
     /**
      * This function gets called by the JSON file loaded via JSONP.
      * @param {Object} json
+     * @return null
      */
-    callback: function(json) {
+    _callback: function(json) {
       function cycle() {
         var remove = [];
       
@@ -108,10 +102,21 @@
       }
     },
     /**
+     * Adds a Json layer to the map.
+     * @return null
+     */
+    create: function(layer) {
+      queue.push(layer);
+      require([
+        layer.url
+      ]);
+    },
+    /**
      * Hides the Json layer.
      * @param {Object} The layer config object of the layer to hide.
+     * @return null
      */
-    hideLayer: function(layer) {
+    hide: function(layer) {
       _.each(layer.geometries, function(v, i) {
         NPMap.Map.setMarkerOptions(v, {
           visible: false
@@ -120,15 +125,20 @@
 
       layer.visible = false;
     },
-    // TODO: Implement this.
-    removeLayer: function(layer) {
+    /**
+     * Removes the layer.
+     * @param {Object} layer
+     * @return null
+     */
+    remove: function(layer) {
     
     },
     /**
      * Shows the KML layer.
-     * @param {Object} The layer config object of the layer to hide.
+     * @param {Object} layer
+     * @return null
      */
-    showLayer: function(layer) {
+    show: function(layer) {
       _.each(layer.geometries, function(v) {
         NPMap.Map.setMarkerOptions(v, {
           visible: true

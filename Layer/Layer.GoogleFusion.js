@@ -6,6 +6,7 @@
     /**
      * Handles the click operation for GoogleFusion layers.
      * @param {Object} e
+     * @return null
      */
     _handleClick: function(e) {
       if (e.npmap && e.npmap.layerType === 'GoogleFusion') {
@@ -18,6 +19,7 @@
     /**
      * Creates a GoogleFusion layer.
      * @param {Object} config
+     * @return null
      */
     create: function(config) {
       var layer;
