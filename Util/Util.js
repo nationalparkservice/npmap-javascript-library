@@ -63,6 +63,13 @@ define(function() {
     return this.push.apply(this, rest);
   };
 
+  // TODO: This is here because String.trim is not supported in IE7/8.
+  if (!String.prototype.trim) {
+    String.prototype.trim = function () {
+      return this.replace(/^\s+|\s+$/g,'');
+    };
+  }
+
   return NPMap.Util = {
     /**
      * Adds a CSS class to an element.

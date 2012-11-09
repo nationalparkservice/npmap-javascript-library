@@ -27,7 +27,8 @@ define([
   
   // https://developer.mozilla.org/en/JXON
   function JXONTree (oXMLParent) {
-    var nAttrLen = 0,
+    var hasAttributes = false,
+        nAttrLen = 0,
         nLength = 0,
         sCollectedTxt = '';
     
@@ -57,8 +58,22 @@ define([
     } else {
       this.keyValue = null;
     }
-    
-    if (oXMLParent.hasAttributes()) {
+
+    if (oXMLParent.hasAttributes) {
+      hasAttributes = oXMLParent.hasAttributes();
+    }
+    else {
+      var attributes = oXMLParent.attributes;
+
+      for (var i = 0; i < attributes.length; i++) {
+        if (attributes[i].specified) {
+          hasAttributes = true;
+          break;
+        }
+      }
+    }
+
+    if (hasAttributes) {
       var oAttrib;
 
       this.keyAttributes = {};
@@ -69,7 +84,10 @@ define([
       }
     }
 
-    Object.freeze(this);
+    // Object.freeze was introduced in IE 9.
+    if (Object.freeze) {
+      Object.freeze(this);
+    }
   }
 
   JXONTree.prototype.valueOf = function () {
