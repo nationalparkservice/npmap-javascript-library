@@ -8,10 +8,17 @@ define([
   return NPMap.Layer.Kml = {
     /**
      * Handles the click operation for ArcGisServerRest layers.
-     * @param {Object} e
+     * @param {Object} eventOrTarget The click event object OR the target itself.
+     * @return null
      */
-    _handleClick: function(e) {
-      var target = NPMap.Map[NPMap.config.api].eventGetShape(e);
+    _handleClick: function(eventOrTarget) {
+      var target;
+
+      if (typeof eventOrTarget.npmap === 'undefined') {
+        target = NPMap.Map[NPMap.config.api].eventGetShape(eventOrTarget);
+      } else {
+        target = eventOrTarget;
+      }
 
       if (target && target.npmap && target.npmap.layerType === 'Kml') {
         var config = Layer.getLayerByName(target.npmap.layerName),
