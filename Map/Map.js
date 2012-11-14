@@ -1239,8 +1239,7 @@ define([
      */
     hideProgressBar: function() {
       divProgressBar.childNodes[0].style.width = '100%';
-
-      /*
+      
       morpheus(divProgressBar, {
         complete: function() {
           divProgressBar.style.display = 'none';
@@ -1249,10 +1248,6 @@ define([
         duration: 1000,
         opacity: 0
       });
-      */
-
-      divProgressBar.style.display = 'none';
-      divProgressBar.style.opacity = 1;
     },
     /**
      * Hides a shape.
