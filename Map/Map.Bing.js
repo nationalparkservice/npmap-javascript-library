@@ -42,7 +42,7 @@ define([
           type: 'Api'
         },
         terrain: {
-          attribution: 'MapBox | @ OpenStreetMap Contributors',
+          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
           icon: 'topo',
           id: 'nps.map-lj6szvbq',
           name: 'Terrain View',
