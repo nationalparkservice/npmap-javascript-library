@@ -1,14 +1,14 @@
-# Important Notes
+<h1 id="notes">Notes</h1>
 
-Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. Do not use them.
+- Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. Do not use them.
 
-# Specifications
+<h1 id="specifications">Specifications</h1>
 
 By design, NPMap doesn't create or utilize traditional JavaScript classes. It, rather, uses simple objects and utility methods specific to whichever base API is being used by the map to convert objects to and from native base API objects.
 
 These specifications document the structure of objects you'll see when interacting directly with NPMap's modules. If you are interacting with objects that aren't proxied through one of the NPMap modules, you'll need to take a look at the API docs for the base API itself to see what the expected format is.
 
-## Bounds
+<h2 id="specifications-bounds">Bounds</h2>
 
 NPMap always expects and returns coordinates in Decimal Degrees.
 
@@ -38,8 +38,7 @@ NPMap always expects and returns coordinates in Decimal Degrees.
     </tr>
   </tbody>
 </table>
-
-## LatLng
+<h2 id="specifications-latlng">LatLng</h2>
 
 NPMap always expects and returns coordinates in Decimal Degrees.
 
@@ -61,9 +60,7 @@ NPMap always expects and returns coordinates in Decimal Degrees.
     </tr>
   </tbody>
 </table>
-
-## Point
-
+<h2 id="specifications-point">Point</h2>
 <table class="table table-bordered table-condensed">
   <thead>
     <tr>
@@ -82,8 +79,7 @@ NPMap always expects and returns coordinates in Decimal Degrees.
     </tr>
   </tbody>
 </table>
-
-## Shape
+<h2 id="specifications-shape">Shape</h2>
 
 NPMap stores important metadata as a property on all the lines, markers, and polygons that it creates. It uses these metadata to make information about the shapes available via <code>click</code> and <code>mouseover</code> operations and various modules and tools.
 
@@ -112,13 +108,12 @@ All of the metadata that NPMap stores with a shape is contained in the <code>npm
   </tbody>
 </table>
 
-# NPMap.config
+<h1 id="npmap.config">NPMap.config</h1>
 
 The <code>NPMap.config</code> object is used to set configuration properties that NPMap uses to build the map. You must create this object **before** loading the NPMap library into your web page.
 
-## Example
-
-<pre data-line="3-11"><code>var NPMap = NPMap || {};
+<h2 id="npmap.config-example">Example</h2>
+<pre data-line="3-10"><code>var NPMap = NPMap || {};
 
 NPMap.config = {
   center: {
@@ -136,8 +131,7 @@ NPMap.config = {
   document.body.appendChild(s);
 })();
 </code></pre>
-
-## Options
+<h2 id="npmap.config-options">Options</h2>
 
 The following properties can be set in the <a href="#npmapconfig"><code>NPMap.config</code></a> object. Note that the only required property is <code>NPMap.config.div</code>.
 
@@ -183,7 +177,7 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
       <td><code>div</code></td>
       <td><code>{String}</code></td>
       <td><code>null</code></td>
-      <td>This property is <em>required</em>. The <code>id</code> of the HTML <code>div</code> element to render the map into. NPMap will automatically size the map to take up 100% of the height and width of the div. If/when this <code>div</code> is resized, NPMap will automatically resize the map.</td>
+      <td>This property is <strong>required</strong>. The <code>id</code> of the HTML <code>div</code> element to render the map into. NPMap will automatically size the map to take up 100% of the height and width of the div. If/when this <code>div</code> is resized, NPMap will automatically resize the map and reposition/resize any toolbars or modules that have been added to the map.</td>
     </tr>
     <tr>
       <td><code>events</code></td>
@@ -195,7 +189,7 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
       <td><code>hideLogo</code></td>
       <td><code>{Boolean}</code></td>
       <td><code>false</code></td>
-      <td>Tells NPMap to hide the NPMap logo. If possible, help us spread the word about NPMap by leaving the logo on the map!</td>
+      <td>Tells NPMap to hide the NPMap logo. If possible, help us spread the word about this project by leaving the logo on the map!</td>
     </tr>
     <tr>
       <td><code>infobox</code></td>
@@ -245,17 +239,15 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
     </tr>
   </tbody>
 </table>
+<h1 id="npmap.map">NPMap.Map</h1>
 
-# NPMap.Map
+The map is the core component of NPMap. The <code>NPMap.Map</code> module facilitates creating and interacting with a map built with one of the supported base APIs. To create a map, you will need to create a <code>NPMap.config</code> object and then load the NPMap library into your web page.
 
-The map is the core component of NPMap. <code>NPMap.Map</code> is a factory that facilitates creating and interacting with a map built using one of the supported base APIs. To create a map, you will need to create a <code>NPMap.config</code> object and then load the NPMap library into your web page.
+<h2 id="npmap.map-dependencies">Dependencies</h2>
 
-## Dependencies
+- [MapBox Wax](http://mapbox.com/wax/)
 
-- Wax
-
-## Methods
-
+<h2 id="npmap.map-methods">Methods</h2>
 <table class="table table-bordered table-condensed">
   <thead>
     <tr>
@@ -330,18 +322,46 @@ The map is the core component of NPMap. <code>NPMap.Map</code> is a factory that
       <td>{Object}</td>
       <td>Creates a Zoomify layer.</td>
     </tr>
+    <tr>
+      <td>getBounds()</td>
+      <td>{Object}</td>
+      <td>Gets the map bounds.</td>
+    </tr>
+    <tr>
+      <td>getCenter()</td>
+      <td>{Object}</td>
+      <td>Gets the center of the map.</td>
+    </tr>
+    <tr>
+      <td>getMapElement()</td>
+      <td>{Object}</td>
+      <td>Gets the map element.</td>
+    </tr>
+    <tr>
+      <td>getBounds()</td>
+      <td>{Object}</td>
+      <td>Gets the map bounds.</td>
+    </tr>
+    <tr>
+      <td>getMaxZoom()</td>
+      <td>{Number}</td>
+      <td>Gets the maximum zoom level for the map.</td>
+    </tr>
+    <tr>
+      <td>getMinZoom()</td>
+      <td>{Number}</td>
+      <td>Gets the minimum zoom level for the map.</td>
+    </tr>
   </tbody>
 </table>
-
-## Properties
-
-## Events
+<h2 id="npmap.map-properties">Properties</h2>
+<h2 id="npmap.map-events">Events</h2>
 
 The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmapevent"><code>NPMap.Event</code></a> module.
 
 You can see these events in action on the [map events example](http://www.nps.gov/npmap/support/library/examples/map-events.html).
 
-### Mouse Events
+<h3 id="npmap.map-events-mouse">Mouse Events</h3>
 
 Once you subscribe to one of these events, your handler will receive the {MouseEvent} as a parameter when the event is fired.
 
@@ -396,9 +416,7 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
     </tr>
   </tbody>
 </table>
-
-### Map Events
-
+<h3 id="npmap.map-events-map">Map Events</h3>
 <table class="table table-bordered table-condensed">
   <thead>
     <tr>
@@ -455,8 +473,7 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
     </tr>
   </tbody>
 </table>
-
-## Submodules
+<h2 id="npmap.map-submodules">Submodules</h2>
 
 Base API-specific code lives in one of the submodules that hang off of the <code>NPMap.Map</code> module. Generally speaking, you should not interact directly with these submodules, but if you need to do something programatically that isn't supported by the <code>NPMap.Map</code> module, you may need to.
 
@@ -465,10 +482,7 @@ Base API-specific code lives in one of the submodules that hang off of the <code
 - <a href="http://www.nps.gov/npmap/support/library/base-apis/leaflet.html"><code>NPMap.Map.Leaflet</code></a>
 - <a href="http://www.nps.gov/npmap/support/library/base-apis/modestmaps.html"><code>NPMap.Map.ModestMaps</code></a>
 
-# NPMap.Layer
-
-# NPMap.Event
-
-# NPMap.InfoBox
-
-# NPMap.Util
+<h1 id="npmap.layer">NPMap.Layer</h1>
+<h1 id="npmap.event">NPMap.Event</h1>
+<h1 id="npmap.infobox">NPMap.InfoBox</h1>
+<h1 id="npmap.util">NPMap.Util</h1>
