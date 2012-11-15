@@ -405,7 +405,7 @@ define([
           logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + apiLower + 'logo.png" /></span>';
         }
         
-        if (!NPMap.config.hideNpmapLogo) {
+        if (!NPMap.config.hideLogo) {
           logosHtml += '<span style="display:block;float:left;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
         }
 
