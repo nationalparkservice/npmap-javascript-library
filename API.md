@@ -248,59 +248,133 @@ The map is the core component of NPMap. <code>NPMap.Map</code> is a factory that
 
 ## Events
 
-<div class="span-6">
-  <p>Mouse:</p>
-  <ul>
-    <li>click</li>
-    <li>dblclick</li>
-    <li>mousedown</li>
-    <li>mousemove</li>
-    <li>mouseout</li>
-    <li>mouseover</li>
-    <li>mouseup</li>
-    <li>shapeclick</li>
-  </ul>
-</div>
-<div class="span-6">
-  <p>Map State:</p>
-  <ul>
-    <li>baselayerchanged</li>
-    <li>panend</li>
-    <li>panstart</li>
-    <li>ready</li>
-    <li>viewchange</li>
-    <li>viewchangeend</li>
-    <li>viewchangestart</li>
-    <li>zoomend</li>
-    <li>zoomstart</li>
- </ul>
-</div>
+The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmapevent"><code>NPMap.Event</code></a> module.
+
+You can see these events in action on the [map events example](http://www.nps.gov/npmap/support/library/examples/map-events.html).
+
+### Mouse Events
+
+Once you subscribe to one of these events, your handler will receive the {MouseEvent} as a parameter when the event is fired.
+
 <table class="table table-bordered table-condensed">
   <thead>
     <tr>
-      <td>Option</td>
-      <td>Type</td>
-      <td>Default</td>
+      <td>Name</td>
+      <td>Argument</td>
       <td>Description</td>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Option</td>
-      <td>Type</td>
-      <td>Default</td>
+      <td>click</td>
+      <td><code>{MouseEvent}</code></td>
+      <td>This event is fired whenever the map is single-clicked using the left mouse button.</td>
+    </tr>
+    <tr>
+      <td>dblclick</td>
+      <td><code>{MouseEvent}</code></td>
+      <td>This event is fired whenever the map is double-clicked using the left mouse button.</td>
+    </tr>
+    <tr>
+      <td>mousedown</td>
+     <td><code>{MouseEvent}</code></td>
+      <td>This event is fired whenever the left mouse button is pushed down, but before it is released.</td>
+    </tr>
+    <tr>
+      <td>mousemove</td>
+      <td><code>{MouseEvent}</code></td>
+      <td>This event is fired whenever the mouse is moved over the map. It fires continously.</td>
+    </tr>
+    <tr>
+      <td>mouseout</td>
+      <td><code>{MouseEvent}</code></td>
+      <td>This event is fired whenever the mouse is moved off of the map's div element.</td>
+    </tr>
+    <tr>
+      <td>mouseover</td>
+      <td><code>{MouseEvent}</code></td>
+      <td>This event is fired whenever the mouse is moved onto the map's div element.</td>
+    </tr>
+    <tr>
+      <td>mouseup</td>
+      <td><code>{MouseEvent}</code></td>
+      <td>This event is fired whenever the left mouse button is released after is has been pushed down.</td>
+    </tr>
+    <tr>
+      <td>shapeclick</td>
+      <td><code>{MouseEvent}</code></td>
+      <td>This event a shape object (marker, line, or polygon) is clicked on the map.</td>
+    </tr>
+  </tbody>
+</table>
+
+### Map Events
+
+<table class="table table-bordered table-condensed">
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Argument</td>
       <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>baselayerchanged</td>
+      <td>{Object}</td>
+      <td>This event is fired whenever the map's base layer is changed.</td>
+    </tr>
+    <tr>
+      <td>panend</td>
+      <td>None</td>
+      <td>This event is fired after the map has been panned.</td>
+    </tr>
+    <tr>
+      <td>panstart</td>
+      <td>None</td>
+      <td>This event is fired when the map starts to pan.</td>
+    </tr>
+    <tr>
+      <td>ready</td>
+      <td>None</td>
+      <td>This event fires once when the map has been loaded and is ready to be interated with programatically.</td>
+    </tr>
+    <tr>
+      <td>viewchange</td>
+      <td>None</td>
+      <td>This event is fired continously while the map's view is changing.</td>
+    </tr>
+    <tr>
+      <td>viewchangeend</td>
+      <td>None</td>
+      <td>This event is fired after the map's view has changed.</td>
+    </tr>
+    <tr>
+      <td>viewchangestart</td>
+      <td>None</td>
+      <td>This event is fired when the map's view starts to change.</td>
+    </tr>
+    <tr>
+      <td>zoomend</td>
+      <td>None</td>
+      <td>This event is fired after the map has been zoomed in or out.</td>
+    </tr>
+    <tr>
+      <td>zoomstart</td>
+      <td>None</td>
+      <td>This event is fired when the map starts to zoom in or out.</td>
     </tr>
   </tbody>
 </table>
 
 ## Submodules
 
-- <a href="../base-apis/bing.html"><code>bing</code></a>
-- <a href="../base-apis/esri.html"><code>esri</code></a>
-- <a href="../base-apis/google.html"><code>google</code></a>
-- <a href="../base-apis/leaflet.html"><code>leaflet</code></a>
-- <a href="../base-apis/modestmaps.html"><code>modestmaps</code></a>
+Base API-specific code lives in one of the submodules that hang off of the <code>NPMap.Map</code> module. Generally speaking, you should not interact directly with these submodules, but if you need to do something programatically that isn't supported by the <code>NPMap.Map</code> module, you may need to access these submodules directly. That said, you should never use any of a submodule's properties or methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>), as these are considered private and may change at any time.
+
+- <a href="http://www.nps.gov/npmap/support/library/base-apis/bing.html"><code>NPMap.Map.Bing</code></a>
+- <a href="http://www.nps.gov/npmap/support/library/base-apis/google.html"><code>NPMap.Map.Google</code></a>
+- <a href="http://www.nps.gov/npmap/support/library/base-apis/leaflet.html"><code>NPMap.Map.Leaflet</code></a>
+- <a href="http://www.nps.gov/npmap/support/library/base-apis/modestmaps.html"><code>NPMap.Map.ModestMaps</code></a>
 
 # NPMap.Layer
 
