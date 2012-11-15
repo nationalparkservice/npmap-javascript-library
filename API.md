@@ -43,7 +43,7 @@ NPMap always expects and returns coordinates in Decimal Degrees.
 
 NPMap always expects and returns coordinates in Decimal Degrees.
 
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
       <td style="width:50%;">Property</td>
@@ -62,7 +62,7 @@ NPMap always expects and returns coordinates in Decimal Degrees.
   </tbody>
 </table>
 <h2 id="specifications-point">Point</h2>
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
       <td style="width:50%;">Property</td>
@@ -86,7 +86,7 @@ NPMap stores important metadata as a property on all the lines, markers, and pol
 
 All of the metadata that NPMap stores with a shape is contained in the <code>npmap</code> object, so if you have a reference to a <code>shape</code>, you can access the NPMap metadata via the <code>shape.npmap</code> property. This object contains the following properties:
 
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
       <td style="width:50%;">Property</td>
@@ -136,7 +136,7 @@ NPMap.config = {
 
 The following properties can be set in the <a href="#npmapconfig"><code>NPMap.config</code></a> object. Note that the only required property is <code>NPMap.config.div</code>.
 
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
       <td>Option</td>
@@ -150,7 +150,7 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
       <td><code>api</code></td>
       <td><code>{String}</code></td>
       <td><code>'bing'</code></td>
-      <td>The base API to use for the web map.</td>
+      <td><p>The base API to use for the web map.</p></td>
     </tr>
     <tr>
       <td><code>baseLayers</code></td>
@@ -166,67 +166,67 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
   lng: -96
 }
 </code></pre></td>
-      <td>The latitude/longitude to initialize the map with. If this is <code>null</code> or missing either the <code>lat</code> or <code>lng</code> property, NPMap will default to the center of the continental United States.</td>
+      <td><p>The latitude/longitude to initialize the map with. If this is <code>null</code> or missing either the <code>lat</code> or <code>lng</code> property, NPMap will default to the center of the continental United States.</p></td>
     </tr>
     <tr>
       <td><code>credentials</code></td>
       <td><code>{String}</code></td>
       <td><code>'nps'</code></td>
-      <td>This property tells NPMap whether or not you are an NPS employee, contractor, or partner. If you are an NPS employee, you do not need to specify this property. If you are not and you are using either the <code>bing</code> or <code>google</code> base API, you should set this property to either your Bing Maps API key or your Google Maps channel and client URL parameters. See the credentials section of the <a href="http://www.nps.gov/npmap/support/library/base-apis/bing.html#credentials">Bing</a> and <a href="http://www.nps.gov/npmap/support/library/base-apis/google.html#credentials">Google</a> base API docs for more information.</td>
+      <td><p>This property tells NPMap whether or not you are an NPS employee, contractor, or partner. If you are an NPS employee, you do not need to specify this property. If you are not and you are using either the <code>bing</code> or <code>google</code> base API, you should set this property to either your Bing Maps API key or your Google Maps channel and client URL parameters. See the credentials section of the <a href="http://www.nps.gov/npmap/support/library/base-apis/bing.html#credentials">Bing</a> and <a href="http://www.nps.gov/npmap/support/library/base-apis/google.html#credentials">Google</a> base API docs for more information.</p></td>
     </tr>
     <tr>
       <td><code>div</code></td>
       <td><code>{String}</code></td>
       <td><code>null</code></td>
-      <td>This property is <strong>required</strong>. The <code>id</code> of the HTML <code>div</code> element to render the map into. NPMap will automatically size the map to take up 100% of the height and width of the div. If/when this <code>div</code> is resized, NPMap will automatically resize the map and reposition/resize any toolbars or modules that have been added to the map.</td>
+      <td><p>This property is <strong>required</strong>. The <code>id</code> of the HTML <code>div</code> element to render the map into. NPMap will automatically size the map to take up 100% of the height and width of the div. If/when this <code>div</code> is resized, NPMap will automatically resize the map and reposition/resize any toolbars or modules that have been added to the map.</p></td>
     </tr>
     <tr>
       <td><code>events</code></td>
       <td><code>{Object}</code></td>
       <td><code>null</code></td>
-      <td>An object with event functions that NPMap should call before, during, and/or after the map creation. The current valid events are <code>preinit</code> and <code>init</code>. The <code>preinit</code> event occurs after the non-mapping dependencies are loaded, but before the mapping library is loaded and the web map is created. The <code>init</code> event occurs after all of the dependencies, including the mapping library, have been loaded and NPMap has created the map. Each of these functions must accept a callback function as a parameter and call the callback function (<code>callback();</code>).</td>
+      <td><p>An object with event functions that NPMap should call before, during, and/or after the map creation. The current valid events are <code>preinit</code> and <code>init</code>. The <code>preinit</code> event occurs after the non-mapping dependencies are loaded, but before the mapping library is loaded and the web map is created. The <code>init</code> event occurs after all of the dependencies, including the mapping library, have been loaded and NPMap has created the map. Each of these functions must accept a callback function as a parameter and call the callback function (<code>callback();</code>).</p></td>
     </tr>
     <tr>
       <td><code>hideLogo</code></td>
       <td><code>{Boolean}</code></td>
       <td><code>false</code></td>
-      <td>Tells NPMap to hide the NPMap logo. If possible, help us spread the word about this project by leaving the logo on the map!</td>
+      <td><p>Tells NPMap to hide the NPMap logo. If possible, help us spread the word about this project by leaving the logo on the map!</p></td>
     </tr>
     <tr>
       <td><code>infobox</code></td>
       <td><code>{Object}</code></td>
       <td><code>null</code></td>
-      <td>The global infobox configuration. You can use this object to customize how the InfoBox looks and behaves.</td>
+      <td><p>The global infobox configuration. You can use this object to customize how the InfoBox looks and behaves.</p></td>
     </tr>
     <tr>
       <td><code>layers</code></td>
       <td><code>{Array}</code></td>
       <td><code>null</code></td>
-      <td>The layers to add to the map.</td>
+      <td><p>The layers to add to the map.</p></td>
     </tr>
     <tr>
       <td><code>modules</code></td>
       <td><code>{Array}</code></td>
       <td><code>null</code></td>
-      <td>The modules to add to the map.</td>
+      <td><p>The modules to add to the map.</p></td>
     </tr>
     <tr>
       <td><code>server</code></td>
       <td><code>{String}</code></td>
       <td><code>'http://www.nps.gov/npmap/1.0.0'</code></td>
-      <td>Allows you to load NPMap from an alternative location. This is only necessary if you're developing or serving NPMap from your own server.</td>
+      <td><p>Allows you to load NPMap from an alternative location. This is only necessary if you're developing or serving NPMap from your own server.</p></td>
     </tr>
     <tr>
       <td><code>tools</code></td>
       <td><code>{Object}</code></td>
       <td><code>null</code></td>
-      <td>Holds configuration information for NPMap's tools.</td>
+      <td><p>Holds configuration information for NPMap's tools.</p></td>
     </tr>
     <tr>
       <td><code>zoom</code></td>
       <td><code>{Number}</code></td>
       <td><code>4</code></td>
-      <td>An integer zoom level to initialize the map with.</td>
+      <td><p>An integer zoom level to initialize the map with.</p></td>
     </tr>
     <tr>
       <td><code>zoomRange</code></td>
@@ -236,7 +236,7 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
   max: 19
 }
 </code></pre></td>
-      <td>The minimum and maximum zoom levels to restrict the map to.</td>
+      <td><p>The minimum and maximum zoom levels to restrict the map to.</p></td>
     </tr>
   </tbody>
 </table>
@@ -249,7 +249,7 @@ The map is the core component of NPMap. The <code>NPMap.Map</code> module facili
 - [MapBox Wax](http://mapbox.com/wax/)
 
 <h2 id="npmap.map-methods">Methods</h2>
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
       <td>Name</td>
@@ -261,97 +261,97 @@ The map is the core component of NPMap. The <code>NPMap.Map</code> module facili
     <tr>
       <td>addControl(el:HtmlElement, callback:Function, stopPropagation:Boolean)</td>
       <td>null</td>
-      <td>Adds an HTML element to the map div.</td>
+      <td><p>Adds an HTML element to the map div.</p></td>
     </tr>
     <tr>
       <td>addShape(shape)</td>
       <td>null</td>
-      <td>Adds a shape (marker, line, or polygon) to the map.</td>
+      <td><p>Adds a shape (marker, line, or polygon) to the map.</p></td>
     </tr>
     <tr>
       <td>addTileLayer(layer)</td>
       <td>null</td>
-      <td>Adds a tile layer to the map.</td>
+      <td><p>Adds a tile layer to the map.</p></td>
     </tr>
     <tr>
       <td>addZoomifyLayer(layer)</td>
       <td>null</td>
-      <td>Adds a Zoomify layer to the map.</td>
+      <td><p>Adds a Zoomify layer to the map.</p></td>
     </tr>
     <tr>
       <td>boundsFromApi(bounds)</td>
       <td>{Object}</td>
-      <td>Converts an API bounds to an NPMap bounds.</td>
+      <td><p>Converts an API bounds to an NPMap bounds.</p></td>
     </tr>
     <tr>
       <td>boundsToApi(bounds)</td>
       <td>{Object}</td>
-      <td>Converts an NPMap bounds to an API bounds.</td>
+      <td><p>Converts an NPMap bounds to an API bounds.</p></td>
     </tr>
     <tr>
       <td>center(latLng)</td>
       <td>null</td>
-      <td>Centers the map.</td>
+      <td><p>Centers the map.</p></td>
     </tr>
     <tr>
       <td>centerAndZoom(latLng, zoom, callback?)</td>
       <td>null</td>
-      <td>Centers the map.</td>
+      <td><p>Centers the map.</p></td>
     </tr>
     <tr>
       <td>closeModules()</td>
       <td>null</td>
-      <td>Closes the modules panel.</td>
+      <td><p>Closes the modules panel.</p></td>
     </tr>
     <tr>
       <td>createLine(latLngs, options?)</td>
       <td>{Object}</td>
-      <td>Creates a line.</td>
+      <td><p>Creates a line.</p></td>
     </tr>
     <tr>
       <td>createMarker(latLng, options?)</td>
       <td>{Object}</td>
-      <td>Creates a marker.</td>
+      <td><p>Creates a marker.</p></td>
     </tr>
     <tr>
       <td>createPolygon(latLngs, options?)</td>
       <td>{Object}</td>
-      <td>Creates a polygon.</td>
+      <td><p>Creates a polygon.</p></td>
     </tr>
     <tr>
       <td>createZoomifyLayer(config)</td>
       <td>{Object}</td>
-      <td>Creates a Zoomify layer.</td>
+      <td><p>Creates a Zoomify layer.</p></td>
     </tr>
     <tr>
       <td>getBounds()</td>
       <td>{Object}</td>
-      <td>Gets the map bounds.</td>
+      <td><p>Gets the map bounds.</p></td>
     </tr>
     <tr>
       <td>getCenter()</td>
       <td>{Object}</td>
-      <td>Gets the center of the map.</td>
+      <td><p>Gets the center of the map.</p></td>
     </tr>
     <tr>
       <td>getMapElement()</td>
       <td>{Object}</td>
-      <td>Gets the map element.</td>
+      <td><p>Gets the map element.</p></td>
     </tr>
     <tr>
       <td>getBounds()</td>
       <td>{Object}</td>
-      <td>Gets the map bounds.</td>
+      <td><p>Gets the map bounds.</p></td>
     </tr>
     <tr>
       <td>getMaxZoom()</td>
       <td>{Number}</td>
-      <td>Gets the maximum zoom level for the map.</td>
+      <td><p>Gets the maximum zoom level for the map.</p></td>
     </tr>
     <tr>
       <td>getMinZoom()</td>
       <td>{Number}</td>
-      <td>Gets the minimum zoom level for the map.</td>
+      <td><p>Gets the minimum zoom level for the map.</p></td>
     </tr>
   </tbody>
 </table>
@@ -366,7 +366,7 @@ You can see these events in action on the [map events example](http://www.nps.go
 
 Once you subscribe to one of these events, your handler will receive the {MouseEvent} as a parameter when the event is fired.
 
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
       <td>Name</td>
@@ -378,47 +378,47 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
     <tr>
       <td>click</td>
       <td><code>{MouseEvent}</code></td>
-      <td>This event is fired whenever the map is single-clicked using the left mouse button.</td>
+      <td><p>This event is fired whenever the map is single-clicked using the left mouse button.</p></td>
     </tr>
     <tr>
       <td>dblclick</td>
       <td><code>{MouseEvent}</code></td>
-      <td>This event is fired whenever the map is double-clicked using the left mouse button.</td>
+      <td><p>This event is fired whenever the map is double-clicked using the left mouse button.</p></td>
     </tr>
     <tr>
       <td>mousedown</td>
      <td><code>{MouseEvent}</code></td>
-      <td>This event is fired whenever the left mouse button is pushed down, but before it is released.</td>
+      <td><p>This event is fired whenever the left mouse button is pushed down, but before it is released.</p></td>
     </tr>
     <tr>
       <td>mousemove</td>
       <td><code>{MouseEvent}</code></td>
-      <td>This event is fired whenever the mouse is moved over the map. It fires continously.</td>
+      <td><p>This event is fired whenever the mouse is moved over the map. It fires continously.</p></td>
     </tr>
     <tr>
       <td>mouseout</td>
       <td><code>{MouseEvent}</code></td>
-      <td>This event is fired whenever the mouse is moved off of the map's div element.</td>
+      <td><p>This event is fired whenever the mouse is moved off of the map's div element.</p></td>
     </tr>
     <tr>
       <td>mouseover</td>
       <td><code>{MouseEvent}</code></td>
-      <td>This event is fired whenever the mouse is moved onto the map's div element.</td>
+      <td><p>This event is fired whenever the mouse is moved onto the map's div element.</p></td>
     </tr>
     <tr>
       <td>mouseup</td>
       <td><code>{MouseEvent}</code></td>
-      <td>This event is fired whenever the left mouse button is released after is has been pushed down.</td>
+      <td><p>This event is fired whenever the left mouse button is released after is has been pushed down.</p></td>
     </tr>
     <tr>
       <td>shapeclick</td>
       <td><code>{MouseEvent}</code></td>
-      <td>This event a shape object (marker, line, or polygon) is clicked on the map.</td>
+      <td><p>This event a shape object (marker, line, or polygon) is clicked on the map.</p></td>
     </tr>
   </tbody>
 </table>
 <h3 id="npmap.map-events-map">Map Events</h3>
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
       <td>Name</td>
@@ -430,47 +430,47 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
     <tr>
       <td>baselayerchanged</td>
       <td>{Object}</td>
-      <td>This event is fired whenever the map's base layer is changed.</td>
+      <td><p>This event is fired whenever the map's base layer is changed.</p></td>
     </tr>
     <tr>
       <td>panend</td>
       <td>None</td>
-      <td>This event is fired after the map has been panned.</td>
+      <td><p>This event is fired after the map has been panned.</p></td>
     </tr>
     <tr>
       <td>panstart</td>
       <td>None</td>
-      <td>This event is fired when the map starts to pan.</td>
+      <td><p>This event is fired when the map starts to pan.</p></td>
     </tr>
     <tr>
       <td>ready</td>
       <td>None</td>
-      <td>This event fires once when the map has been loaded and is ready to be interated with programatically.</td>
+      <td><p>This event fires once when the map has been loaded and is ready to be interated with programatically.</p></td>
     </tr>
     <tr>
       <td>viewchange</td>
       <td>None</td>
-      <td>This event is fired continously while the map's view is changing.</td>
+      <td><p>This event is fired continously while the map's view is changing.</p></td>
     </tr>
     <tr>
       <td>viewchangeend</td>
       <td>None</td>
-      <td>This event is fired after the map's view has changed.</td>
+      <td><p>This event is fired after the map's view has changed.</p></td>
     </tr>
     <tr>
       <td>viewchangestart</td>
       <td>None</td>
-      <td>This event is fired when the map's view starts to change.</td>
+      <td><p>This event is fired when the map's view starts to change.</p></td>
     </tr>
     <tr>
       <td>zoomend</td>
       <td>None</td>
-      <td>This event is fired after the map has been zoomed in or out.</td>
+      <td><p>This event is fired after the map has been zoomed in or out.</p></td>
     </tr>
     <tr>
       <td>zoomstart</td>
       <td>None</td>
-      <td>This event is fired when the map starts to zoom in or out.</td>
+      <td><p>This event is fired when the map starts to zoom in or out.</p></td>
     </tr>
   </tbody>
 </table>
