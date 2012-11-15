@@ -4,7 +4,7 @@ Do you use NPMap and want to help add features or fix bugs? Thanks! First, thoug
 
 ## Reporting issues
 
-A bug is a _demonstrable problem_. Please read the following guidance before [reporting an issue](https://github.com/nationalparkservice/npmap/issues/):
+A bug is a _demonstrable problem_. Please read the following guidance before reporting an issue:
 
 1. Use the search to see if the issue has already been reported. If it already exists, do not open a new issue - simply comment on the existing one.
 2. Isolate the problem and ensure that the issue is in NPMap itself and not in your code.
@@ -28,6 +28,8 @@ Here's an example of a good bug report:
 > Any other information you want to share that is relevant to the issue being reported. This might include the file or module name and the line numbers of the code that is causing the bug. You may also want to include potential solutions.
 
 A good bug report should be clear and to the point, and should provide enough information for an NPMap contributor to assess and/or fix the bug without coming back to you for more information.
+
+Ready to submit an issue? [Here you go](https://github.com/nationalparkservice/npmap/issues/).
 
 ## Pull requests
 
