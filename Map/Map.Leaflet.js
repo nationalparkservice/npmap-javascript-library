@@ -402,13 +402,13 @@ define([
     activeBaseLayer = NPMap.config.baseLayers[0];
   }
   
-  if (typeof NPMap.config.restrictZoom !== 'undefined') {
-    if (typeof NPMap.config.restrictZoom.max !== 'undefined') {
-      mapConfig.maxZoom = NPMap.config.restrictZoom.max;
+  if (typeof NPMap.config.zoomRange !== 'undefined') {
+    if (typeof NPMap.config.zoomRange.max !== 'undefined') {
+      mapConfig.maxZoom = NPMap.config.zoomRange.max;
     }
     
-    if (typeof NPMap.config.restrictZoom.min !== 'undefined') {
-      mapConfig.minZoom = NPMap.config.restrictZoom.min;
+    if (typeof NPMap.config.zoomRange.min !== 'undefined') {
+      mapConfig.minZoom = NPMap.config.zoomRange.min;
     }
   } else {
     mapConfig.maxZoom = 19;
@@ -931,14 +931,14 @@ define([
      * @return null
      */
     setZoomRestrictions: function(restrictions) {
-      NPMap.config.restrictZoom = NPMap.config.restrictZoom || {};
+      NPMap.config.zoomRange = NPMap.config.zoomRange || {};
       
       if (restrictions.max) {
-        NPMap.config.restrictZoom.max = max;
+        NPMap.config.zoomRange.max = max;
       }
       
       if (restrictions.min) {
-        NPMap.config.restrictZoom.min = min;
+        NPMap.config.zoomRange.min = min;
       }
       
       // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.

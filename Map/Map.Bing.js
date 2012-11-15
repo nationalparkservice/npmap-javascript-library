@@ -192,20 +192,20 @@ define([
 
   NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
 
-  if (NPMap.config.restrictZoom) {
-    if (NPMap.config.restrictZoom.max) {
-      if (NPMap.config.restrictZoom.max === 'auto') {
+  if (NPMap.config.zoomRange) {
+    if (NPMap.config.zoomRange.max) {
+      if (NPMap.config.zoomRange.max === 'auto') {
         max = map.getZoom();
       } else {
-        max = NPMap.config.restrictZoom.max;
+        max = NPMap.config.zoomRange.max;
       }
     }
 
-    if (NPMap.config.restrictZoom.min) {
-      if (NPMap.config.restrictZoom.min === 'auto') {
+    if (NPMap.config.zoomRange.min) {
+      if (NPMap.config.zoomRange.min === 'auto') {
         min = map.getZoom();
       } else {
-        min = NPMap.config.restrictZoom.min;
+        min = NPMap.config.zoomRange.min;
       }
 
       if (min < 3) {

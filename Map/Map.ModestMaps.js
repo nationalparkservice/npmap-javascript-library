@@ -87,13 +87,13 @@ define([
     }];
   }
 
-  if (NPMap.config.restrictZoom) {
-    if (NPMap.config.restrictZoom.max) {
-      max = NPMap.config.restrictZoom.max;
+  if (NPMap.config.zoomRange) {
+    if (NPMap.config.zoomRange.max) {
+      max = NPMap.config.zoomRange.max;
     }
     
-    if (NPMap.config.restrictZoom.min) {
-      min = NPMap.config.restrictZoom.min;
+    if (NPMap.config.zoomRange.min) {
+      min = NPMap.config.zoomRange.min;
     }
   }
 
@@ -585,14 +585,14 @@ define([
      * @param {Object} restrictions
      */
     setZoomRestrictions: function(restrictions) {
-      NPMap.config.restrictZoom = NPMap.config.restrictZoom || {};
+      NPMap.config.zoomRange = NPMap.config.zoomRange || {};
       
       if (restrictions.max) {
-        NPMap.config.restrictZoom.max = max;
+        NPMap.config.zoomRange.max = max;
       }
       
       if (restrictions.min) {
-        NPMap.config.restrictZoom.min = min;
+        NPMap.config.zoomRange.min = min;
       }
       
       map.setZoomRange(min, max);

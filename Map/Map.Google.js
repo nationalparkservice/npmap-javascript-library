@@ -217,16 +217,16 @@
         });
       }
 
-      if (NPMap.config.restrictZoom) {
-        if (NPMap.config.restrictZoom.max) {
+      if (NPMap.config.zoomRange) {
+        if (NPMap.config.zoomRange.max) {
           map.setOptions({
-            maxZoom: NPMap.config.restrictZoom.max === 'auto' ? initialZoom : NPMap.config.restrictZoom.max
+            maxZoom: NPMap.config.zoomRange.max === 'auto' ? initialZoom : NPMap.config.zoomRange.max
           });
         }
         
-        if (NPMap.config.restrictZoom.min) {
+        if (NPMap.config.zoomRange.min) {
           map.setOptions({
-            minZoom: NPMap.config.restrictZoom.min === 'auto' ? initialZoom : NPMap.config.restrictZoom.min
+            minZoom: NPMap.config.zoomRange.min === 'auto' ? initialZoom : NPMap.config.zoomRange.min
           });
         }
       }
