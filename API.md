@@ -13,7 +13,6 @@ These specifications document the structure of objects you'll see when interacti
 NPMap always expects and returns coordinates in Decimal Degrees.
 
 <table class="table table-bordered table-condensed table-striped">
-  <caption style="display:none;">Bounds specification properties.</caption>
   <thead>
     <tr>
       <td style="width:50%;">Property</td>
@@ -259,98 +258,98 @@ The map is the core component of NPMap. The <code>NPMap.Map</code> module facili
   </thead>
   <tbody>
     <tr>
-      <td>addControl(el:HtmlElement, callback:Function, stopPropagation:Boolean)</td>
-      <td>null</td>
+      <td><code>addControl(el:HtmlElement, callback:Function, stopPropagation:Boolean)</code></td>
+      <td><code>null</code></td>
       <td><p>Adds an HTML element to the map div.</p></td>
     </tr>
     <tr>
-      <td>addShape(shape)</td>
-      <td>null</td>
+      <td><code>addShape(shape)</code></td>
+      <td><code>null</code></td>
       <td><p>Adds a shape (marker, line, or polygon) to the map.</p></td>
     </tr>
     <tr>
-      <td>addTileLayer(layer)</td>
-      <td>null</td>
+      <td><code>addTileLayer(layer)</code></td>
+      <td><code>null</code></td>
       <td><p>Adds a tile layer to the map.</p></td>
     </tr>
     <tr>
-      <td>addZoomifyLayer(layer)</td>
-      <td>null</td>
+      <td><code>addZoomifyLayer(layer)</code></td>
+      <td><code>null</code></td>
       <td><p>Adds a Zoomify layer to the map.</p></td>
     </tr>
     <tr>
-      <td>boundsFromApi(bounds)</td>
-      <td>{Object}</td>
+      <td><code>boundsFromApi(bounds)</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Converts an API bounds to an NPMap bounds.</p></td>
     </tr>
     <tr>
-      <td>boundsToApi(bounds)</td>
-      <td>{Object}</td>
+      <td><code>boundsToApi(bounds)</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Converts an NPMap bounds to an API bounds.</p></td>
     </tr>
     <tr>
-      <td>center(latLng)</td>
-      <td>null</td>
+      <td><code>center(latLng)</code></td>
+      <td><code>null</code></td>
       <td><p>Centers the map.</p></td>
     </tr>
     <tr>
-      <td>centerAndZoom(latLng, zoom, callback?)</td>
-      <td>null</td>
+      <td><code>centerAndZoom(latLng, zoom, callback?)</code></td>
+      <td><code>null</code></td>
       <td><p>Centers the map.</p></td>
     </tr>
     <tr>
-      <td>closeModules()</td>
-      <td>null</td>
+      <td><code>closeModules()</code></td>
+      <td><code>null</code></td>
       <td><p>Closes the modules panel.</p></td>
     </tr>
     <tr>
-      <td>createLine(latLngs, options?)</td>
-      <td>{Object}</td>
+      <td><code>createLine(latLngs, options?)</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Creates a line.</p></td>
     </tr>
     <tr>
-      <td>createMarker(latLng, options?)</td>
-      <td>{Object}</td>
+      <td><code>createMarker(latLng, options?)</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Creates a marker.</p></td>
     </tr>
     <tr>
-      <td>createPolygon(latLngs, options?)</td>
-      <td>{Object}</td>
+      <td><code>createPolygon(latLngs, options?)</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Creates a polygon.</p></td>
     </tr>
     <tr>
-      <td>createZoomifyLayer(config)</td>
-      <td>{Object}</td>
+      <td><code>createZoomifyLayer(config)</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Creates a Zoomify layer.</p></td>
     </tr>
     <tr>
-      <td>getBounds()</td>
-      <td>{Object}</td>
+      <td><code>getBounds()</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Gets the map bounds.</p></td>
     </tr>
     <tr>
-      <td>getCenter()</td>
-      <td>{Object}</td>
+      <td><code>getCenter()</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Gets the center of the map.</p></td>
     </tr>
     <tr>
-      <td>getMapElement()</td>
-      <td>{Object}</td>
+      <td><code>getMapElement()</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Gets the map element.</p></td>
     </tr>
     <tr>
-      <td>getBounds()</td>
-      <td>{Object}</td>
+      <td><code>getBounds()</code></td>
+      <td><code>{Object}</code></td>
       <td><p>Gets the map bounds.</p></td>
     </tr>
     <tr>
-      <td>getMaxZoom()</td>
-      <td>{Number}</td>
+      <td><code>getMaxZoom()</code></td>
+      <td><code>{Number}</code></td>
       <td><p>Gets the maximum zoom level for the map.</p></td>
     </tr>
     <tr>
-      <td>getMinZoom()</td>
-      <td>{Number}</td>
+      <td><code>getMinZoom()</code></td>
+      <td><code>{Number}</code></td>
       <td><p>Gets the minimum zoom level for the map.</p></td>
     </tr>
   </tbody>
@@ -376,42 +375,42 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
   </thead>
   <tbody>
     <tr>
-      <td>click</td>
+      <td><code>click</code></td>
       <td><code>{MouseEvent}</code></td>
       <td><p>This event is fired whenever the map is single-clicked using the left mouse button.</p></td>
     </tr>
     <tr>
-      <td>dblclick</td>
+      <td><code>dblclick</code></td>
       <td><code>{MouseEvent}</code></td>
       <td><p>This event is fired whenever the map is double-clicked using the left mouse button.</p></td>
     </tr>
     <tr>
-      <td>mousedown</td>
+      <td><code>mousedown</code></td>
      <td><code>{MouseEvent}</code></td>
       <td><p>This event is fired whenever the left mouse button is pushed down, but before it is released.</p></td>
     </tr>
     <tr>
-      <td>mousemove</td>
+      <td><code>mousemove</code></td>
       <td><code>{MouseEvent}</code></td>
       <td><p>This event is fired whenever the mouse is moved over the map. It fires continously.</p></td>
     </tr>
     <tr>
-      <td>mouseout</td>
+      <td><code>mouseout</code></td>
       <td><code>{MouseEvent}</code></td>
       <td><p>This event is fired whenever the mouse is moved off of the map's div element.</p></td>
     </tr>
     <tr>
-      <td>mouseover</td>
+      <td><code>mouseover</code></td>
       <td><code>{MouseEvent}</code></td>
       <td><p>This event is fired whenever the mouse is moved onto the map's div element.</p></td>
     </tr>
     <tr>
-      <td>mouseup</td>
+      <td><code>mouseup</code></td>
       <td><code>{MouseEvent}</code></td>
       <td><p>This event is fired whenever the left mouse button is released after is has been pushed down.</p></td>
     </tr>
     <tr>
-      <td>shapeclick</td>
+      <td><code>shapeclick</code></td>
       <td><code>{MouseEvent}</code></td>
       <td><p>This event a shape object (marker, line, or polygon) is clicked on the map.</p></td>
     </tr>
@@ -428,48 +427,48 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
   </thead>
   <tbody>
     <tr>
-      <td>baselayerchanged</td>
-      <td>{Object}</td>
+      <td><code>baselayerchanged</code></td>
+      <td><code>{Object}</code></td>
       <td><p>This event is fired whenever the map's base layer is changed.</p></td>
     </tr>
     <tr>
-      <td>panend</td>
-      <td>None</td>
+      <td><code>panend</code></td>
+      <td><code>null</code></td>
       <td><p>This event is fired after the map has been panned.</p></td>
     </tr>
     <tr>
-      <td>panstart</td>
-      <td>None</td>
+      <td><code>panstart</code></td>
+      <td><code>null</code></td>
       <td><p>This event is fired when the map starts to pan.</p></td>
     </tr>
     <tr>
-      <td>ready</td>
-      <td>None</td>
+      <td><code>ready</code></td>
+      <td><code>null</code></td>
       <td><p>This event fires once when the map has been loaded and is ready to be interated with programatically.</p></td>
     </tr>
     <tr>
-      <td>viewchange</td>
-      <td>None</td>
+      <td><code>viewchange</code></td>
+      <td><code>null</code></td>
       <td><p>This event is fired continously while the map's view is changing.</p></td>
     </tr>
     <tr>
-      <td>viewchangeend</td>
-      <td>None</td>
+      <td><code>viewchangeend</code></td>
+      <td><code>null</code></td>
       <td><p>This event is fired after the map's view has changed.</p></td>
     </tr>
     <tr>
-      <td>viewchangestart</td>
-      <td>None</td>
+      <td><code>viewchangestart</code></td>
+      <td><code>null</code></td>
       <td><p>This event is fired when the map's view starts to change.</p></td>
     </tr>
     <tr>
-      <td>zoomend</td>
-      <td>None</td>
+      <td><code>zoomend</code></td>
+      <td><code>null</code></td>
       <td><p>This event is fired after the map has been zoomed in or out.</p></td>
     </tr>
     <tr>
-      <td>zoomstart</td>
-      <td>None</td>
+      <td><code>zoomstart</code></td>
+      <td><code>null</code></td>
       <td><p>This event is fired when the map starts to zoom in or out.</p></td>
     </tr>
   </tbody>
