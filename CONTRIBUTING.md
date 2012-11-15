@@ -1,4 +1,4 @@
-# Contributing to the NPMap Library
+<h1 class="page-title">Contributing</h1>
 
 Do you use the NPMap library, and want to help add features or fix bugs? Thanks! First, though, please take a look at the guidelines below. Following them will ensure that your contriubtion can make it into the library quickly and with minimal effort.
 
