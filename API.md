@@ -13,7 +13,7 @@ These specifications document the structure of objects you'll see when interacti
 NPMap always expects and returns coordinates in Decimal Degrees.
 
 <table class="table table-bordered table-condensed table-striped">
-  <caption>Bounds specification properties.</caption>
+  <caption style="display:none;">Bounds specification properties.</caption>
   <thead>
     <tr>
       <td style="width:50%;">Property</td>
