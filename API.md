@@ -135,6 +135,8 @@ NPMap.config = {
 
 ## Options
 
+The following properties can be set in the <a href="#npmapconfig"><code>NPMap.config</code></a> object. Note that the only required property is <code>NPMap.config.div</code>.
+
 <table class="table table-bordered table-condensed">
   <thead>
     <tr>
