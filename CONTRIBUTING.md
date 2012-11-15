@@ -1,6 +1,6 @@
 <h1 class="page-title">Contributing</h1>
 
-Do you use NPMap and want to help add features or fix bugs? Thanks! First, though, please take a look at the guidelines below. Following them will ensure that your contriubtion can make it into the library quickly and with minimal effort.
+Do you use NPMap and want to help add features or fix bugs? Thanks! First, though, please take a look at the guidelines below. Following them will ensure that your contribution can make it into the library quickly and with minimal effort.
 
 ## Reporting issues
 
