@@ -1,3 +1,7 @@
+# Important Notes
+
+Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. Do not use them.
+
 # Specifications
 
 By design, NPMap doesn't create or utilize traditional JavaScript classes. It, rather, uses simple objects and utility methods specific to whichever base API is being used by the map to convert objects to and from native base API objects.
@@ -246,6 +250,91 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
 
 The map is the core component of NPMap. <code>NPMap.Map</code> is a factory that facilitates creating and interacting with a map built using one of the supported base APIs. To create a map, you will need to create a <code>NPMap.config</code> object and then load the NPMap library into your web page.
 
+## Dependencies
+
+- Wax
+
+## Methods
+
+<table class="table table-bordered table-condensed">
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Return Value</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>addControl(el:HtmlElement, callback:Function, stopPropagation:Boolean)</td>
+      <td>null</td>
+      <td>Adds an HTML element to the map div.</td>
+    </tr>
+    <tr>
+      <td>addShape(shape)</td>
+      <td>null</td>
+      <td>Adds a shape (marker, line, or polygon) to the map.</td>
+    </tr>
+    <tr>
+      <td>addTileLayer(layer)</td>
+      <td>null</td>
+      <td>Adds a tile layer to the map.</td>
+    </tr>
+    <tr>
+      <td>addZoomifyLayer(layer)</td>
+      <td>null</td>
+      <td>Adds a Zoomify layer to the map.</td>
+    </tr>
+    <tr>
+      <td>boundsFromApi(bounds)</td>
+      <td>{Object}</td>
+      <td>Converts an API bounds to an NPMap bounds.</td>
+    </tr>
+    <tr>
+      <td>boundsToApi(bounds)</td>
+      <td>{Object}</td>
+      <td>Converts an NPMap bounds to an API bounds.</td>
+    </tr>
+    <tr>
+      <td>center(latLng)</td>
+      <td>null</td>
+      <td>Centers the map.</td>
+    </tr>
+    <tr>
+      <td>centerAndZoom(latLng, zoom, callback?)</td>
+      <td>null</td>
+      <td>Centers the map.</td>
+    </tr>
+    <tr>
+      <td>closeModules()</td>
+      <td>null</td>
+      <td>Closes the modules panel.</td>
+    </tr>
+    <tr>
+      <td>createLine(latLngs, options?)</td>
+      <td>{Object}</td>
+      <td>Creates a line.</td>
+    </tr>
+    <tr>
+      <td>createMarker(latLng, options?)</td>
+      <td>{Object}</td>
+      <td>Creates a marker.</td>
+    </tr>
+    <tr>
+      <td>createPolygon(latLngs, options?)</td>
+      <td>{Object}</td>
+      <td>Creates a polygon.</td>
+    </tr>
+    <tr>
+      <td>createZoomifyLayer(config)</td>
+      <td>{Object}</td>
+      <td>Creates a Zoomify layer.</td>
+    </tr>
+  </tbody>
+</table>
+
+## Properties
+
 ## Events
 
 The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmapevent"><code>NPMap.Event</code></a> module.
@@ -369,7 +458,7 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
 
 ## Submodules
 
-Base API-specific code lives in one of the submodules that hang off of the <code>NPMap.Map</code> module. Generally speaking, you should not interact directly with these submodules, but if you need to do something programatically that isn't supported by the <code>NPMap.Map</code> module, you may need to access these submodules directly. That said, you should never use any of a submodule's properties or methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>), as these are considered private and may change at any time.
+Base API-specific code lives in one of the submodules that hang off of the <code>NPMap.Map</code> module. Generally speaking, you should not interact directly with these submodules, but if you need to do something programatically that isn't supported by the <code>NPMap.Map</code> module, you may need to.
 
 - <a href="http://www.nps.gov/npmap/support/library/base-apis/bing.html"><code>NPMap.Map.Bing</code></a>
 - <a href="http://www.nps.gov/npmap/support/library/base-apis/google.html"><code>NPMap.Map.Google</code></a>

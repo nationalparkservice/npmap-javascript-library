@@ -988,7 +988,7 @@ define([
       NPMap.config.baseLayers = baseLayersMatched;
     },
     /**
-     * Adds an HTML element to the npmap-controls div.
+     * Adds an HTML element to the map div.
      * @param {Object} el
      * @param {Function} callback (Optional)
      * @param {Boolean} stopPropagation (Optional)
@@ -1012,7 +1012,7 @@ define([
       }
     },
     /**
-     * Adds a shape to the map.
+     * Adds a shape (marker, line, or polygon) to the map.
      * @param {Object} shape The shape to add to the map. This can be a base API marker, line, or polygon object.
      * @return null
      */
@@ -1080,7 +1080,7 @@ define([
       divMap.style.left = '0';
     },
     /**
-     * Creates a line using the base API's line class.
+     * Creates a line.
      * @param {Array} latLngs An array of the latitude/longitude objects to use to create the line.
      * @param {Object} options (Optional) Line options.
      * @return {Object}
@@ -1091,7 +1091,7 @@ define([
       return this._createLine(latLngs, NPMap.Map[NPMap.config.api].convertLineOptions(options));
     },
     /**
-     * Creates a marker using the base API's marker class.
+     * Creates a marker.
      * @param {Object} latLng The latitude/longitude object to use to create the marker.
      * @param {Object} options (Optional) Marker options.
      * @return {Object}
@@ -1102,7 +1102,7 @@ define([
       return this._createMarker(latLng, NPMap.Map[NPMap.config.api].convertMarkerOptions(options));
     },
     /**
-     * Creates a polygon using the base API's polygon class.
+     * Creates a polygon.
      * @param {Array} latLngs An array of latitude/longitude objects to use to create the polygon.
      * @param {Object} options (Optional) Polygon options.
      * @return {Object}
@@ -1141,6 +1141,10 @@ define([
     getMapElement: function() {
       return NPMap.Map[NPMap.config.api].getMapElement();
     },
+
+
+
+
     /**
      * Get the marker latitude and longitude.
      * @param {Object} marker
@@ -1166,6 +1170,11 @@ define([
     getMarkerVisibility: function(marker) {
       return NPMap.Map[NPMap.config.api].getMarkerVisibility(marker);
     },
+
+
+
+
+    
     /**
      * Gets the maximum zoom level for the map.
      * @return {Number}
