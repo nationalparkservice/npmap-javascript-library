@@ -545,7 +545,7 @@ NPMap.config = {
 <h2 id="npmap.map-properties">Properties</h2>
 <p><code>NPMap.Map</code> does not expose any public properties.</p>
 <h2 id="npmap.map-events">Events</h2>
-<p>The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmap-event"><code>NPMap.Event</code></a> module.</p>
+<p>The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmap.event"><code>NPMap.Event</code></a> module.</p>
 <p>You can see these events in action on the [map events example](http://www.nps.gov/npmap/support/library/examples/map-events.html).</p>
 <h3 id="npmap.map-events-mouse">Mouse Events</h3>
 <p>Once you subscribe to one of these events, your handler will receive the {MouseEvent} as a parameter when the event is fired.</p>
@@ -737,7 +737,7 @@ NPMap.config = {
   </tbody>
 </table>
 <h2 id="npmap.infobox-events">Events</h2>
-<p>The <code>NPMap.InfoBox</code> module exposes a few events that can be utilized. You can subscribe to and unsubscribe from these events using the <a href="#npmap-event"><code>NPMap.Event</code></a> module.</p>
+<p>The <code>NPMap.InfoBox</code> module exposes a few events that can be utilized. You can subscribe to and unsubscribe from these events using the <a href="#npmap.event"><code>NPMap.Event</code></a> module.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -820,7 +820,7 @@ NPMap.config = {
 <h2 id="npmap.layer-properties">Properties</h2>
 <p><code>NPMap.Layer</code> does not expose any public properties.</p>
 <h2 id="npmap.layer-events">Events</h2>
-<p>The <code>NPMap.Layer</code> module exposes several events that can be utilized to hook custom behaviors up to layers. You can subscribe to and unsubscribe from these events using the <a href="#npmap-event"><code>NPMap.Event</code></a> module.</p>
+<p>The <code>NPMap.Layer</code> module exposes several events that can be utilized to hook custom behaviors up to layers. You can subscribe to and unsubscribe from these events using the <a href="#npmap.event"><code>NPMap.Event</code></a> module.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -855,7 +855,7 @@ NPMap.config = {
 <h2 id="npmap.layer-submodules">Submodules</h2>
 <p>Code that is specific to the individual layer handlers hang off of the <code>NPMap.Layer</code> module.</p>
 <ul>
-  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/arcgisserverrest.html"><code>NPMap.Layer.ArcGisServerRest</code></a><li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/arcgisserverrest.html"><code>NPMap.Layer.ArcGisServerRest</code></a></li>
   <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/cartodb.html"><code>NPMap.Layer.CartoDb</code></a></li>
   <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/geojson.html"><code>NPMap.Layer.GeoJson</code></a></li>
   <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/googlefusion.html"><code>NPMap.Layer.GoogleFusion</code></a></li>
