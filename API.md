@@ -931,6 +931,16 @@ NPMap.config = {
   <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/zoomify.html"><code>NPMap.Layer.Zoomify</code></a></li>
 </ul>
 <h1 id="npmap.event">NPMap.Event</h1>
+<h2 id="npmap.event-example">Example</h2>
+<pre><code>
+// Add an event.
+var eventId = NPMap.Event.add('NPMap.Map', 'click', function(e) {
+  console.log(e); // The click event.
+});
+
+// Remove the event.
+NPMap.Event.remove(eventId);
+</code></pre>
 <h2 id="npmap.event-methods">Methods</h2>
 <table class="table table-bordered table-condensed table-striped" style="width:100%;">
   <thead>
