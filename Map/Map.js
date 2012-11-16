@@ -1174,7 +1174,7 @@ define([
 
 
 
-    
+
     /**
      * Gets the maximum zoom level for the map.
      * @return {Number}
@@ -1197,7 +1197,8 @@ define([
       return NPMap.Map[NPMap.config.api].getZoom();
     },
     /**
-     * Handles any necessary sizing and positioning for the map when its parent HTML element is resized.
+     * Handles any necessary sizing and positioning for the map when its parent HTML element is resized. You should not need to call this manually.
+     * @return null
      */
     handleResize: function() {
       if (typeof NPMap.Map[NPMap.config.api] !== 'undefined') {
@@ -1284,7 +1285,7 @@ define([
       return NPMap.Map[NPMap.config.api].isLatLngWithinMapBounds(latLng);
     },
     /**
-     * Tests the equivalency of two location strings.
+     * Tests the equivalency of two lat/lng objects.
      * @param {Object} latLng1 The first latLng object.
      * @param {Object} latLng2 The second latLng object.
      * @return {Boolean}
@@ -1299,7 +1300,7 @@ define([
       return areEqual;
     },
     /**
-     * Converts a base API lat/lng object to a NPMap lat/lng object.
+     * Converts a base API lat/lng object to an NPMap lat/lng object.
      * @param {Object} latLng The lat/lng object.
      * @return {Object}
      */
@@ -1307,7 +1308,7 @@ define([
       return NPMap.Map[NPMap.config.api].latLngFromApi(latLng);
     },
     /**
-     * Converts a NPMap lat/lng object to a base API latLng object.
+     * Converts an NPMap lat/lng object to a base API latLng object.
      * @param {Object} latLng The lat/lng object.
      * @return {Object}
      */
@@ -1315,7 +1316,9 @@ define([
       return NPMap.Map[NPMap.config.api].latLngToApi(latLng);
     },
     /**
-     *
+     * Converts an NPMap lat/lng object to an NPMap pixel object.
+     * @param {Object} latLng The lat/lng object.
+     * @return {Object}
      */
     latLngToPixel: function(latLng) {
       return NPMap.Map[NPMap.config.api].latLngToPixel(this.latLngToApi(latLng));
@@ -1423,13 +1426,13 @@ define([
       }
     },
     /**
-     * Pans the map horizontally and/or vertically based on the pixels passed in.
-     * @param {Object} pixels
+     * Pans the map horizontally and/or vertically based on the pixel object passed in.
+     * @param {Object} pixel
      * @param {Function} callback (Optional)
      * @return null
      */
-    panByPixels: function(pixels, callback) {
-      NPMap.Map[NPMap.config.api].panByPixels(pixels, callback);
+    panByPixels: function(pixel, callback) {
+      NPMap.Map[NPMap.config.api].panByPixels(pixel, callback);
     },
     /**
      * Pans the map in a direction by a quarter of the current map viewport.
@@ -1478,7 +1481,7 @@ define([
       return NPMap.Map[NPMap.config.api].pixelFromApi(pixel);
     },
     /**
-     * Converts a NPMap pixel object to its base API equivalent.
+     * Converts an NPMap pixel object to its base API equivalent.
      * @param {Object} pixel
      * @return {Object}
      */
@@ -1486,7 +1489,7 @@ define([
       return NPMap.Map[NPMap.config.api].pixelToApi(pixel);
     },
     /**
-     * Converts a pixel object to a lat/lng object.
+     * Converts an NPMap pixel object to an NPMap lat/lng object.
      * @param {Object} pixel
      * @return {Object}
      */
@@ -1554,15 +1557,15 @@ define([
     },
     /**
      * Sets the notify target to an HTML element other than the map div. This can only be called after NPMap has been initialized.
-     * @param {Object} target
+     * @param {Object} el
      * @return null
      */
-    setNotifyTarget: function(target) {
+    setNotifyTarget: function(el) {
       if (!divNotify) {
         divNotify = document.getElementById('npmap-notify');
       }
 
-      target.appendChild(divNotify);
+      el.appendChild(divNotify);
     },
     /**
      * Sets min and/or max zoom restrictions on the map.

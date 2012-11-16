@@ -352,9 +352,217 @@ The map is the core component of NPMap. The <code>NPMap.Map</code> module facili
       <td><code>{Number}</code></td>
       <td><p>Gets the minimum zoom level for the map.</p></td>
     </tr>
+    <tr>
+      <td><code>getZoom()</code></td>
+      <td><code>{Number}</code></td>
+      <td><p>Gets the zoom level of the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>handleResize()</code></td>
+      <td><code>null</code></td>
+      <td><p>Handles any necessary sizing and positioning for the map when its parent HTML element is resized. You should not need to call this manually.</p></td>
+    </tr>
+    <tr>
+      <td><code>hasClusteredLayer()</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Checks to see if a clustered layer has been added to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>hasTiledLayer()</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Checks to see if a tiled layer has been added to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>hideProgressBar()</code></td>
+      <td><code>null</code></td>
+      <td><p>Hides the progress bar.</p></td>
+    </tr>
+    <tr>
+      <td><code>hideShape(shape)</code></td>
+      <td><code>null</code></td>
+      <td><p>Hides a shape.</p></td>
+    </tr>
+    <tr>
+      <td><code>hideTip(shape)</code></td>
+      <td><code>null</code></td>
+      <td><p>Hides the tip.</p></td>
+    </tr>
+    <tr>
+      <td><code>isLatLngWithinMapBounds(latLng)</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Tests to see if a latLng is within the map's current bounds.</p></td>
+    </tr>
+    <tr>
+      <td><code>latLngsAreEqual(latLng1, latLng2)</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Tests the equivalency of two lat/lng objects.</p></td>
+    </tr>
+    <tr>
+      <td><code>latLngFromApi(latLng)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Converts a base API lat/lng object to an NPMap lat/lng object.</p></td>
+    </tr>
+    <tr>
+      <td><code>latLngToApi(latLng)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Converts an NPMap lat/lng object to a base API latLng object.</p></td>
+    </tr>
+    <tr>
+      <td><code>latLngToPixel(latLng)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Converts an NPMap lat/lng object to an NPMap pixel object.</p></td>
+    </tr>
+    <tr>
+      <td><code>metersToZoomLevel(meters)</code></td>
+      <td><code>{Number}</code></td>
+      <td><p>Turns meters into a zoom level. This function is not precise, as it is impossible to get precise meter scale values for the entire earth reprojected to web mercator.</p></td>
+    </tr>
+    <tr>
+      <td><code>notify(message, title?, type?, interval?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Shows a notification.</p></td>
+    </tr>
+    <tr>
+      <td><code>openModule(el)</code></td>
+      <td><code>null</code></td>
+      <td><p>Opens the UI for a module.</p></td>
+    </tr>
+    <tr>
+      <td><code>panByPixels(pixel, callback?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Pans the map horizontally and/or vertically based on the pixel object passed in.</p></td>
+    </tr>
+    <tr>
+      <td><code>panInDirection(direction)</code></td>
+      <td><code>null</code></td>
+      <td><p>Pans the map in a direction by a quarter of the current map viewport.</p></td>
+    </tr>
+    <tr>
+      <td><code>pixelFromApi(pixel)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Converts a base API pixel object to its NPMap equivalent.</p></td>
+    </tr>
+    <tr>
+      <td><code>pixelToApi(pixel)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Converts an NPMap pixel object to its base API equivalent.</p></td>
+    </tr>
+    <tr>
+      <td><code>pixelToLatLng(pixel)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Converts an NPMap pixel object to an NPMap lat/lng object.</p></td>
+    </tr>
+    <tr>
+      <td><code>removeShape(shape)</code></td>
+      <td><code>null</code></td>
+      <td><p>Removes a shape from the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>setBounds(bounds)</code></td>
+      <td><code>null</code></td>
+      <td><p>Sets the map bounds.</p></td>
+    </tr>
+    <tr>
+      <td><code>setCursor(cursor)</code></td>
+      <td><code>null</code></td>
+      <td><p>Sets the map cursor.</p></td>
+    </tr>
+    <tr>
+      <td><code>setInitialCenter(center)</code></td>
+      <td><code>null</code></td>
+      <td><p>Sets the initial center of the map. This initial center is stored with the map, and is used by the setInitialExtent method, among other things.</p></td>
+    </tr>
+    <tr>
+      <td><code>setInitialZoom(zoom)</code></td>
+      <td><code>null</code></td>
+      <td><p>Sets the initial zoom of the map. This initial zoom is stored with the map, and is used by the setInitialExtent method, among other things.</p></td>
+    </tr>
+    <tr>
+      <td><code>setMarkerOptions(marker, options)</code></td>
+      <td><code>null</code></td>
+      <td><p>Sets a marker's options.</p></td>
+    </tr>
+    <tr>
+      <td><code>setNotifyTarget(el)</code></td>
+      <td><code>null</code></td>
+      <td><p>Sets the notify target to an HTML element other than the map div. This can only be called after NPMap has been initialized.</p></td>
+    </tr>
+    <tr>
+      <td><code>setZoomRestrictions(restrictions)</code></td>
+      <td><code>null</code></td>
+      <td><p>Sets min and/or max zoom restrictions on the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>showProgressBar(value)</code></td>
+      <td><code>null</code></td>
+      <td><p>Shows the progress bar.</p></td>
+    </tr>
+    <tr>
+      <td><code>showShape(shape)</code></td>
+      <td><code>null</code></td>
+      <td><p>Shows a shape.</p></td>
+    </tr>
+    <tr>
+      <td><code>showTip(content, position)</code></td>
+      <td><code>null</code></td>
+      <td><p>Shows the tip.</p></td>
+    </tr>
+    <tr>
+      <td><code>toBounds(bounds)</code></td>
+      <td><code>null</code></td>
+      <td><p>Zooms the map to a bounding box.</p></td>
+    </tr>
+    <tr>
+      <td><code>toggleFullScreen()</code></td>
+      <td><code>null</code></td>
+      <td><p>Toggles fullscreen mode on or off.</p></td>
+    </tr>
+    <tr>
+      <td><code>toInitialExtent()</code></td>
+      <td><code>null</code></td>
+      <td><p>Zooms and/or pans the map to its initial extent.</p></td>
+    </tr>
+    <tr>
+      <td><code>toLatLngs(latLngs)</code></td>
+      <td><code>null</code></td>
+      <td><p>Zooms the map to the extent of an array of lat/lng objects.</p></td>
+    </tr>
+    <tr>
+      <td><code>toMarkers(markers)</code></td>
+      <td><code>null</code></td>
+      <td><p>Zooms the map to the extent of an array of marker objects.</p></td>
+    </tr>
+    <tr>
+      <td><code>updateAttribution()</code></td>
+      <td><code>null</code></td>
+      <td><p>Updates the map attribution. Looks at the NPMap.Map[NPMap.config.api]._attribution property and iterates through all of the visible baseLayers and layers and looks at their attribution property, as well.</p></td>
+    </tr>
+    <tr>
+      <td><code>updateProgressBar(value)</code></td>
+      <td><code>null</code></td>
+      <td><p>Updates the progress bar value.</p></td>
+    </tr>
+    <tr>
+      <td><code>zoom(zoom)</code></td>
+      <td><code>null</code></td>
+      <td><p>Zooms the map to a zoom level.</p></td>
+    </tr>
+    <tr>
+      <td><code>zoomIn()</code></td>
+      <td><code>null</code></td>
+      <td><p>Zooms the map in by one zoom level.</p></td>
+    </tr>
+    <tr>
+      <td><code>zoomOut()</code></td>
+      <td><code>null</code></td>
+      <td><p>Zooms the map out by one zoom level.</p></td>
+    </tr>
   </tbody>
 </table>
 <h2 id="npmap.map-properties">Properties</h2>
+
+<code>NPMap.Map</code> does not expose any public properties.
+
 <h2 id="npmap.map-events">Events</h2>
 
 The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmapevent"><code>NPMap.Event</code></a> module.
@@ -476,6 +684,8 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
 <h2 id="npmap.map-submodules">Submodules</h2>
 
 Base API-specific code lives in one of the submodules that hang off of the <code>NPMap.Map</code> module. Generally speaking, you should not interact directly with these submodules, but if you need to do something programatically that isn't supported by the <code>NPMap.Map</code> module, you may need to.
+
+One property that you may need to access is the underlying map object that has been created using the base API. This property can be accessed at <code>NPMap.Map['Bing'/'Google'/'Leaflet'/'ModestMaps'].map</code>. Once NPMap has initialized the map and loaded all of its tools and modules, you can use this map to access functionality that is provided by the base API but not supported by one of the NPMap modules.
 
 - <a href="http://www.nps.gov/npmap/support/library/base-apis/bing.html"><code>NPMap.Map.Bing</code></a>
 - <a href="http://www.nps.gov/npmap/support/library/base-apis/google.html"><code>NPMap.Map.Google</code></a>
