@@ -248,7 +248,7 @@ The map is the core component of NPMap. The <code>NPMap.Map</code> module facili
 - [MapBox Wax](http://mapbox.com/wax/)
 
 <h2 id="npmap.map-methods">Methods</h2>
-<table class="table table-bordered table-condensed table-striped">
+<table class="table table-bordered table-condensed table-striped" style="width:100%;">
   <thead>
     <tr>
       <td>Name</td>
