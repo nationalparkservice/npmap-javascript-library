@@ -1131,7 +1131,7 @@ NPMap.Event.remove(eventId);
 <h2 id="npmap.util-events">Events</h2>
 <p><code>NPMap.Util</code> does not trigger any events.</p>
 <h2 id="npmap.layer-submodules">Submodules</h2>
-<p>A few utility modules hang off of the <code>NPMap.Util</code> module.</p>
+<p>A few utility modules hang off of the <code>NPMap.Util</code> module:</p>
 <ul>
   <li><code>NPMap.Util.Json</code>
     <ul>

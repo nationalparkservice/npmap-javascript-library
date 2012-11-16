@@ -1,12 +1,12 @@
 # The NPMap Library
 
-NPMap is a JavaScript astraction library developed, maintained, and used by the [U.S. National Park Service](http://www.nps.gov). It creates a "wrapper" around various web mapping APIs and exposes commonly-used functionality through a simple and targeted API. NPMap also provides a number of custom components and a look-and-feel that fits in with the graphic identity of the National Park Service.
+NPMap is a JavaScript astraction library developed, maintained, and used by the [U.S. National Park Service](http://www.nps.gov). It creates a "wrapper" around various web mapping APIs (namely Bing, Google, Leaflet, and Modest Maps) and exposes commonly-used functionality through a simple and targeted API. NPMap also provides a number of custom components and a look-and-feel that fits in with the graphic identity of the National Park Service.
 
-For more information, including API documentation and examples, take a look at the [support documentation](http://www.nps.gov/npmap/support/).
+For more information, including full [API documentation](http://www.nps.gov/npmap/support/library/api), a [gallery of maps](http://www.nps.gov/npmap/gallery) that have been built with NPMap, and a bunch of more [targeted examples](http://www.nps.gov/npmap/support/library/examples) for developers, take a look at the [NPMap website](http:/www.nps.gov/npmap).
 
-# Current Status
+# Contributing
 
-Migration of some modules from pre-1.0.0 is ongoing, and should be completed in the next few months. Once the migration is completed, 1.0.0 will be tagged, and development will continue.
+If you're interested in contributing to NPMap, take a look at our [contributing guidelines](https://github.com/nationalparkservice/npmap/blob/master/CONTRIBUTING.md) and our [conventions document](https://github.com/nationalparkservice/npmap/blob/master/CONVENTIONS.md). Both of these are works-in-progress.
 
 # License
 
