@@ -53,6 +53,58 @@
     </tr>
   </tbody>
 </table>
+<h2 id="specifications-layer">Layer</h2>
+<p>In NPMap, a layer object is really just a configuration object for either a baseLayer or layer that NPMap appends properties to and uses to manage the layer within the context of the map.</p>
+<p>The properties that are defined on an individual layer object depend on the type of <a href="http://www.nps.gov/npmap/support/library/layer-handlers">layer handler</a> that the layer utilizes. There are, however, some properties that are used fairly consistently across the different types of layers that NPMap supports.</p>
+<p>For "vector" layers (<code>GeoJson</code>, <code>Json</code>, <code>Kml</code>, <code>NativeVectors</code>, and <code>Xml</code>), the following properties are added to the layer config object:</p>
+<table class="table table-bordered table-condensed table-striped">
+  <thead>
+    <tr>
+      <td>Property</td>
+      <td>Type</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>identify</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>An object with <code>'content'</code>, <code>'title'</code> and optionally <code>'footer'</code> and <code>'cluster'</code> configs that are used by NPMap to configure the InfoBox display for this layer. If these configs aren't specified in the initial layer config object, NPMap will use the default display parameters to display information for an identify operation.</p></td>
+    </tr>
+    <tr>
+      <td><code>shapes</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>An array of the <a href="specifications-shape">shapes</a> that have been added to the map for this layer.</p></td>
+    </tr>
+    <tr>
+      <td><code>style</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>The set of marker, line, and polygon styles that will be used to style the shapes on the map. If these styles aren't specified in the initial layer config object, NPMap will utilize the default styles.</p>
+    </tr>
+  </tbody>
+</table>
+<p>For "raster" or "tiled" layers (<code>ArcGisServerRest</code>, <code>CartoDb</code>, <code>Tiled</code>, <code>TileStream</code>, and <code>Zoomify</code>), the following properties are added to the layer config object:</p>
+<table class="table table-bordered table-condensed table-striped">
+  <thead>
+    <tr>
+      <td>Property</td>
+      <td>Type</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>api</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>The "native" layer object.</p></td>
+    </tr>
+    <tr>
+      <td><code>identify</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>An object with <code>'content'</code>, <code>'title'</code> and optionally <code>'footer'</code> and <code>'cluster'</code> configs that are used by NPMap to configure the InfoBox display for this layer. If these configs aren't specified in the initial layer config object, NPMap will use the default display parameters to display information for an identify operation.</p></td>
+    </tr>
+  </tbody>
+</table>
 <h2 id="specifications-point">Point</h2>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
@@ -93,6 +145,10 @@
     </tr>
     <tr>
       <td><code>layerType</code></td>
+      <td><code>{String}</code></td>
+    </tr>
+    <tr>
+      <td><code>shapeType</code></td>
       <td><code>{String}</code></td>
     </tr>
   </tbody>
