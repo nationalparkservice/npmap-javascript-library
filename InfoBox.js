@@ -536,9 +536,15 @@ define([
       
       if (!html) {
         if (element === 'content') {
-          html = 'There is no description available for this location.';
+          html = '<ul>';
+
+          for (var prop in attributes) {
+            html += '<li>' + prop + ': ' + attributes[prop] + '</li>';
+          }
+
+          html += '</ul>';
         } else if (element === 'title') {
-          html = 'No Title';
+          html = 'Attributes';
         }
       }
 
