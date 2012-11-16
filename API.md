@@ -1,6 +1,7 @@
 <h1 id="notes">Notes</h1>
 <ul>
-  <li>Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. Do not use them.</li>
+  <li>NPMap is designed to be as simple and targeted as possible. It is comprised of simple JavaScript modules, and it does not support everything that full-featured mapping libraries support. That said, it does support even the most advanced cases by making available the underlying classes and objects that are exposed via whichever <a href="http://www.nps.gov/npmap/support/library/base-apis/">base API</a> your map uses.</li>
+  <li>Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. <strong>Do not use them.</strong></li>
 </ul>
 <h1 id="specifications">Specifications</h1>
 <p>By design, NPMap doesn't create or utilize traditional JavaScript classes. It, rather, uses simple objects and utility methods specific to whichever base API is being used by the map to convert objects to and from native base API objects.</p>
@@ -160,7 +161,7 @@
   </tbody>
 </table>
 <h1 id="npmap.config">NPMap.config</h1>
-<p>The <code>NPMap.config</code> object is used to set configuration properties that NPMap uses to build the map. You must create this object **before** loading the NPMap library into your web page.</p>
+<p>The <code>NPMap.config</code> object is used to set configuration properties that NPMap uses to build the map. You must create this object <strong>before</strong> loading the NPMap library into your web page.</p>
 <h2 id="npmap.config-example">Example</h2>
 <pre data-line="3-10"><code>var NPMap = NPMap || {};
 
