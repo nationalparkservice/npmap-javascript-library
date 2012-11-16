@@ -4,7 +4,13 @@
 </ul>
 <h1 id="specifications">Specifications</h1>
 <p>By design, NPMap doesn't create or utilize traditional JavaScript classes. It, rather, uses simple objects and utility methods specific to whichever base API is being used by the map to convert objects to and from native base API objects.</p>
-<p>These specifications document the structure of objects you'll see when interacting directly with NPMap's modules. If you are interacting with objects that aren't proxied through one of the NPMap modules, you'll need to take a look at the API docs for the base API itself to see what the expected format is.</p>
+<p>These specifications document the structure of objects you'll see when interacting directly with NPMap's modules. If you are interacting with objects that aren't proxied through one of the NPMap modules, you'll need to take a look at the API docs for the <a href="http://www.nps.gov/npmap/support/library/base-apis/">base API</a> itself to see what the expected format is. Here are links to the API docs for each base API that NPMap supports:</p>
+<ul>
+  <li><a href="http://msdn.microsoft.com/en-us/library/gg427610.aspx">Bing</a></li>
+  <li><a href="https://developers.google.com/maps/documentation/javascript/reference">Google</a></li>
+  <li><a href="http://leafletjs.com/reference.html">Leaflet</a></li>
+  <li><a href="https://github.com/stamen/modestmaps-js/wiki">Modest Maps</a></li>
+</ul>
 <h2 id="specifications-bounds">Bounds</h2>
 <p>NPMap always expects and returns coordinates in Decimal Degrees.</p>
 <table class="table table-bordered table-condensed table-striped">
@@ -74,7 +80,7 @@
     <tr>
       <td><code>shapes</code></td>
       <td><code>{Array}</code></td>
-      <td><p>An array of the <a href="specifications-shape">shapes</a> that have been added to the map for this layer.</p></td>
+      <td><p>An array of the <a href="#specifications-shape">shapes</a> that have been added to the map for this layer.</p></td>
     </tr>
     <tr>
       <td><code>style</code></td>
@@ -1118,7 +1124,7 @@ NPMap.config = {
 <ul>
   <li><code>NPMap.Util.Json</code>
     <ul>
-      <li>NPMap.Util.Json.GeoJson</li>
+      <li><code>NPMap.Util.Json.GeoJson</code></li>
     </ul>
   <li>
   <li><code>NPMap.Util.Xml</code>
