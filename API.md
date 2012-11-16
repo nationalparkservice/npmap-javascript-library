@@ -1137,7 +1137,7 @@ NPMap.Event.remove(eventId);
     <ul>
       <li><code>NPMap.Util.Json.GeoJson</code></li>
     </ul>
-  <li>
+  </li>
   <li><code>NPMap.Util.Xml</code>
     <ul>
       <li><code>NPMap.Util.Xml.Kml</code></li>
