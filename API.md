@@ -1,17 +1,12 @@
 <h1 id="notes">Notes</h1>
-
-- Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. Do not use them.
-
+<ul>
+  <li>Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. Do not use them.</li>
+</ul>
 <h1 id="specifications">Specifications</h1>
-
-By design, NPMap doesn't create or utilize traditional JavaScript classes. It, rather, uses simple objects and utility methods specific to whichever base API is being used by the map to convert objects to and from native base API objects.
-
-These specifications document the structure of objects you'll see when interacting directly with NPMap's modules. If you are interacting with objects that aren't proxied through one of the NPMap modules, you'll need to take a look at the API docs for the base API itself to see what the expected format is.
-
+<p>By design, NPMap doesn't create or utilize traditional JavaScript classes. It, rather, uses simple objects and utility methods specific to whichever base API is being used by the map to convert objects to and from native base API objects.</p>
+<p>These specifications document the structure of objects you'll see when interacting directly with NPMap's modules. If you are interacting with objects that aren't proxied through one of the NPMap modules, you'll need to take a look at the API docs for the base API itself to see what the expected format is.</p>
 <h2 id="specifications-bounds">Bounds</h2>
-
-NPMap always expects and returns coordinates in Decimal Degrees.
-
+<p>NPMap always expects and returns coordinates in Decimal Degrees.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -39,9 +34,7 @@ NPMap always expects and returns coordinates in Decimal Degrees.
   </tbody>
 </table>
 <h2 id="specifications-latlng">LatLng</h2>
-
-NPMap always expects and returns coordinates in Decimal Degrees.
-
+<p>NPMap always expects and returns coordinates in Decimal Degrees.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -80,11 +73,8 @@ NPMap always expects and returns coordinates in Decimal Degrees.
   </tbody>
 </table>
 <h2 id="specifications-shape">Shape</h2>
-
-NPMap stores important metadata as a property on all the lines, markers, and polygons that it creates. It uses these metadata to make information about the shapes available via <code>click</code> and <code>mouseover</code> operations and various modules and tools.
-
-All of the metadata that NPMap stores with a shape is contained in the <code>npmap</code> object, so if you have a reference to a <code>shape</code>, you can access the NPMap metadata via the <code>shape.npmap</code> property. This object contains the following properties:
-
+<p>NPMap stores important metadata as a property on all the lines, markers, and polygons that it creates. It uses these metadata to make information about the shapes available via <code>click</code> and <code>mouseover</code> operations and various modules and tools.</p>
+<p>All of the metadata that NPMap stores with a shape is contained in the <code>npmap</code> object, so if you have a reference to a <code>shape</code>, you can access the NPMap metadata via the <code>shape.npmap</code> property. This object contains the following properties:</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -107,11 +97,8 @@ All of the metadata that NPMap stores with a shape is contained in the <code>npm
     </tr>
   </tbody>
 </table>
-
 <h1 id="npmap.config">NPMap.config</h1>
-
-The <code>NPMap.config</code> object is used to set configuration properties that NPMap uses to build the map. You must create this object **before** loading the NPMap library into your web page.
-
+<p>The <code>NPMap.config</code> object is used to set configuration properties that NPMap uses to build the map. You must create this object **before** loading the NPMap library into your web page.</p>
 <h2 id="npmap.config-example">Example</h2>
 <pre data-line="3-10"><code>var NPMap = NPMap || {};
 
@@ -132,9 +119,7 @@ NPMap.config = {
 })();
 </code></pre>
 <h2 id="npmap.config-options">Options</h2>
-
-The following properties can be set in the <a href="#npmapconfig"><code>NPMap.config</code></a> object. Note that the only required property is <code>NPMap.config.div</code>.
-
+<p>The following properties can be set in the <a href="#npmapconfig"><code>NPMap.config</code></a> object. Note that the only required property is <code>NPMap.config.div</code>.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -240,25 +225,23 @@ The following properties can be set in the <a href="#npmapconfig"><code>NPMap.co
   </tbody>
 </table>
 <h1 id="npmap.map">NPMap.Map</h1>
-
-The map is the core component of NPMap. The <code>NPMap.Map</code> module facilitates creating and interacting with a map built with one of the supported base APIs. To create a map, you will need to create a <code>NPMap.config</code> object and then load the NPMap library into your web page.
-
+<p>The map is the core component of NPMap. The <code>NPMap.Map</code> module facilitates creating and interacting with a map built with one of the supported base APIs. To create a map, you will need to create a <code>NPMap.config</code> object and then load the NPMap library into your web page.</p>
 <h2 id="npmap.map-dependencies">Dependencies</h2>
-
-- [MapBox Wax](http://mapbox.com/wax/)
-
+<ul>
+  <li><a href="http://mapbox.com/wax/">MapBox Wax</a></li>
+</ul>
 <h2 id="npmap.map-methods">Methods</h2>
 <table class="table table-bordered table-condensed table-striped" style="width:100%;">
   <thead>
     <tr>
-      <td><div style="max-width:450px;">Name</div></td>
+      <td>Method</td>
       <td>Return Value</td>
       <td>Description</td>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td><code>addControl(el:HtmlElement, callback:Function, stopPropagation:Boolean)</code></td>
+      <td style="max-width:450px;word-wrap:break-word;"><code>addControl(el:HtmlElement, callback:Function, stopPropagation:Boolean)</code></td>
       <td><code>null</code></td>
       <td><p>Adds an HTML element to the map div.</p></td>
     </tr>
@@ -560,19 +543,12 @@ The map is the core component of NPMap. The <code>NPMap.Map</code> module facili
   </tbody>
 </table>
 <h2 id="npmap.map-properties">Properties</h2>
-
-<code>NPMap.Map</code> does not expose any public properties.
-
+<p><code>NPMap.Map</code> does not expose any public properties.</p>
 <h2 id="npmap.map-events">Events</h2>
-
-The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmapevent"><code>NPMap.Event</code></a> module.
-
-You can see these events in action on the [map events example](http://www.nps.gov/npmap/support/library/examples/map-events.html).
-
+<p>The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmap-event"><code>NPMap.Event</code></a> module.</p>
+<p>You can see these events in action on the [map events example](http://www.nps.gov/npmap/support/library/examples/map-events.html).</p>
 <h3 id="npmap.map-events-mouse">Mouse Events</h3>
-
-Once you subscribe to one of these events, your handler will receive the {MouseEvent} as a parameter when the event is fired.
-
+<p>Once you subscribe to one of these events, your handler will receive the {MouseEvent} as a parameter when the event is fired.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -682,17 +658,416 @@ Once you subscribe to one of these events, your handler will receive the {MouseE
   </tbody>
 </table>
 <h2 id="npmap.map-submodules">Submodules</h2>
-
-Base API-specific code lives in one of the submodules that hang off of the <code>NPMap.Map</code> module. Generally speaking, you should not interact directly with these submodules, but if you need to do something programatically that isn't supported by the <code>NPMap.Map</code> module, you may need to.
-
-One property that you may need to access is the underlying map object that has been created using the base API. This property can be accessed at <code>NPMap.Map['Bing'/'Google'/'Leaflet'/'ModestMaps'].map</code>. Once NPMap has initialized the map and loaded all of its tools and modules, you can use this map to access functionality that is provided by the base API but not supported by one of the NPMap modules.
-
-- <a href="http://www.nps.gov/npmap/support/library/base-apis/bing.html"><code>NPMap.Map.Bing</code></a>
-- <a href="http://www.nps.gov/npmap/support/library/base-apis/google.html"><code>NPMap.Map.Google</code></a>
-- <a href="http://www.nps.gov/npmap/support/library/base-apis/leaflet.html"><code>NPMap.Map.Leaflet</code></a>
-- <a href="http://www.nps.gov/npmap/support/library/base-apis/modestmaps.html"><code>NPMap.Map.ModestMaps</code></a>
-
-<h1 id="npmap.layer">NPMap.Layer</h1>
-<h1 id="npmap.event">NPMap.Event</h1>
+<p>Base API-specific code lives in one of the submodules that hang off of the <code>NPMap.Map</code> module. Generally speaking, you should not interact directly with these submodules, but if you need to do something programatically that isn't supported by the <code>NPMap.Map</code> module, you may need to.</p>
+<p>One property that you may need to access is the underlying map object that has been created using the base API. This property can be accessed at <code>NPMap.Map['Bing'|'Google'|'Leaflet'|'ModestMaps'].map</code>. Once NPMap has initialized the map and loaded all of its tools and modules, you can use this map to access functionality that is provided by the base API but not supported by one of the NPMap modules.</p>
+<ul>
+  <li><a href="http://www.nps.gov/npmap/support/library/base-apis/bing.html"><code>NPMap.Map.Bing</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/base-apis/google.html"><code>NPMap.Map.Google</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/base-apis/leaflet.html"><code>NPMap.Map.Leaflet</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/base-apis/modestmaps.html"><code>NPMap.Map.ModestMaps</code></a></li>
+</ul>
 <h1 id="npmap.infobox">NPMap.InfoBox</h1>
+<h2 id="npmap.infobox-methods">Methods</h2>
+<table class="table table-bordered table-condensed table-striped" style="width:100%;">
+  <thead>
+    <tr>
+      <td>Method</td>
+      <td>Return Value</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>hide()</code></td>
+      <td><code>null</code></td>
+      <td><p>Hides the InfoBox.</p></td>
+    </tr>
+    <tr>
+      <td><code>removeAction(el)</code></td>
+      <td><code>null</code></td>
+      <td><p>Removes an action HTML element (<code>&lt;a&gt;</code>)from the InfoBox.</p></td>
+    </tr>
+    <tr>
+      <td><code>reposition()</code></td>
+      <td><code>null</code></td>
+      <td><p>Repositions the npmap-clickdot div then repositions the InfoBox. If the marker or npmap-clickdot is not in the current map bounds, it is hidden.</p></td>
+    </tr>
+    <tr>
+      <td style="max-width:450px;word-wrap:break-word;"><code>show(content, title, footer, actions, styles, target?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Shows the InfoBox.</p></td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="npmap.infobox-properties">Properties</h2>
+<table class="table table-bordered table-condensed table-striped" style="width:100%;">
+  <thead>
+    <tr>
+      <td>Property</td>
+      <td>Type</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>actions</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>An array of action objects associated with the current identify operation. If the InfoBox is hidden, this will be <code>null</code>.</p></td>
+    </tr>
+    <tr>
+      <td><code>results</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>An array of result objects for the current identify operation. If the InfoBox is hidden, this will be <code>null</code>.</p></td>
+    </tr>
+    <tr>
+      <td><code>latLng</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>The current latitude/longitude of the InfoBox. If the InfoBox is hidden, this will be <code>null</code>.</p></td>
+    </tr>
+    <tr>
+      <td><code>marker</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>The current marker, if a marker is present. This is <code>null</code> if the InfoBox is displaying without a marker or if the InfoBox is hidden.</p></td>
+    </tr>
+    <tr>
+      <td><code>visible</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>This is <code>true</code> if the InfoBox is currently visible.</p></td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="npmap.infobox-events">Events</h2>
+<p>The <code>NPMap.InfoBox</code> module exposes a few events that can be utilized. You can subscribe to and unsubscribe from these events using the <a href="#npmap-event"><code>NPMap.Event</code></a> module.</p>
+<table class="table table-bordered table-condensed table-striped">
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Argument</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>hide</code></td>
+      <td><code>null</code></td>
+      <td><p>This event is fired when the InfoBox is hidden.</p></td>
+    </tr>
+    <tr>
+      <td><code>show</code></td>
+      <td><code>null</code></td>
+      <td><p>This event is fired when the InfoBox is shown.</p></td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="npmap.layer">NPMap.Layer</h1>
+<h2 id="npmap.layer-methods">Methods</h2>
+<table class="table table-bordered table-condensed table-striped" style="width:100%;">
+  <thead>
+    <tr>
+      <td>Method</td>
+      <td>Return Value</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>getActiveLayerTypes()</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>Gets the active layer types for both the baseLayers and layers configs.</p></td>
+    </tr>
+    <tr>
+      <td><code>getLayerById(id, layers?)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets a layer config object by layer id.</p></td>
+    </tr>
+    <tr>
+      <td><code>getLayerByName(name, layers?)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets a layer config object by layer name.</p></td>
+    </tr>
+    <tr>
+      <td><code>getName(config)</code></td>
+      <td><code>{String}</code></td>
+      <td><p>Gets the layer name.</p></td>
+    </tr>
+    <tr>
+      <td><code>getType(config)</code></td>
+      <td><code>{String}</code></td>
+      <td><p>Gets the layer type.</p></td>
+    </tr>
+    <tr>
+      <td><code>getVisibleLayers()</code></td>
+      <td><code>{String}</code></td>
+      <td><p>Gets the layers that are currently visible.</p></td>
+    </tr>
+    <tr>
+      <td><code>iterateThroughAllLayers(func)</code></td>
+      <td><code>{Function}</code></td>
+      <td><p>Iterates through all the objects in the NPMap.config.baseLayers and NPMap.config.layers configs.</p><p>The function will be passed each of the layer config objects as a parameter.</p></td>
+    </tr>
+    <tr>
+      <td><code>iterateThroughBaseLayers(func)</code></td>
+      <td><code>{Function}</code></td>
+      <td><p>Iterates through all the objects in the NPMap.config.baseLayers config.</p><p>The function will be passed each of the layer config objects as a parameter.</p></td>
+    </tr>
+    <tr>
+      <td><code>iterateThroughLayers(func)</code></td>
+      <td><code>{Function}</code></td>
+      <td><p>Iterates through all the objects in the NPMap.config.layers config.</p><p>The function will be passed each of the layer config objects as a parameter.</p></td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="npmap.layer-properties">Properties</h2>
+<p><code>NPMap.Layer</code> does not expose any public properties.</p>
+<h2 id="npmap.layer-events">Events</h2>
+<p>The <code>NPMap.Layer</code> module exposes several events that can be utilized to hook custom behaviors up to layers. You can subscribe to and unsubscribe from these events using the <a href="#npmap-event"><code>NPMap.Event</code></a> module.</p>
+<table class="table table-bordered table-condensed table-striped">
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Argument</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>added</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired when a new baseLayer or layer is added to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>beforeadd</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired before a new baseLayer or layer is added to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>ready</code></td>
+      <td><code>null</code></td>
+      <td><p>This event fires once when all the layers the map has been initialized with have been added to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>removed</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired when a baseLayer or layer is removed from the map.</p></td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="npmap.layer-submodules">Submodules</h2>
+<p>Code that is specific to the individual layer handlers hang off of the <code>NPMap.Layer</code> module.</p>
+<ul>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/arcgisserverrest.html"><code>NPMap.Layer.ArcGisServerRest</code></a><li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/cartodb.html"><code>NPMap.Layer.CartoDb</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/geojson.html"><code>NPMap.Layer.GeoJson</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/googlefusion.html"><code>NPMap.Layer.GoogleFusion</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/json.html"><code>NPMap.Layer.Json</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/kml.html"><code>NPMap.Layer.Kml</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/nativevectors.html"><code>NPMap.Layer.NativeVectors</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/tiled.html"><code>NPMap.Layer.Tiled</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/tilestream.html"><code>NPMap.Layer.TileStream</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/xml.html"><code>NPMap.Layer.Xml</code></a></li>
+  <li><a href="http://www.nps.gov/npmap/support/library/layer-handlers/zoomify.html"><code>NPMap.Layer.Zoomify</code></a></li>
+</ul>
+<h1 id="npmap.event">NPMap.Event</h1>
+<h2 id="npmap.event-methods">Methods</h2>
+<table class="table table-bordered table-condensed table-striped" style="width:100%;">
+  <thead>
+    <tr>
+      <td>Method</td>
+      <td>Return Value</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="max-width:450px;word-wrap:break-word;"><code>add(obj, event, func, single?)</code></td>
+      <td><code>{Number}</code></td>
+      <td><p>Adds an event.</p></td>
+    </tr>
+    <tr>
+      <td><code>get(obj?)</code></td>
+      <td><code>{Number}</code></td>
+      <td><p>Gets all the events or, optionally, just the events that have been added to a module.</p></td>
+    </tr>
+    <tr>
+      <td><code>remove(id)</code></td>
+      <td><code>null</code></td>
+      <td><p>Removes an event.</p></td>
+    </tr>
+    <tr>
+      <td><code>trigger(obj, event, e?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Triggers an event.</p></td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="npmap.event-properties">Properties</h2>
+<p><code>NPMap.Event</code> does not expose any public properties.</p>
+<h2 id="npmap.event-events">Events</h2>
+<p><code>NPMap.Event</code> does not trigger any events.</p>
 <h1 id="npmap.util">NPMap.Util</h1>
+<p>The <code>NPMap.Util</code> module contains helper methods that make certain tasks easier. NPMap also loads and utilizes the <a href="http://underscorejs.org">Underscore</a> library, so you can utilize any of the methods it exposes in addition to the <code>NPMap.Util</code> methods.</p>
+<h2 id="npmap.util-methods">Methods</h2>
+<table class="table table-bordered table-condensed table-striped" style="width:100%;">
+  <thead>
+    <tr>
+      <td>Method</td>
+      <td>Return Value</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>addClass(el, cls)</code></td>
+      <td><code>null</code></td>
+      <td><p>Adds a CSS class to an element.</p></td>
+    </tr>
+    <tr>
+      <td><code>bindEventToElement(el, name, handler)</code></td>
+      <td><code>null</code></td>
+      <td><p>Adds a CSS class to an element.</p></td>
+    </tr>
+    <tr>
+      <td><code>doesPropertyExist(obj, prop)</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Given an object, does a property exist?</p></td>
+    </tr>
+    <tr>
+      <td><code>eventCancelMouseWheel(e)</code></td>
+      <td><code>null</code></td>
+      <td><p>Cancels a <code>mousewheel</code> event.</p></td>
+    </tr>
+    <tr>
+      <td><code>eventCancelPropagation(e)</code></td>
+      <td><code>null</code></td>
+      <td><p>Cross-browser cancel event propagation.</p></td>
+    </tr>
+    <tr>
+      <td><code>getElementsByClass(cls)</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>Gets elements by class name.</p></td>
+    </tr>
+    <tr>
+      <td><code>getFirstPropertyOfObject(obj)</code></td>
+      <td><code>{Array}|{Boolean}|{Function}|{Object}</code></td>
+      <td><p>Gets the first property of an object.</p></td>
+    </tr>
+    <tr>
+      <td><code>getMousePositionPage()</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets the mouse position, in pixels and relative to the page, for a MouseEvent object.</p></td>
+    </tr>
+    <tr>
+      <td><code>getNextElement(el)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets the next sibling element.</p></td>
+    </tr>
+    <tr>
+      <td><code>getOffset(el)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets the offset, in pixels, of an element.</p></td>
+    </tr>
+    <tr>
+      <td><code>getOuterDimensions(el)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets the outer dimensions, in pixels, of an HTML element.</p></td>
+    </tr>
+    <tr>
+      <td><code>getScrollBarWidth()</code></td>
+      <td><code>{Number}</code></td>
+      <td><p>Gets the width of the browser's vertical scrollbar.</p></td>
+    </tr>
+    <tr>
+      <td><code>getScrollPosition()</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets the current scroll position, in pixels, of the browser window.</p></td>
+    </tr>
+    <tr>
+      <td><code>getWindowDimensions()</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets the current window dimensions, in pixels.</p></td>
+    </tr>
+    <tr>
+      <td><code>hasClass(el, cls)</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Checks to see if an HTML element has a CSS class.</p></td>
+    </tr>
+    <tr>
+      <td><code>hexToRgb(hex)</code></td>
+      <td><code>{String}</code></td>
+      <td><p>Converts a HEX color to RGB.</p></td>
+    </tr>
+    <tr>
+      <td><code>injectCss(locations, callback?</code></td>
+      <td><code>null</code></td>
+      <td><p>Injects a CSS stylesheet or multiple CSS stylesheets into the page.</p></td>
+    </tr>
+    <tr>
+      <td><code>isBetween(start, end, test</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Returns true if the test number falls between the start and end numbers.</p></td>
+    </tr>
+    <tr>
+      <td><code>isInt(n)</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Returns true if the number passed in is an integer.</p></td>
+    </tr>
+    <tr>
+      <td><code>isRightClick(e)</code></td>
+      <td><code>{Boolean}</code></td>
+      <td><p>Detects if a MouseEvent is a right-click event.</p></td>
+    </tr>
+    <tr>
+      <td><code>iterateThroughChildNodes(el, func)</code></td>
+      <td><code>null</code></td>
+      <td><p>Iterates through all of the child nodes of an element.</p></td>
+    </tr>
+    <tr>
+      <td><code>monitorResize(el, handler)</code></td>
+      <td><code>null</code></td>
+      <td><p>Monitors an HTML element and calls the handler when its size changes.</p></td>
+    </tr>
+    <tr>
+      <td><code>removeClass(el, cls)</code></td>
+      <td><code>null</code></td>
+      <td><p>Removes a CSS class from an HTML element.</p></td>
+    </tr>
+    <tr>
+      <td><code>safeLoad(module, callback)</code></td>
+      <td><code>null</code></td>
+      <td><p>Checks to make sure a module has been loaded before calling callback function. This function assumes that the module resides in the NPMap namespace.</p></td>
+    </tr>
+    <tr>
+      <td><code>stopAllPropagation(el)</code></td>
+      <td><code>null</code></td>
+      <td><p>Stops the propagation of all events on an HTML element.</p></td>
+    </tr>
+    <tr>
+      <td><code>stripHtmlFromString(html)</code></td>
+      <td><code>{String}</code></td>
+      <td><p>Strips all HTML from a string.</p></td>
+    </tr>
+    <tr>
+      <td><code>trimString(string)</code></td>
+      <td><code>{String}</code></td>
+      <td><p>Trims whitespace from the beginning and end of a string.</p></td>
+    </tr>
+  </tbody>
+<table>
+<h2 id="npmap.util-properties">Properties</h2>
+<p><code>NPMap.Util</code> does not expose any public properties.</p>
+<h2 id="npmap.util-events">Events</h2>
+<p><code>NPMap.Util</code> does not trigger any events.</p>
+<h2 id="npmap.layer-submodules">Submodules</h2>
+<p>A few utility modules hang off of the <code>NPMap.Util</code> module.</p>
+<ul>
+  <li><code>NPMap.Util.Json</code>
+    <ul>
+      <li>NPMap.Util.Json.GeoJson</li>
+    </ul>
+  <li>
+  <li><code>NPMap.Util.Xml</code>
+    <ul>
+      <li><code>NPMap.Util.Xml.Kml</code></li>
+    </ul>
+  </li>
+</ul>

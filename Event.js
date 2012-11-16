@@ -10,11 +10,11 @@ define(function() {
 
   return NPMap.Event = {
     /**
-     * Add an event to an NPMap class.
+     * Adds an event.
      * @param {String} obj The name of the nested class, in "NPMap.ObjectName" format, to add the event to.
      * @param {String} event The name of the event to add to the class.
      * @param {Function} func The function to call when the event is fired.
-     * @param {Boolean} single Should this event only be called once and then disposed?
+     * @param {Boolean} single (Optional) Should this event only be called once and then disposed?
      * @return {Number}
      */
     add: function(obj, event, func, single) {
@@ -31,7 +31,7 @@ define(function() {
       return id - 1;
     },
     /**
-     * Gets all the events, and optionally just the events that have been added to a modulezs.
+     * Gets all the events or, optionally, just the events that have been added to a module.
      * @param {String} obj (Optional)
      * @return {Array}
      */
@@ -55,7 +55,7 @@ define(function() {
       return events;
     },
     /**
-     * Removes an existing event from a NPMap module.
+     * Removes an event.
      * @param {Number} id
      * @return null
      */

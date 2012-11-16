@@ -238,14 +238,14 @@ define([
               Map.hideProgressBar(value);
               InfoBox.show(infobox.content, infobox.title);
               clusterPosition = 0;
-              InfoBox.scrollTo(0);
+              InfoBox._scrollTo(0);
             }
           } else {
             clearInterval(interval);
             Map.hideProgressBar();
             InfoBox.show('The identify operation is taking too long. Zoom in further and try again.', 'Sorry!');
             clusterPosition = 0;
-            InfoBox.scrollTo(0);
+            InfoBox._scrollTo(0);
           }
         }, 5);
       }
@@ -272,7 +272,7 @@ define([
      */
     _infoBoxBack: function() {
       InfoBox.show(backContent, backTitle);
-      InfoBox.scrollTo(clusterPosition);
+      InfoBox._scrollTo(clusterPosition);
 
       this._identifyResult = identifyResults;
     },
@@ -361,9 +361,9 @@ define([
         actions = [];
       }
 
-      clusterPosition = InfoBox.getScrollPosition();
+      clusterPosition = InfoBox._getScrollPosition();
 
-      InfoBox.scrollTo(0);
+      InfoBox._scrollTo(0);
       InfoBox.show(InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
     },
     /**

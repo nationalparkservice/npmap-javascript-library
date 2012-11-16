@@ -303,7 +303,7 @@ define([
       return layers;
     },
     /**
-     * Iterates through all the objects in the NPMap.config.baseLayers and NPMap.config.layers configs.
+     * Iterates through all the objects in the NPMap.config.baseLayers and NPMap.config.layers configs. The function will be passed each of the layer config objects as a parameter.
      * @param {Function} func
      * @return null
      */
@@ -312,7 +312,7 @@ define([
       this.iterateThroughLayers(func);
     },
     /**
-     * Iterates through all the objects in the NPMap.config.baseLayers config.
+     * Iterates through all the objects in the NPMap.config.baseLayers config. The function will be passed each of the layer config objects as a parameter.
      * @param {Function} func
      * @return null
      */
@@ -322,7 +322,7 @@ define([
       }
     },
     /**
-     * Iterates through all the objects in the NPMap.config.layers config.
+     * Iterates through all the objects in the NPMap.config.layers config. The function will be passed each of the layer config objects as a parameter.
      * @param {Function} func
      * @return null
      */

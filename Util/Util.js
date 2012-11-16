@@ -91,7 +91,7 @@ define(function() {
       bindEvent(el, name, handler);
     },
     /**
-     * Given an object, does a property exist.
+     * Given an object, does a property exist?
      * @param {Object} obj The object to test.
      * @param {String} prop The property to look for. Ex: 'NPMap.config.tools.keyboard'.
      * @return {Boolean}
@@ -112,7 +112,7 @@ define(function() {
       return true;
     },
     /**
-     * Cancels the mousewheel event.
+     * Cancels a mousewheel event.
      * @param {Object} e
      * @return {Boolean}
      */
@@ -159,7 +159,7 @@ define(function() {
     /**
      * Gets the first property of an object.
      * @param {Object} obj The object to get the first property of.
-     * @return {Array} OR {Boolean} OR {Function} OR {Object}
+     * @return {Array}|{Boolean}|{Function}|{Object}
      */
     getFirstPropertyOfObject: function(obj) {
       for (var key in obj) {
@@ -169,7 +169,7 @@ define(function() {
       }
     },
     /**
-     * Gets the mouse position, in pixels, for a MouseEvent object. Taken from mapbox/wax - https://github.com/mapbox/wax.
+     * Gets the mouse position, in pixels and relative to the page, for a MouseEvent object. Taken from mapbox/wax - https://github.com/mapbox/wax.
      * @param {Object} e
      * @return {Object}
      */
@@ -217,7 +217,7 @@ define(function() {
       };
     },
     /**
-     * Gets the outer dimensions of an HTML element.
+     * Gets the outer dimensions, in pixels, of an HTML element.
      * @param {Object} el
      * @return {Object}
      */
@@ -296,7 +296,7 @@ define(function() {
       return (w1 - w2);
     },
     /**
-     * Gets the current scroll position of the browser window.
+     * Gets the current scroll position, in pixels, of the browser window.
      * @return {Object}
      */
     getScrollPosition: function() {
@@ -319,7 +319,7 @@ define(function() {
       return position;
     },
     /**
-     * Gets the current window dimensions.
+     * Gets the current window dimensions, in pixels.
      * @return {Object}
      */
     getWindowDimensions: function() {
@@ -371,7 +371,7 @@ define(function() {
       return rgb;
     },
     /**
-     * Injects a CSS stylesheet into the page.
+     * Injects a CSS stylesheet or multiple CSS stylesheets into the page.
      * @param {String/Array} location The path to the CSS stylesheet.
      * @param {Function} callback (Optional)
      * @return null
@@ -428,7 +428,7 @@ define(function() {
     /**
      * Iterates through all of the child nodes of an element.
      * @param {Object} el
-     * @param {Function} func (Optional)
+     * @param {Function} func
      * @return null
      */
     iterateThroughChildNodes: function(el, func) {
@@ -445,7 +445,7 @@ define(function() {
       }
     },
     /**
-     * Monitors a div and calls the handler when its size has changed.
+     * Monitors an HTML element and calls the handler when its size changes.
      * @param {Object} el
      * @param {Function} handler
      * @return null
@@ -487,7 +487,7 @@ define(function() {
       el.className = el.className.replace(cls, '');
     },
     /**
-     * DEPRECATED
+     * DEPRECATED: STILL USED BY ROUTE MODULE.
      * Replaces "bad characters" that have been inserted by NPMap into strings.
      * @param {String} html The HTML string to perform the replace operation on.
      * @return {String}
@@ -497,8 +497,8 @@ define(function() {
     },
     /**
      * Checks to make sure a module has been loaded before calling callback function. This function assumes that the module resides in the NPMap namespace.
-     * @param module {String} (Required) The full name of the module, including namespace, that must be loaded before callback is called.
-     * @param callback {Function} (Required) The callback function to call once the module has been loaded.
+     * @param module {String} The full name of the module, including namespace, that must be loaded before callback is called.
+     * @param callback {Function} The callback function to call once the module has been loaded.
      * @return null
      */
     safeLoad: function(module, callback) {
@@ -525,7 +525,7 @@ define(function() {
       }, 250);
     },
     /**
-     * Stops the propagation of all events.
+     * Stops the propagation of all events on an HTML element.
      * @param {Object} el
      * @return null
      */
@@ -537,7 +537,7 @@ define(function() {
       }
     },
     /**
-     * Strips HTML elements from a string.
+     * Strips all HTML from a string.
      * @param {String} html The string to strip HTML from.
      * @return {String}
      */

@@ -544,25 +544,36 @@ define([
 
       return html;
     },
-    // An array of action objects associated with the current identify operation. This is null if the InfoBox is hidden.
-    actions: [],
-    // An array of result objects for the current identify operation. This is null if the InfoBox is hidden.
-    results: [],
-    // The current latitude/longitude, in "latitude,longitude" format, of the InfoBox (or is it the InfoBox's anchor?). If the InfoBox is hidden, this will be null.
-    latLng: null,
-    // The current marker, if a marker is present. This is null if the InfoBox is displaying without a marker or if the InfoBox is hidden.
-    marker: null,
-    // Is the InfoBox currently visible?
-    visible: false,
     /**
      * Gets the current scroll position of the InfoBox content wrapper div.
      * @return {Number}
      */
-    getScrollPosition: function() {
+    _getScrollPosition: function() {
       return divInfoBoxContentWrapper.scrollTop;
     },
     /**
+     * Scrolls the InfoBox content wrapper div to a position.
+     * @param {Number} y
+     * @return null
+     */
+    _scrollTo: function(y) {
+      if (typeof divInfoBoxContentWrapper !== 'undefined') {
+        divInfoBoxContentWrapper.scrollTop = y;
+      }
+    },
+    // An array of action objects associated with the current identify operation. If the InfoBox is hidden, this will be null.
+    actions: [],
+    // An array of result objects for the current identify operation. If the InfoBox is hidden, this will be null.
+    results: [],
+    // The current latitude/longitude of the InfoBox. If the InfoBox is hidden, this will be null.
+    latLng: null,
+    // The current marker, if a marker is present. This is null if the InfoBox is displaying without a marker or if the InfoBox is hidden.
+    marker: null,
+    // This is true if the InfoBox is currently visible.
+    visible: false,
+    /**
      * Hides the InfoBox.
+     * @return null
      */
     hide: function() {
       if (this.visible) {
@@ -586,6 +597,7 @@ define([
     },
     /**
      * Removes an action HTML element (<a>) from the InfoBox.
+     * @return null
      */
     removeAction: function(el) {
       el.parentNode.removeChild(el);
@@ -599,6 +611,7 @@ define([
     },
     /**
      * Repositions the npmap-clickdot div then repositions the InfoBox. If the marker or npmap-clickdot is not in the current map bounds, it is hidden.
+     * @return null
      */
     reposition: function() {
       var to = this.marker || this.latLng;
@@ -613,16 +626,6 @@ define([
       }
     },
     /**
-     * Scrolls the InfoBox content wrapper div to a position.
-     * @param {Number} y
-     * @return null
-     */
-    scrollTo: function(y) {
-      if (typeof divInfoBoxContentWrapper !== 'undefined') {
-        divInfoBoxContentWrapper.scrollTop = y;
-      }
-    },
-    /**
      * Shows the InfoBox.
      * @param {String} content The content string (HTML allowed) to set the InfoBox's content div to.
      * @param {String} title The title string (HTML allowed) to set the InfoBox's title div to.
@@ -630,6 +633,7 @@ define([
      * @param {Array} actions (Optional) An array of action objects and template strings (like 'zoombable').
      * @param {Object} styles (Optional) An object w/nested objects to override individual styles for the content, title, and/or footer divs. Example: {content: {maxHeight: '500px'}}.
      * @param {String} or {Object} target (Optional) Either a latitude,longitude string or a marker object to position the InfoBox too.
+     * @return null
      */
     show: function(content, title, footer, actions, styles, target) {
       var bottomHeight,
