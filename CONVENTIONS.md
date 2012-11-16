@@ -1,3 +1,5 @@
+<h1 class="page-title">Conventions</h1>
+
 <div class="alert-box" style="margin-bottom:15px;">
     These coding conventions are a work-in-progress, and should be considered "DRAFT."
 </div>
