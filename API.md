@@ -119,7 +119,7 @@ NPMap.config = {
 })();
 </code></pre>
 <h2 id="npmap.config-options">Options</h2>
-<p>The following properties can be set in the <a href="#npmapconfig"><code>NPMap.config</code></a> object. Note that the only required property is <code>NPMap.config.div</code>.</p>
+<p>The following properties can be set in the <a href="#npmap.config"><code>NPMap.config</code></a> object. Note that the only required property is <code>NPMap.config.div</code>.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
