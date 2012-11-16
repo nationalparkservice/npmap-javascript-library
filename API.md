@@ -251,7 +251,7 @@ The map is the core component of NPMap. The <code>NPMap.Map</code> module facili
 <table class="table table-bordered table-condensed table-striped" style="width:100%;">
   <thead>
     <tr>
-      <td>Name</td>
+      <td><div style="max-width:450px;">Name</div></td>
       <td>Return Value</td>
       <td>Description</td>
     </tr>
