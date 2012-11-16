@@ -89,7 +89,7 @@
     </tr>
   </tbody>
 </table>
-<p>For "raster" or "tiled" layers (<code>ArcGisServerRest</code>, <code>CartoDb</code>, <code>Tiled</code>, <code>TileStream</code>, and <code>Zoomify</code>), the following properties are added to the layer config object:</p>
+<p>For "raster" or "tiled" layers (<code>ArcGisServerRest</code>, <code>CartoDb</code>, <code>GoogleFusion</code>, <code>Tiled</code>, <code>TileStream</code>, and <code>Zoomify</code>), the following properties are added to the layer config object:</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
