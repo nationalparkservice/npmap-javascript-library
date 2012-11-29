@@ -2,7 +2,7 @@
   'Event',
   'Layer/Layer',
   'Map/Map'
-], function(Event, InfoBox, Map) {
+], function(Event, Layer, Map) {
   /**
    * Constructs a URI for a tile.
    * @param {Number} x
@@ -25,12 +25,28 @@
 
   return NPMap.Layer.Tiled = {
     /**
+     * Handles the click operation for Tiled layers.
+     * @param {Object} e
+     * @return null
+     */
+    _handleClick: function(e) {
+      
+    },
+    /**
      * Creates a Tiled layer and adds it to the map.
      * @param {Object} config
      * @return null
      */
     create: function(config) {
-      var tileLayer = NPMap.Map[NPMap.config.api].createTileLayer(uriConstructor, {
+      var constructor;
+
+      if (typeof config.url === 'function') {
+        constructor = config.url;
+      } else {
+        constructor = uriConstructor;
+      }
+
+      NPMap.Map[NPMap.config.api].addTileLayer(NPMap.Map[NPMap.config.api].createTileLayer(constructor, {
         subdomains: [
           'a',
           'b',
@@ -39,9 +55,7 @@
         ],
         url: config.url,
         zIndex: config.zIndex
-      });
-
-      NPMap.Map[NPMap.config.api].addTileLayer(tileLayer);
+      }));
     }
   };
 });
