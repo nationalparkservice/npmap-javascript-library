@@ -162,6 +162,7 @@
       var baseLayer = this._getVisibleBaseLayer(),
           composited = config.composited,
           layerString = config.id,
+          me = this,
           url = config.url || 'http://api.tiles.mapbox.com/v3/';
 
       silent = silent || false;
@@ -282,9 +283,9 @@
           if (!interaction && response.grids && waxShort) {
             config.interaction = interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
               Map.setCursor('pointer');
-
-              if (o.e.type !== 'mousemove') {
-                NPMap.Event.trigger('NPMap.Map', 'shapeclick', o);
+              if (o.e.type === 'click') {
+                //NPMap.Event.trigger('NPMap.Map', 'shapeclick', o);
+                me._handleClick(o);
               }
             }).on('off', function(o) {
               Map.setCursor('default');
