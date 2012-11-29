@@ -1,8 +1,8 @@
 <h1 id="notes">Notes</h1>
-<ul>
-  <li>NPMap is designed to be as simple and targeted as possible. It is comprised of simple JavaScript modules, and it does not support everything that full-featured mapping libraries support. That said, it does support even the most advanced cases by making available the underlying classes and objects that are exposed via whichever <a href="http://www.nps.gov/npmap/support/library/base-apis/">base API</a> your map uses.</li>
+<ol>
+  <li>NPMap is designed to be as simple and targeted as possible. It is comprised of simple JavaScript modules, and it does not support everything that full-featured mapping libraries support. That said, it does support even the most advanced cases by making the underlying classes and objects that are exposed via whichever <a href="http://www.nps.gov/npmap/support/library/base-apis/">base API</a> your map uses available.</li>
   <li>Module properties and methods that start with an underscore (i.e. <code>_zoomToLatLngs</code>) are considered private and may change at any time. <strong>Do not use them.</strong></li>
-</ul>
+</ol>
 <h1 id="specifications">Specifications</h1>
 <p>By design, NPMap doesn't create or utilize traditional JavaScript classes. It, rather, uses simple objects and utility methods specific to whichever base API is being used by the map to convert objects to and from native base API objects.</p>
 <p>These specifications document the structure of objects you'll see when interacting directly with NPMap's modules. If you are interacting with objects that aren't proxied through one of the NPMap modules, you'll need to take a look at the API docs for the <a href="http://www.nps.gov/npmap/support/library/base-apis/">base API</a> itself to see what the expected format is. Here are links to the API docs for each base API that NPMap supports:</p>
@@ -177,7 +177,6 @@ NPMap.config = {
 (function() {
   var s = document.createElement('script');
   s.src = 'http://www.nps.gov/npmap/1.0.0/bootstrap.js';
-  s.type = 'text/javascript';
   document.body.appendChild(s);
 })();
 </code></pre>

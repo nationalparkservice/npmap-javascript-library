@@ -523,7 +523,7 @@ define([
           template = _.template(NPMap.config.identify[element]);
           html = template(attributes);
         }
-      } else {
+      } else if (config) {
         if (typeof config.identify !== 'undefined' && typeof config.identify[element] !== 'undefined') {
           if (typeof config.identify[element] === 'function') {
             html = config.identify[element](attributes);
