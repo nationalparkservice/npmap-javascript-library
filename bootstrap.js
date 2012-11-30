@@ -108,6 +108,16 @@ if (typeof bean === 'undefined') {
    * Called after the map API has been loaded.
    */
   function mappingCallback() {
+    // TODO: DEPRECATED: Take out after 1.0.0 is released.
+    if (NPMap.config.restrictZoom) {
+      NPMap.config.zoomRange = NPMap.config.restrictZoom;
+    }
+
+    // TODO: DEPRECATED: Take out after 1.0.0 is released.
+    if (NPMap.config.hideNpmapLogo) {
+      NPMap.config.hideLogo = NPMap.config.hideNpmapLogo;
+    }
+
     var callback = function() {
       NPMap.Util.injectCss(NPMap.config.server + '/resources/css/base.css');
       
