@@ -112,13 +112,13 @@ if (typeof bean === 'undefined') {
       NPMap.Util.injectCss(NPMap.config.server + '/resources/css/base.css');
       
       if (NPMap.config.api === 'Leaflet') {
-        NPMap.Util.injectCss('http://www.nps.gov/npmap/libs/leaflet/0.4.4-119/leaflet.css');
+        NPMap.Util.injectCss('http://www.nps.gov/npmap/libs/leaflet/master/leaflet.css');
         
         // http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
         var ie=function(){for(var a=3,b=document.createElement("div"),c=b.getElementsByTagName("i");b.innerHTML="<\!--[if gt IE "+ ++a+"]><i></i><![endif]--\>",c[0];);return 4<a?a:void 0}();
         
         if (ie < 8) {
-          NPMap.Util.injectCss('http://www.nps.gov/npmap/libs/leaflet/0.4.4-119/leaflet.ie.css');
+          NPMap.Util.injectCss('http://www.nps.gov/npmap/libs/leaflet/master/leaflet.ie.css');
         }
       }
       
@@ -403,7 +403,7 @@ if (typeof bean === 'undefined') {
           
           break;
         case 'Leaflet':
-          apiUrl = 'http://www.nps.gov/npmap/libs/leaflet/0.4.4-119/leaflet.js';
+          apiUrl = 'http://www.nps.gov/npmap/libs/leaflet/master/leaflet.js';
           callback = function() {
             var interval = setInterval(function() {
               if (typeof L !== 'undefined') {
