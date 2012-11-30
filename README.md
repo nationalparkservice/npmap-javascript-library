@@ -1,3 +1,7 @@
+<div style="text-align:center;">
+  <img src="http://www.nps.gov/npmap/img/nps-arrowhead-medium.png" alt="NPS Arrowhead">
+</div>
+
 # The NPMap Library
 
 NPMap is a JavaScript astraction library developed, maintained, and used by the [U.S. National Park Service](http://www.nps.gov). It creates a "wrapper" around various web mapping APIs (namely Bing, Google, Leaflet, and Modest Maps) and exposes commonly-used functionality through a simple and targeted API. NPMap also provides a number of custom components and a look-and-feel that fits in with the graphic identity of the National Park Service.

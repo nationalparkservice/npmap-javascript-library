@@ -476,13 +476,33 @@ define([
   map.on('mouseup', function(e) {
     Event.trigger('NPMap.Map', 'mouseup', e);
   });
+
+
+
+  
+  // TODO: Why is InfoBox not positioning properly when you "throw" the map?
+
+
+
+
   map.on('move', function(e) {
+    //console.log('move');
+
     if (NPMap.InfoBox.visible) {
       NPMap.InfoBox.reposition();
     }
 
     NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
+  /*
+  map.on('viewreset', function() {
+    if (NPMap.InfoBox.visible) {
+      NPMap.InfoBox.reposition();
+    }
+
+    console.log('viewreset');
+  });
+*/
   map.on('zoomstart', function() {
     NPMap.Event.trigger('NPMap.Map', 'zoomstart');
   });
