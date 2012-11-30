@@ -77,11 +77,11 @@ define([
     easey_handlers.DoubleClickHandler()
   ]);
   zoom = initialZoom = oldZoom = NPMap.config.zoom || 4;
-  
-  if (typeof NPMap.config.baseLayers === 'undefined' || NPMap.config.baseLayers !== false) {
+
+  if (typeof NPMap.config.baseLayers === 'undefined' && NPMap.config.baseLayers !== false) {
     NPMap.config.baseLayers = [{
-      id: 'mapbox.mapbox-light',
-      name: 'MapBox Light',
+      id: 'nps.map-sligp1fr',
+      name: 'Light Gray',
       type: 'TileStream',
       visible: true
     }];
