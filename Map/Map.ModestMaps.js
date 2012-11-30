@@ -218,8 +218,11 @@ define([
      * @param {Object} layer
      */
     addTileLayer: function(layer) {
-      //map.insertLayerAt(layer.zIndex, layer);
-      map.addLayer(layer);
+      if (layer.zIndex === null) {
+        map.addLayer(layer);
+      } else {
+        map.insertLayerAt(layer.zIndex, layer);
+      }
     },
     /**
      * Removes a tile layer from the map.
@@ -229,7 +232,6 @@ define([
       //map.removeLayerAt(layer.zIndex);
       map.removeLayer(layer);
     },
-
     /**
      * Converts an API bounds to a NPMap bounds.
      * @param {Object} bounds
@@ -327,6 +329,7 @@ define([
      */
     createTileLayer: function(constructor, options) {
       var getSubdomain = null,
+          tileLayer,
           uriConstructor;
 
       options = options || {};
@@ -372,7 +375,10 @@ define([
         };
       }
 
-      return new MM.Layer(new MM.MapProvider(uriConstructor));
+      tileLayer = new MM.Layer(new MM.MapProvider(uriConstructor));
+      tileLayer.zIndex = (typeof options.zIndex === 'number' ? options.zIndex : null);
+
+      return tileLayer;
     },
     /**
      * Gets a latLng from a click event object.
