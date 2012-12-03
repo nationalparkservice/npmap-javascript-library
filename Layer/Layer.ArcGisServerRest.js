@@ -409,11 +409,11 @@ define([
         opacity: config.opacity,
         zIndex: config.zIndex || null
       });
-      config.api = tileLayer;
       tileLayer.npmap = {
         layerName: config.name,
         layerType: config.type
       };
+      config.api = tileLayer;
 
       Map.addTileLayer(tileLayer);
 
@@ -444,7 +444,10 @@ define([
      */
     reload: function(config) {
       InfoBox.hide();
-      this.remove(config);
+      
+      if (config.api) {
+        this.remove(config);
+      }
 
       config.visible = true;
 
@@ -458,7 +461,7 @@ define([
     remove: function(config) {
       InfoBox.hide();
       Map[NPMap.config.api].removeTileLayer(config.api);
-
+      
       if (config.identifiable === true) {
         identifyLayers--;
       }
