@@ -954,7 +954,7 @@
         */
       } else {
         overlayMapTypes.forEach(function(mapType, i) {
-          if (layer.api === mapType) {
+          if (layer === mapType) {
             overlayMapTypes.removeAt(i);
           }
         });
