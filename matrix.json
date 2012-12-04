@@ -164,7 +164,7 @@
       "Route"
     ],
     "name": "Xml",
-    "type" "vector"
+    "type": "vector"
   }],
   "modules": [{
     "name": "Edit"
