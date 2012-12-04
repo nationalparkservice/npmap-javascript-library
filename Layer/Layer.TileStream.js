@@ -61,6 +61,8 @@
   }
 
   return NPMap.Layer.TileStream = {
+    // True if mouseover or click interactivity is currently active.
+    _interactivityActive: false,
     /**
      * Gets the number of visible TileStream layers.
      * @return {Array}
@@ -282,13 +284,26 @@
 
           if (!interaction && response.grids && waxShort) {
             config.interaction = interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
+              me._interactivityActive = true;
+
               Map.setCursor('pointer');
+              
+              console.log(o.e.type);
+
               if (o.e.type === 'click') {
                 //NPMap.Event.trigger('NPMap.Map', 'shapeclick', o);
                 me._handleClick(o);
               }
             }).on('off', function(o) {
-              Map.setCursor('default');
+              me._interactivityActive = false;
+
+              if (NPMap.Layer.CartoDb) {
+                if (NPMap.Layer.CartoDb._interactivityActive === false) {
+                  Map.setCursor('default');
+                }
+              } else {
+                Map.setCursor('default');
+              }
             });
           }
 

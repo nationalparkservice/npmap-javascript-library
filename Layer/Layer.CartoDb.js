@@ -38,7 +38,15 @@
     }
     */
 
-    Map.setCursor('default');
+    NPMap.Layer.CartoDb._interactivityActive = false;
+
+    if (NPMap.Layer.TileStream) {
+      if (NPMap.Layer.TileStream._interactivityActive === false) {
+        Map.setCursor('default');
+      }
+    } else {
+      Map.setCursor('default');
+    }
   }
   /**
    * Handles the CartoDb over events.
@@ -49,6 +57,8 @@
    * @return null
    */
   function over (feature, latLng, pos, data) {
+    NPMap.Layer.CartoDb._interactivityActive = true;
+
     Map.setCursor('pointer');
 
     /*
@@ -75,6 +85,8 @@
   }
 
   return NPMap.Layer.CartoDb = {
+    // True if mouseover or click interactivity is currently active.
+    _interactivityActive: false,
     /**
      * Handles the click operation for CartoDb layers.
      * @param {Object} e
