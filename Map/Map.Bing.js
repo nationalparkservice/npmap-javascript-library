@@ -346,7 +346,6 @@ define([
         zoomStartReported = true;
       }
       
-      
       Event.trigger('NPMap.Map', 'zooming');
     }
 

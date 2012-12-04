@@ -207,7 +207,7 @@ define([
     }
   });
   Event.add('NPMap.Map', 'mouseup', function(e) {
-    if (e.shiftKey) {
+    if (divZoombox.style.display === 'block') {
       var pixel = getMousePixel(e),
           coords = {},
           nw,
@@ -245,14 +245,15 @@ define([
         w: nw.lng
       });
       NPMap.Map.setCursor('auto');
-
-      pixelMouseDown = null;
+      
       divZoombox.style.display = 'none';
       divZoombox.style.height = '0px';
       divZoombox.style.width = '0px';
 
       NPMap.Event.remove(mouseMoveId);
     }
+
+    pixelMouseDown = null;
   });
   Event.add('NPMap.Map', 'zoomstart', function() {
     if (!NPMap.InfoBox.marker) {

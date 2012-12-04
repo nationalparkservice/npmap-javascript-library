@@ -230,7 +230,7 @@
           });
         }
       }
-
+      
       google.maps.event.addListener(map, 'bounds_changed', function() {
         if (NPMap.InfoBox.visible) {
           NPMap.InfoBox.reposition();
@@ -276,21 +276,34 @@
       google.maps.event.addListener(map, 'idle', function() {
         Event.trigger('NPMap.Map', 'viewchangeend');
       });
-      google.maps.event.addListener(map, 'mousedown', function(e) {
+      google.maps.event.addDomListener(document, 'keydown', function(e) {
+        if (e.shiftKey) {
+          map.setOptions({
+            draggable: false
+          });
+        }
+      });
+      google.maps.event.addDomListener(document, 'keyup', function(e) {
+        map.setOptions({
+          draggable: true
+        });
+      });
+      google.maps.event.addDomListener(map.getDiv(), 'mousedown', function(e) {
         Event.trigger('NPMap.Map', 'mousedown', e);
       });
-      google.maps.event.addListener(map, 'mousemove', function(e) {
+      google.maps.event.addDomListener(map.getDiv(), 'mousemove', function(e) {
         Event.trigger('NPMap.Map', 'mousemove', e);
       });
-      google.maps.event.addListener(map, 'mouseout', function(e) {
+      google.maps.event.addDomListener(map.getDiv(), 'mouseout', function(e) {
         Event.trigger('NPMap.Map', 'mouseout', e);
       });
-      google.maps.event.addListener(map, 'mouseover', function(e) {
+      google.maps.event.addDomListener(map.getDiv(), 'mouseover', function(e) {
         Event.trigger('NPMap.Map', 'mouseover', e);
       });
-      google.maps.event.addListener(map, 'mouseup', function(e) {
+      google.maps.event.addDomListener(map.getDiv(), 'mouseup', function(e) {
         Event.trigger('NPMap.Map', 'mouseup', e);
       });
+      // TODO: You should probably add this as a DOM listener.
       google.maps.event.addListener(map, 'rightclick', function(e) {
         Event.trigger('NPMap.Map', 'rightclick', e);
       });
