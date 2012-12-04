@@ -287,8 +287,6 @@
               me._interactivityActive = true;
 
               Map.setCursor('pointer');
-              
-              console.log(o.e.type);
 
               if (o.e.type === 'click') {
                 //NPMap.Event.trigger('NPMap.Map', 'shapeclick', o);
