@@ -18,12 +18,50 @@ define([
   var mapbox={markers:{}};mapbox.markers.layer=function(){function g(b){b.coord||(b.coord=a.map.locationCoordinate(b.location));var c=a.map.coordinatePoint(b.coord),e,d;0>c.x?(e=new MM.Location(b.location.lat,b.location.lon),e.lon+=360*Math.ceil((o.lon-b.location.lon)/360),d=a.map.locationPoint(e),d.x<a.map.dimensions.x&&(c=d,b.coord=a.map.locationCoordinate(e))):c.x>a.map.dimensions.x&&(e=new MM.Location(b.location.lat,b.location.lon),e.lon-=360*Math.ceil((b.location.lon-p.lon)/360),d=a.map.locationPoint(e),0<d.x&&(c=d,b.coord=a.map.locationCoordinate(e)));c.scale=1;c.width=c.height=0;MM.moveElement(b.element,c)}var a={},d=[],f=[],i=new MM.CallbackManager(a,["drawn","markeradded"]),h=mapbox.markers.simplestyle_factory,l=function(a,c){return c.geometry.coordinates[1]-a.geometry.coordinates[1]},k,o=null,p=null,m=function(){return!0},q=0,n=function(){return++q},j={};a.parent=document.createElement("div");a.parent.style.cssText="position: absolute; top: 0px;left:0px; width:100%; height:100%; margin:0; padding:0; z-index:0;pointer-events:none;";a.name="markers";a.addCallback=function(b,c){i.addCallback(b,c);return a};a.removeCallback=function(b,c){i.removeCallback(b,c);return a};a.draw=function(){if(a.map){o=a.map.pointLocation(new MM.Point(0,0));p=a.map.pointLocation(new MM.Point(a.map.dimensions.x,0));i.dispatchCallback("drawn",a);for(var b=0;b<f.length;b++)g(f[b])}};a.add=function(b){if(!b||!b.element)return null;a.parent.appendChild(b.element);f.push(b);i.dispatchCallback("markeradded",b);return b};a.remove=function(b){if(!b)return null;a.parent.removeChild(b.element);for(var c=0;c<f.length;c++)if(f[c]===b){f.splice(c,1);break}return b};a.markers=function(a){if(!arguments.length)return f};a.add_feature=function(b){return a.features(a.features().concat([b]))};a.sort=function(b){if(!arguments.length)return l;l=b;return a};a.features=function(b){if(!arguments.length)return d;b||(b=[]);d=b.slice();d.sort(l);for(var c=0;c<f.length;c++)f[c].touch=!1;for(c=0;c<d.length;c++)if(m(d[c])){var e=n(d[c]);j[e]?(j[e].location=new MM.Location(d[c].geometry.coordinates[1],d[c].geometry.coordinates[0]),j[e].coord=null,g(j[e])):j[e]=a.add({element:h(d[c]),location:new MM.Location(d[c].geometry.coordinates[1],d[c].geometry.coordinates[0]),data:d[c]});j[e]&&(j[e].touch=!0)}for(c=f.length-1;0<=c;c--)!1===f[c].touch&&a.remove(f[c]);a.map&&a.map.coordinate&&a.map.draw();return a};a.url=function(b,c){function d(b,e){if(b&&c)return c(b);e&&e.features&&a.features(e.features);c&&c(b,e.features,a)}if(!arguments.length)return k;if("undefined"===typeof reqwest)throw"reqwest is required for url loading";"string"===typeof b&&(b=[b]);k=b;reqwest(k[0].match(/geojsonp$/)?{url:k[0]+(~k[0].indexOf("?")?"&":"?")+"callback=grid",type:"jsonp",jsonpCallback:"callback",success:function(a){d(null,a)},error:d}:{url:k[0],type:"json",success:function(a){d(null,a)},error:d});return a};a.id=function(b,c){return a.url("http://a.tiles.mapbox.com/v3/"+b+"/markers.geojsonp",c)};a.csv=function(b){return a.features(mapbox.markers.csv_to_geojson(b))};a.extent=function(){for(var b=[{lat:Infinity,lon:Infinity},{lat:-Infinity,lon:-Infinity}],c=a.features(),d=0;d<c.length;d++){var f=c[d].geometry.coordinates;f[0]<b[0].lon&&(b[0].lon=f[0]);f[1]<b[0].lat&&(b[0].lat=f[1]);f[0]>b[1].lon&&(b[1].lon=f[0]);f[1]>b[1].lat&&(b[1].lat=f[1])}return b};a.key=function(b){if(!arguments.length)return n;n=null===b?function(){return++q}:b;return a};a.factory=function(b){if(!arguments.length)return h;h=b;a.features(a.features());return a};a.filter=function(b){if(!arguments.length)return m;m=b;a.features(a.features());return a};a.destroy=function(){a.parent.parentNode&&a.parent.parentNode.removeChild(a.parent)};a.named=function(b){if(!arguments.length)return a.name;a.name=b;return a};a.enabled=!0;a.enable=function(){this.enabled=!0;this.parent.style.display="";return a};a.disable=function(){this.enabled=!1;this.parent.style.display="none";return a};return a};mmg=mapbox.markers.layer;mapbox.markers.simplestyle_factory=function(g){var a={small:[20,50],medium:[30,70],large:[35,90]},d=g.properties||{},g=d["marker-size"]||"medium",f=d["marker-symbol"]?"-"+d["marker-symbol"]:"",i=d["marker-color"]||"7e7e7e",i=i.replace("#",""),h=document.createElement("img");h.width=a[g][0];h.height=a[g][1];h.className="simplestyle-marker";h.alt=d.title||"";h.src=(mapbox.markers.marker_baseurl||"http://a.tiles.mapbox.com/v3/marker/")+"pin-"+g.charAt(0)+f+"+"+i+(2===window.devicePixelRatio?"@2x":"")+".png";d=h.style;d.position="absolute";d.clip="rect(auto auto "+0.75*a[g][1]+"px auto)";d.marginTop=-(a[g][1]/2)+"px";d.marginLeft=-(a[g][0]/2)+"px";d.cursor="pointer";d.pointerEvents="all";return h};
 
   var
+      // The currently active baseLayer config.
+      activeBaseLayer,
       // The base layer to initialize the map with.
       baseLayer,
       // The current center.
       center,
       //
       clicks = 0,
+      // An array of the default base layers for the ModestMaps baseAPI.
+      DEFAULT_BASE_LAYERS = {
+        aerial: {
+          icon: 'aerial',
+          id: 'nps.map-n9nxe12m',
+          name: 'Aerial View',
+          type: 'TileStream'
+        },
+        blank: {
+          cls: 'blank',
+          icon: 'blank',
+          name: 'Blank View',
+          type: 'Api'
+        },
+        hybrid: {
+          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.',
+          icon: 'aerial',
+          id: 'nps.map-r3ilza09',
+          name: 'Hybrid View',
+          type: 'TileStream'
+        },
+        streets: {
+          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
+          icon: 'street',
+          id: 'nps.map-06dnxzq5',
+          name: 'Street View',
+          type: 'TileStream'
+        },
+        terrain: {
+          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
+          icon: 'topo',
+          id: 'nps.map-lj6szvbq',
+          name: 'Terrain View',
+          type: 'TileStream'
+        }
+      },
       // The map div.
       divMap = document.getElementById(NPMap.config.div).parentNode,
       // The initial center of the map.
@@ -78,14 +116,32 @@ define([
   ]);
   zoom = initialZoom = oldZoom = NPMap.config.zoom || 4;
 
-  if (typeof NPMap.config.baseLayers === 'undefined' && NPMap.config.baseLayers !== false) {
-    NPMap.config.baseLayers = [{
-      id: 'nps.map-sligp1fr',
-      name: 'Light Gray',
-      type: 'TileStream',
-      visible: true
-    }];
+  if (NPMap.config.baseLayers) {
+    Map._matchBaseLayers(DEFAULT_BASE_LAYERS);
+
+    for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+      var baseLayerI = NPMap.config.baseLayers[i];
+
+      if (baseLayerI.visible) {
+        activeBaseLayer = baseLayerI;
+        break;
+      }
+    }
+  } else if (typeof NPMap.config.baseLayers === 'undefined') {
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['streets']
+    ];
+    NPMap.config.baseLayers[0].visible = true;
+    activeBaseLayer = NPMap.config.baseLayers[0];
+  } else {
+    NPMap.config.baseLayers = [
+      DEFAULT_BASE_LAYERS['blank']
+    ];
+    NPMap.config.baseLayers[0].visible = true;
+    activeBaseLayer = NPMap.config.baseLayers[0];
   }
+
+  NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
 
   if (NPMap.config.zoomRange) {
     if (NPMap.config.zoomRange.max) {
@@ -589,6 +645,7 @@ define([
     /**
      * Sets zoom restrictions on the map.
      * @param {Object} restrictions
+     * @return null
      */
     setZoomRestrictions: function(restrictions) {
       NPMap.config.zoomRange = NPMap.config.zoomRange || {};
@@ -602,6 +659,46 @@ define([
       }
       
       map.setZoomRange(min, max);
+    },
+    /**
+     * Switches the base map.
+     * @param {Object} baseLayer The base layer to switch to.
+     * @return null
+     */
+    switchBaseLayer: function(baseLayer) {
+      var api,
+          cls = baseLayer.cls,
+          mapTypeId,
+          me = this,
+          removeAttribution = [];
+
+      for (var k = 0; k < NPMap.config.baseLayers.length; k++) {
+        var bl = NPMap.config.baseLayers[k];
+
+        if (bl.visible) {
+          activeBaseLayer = bl;
+        }
+
+        bl.visible = false;
+      }
+
+      if (activeBaseLayer.type !== 'Api') {
+        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+      }
+      
+      activeBaseLayer = baseLayer;
+
+      if (cls) {
+        cls = cls.toLowerCase();
+      }
+      
+      if (baseLayer.type !== 'Api') {
+        NPMap.Layer[baseLayer.type].create(baseLayer);
+      }
+
+      baseLayer.visible = true;
+
+      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
     },
     /**
      * Zooms the map to a bounding box.
