@@ -1,93 +1,189 @@
 {
   "baseApis": [{
-    "bing": {
-      "layerHandlers": [{
-        "ArcGisServerRest": {
-          "display": true,
-          "identify": true,
-          "modules": [
-            "edit",
-            "route"
-          ]
-        },
-        "CartoDb": {
-          "display": true,
-          "identify": false,
-          "modules": []
-        },
-        "GeoJson": {
-          "display": true,
-          "identify": true,
-          "modules": [
-            "route"
-          ]
-        },
-        "GoogleFusion": {
-          "display": true,
-          "identify": true,
-          "modules": [
-            "route"
-          ]
-        },
-        "Json": {
-          "display": true,
-          "identify": true,
-          "modules": [
-            "route"
-          ]
-        },
-        "Kml": {
-          "display": true,
-          "identify": true,
-          "modules": [
-            "route"
-          ]
-        },
-        "NativeVectors": {
-          "display": true,
-          "identify": true,
-          "modules": [
-            "route"
-          ]
-        },
-        "Tiled": {
-          "display": true,
-          "identify": false,
-          "modules": []
-        },
-        "TileStream": {
-          "display": true,
-          "identify": true,
-          "modules": []
-        },
-        "Xml": {
-          "display": true,
-          "identify": true,
-          "modules": [
-            "route"
-          ]
-        }
-      }]
-    },
-    "esri": {
-      "layerHandlers": [{
-
-      }]
-    },
-    "google": {
-      "layerHandlers": [{
-
-      }]
-    },
-    "leaflet": {
-      "layerHandlers": [{
-
-      }]
-    },
-    "modestmaps": {
-      "layerHandlers": [{
-
-      }]
+    "layerHandlers": [
+      "ArcGisServerRest",
+      "GeoJson",
+      "Json",
+      "Kml",
+      "Tiled",
+      "Xml"
+    ],
+    "modules": [
+      "Route"
+    ],
+    "name": "Bing",
+    "tools": [
+      "Fullscreen",
+      "Navigation"
+    ],
+    "usage": {
+      "external": true,
+      "internal": true
     }
+  },{
+    "layerHandlers": [
+      "ArcGisServerRest",
+      "CartoDb",
+      "GeoJson",
+      "GoogleFusion",
+      "Json",
+      "Kml",
+      "Tiled",
+      "TileStream",
+      "Xml"
+    ],
+    "modules": [
+      "Edit",
+      "Route"
+    ],
+    "name": "Google",
+    "tools": [
+      "Fullscreen",
+      "Navigation"
+    ],
+    "usage": {
+      "external": true,
+      "internal": true
+    }
+  },{
+    "layerHandlers": [
+      "ArcGisServerRest",
+      "CartoDb",
+      "Tiled",
+      "TileStream"
+    ],
+    "modules": [
+      "Route"
+    ],
+    "name": "Leaflet",
+    "tools": [
+      "Fullscreen",
+      "Navigation"
+    ],
+    "usage": {
+      "external": true,
+      "internal": true
+    }
+  },{
+    "layerHandlers": [
+      "ArcGisServerRest",
+      "Tiled",
+      "TileStream"
+    ],
+    "modules": [
+      "Route"
+    ],
+    "name": "ModestMaps",
+    "tools": [
+      "Fullscreen",
+      "Navigation"
+    ],
+    "usage": {
+      "external": true,
+      "internal": true
+    }
+  }],
+  "layerHandlers": [{
+    "display": true,
+    "hover": false,
+    "identify": true,
+    "modules": [
+      "Edit",
+      "Route"
+    ],
+    "name": "ArcGisServerRest",
+    "type": "raster"
+  },{
+    "display": true,
+    "hover": true,
+    "identify": true,
+    "modules": [
+      "Route"
+    ],
+    "name": "CartoDb",
+    "type": "raster"
+  },{
+    "display": true,
+    "hover": true,
+    "identify": true,
+    "modules": [
+      "Route"
+    ],
+    "name": "GeoJson",
+    "type": "vector"
+  },{
+    "display": true,
+    "hover": true,
+    "identify": true,
+    "modules": [
+      "Route"
+    ],
+    "name": "GoogleFusion",
+    "type": "raster"
+  },{
+    "display": true,
+    "hover": true,
+    "identify": true,
+    "modules": [
+      "Route"
+    ],
+    "name": "Json",
+    "type": "vector"
+  },{
+    "display": true,
+    "hover": true,
+    "identify": true,
+    "modules": [
+      "Route"
+    ],
+    "name": "Kml",
+    "type": "vector"
+  },{
+    "display": true,
+    "hover": false,
+    "identify": false,
+    "modules": [
+      "Route"
+    ],
+    "name": "Tiled",
+    "type": "raster"
+  },{
+    "display": true,
+    "hover": true,
+    "identify": true,
+    "modules": [
+      "Route"
+    ],
+    "name": "TileStream",
+    "type": "raster"
+  },{
+    "display": true,
+    "hover": true,
+    "identify": true,
+    "modules": [
+      "Route"
+    ],
+    "name": "Xml",
+    "type" "vector"
+  }],
+  "modules": [{
+    "name": "Edit"
+  },{
+    "name": "Route"
+  }],
+  "tools": [{
+    "name": "Fullscreen"
+  },{
+    "name": "Geocoder"
+  },{
+    "name": "Keyboard"
+  },{
+    "name": "Legend"
+  },{
+    "name": "Navigation"
+  },{
+    "name": "OverviewMap"
+  },{
+    "name": "ScaleBar"
   }]
 }
