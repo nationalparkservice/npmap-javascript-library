@@ -22,12 +22,20 @@ define([
       activeBaseLayer,
       // An array of the default base layers for the Leaflet baseAPI.
       DEFAULT_BASE_LAYERS = {
+        /*
         aerial: {
           cls: 'aerial',
           icon: 'aerial',
           mapTypeId: 'Aerial',
           name: 'Aerial View',
           type: 'Api'
+        },
+        */
+        aerial: {
+          icon: 'aerial',
+          id: 'nps.map-n9nxe12m',
+          name: 'Aerial View',
+          type: 'TileStream'
         },
         blank: {
           cls: 'blank',
@@ -36,6 +44,21 @@ define([
           name: 'Blank View',
           type: 'Api'
         },
+        hybrid: {
+          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.',
+          icon: 'aerial',
+          id: 'nps.map-r3ilza09',
+          name: 'Hybrid View',
+          type: 'TileStream'
+        },
+        streets: {
+          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
+          icon: 'street',
+          id: 'nps.map-06dnxzq5',
+          name: 'Street View',
+          type: 'TileStream'
+        },
+        /*
         hybrid: {
           cls: 'hybrid',
           icon: 'aerial',
@@ -50,6 +73,7 @@ define([
           name: 'Street View',
           type: 'Api'
         },
+        */
         terrain: {
           attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
           icon: 'topo',
