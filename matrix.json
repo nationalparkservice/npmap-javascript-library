@@ -14,7 +14,9 @@
     "name": "Bing",
     "tools": [
       "Fullscreen",
-      "Navigation"
+      "Keyboard",
+      "Navigation",
+      "OverviewMap"
     ],
     "usage": {
       "external": true,
@@ -39,6 +41,7 @@
     "name": "Google",
     "tools": [
       "Fullscreen",
+      "Keyboard",
       "Navigation"
     ],
     "usage": {
@@ -58,6 +61,7 @@
     "name": "Leaflet",
     "tools": [
       "Fullscreen",
+      "Keyboard",
       "Navigation"
     ],
     "usage": {
