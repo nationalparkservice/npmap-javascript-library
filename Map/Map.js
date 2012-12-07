@@ -1045,6 +1045,15 @@ define([
       return NPMap.Map[NPMap.config.api].boundsFromApi(bounds);
     },
     /**
+     * UNDOCUMENTED
+     */
+    boundsGetCenter: function(bounds) {
+      return {
+        lat: (bounds.n + bounds.s) / 2,
+        lng: (bounds.w + bounds.e) / 2
+      };
+    },
+    /**
      * Converts a NPMap bounds to an API bounds.
      * @param {Object} bounds
      * @return {Object}
@@ -1171,7 +1180,6 @@ define([
     getMarkerVisibility: function(marker) {
       return NPMap.Map[NPMap.config.api].getMarkerVisibility(marker);
     },
-
 
 
 
@@ -1727,9 +1735,10 @@ define([
     /**
      * Zooms the map to the extent of an array of lat/lng objects.
      * @param {Array} latLngs The array of lat/lng objects.
+     * @param {Number} zoom (Optional) The zoom level to zoom the map to.
      * @return null
      */
-    toLatLngs: function(latLngs) {
+    toLatLngs: function(latLngs, zoom) {
       var first = latLngs[0],
           bounds = {
             e: first.lng,
@@ -1755,8 +1764,12 @@ define([
           bounds.w = latLng.lng;
         }
       });
-
-      this.toBounds(bounds);
+      
+      if (zoom) {
+        this.centerAndZoom(this.boundsGetCenter(bounds), zoom);
+      } else {
+        this.toBounds(bounds);
+      }
     },
     /**
      * Zooms the map to the extent of an array of marker objects.
