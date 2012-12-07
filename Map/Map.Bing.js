@@ -42,11 +42,12 @@ define([
           type: 'Api'
         },
         terrain: {
-          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
+          attribution: 'Esri',
           icon: 'topo',
-          id: 'nps.map-lj6szvbq',
           name: 'Terrain View',
-          type: 'TileStream'
+          tiled: true,
+          type: 'ArcGisServerRest',
+          url: 'http://server.arcgisonline.com/arcgis/rest/services/World_Terrain_Base/MapServer'
         }
       },
       // Has the map been double-clicked?
@@ -266,7 +267,7 @@ define([
       Map.setCursor('move');
     } else {
       Map.setCursor('auto');
-    
+
       if (oldIcon && oldTarget) {
         oldTarget.setOptions({
           icon: oldIcon
@@ -276,9 +277,17 @@ define([
         oldTarget = null;
       }
 
+      //console.log(e.targetType);
+
       if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
         Map.setCursor('pointer');
+
+        // TODO: Trigger hover.
+
+        //console.log(e.target);
         
+        /*
+        // TODO: Migrate this into e.target.npmap object.
         if (e.target.data && e.target.data.overIcon) {
           oldIcon = e.target.getIcon();
           oldTarget = e.target;
@@ -289,6 +298,7 @@ define([
             });
           }
         }
+        */
       }
 
       oldCursor = map.getRootElement().style.cursor;
@@ -585,7 +595,7 @@ define([
                   anchor = options.anchor || new Microsoft.Maps.Point(width / 2, height / 2);
               
               clearInterval(interval);
-                  
+
               if (!marker) {
                 options.anchor = anchor;
                 options.height = height;
