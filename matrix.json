@@ -180,6 +180,8 @@
   },{
     "name": "Geocoder"
   },{
+    "name": "History"
+  },{
     "name": "Keyboard"
   },{
     "name": "Legend"
@@ -188,6 +190,10 @@
   },{
     "name": "OverviewMap"
   },{
+    "name": "Print"
+  },{
     "name": "ScaleBar"
+  },{
+    "name": "Share"
   }]
 }
