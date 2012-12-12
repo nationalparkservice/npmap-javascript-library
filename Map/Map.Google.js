@@ -127,7 +127,7 @@
   } else if (typeof NPMap.config.baseLayers === 'undefined') {
     mapTypeId = google.maps.MapTypeId.TERRAIN;
     NPMap.config.baseLayers = [
-      DEFAULT_BASE_LAYERS['terrain']
+      DEFAULT_BASE_LAYERS['streets']
     ];
     NPMap.config.baseLayers[0].visible = true;
   } else {

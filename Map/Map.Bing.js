@@ -225,12 +225,10 @@ define([
   Microsoft.Maps.Events.addHandler(map, 'click', function(e) {
     var cloned = _.clone(e.originalEvent);
 
-    doubleClicked = false;
-
     cloned.pageX = e.pageX;
     cloned.pageY = e.pageY;
+    doubleClicked = false;
 
-    Map.setCursor(oldCursor);
     setTimeout(function() {
       if (!doubleClicked && !viewChanged && e.isPrimary === true) {
         if (e.targetType === 'map' || e.target.allowClickThrow === true) {
@@ -248,25 +246,25 @@ define([
   Microsoft.Maps.Events.addHandler(map, 'dblclick', function(e) {
     doubleClicked = true;
 
-    Map.setCursor(oldCursor);
     Event.trigger('NPMap.Map', 'dblclick', e.originalEvent);
   });
   Microsoft.Maps.Events.addHandler(map, 'mousedown', function(e) {
     mouseDown = true;
     viewChanged = false;
 
-    Map.setCursor('move');
     Event.trigger('NPMap.Map', 'mousedown', e.originalEvent);
 
     if (e.originalEvent.shiftKey) {
       e.handled = true;
     }
+
+    if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
+      Map.setCursor('pointer');
+    }
   });
   Microsoft.Maps.Events.addHandler(map, 'mousemove', function(e) {
-    if (mouseDown) {
-      Map.setCursor('move');
-    } else {
-      Map.setCursor('auto');
+    if (!mouseDown) {
+      Map.setCursor('url(http://ecn.dev.virtualearth.net/mapcontrol/v7.0/7.0.20121119165209.01/cursors/grab.cur) 10 9, move');
 
       if (oldIcon && oldTarget) {
         oldTarget.setOptions({
@@ -277,16 +275,11 @@ define([
         oldTarget = null;
       }
 
-      //console.log(e.targetType);
-
       if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
         Map.setCursor('pointer');
-
-        // TODO: Trigger hover.
-
-        //console.log(e.target);
         
         /*
+        // TODO: Trigger hover.
         // TODO: Migrate this into e.target.npmap object.
         if (e.target.data && e.target.data.overIcon) {
           oldIcon = e.target.getIcon();
@@ -300,8 +293,6 @@ define([
         }
         */
       }
-
-      oldCursor = map.getRootElement().style.cursor;
     }
 
     Event.trigger('NPMap.Map', 'mousemove', e.originalEvent);
@@ -317,7 +308,10 @@ define([
   Microsoft.Maps.Events.addHandler(map, 'mouseup', function(e) {
     mouseDown = false;
 
-    Map.setCursor(oldCursor);
+    if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
+      Map.setCursor('pointer');
+    }
+
     Event.trigger('NPMap.Map', 'mouseup', e.originalEvent);
   });
   Microsoft.Maps.Events.addHandler(map, 'rightclick', function(e) {
