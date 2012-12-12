@@ -138,7 +138,7 @@ define([
 
       if (style) {
         if (style.line) {
-
+          lineStyle = style.line;
         }
 
         if (style.marker && style.marker.url) {
@@ -153,19 +153,22 @@ define([
             markerStyle = style.marker;
           } else {
             // TODO: You need to load the image and calculate the height, width, and anchor here.
+            markerStyle = style.marker;
           }
         }
 
         if (style.polygon) {
-          polygonStyle = config.style.polygon;
+          polygonStyle = style.polygon;
         }
       } else {
-        config.style = {};
+        style = {};
       }
 
-      config.style.line = Map[NPMap.config.api].convertLineOptions(lineStyle);
-      config.style.marker = Map[NPMap.config.api].convertMarkerOptions(markerStyle);
-      config.style.polygon = Map[NPMap.config.api].convertPolygonOptions(polygonStyle);
+      config.style = {
+        line: Map[NPMap.config.api].convertLineOptions(lineStyle),
+        marker: Map[NPMap.config.api].convertMarkerOptions(markerStyle),
+        polygon: Map[NPMap.config.api].convertPolygonOptions(polygonStyle)
+      };
     }
   });
   Event.add('NPMap.Layer', 'removed', function(config) {
