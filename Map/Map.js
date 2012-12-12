@@ -119,8 +119,13 @@ define([
         position = Util.getOffset(divMap),
         scroll = Util.getScrollPosition(divMap);
 
-    pixel.x = pixel.x - position.left + scroll.left;
-    pixel.y = pixel.y - position.top + scroll.top;
+    pixel.x = pixel.x - position.left;
+    pixel.y = pixel.y - position.top;
+
+    if (!isFullScreen) {
+      pixel.x = pixel.x + scroll.left;
+      pixel.y = pixel.y + scroll.top;
+    }
 
     return pixel;
   }
@@ -197,14 +202,16 @@ define([
   Event.add('NPMap.Map', 'mousedown', function(e) {
     pixelMouseDown = getMousePixel(e);
 
-    if (e.shiftKey) {
-      divZoombox.style.display = 'block';
-      divZoombox.style.left = pixelMouseDown.x + 'px';
-      divZoombox.style.top = pixelMouseDown.y + 'px';
-      mouseMoveId = NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
-      
-      NPMap.Map.setCursor('crosshair');
+    if (!e.shiftKey || ((e.which !== 1) && (e.button !== 1))) {
+      return false;
     }
+
+    divZoombox.style.display = 'block';
+    divZoombox.style.left = pixelMouseDown.x + 'px';
+    divZoombox.style.top = pixelMouseDown.y + 'px';
+    mouseMoveId = NPMap.Event.add('NPMap.Map', 'mousemove', mouseMoveZoomBox);
+    
+    NPMap.Map.setCursor('crosshair');
   });
   Event.add('NPMap.Map', 'mouseup', function(e) {
     if (divZoombox.style.display === 'block') {
@@ -212,7 +219,7 @@ define([
           coords = {},
           nw,
           se;
-          
+
       if (pixel.x > pixelMouseDown.x) {
         coords.e = pixel.x;
         coords.w = pixelMouseDown.x;
@@ -237,6 +244,9 @@ define([
         x: coords.e,
         y: coords.s
       });
+      divZoombox.style.display = 'none';
+      divZoombox.style.height = '0px';
+      divZoombox.style.width = '0px';
 
       NPMap.Map.toBounds({
         e: se.lng,
@@ -244,12 +254,7 @@ define([
         s: se.lat,
         w: nw.lng
       });
-      NPMap.Map.setCursor('auto');
-      
-      divZoombox.style.display = 'none';
-      divZoombox.style.height = '0px';
-      divZoombox.style.width = '0px';
-
+      NPMap.Map.setCursor('');
       NPMap.Event.remove(mouseMoveId);
     }
 
