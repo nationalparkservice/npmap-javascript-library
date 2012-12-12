@@ -67,7 +67,7 @@ define([
               shape,
               shapeType = feature.shapeType,
               style = null;
-
+              
           if (typeof config.style !== 'undefined' && config.style[shapeType.toLowerCase()] !== 'undefined') {
             style = config.style[shapeType.toLowerCase()];
           }
