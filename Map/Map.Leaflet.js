@@ -460,14 +460,33 @@ define([
     }
   }
 
-  // Update attribution.
-
+  L.DomEvent.on(map.getContainer(), 'mousedown', function(e) {
+    Event.trigger('NPMap.Map', 'mousedown', e);
+    L.DomEvent.preventDefault(e);
+  });
+  L.DomEvent.on(map.getContainer(), 'mouseenter', function(e) {
+    Event.trigger('NPMap.Map', 'mouseover', e);
+    L.DomEvent.preventDefault(e);
+  });
+  L.DomEvent.on(map.getContainer(), 'mouseleave', function(e) {
+    Event.trigger('NPMap.Map', 'mouseout', e);
+    L.DomEvent.preventDefault(e);
+  });
+  L.DomEvent.on(map.getContainer(), 'mousemove', function(e) {
+    Event.trigger('NPMap.Map', 'mousemove', e);
+    L.DomEvent.preventDefault(e);
+  });
+  L.DomEvent.on(map.getContainer(), 'mouseup', function(e) {
+    Event.trigger('NPMap.Map', 'mouseup', e);
+    L.DomEvent.preventDefault(e);
+  });
+  // TODO: For mouse events on map, maybe combine e.originalEvent and e - minus the originalEvent property?
   map.on('click', function(e) {
     doubleClicked = false;
 
     setTimeout(function() {
       if (!doubleClicked) {
-        Event.trigger('NPMap.Map', 'click', e);
+        Event.trigger('NPMap.Map', 'click', e.originalEvent);
       }
     }, 350);
   });
@@ -477,56 +496,16 @@ define([
   map.on('dblclick', function(e) {
     doubleClicked = true;
 
-    Event.trigger('NPMap.Map', 'dblclick', e);
+    Event.trigger('NPMap.Map', 'dblclick', e.originalEvent);
   });
-  map.on('dragend', function() {
-    Map.setCursor('default');
-  });
-  map.on('dragstart', function() {
-    Map.setCursor('move');
-  });
-  map.on('mousedown', function(e) {
-    Event.trigger('NPMap.Map', 'mousedown', e);
-  });
-  map.on('mouseenter', function(e) {
-    Event.trigger('NPMap.Map', 'mouseover', e);
-  });
-  map.on('mouseleave', function(e) {
-    Event.trigger('NPMap.Map', 'mouseout', e);
-  });
-  map.on('mousemove', function(e) {
-    Event.trigger('NPMap.Map', 'mousemove', e);
-  });
-  map.on('mouseup', function(e) {
-    Event.trigger('NPMap.Map', 'mouseup', e);
-  });
-
-
-
-  
   // TODO: Why is InfoBox not positioning properly when you "throw" the map?
-
-
-
-
   map.on('move', function(e) {
-    //console.log('move');
-
     if (NPMap.InfoBox.visible) {
       NPMap.InfoBox.reposition();
     }
 
     NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
-  /*
-  map.on('viewreset', function() {
-    if (NPMap.InfoBox.visible) {
-      NPMap.InfoBox.reposition();
-    }
-
-    console.log('viewreset');
-  });
-*/
   map.on('zoomstart', function() {
     NPMap.Event.trigger('NPMap.Map', 'zoomstart');
   });
@@ -586,7 +565,7 @@ define([
      * @return {Object}
      */
     boundsToApi: function(bounds) {
-      return new L.LatLngBounds(new L.LatLng(bounds.w, bounds.n), new L.LatLng(bounds.e, bounds.s));
+      return new L.LatLngBounds(new L.LatLng(bounds.n, bounds.w), new L.LatLng(bounds.s, bounds.e));
     },
     /**
      * Centers the map.
