@@ -940,13 +940,15 @@ define([
 
             delete Api._isReady;
 
-            Util.monitorResize(divMap, function() {
-              setAttributionMaxWidthAndPosition();
-              me.handleResize();
-              Event.trigger('NPMap.Map', 'resized');
-            });
             Event.add('NPMap.Layer', 'ready', function() {
               me.updateAttribution();
+            });
+            Event.add('NPMap.Map', 'resized', function() {
+              setAttributionMaxWidthAndPosition();
+              me.handleResize();
+            });
+            Util.monitorResize(divMap, function() {
+              Event.trigger('NPMap.Map', 'resized');
             });
             Event.trigger('NPMap.Map', 'ready');
           }
@@ -1683,7 +1685,7 @@ define([
           isFullScreen = true;
         }
       } else {
-        */
+      */
         var dimensionsWindow = Util.getWindowDimensions(),
             divMask = document.getElementById('npmap-fullscreen-mask');
         
@@ -1728,7 +1730,14 @@ define([
           document.getElementById('npmap-infobox').style.zIndex = '99999999999999';
           isFullScreen = true;
         }
-      //}
+
+        // TODO: Need to look into why this isn't being triggered properly.
+        if (NPMap.config.api === 'ModestMaps') {
+          Event.trigger('NPMap.Map', 'resized');
+        }
+      /*
+      }
+      */
     },
     /**
      * Zooms and/or pans the map to its initial extent.

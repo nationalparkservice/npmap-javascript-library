@@ -539,7 +539,7 @@ define([
       if (divTools) {
         dimensionsNpmap.height = dimensionsNpmap.height - Util.getOuterDimensions(divTools).height;
       }
-
+      
       map.setSize(new MM.Point(dimensionsNpmap.width, dimensionsNpmap.height));
 
       if (callback) {
