@@ -140,8 +140,8 @@
 
   mapConfig = {
     disableDefaultUI: true,
-    draggableCursor: 'default',
-    draggingCursor: 'move',
+    draggableCursor: 'url(http://maps.gstatic.com/mapfiles/openhand_8_8.cur) 8 8, default',
+    draggingCursor: 'url(http://maps.gstatic.com/mapfiles/closedhand_8_8.cur) 8 8, default',
     keyboardShortcuts: true,
     mapTypeControl: false,
     noClear: true,
