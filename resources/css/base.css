@@ -10,7 +10,7 @@
 #npmap ul li {background:none;}
 
 /* Core elements */
-#npmap {background-color:#EBF2DA;border:solid 1px #e0e0e0;font-size:13px;line-height:16px;}
+#npmap {background-color:#EBF2DA;font-size:13px;line-height:16px;} /*border:solid 1px #e0e0e0;*/
 #npmap-map {z-index:0;}
 #npmap-modules {background-color:#F9F7F1;bottom:0;display:none;left:0;position:absolute;top:0;width:200px;z-index:1;}
 #npmap-toolbar {background-color:#908D7C;left:0;height:28px;position:absolute;right:0;top:0;z-index:2;} /*border-bottom-left-radius:3px;border-bottom-right-radius:3px;*/
