@@ -902,15 +902,10 @@ define([
           latLng = (function() {
             var latLng = null;
 
-            if (typeof(to) === 'string') {
-              to = to.split(',');
-              latLng = new L.LatLng(parseFloat(to[0]), parseFloat(to[1]));
+            if (typeof to.lat === 'number') {
+              latLng = new L.LatLng(to.lat, to.lng);
             } else {
-              if (typeof to.lat === 'number') {
-                latLng = new L.LatLng(to.lat, to.lng);
-              } else {
-                latLng = to.getLatLng();
-              }
+              latLng = to.getLatLng();
             }
             
             return latLng;
