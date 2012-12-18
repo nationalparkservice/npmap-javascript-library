@@ -471,9 +471,15 @@ define([
     divInfoBoxTitle = document.getElementById('npmap-infobox-title');
 
     if (panActivated) {
-      Util.monitorResize(divMap, refreshDimensionsAndHeightWidth);
+      Util.monitorResize(divMap, function() {
+        refreshOffsetsAndWidth();
+        refreshDimensionsAndHeightWidth();
+      });
     } else {
-      Util.monitorResize(divMap, refreshDimensions);
+      Util.monitorResize(divMap, function() {
+        refreshOffsetsAndWidth();
+        refreshDimensions();
+      });
     }
 
     if (parent === 'page') {
@@ -487,7 +493,7 @@ define([
         refreshDimensions();
       };
     }
-    
+
     bean.add(divInfoBoxContentWrapper, 'mousewheel', function(e) {
       if ((this.scrollTop === 0 && e.wheelDeltaY > 0) || ((this.scrollTop === (this.scrollHeight - this.offsetHeight)) && e.wheelDeltaY < 0)) {
         Util.eventCancelMouseWheel(e);
