@@ -16,7 +16,6 @@
    * @return null
    */
   function click(feature, latLng, pos, data, options) {
-    feature.stopPropagation();
     _.extend(options.npmap, {
       data: data
     });
