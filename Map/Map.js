@@ -1004,9 +1004,9 @@ define([
      */
     addControl: function(el, callback, stopPropagation) {
       var div = NPMap.Map[NPMap.config.api].getMapElement();
-      
+
       if (el.style.zIndex === '' && el.style.cssText.indexOf('z-index') === -1) {
-        el.style.zIndex = '1';
+        el.style.zIndex = '30';
       }
 
       div.appendChild(el);
@@ -1708,7 +1708,7 @@ define([
           divNpmapParent.appendChild(divNpmap);
 
           divMask.style.display = 'none';
-          document.getElementById('npmap-infobox').style.zIndex = '999999';
+          document.getElementById('npmap-infobox').style.zIndex = '30';
           isFullScreen = false;
         } else {
           if (!divMask) {

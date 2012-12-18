@@ -398,7 +398,7 @@ define([
     Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/nps.css');
     
     // TODO: Add support for non-shadowed "hook".
-    divInfoBox.innerHTML = '<div id="npmap-infobox-close" class="close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook-nps.png" /></div>';
+    divInfoBox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook-nps.png" /></div>';
   }
   
   divInfoBox.className = 'shadow';
@@ -415,7 +415,7 @@ define([
     offsetTop = offset.top;
 
     if (parent === 'map') {
-      divInfoBox.style.zIndex = 1;
+      divInfoBox.style.zIndex = 30;
 
       NPMap.Map.addControl(divInfoBox);
     } else {
@@ -672,7 +672,7 @@ define([
       divInfoBoxFooter.style.display = 'none';
       divInfoBoxTitle.innerHTML = title;
 
-      if (config.skipActions) {
+      if (config.hideActions) {
         actions = [];
       } else {
         if (actions.length > 0) {
