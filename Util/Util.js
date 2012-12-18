@@ -454,28 +454,32 @@ define(function() {
       var dimensions = this.getOuterDimensions(el),
           me = this;
 
+      if (!elementsToMonitor.length) {
+        (function loop() {
+          setTimeout(function() {
+            for (var i = 0; i < elementsToMonitor.length; i++) {
+              var e = elementsToMonitor[i],
+                  d = me.getOuterDimensions(e.el);
+
+              if (e.height !== d.height || e.width !== d.width) {
+                e.handler(d);
+
+                e.height = d.height;
+                e.width = d.width;
+              }
+            }
+
+            loop();
+          }, 16);
+        })();
+      }
+
       elementsToMonitor.push({
         el: el,
         handler: handler,
         height: dimensions.height,
         width: dimensions.width
       });
-
-      if (!elementResizeInterval) {
-        elementResizeInterval = setInterval(function() {
-          for (var i = 0; i < elementsToMonitor.length; i++) {
-            var e = elementsToMonitor[i],
-                d = me.getOuterDimensions(e.el);
-
-            if (e.height !== d.height || e.width !== d.width) {
-              e.handler(d);
-
-              e.height = d.height;
-              e.width = d.width;
-            }
-          }
-        }, 0);
-      }
     },
     /**
      * Removes a CSS class from an HTML element.
