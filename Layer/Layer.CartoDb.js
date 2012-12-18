@@ -18,8 +18,7 @@
   function click(feature, latLng, pos, data, options) {
     feature.stopPropagation();
     _.extend(options.npmap, {
-      data: data,
-      latLng: latLng
+      data: data
     });
 
     feature.npmap = options.npmap;
@@ -97,8 +96,8 @@
 
       if (npmap && npmap.layerType === 'CartoDb') {
         var config = Layer.getLayerByName(npmap.layerName),
-            latLng = npmap.latLng;
-        
+            latLng = Map[NPMap.config.api].eventGetLatLng(e);
+
         InfoBox.hide();
         InfoBox.latLng = latLng;
         Map[NPMap.config.api].positionClickDot(latLng);
