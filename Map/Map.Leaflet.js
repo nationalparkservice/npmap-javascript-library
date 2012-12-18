@@ -902,7 +902,9 @@ define([
           latLng = (function() {
             var latLng = null;
 
-            if (typeof to.lat === 'number') {
+            if (typeof to.distanceTo !== 'function') {
+              latLng = to;
+            } else if (typeof to.lat === 'number') {
               latLng = new L.LatLng(to.lat, to.lng);
             } else {
               latLng = to.getLatLng();
