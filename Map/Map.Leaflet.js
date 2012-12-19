@@ -94,6 +94,7 @@ define([
       mapConfig = {
         attributionControl: false,
         center: initialCenter,
+        inertia: false, // TODO: Turned off because 'move' event is not called by Leaflet when the map is "thrown".
         zoom: initialZoom,
         zoomControl: false
       };
@@ -498,12 +499,7 @@ define([
 
     Event.trigger('NPMap.Map', 'dblclick', e.originalEvent);
   });
-  // TODO: Why is InfoBox not positioning properly when you "throw" the map?
-  map.on('move', function(e) {
-    if (NPMap.InfoBox.visible) {
-      NPMap.InfoBox.reposition();
-    }
-
+  map.on('move', function() {
     NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
   map.on('zoomstart', function() {

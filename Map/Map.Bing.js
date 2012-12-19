@@ -354,10 +354,6 @@ define([
     }
 
     viewChanged = true;
-
-    if (NPMap.InfoBox.visible) {
-      NPMap.InfoBox.reposition();
-    }
     
     checkMaxMinZoom();
     Event.trigger('NPMap.Map', 'viewchanging');

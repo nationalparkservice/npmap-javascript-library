@@ -157,8 +157,6 @@ define([
     var z = Math.round(map.getZoom());
 
     viewChanged = true;
-
-    Event.trigger('NPMap.Map', 'viewchanging');
     
     if (oldZoom !== z) {
       if (!zooming) {
@@ -184,10 +182,8 @@ define([
         }
       }, 50);
     }
-    
-    if (NPMap.InfoBox.visible) {
-      NPMap.InfoBox.reposition();
-    }
+
+    Event.trigger('NPMap.Map', 'viewchanging');
   });
   map.addCallback('panned', function() {
     var center = map.getCenter();
