@@ -502,6 +502,12 @@ define([
   map.on('move', function() {
     NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
+  map.on('moveend', function() {
+    NPMap.Event.trigger('NPMap.Map', 'viewchanging');
+  });
+  map.on('movestart', function() {
+    NPMap.Event.trigger('NPMap.Map', 'viewchanging');
+  });
   map.on('zoomstart', function() {
     NPMap.Event.trigger('NPMap.Map', 'zoomstart');
   });
@@ -850,15 +856,28 @@ define([
      * @return null
      */
     panByPixels: function(pixels, callback) {
-      map.panBy(new L.Point(-pixels.x, -pixels.y));
+      var point = new L.Point(-pixels.x, -pixels.y);
 
-      if (callback) {
-        function callbackPanByPixels() {
-          map.off('moveend', callbackPanByPixels);
+      if (NPMap.InfoBox.visible) {
+        map._rawPanBy(point);
+        map.fireEvent('movestart');
+        map.fireEvent('move');
+        map.fireEvent('moveend');
+
+        if (callback) {
           callback();
         }
+      } else {
+        map.panBy(point);
 
-        map.on('moveend', callbackPanByPixels);
+        if (callback) {
+          function callbackPanByPixels() {
+            map.off('moveend', callbackPanByPixels);
+            callback();
+          }
+
+          map.on('moveend', callbackPanByPixels);
+        }
       }
     },
     /**
