@@ -632,7 +632,7 @@ define([
      */
     reposition: function() {
       var to = this.marker || this.latLng;
-
+      
       NPMap.Map[NPMap.config.api].positionClickDot(to);
       
       if (NPMap.Map[NPMap.config.api].isLatLngWithinMapBounds(NPMap.Map[NPMap.config.api].getClickDotLatLng()) === true) {
