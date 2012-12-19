@@ -510,8 +510,6 @@ define([
     });
   });
   Event.add('NPMap.Map', 'viewchanging', function() {
-    console.log('viewchanging');
-
     if (NPMap.InfoBox.visible) {
       NPMap.InfoBox.reposition();
     }
