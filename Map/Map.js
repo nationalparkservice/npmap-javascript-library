@@ -612,7 +612,7 @@ define([
               module.id = id.split(' ').join('_');
 
               // TODO: The built-in modules should not be manually specified here. You should load matrix.json and "query" it for information like this.
-              if (typeof module.html === 'string' && id !== 'edit' && id !== 'route') {
+              if (id !== 'edit' && id !== 'route') {
                 build.push(module);
               }
             }
