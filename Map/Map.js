@@ -641,7 +641,7 @@ define([
 
               htmlTabs += '</div>';
 
-              if (module.visible) {
+              if (!visible && module.visible) {
                 active = 'npmap-module-tab-' + id;
               }
             }
