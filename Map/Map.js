@@ -317,16 +317,10 @@ define([
 
       Util.safeLoad('NPMap.Map.' + NPMap.config.api, function() {
         var
-            // An array of elements to add to the map div.
-            elements = [],
-            //
-            interval,
-            // HTML for the logos div.
-            logosHtml = '',
             // The config object for NPMap's modules.
-            modulesConfig = NPMap.config.modules || null,
+            configModules = NPMap.config.modules || null,
             // The config object for NPMap's tools. Supports legacy config information too.
-            toolsConfig = (function() {
+            configTools = (function() {
               if (NPMap.config.tools) {
                 return {
                   fullscreen: NPMap.config.tools.fullscreen || false,
@@ -354,7 +348,13 @@ define([
               } else {
                 return {};
               }
-            })();
+            })(),
+            // An array of elements to add to the map div.
+            elements = [],
+            // HTML for the logos div.
+            htmlLogos = '',
+            //
+            interval;
 
         /**
          * Hooks mouseevents up to navigation controls.
@@ -408,19 +408,19 @@ define([
         });
         
         if (apiLower !== 'leaflet' && apiLower !== 'modestmaps') {
-          logosHtml += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + apiLower + 'logo.png" /></span>';
+          htmlLogos += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + apiLower + 'logo.png" /></span>';
         }
         
         if (!NPMap.config.hideLogo) {
-          logosHtml += '<span style="display:block;float:left;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+          htmlLogos += '<span style="display:block;float:left;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
         }
 
-        if (logosHtml.length > 0) {
+        if (htmlLogos.length > 0) {
           // The logo div.
           var logos = document.createElement('div');
           
           logos.id = 'npmap-logos';
-          logos.innerHTML = logosHtml;
+          logos.innerHTML = htmlLogos;
           logos.style.cssText = 'bottom:3px;height:30px;left:5px;position:absolute;z-index:30;';
           elements.push({
             el: logos,
@@ -433,7 +433,7 @@ define([
           });
         }
 
-        if (toolsConfig.navigation) {
+        if (configTools.navigation) {
           var
               // An array of callback functions.
               callbacksNavigation = [],
@@ -442,10 +442,10 @@ define([
               // HTML string for the navigation div.
               navigationHtml = '',
               // The position string for the navigation tools.
-              position = toolsConfig.navigation.position.split(' ');
+              position = configTools.navigation.position.split(' ');
               
-          if (toolsConfig.navigation.pan) {
-            var compass = toolsConfig.navigation.pan;
+          if (configTools.navigation.pan) {
+            var compass = configTools.navigation.pan;
 
             navigation.style.width = '58px';
 
@@ -495,10 +495,10 @@ define([
             });
           }
           
-          if (toolsConfig.navigation.zoom === 'small') {
+          if (configTools.navigation.zoom === 'small') {
             navigationHtml += '<div id="npmap-navigation-small-zoom" class="npmap-navigation-small-zoom"';
             
-            if (typeof toolsConfig.navigation.pan !== 'undefined') {
+            if (typeof configTools.navigation.pan !== 'undefined') {
               navigationHtml += ' style="margin-left:17px;margin-top:5px;"';
             }
             
@@ -560,12 +560,12 @@ define([
           });
         }
         
-        if (toolsConfig.fullscreen || toolsConfig.print || toolsConfig.share) {
+        if (configTools.fullscreen || configTools.print || configTools.share) {
           var callbacks = [],
               html = '<ul id="npmap-tools">',
               toolbar = document.createElement('div');
 
-          if (toolsConfig.fullscreen) {
+          if (configTools.fullscreen) {
             html += '<li id="npmap-toolbar-fullscreen"><div class="npmap-toolbar-fullscreen"></div></li>';
 
             callbacks.push(function() {
@@ -575,12 +575,12 @@ define([
             });
           }
 
-          if (toolsConfig.print) {
+          if (configTools.print) {
             html += '<li id="npmap-toolbar-print"><div class="npmap-toolbar-print"></div></li>';
             //callbacks.push();
           }
 
-          if (toolsConfig.share) {
+          if (configTools.share) {
             html += '<li id="npmap-toolbar-share"><div class="npmap-toolbar-share"></div></li>';
             //callbacks.push();
           }
@@ -599,31 +599,11 @@ define([
           callbacks = [];
         }
 
-        if (NPMap.config.modules && NPMap.config.modules.length > 0) {
-          /**
-                Support two use cases: 1) modules built into the library, 2) custom modules included in NPMap.config.
-
-                1) Modules built into the library
-
-                - Match the "name" property up, and use the built-in module
-                - Configuration should be done via the NPMap.config.modules['ModuleName'] object
-                - Icon and content should be 
-
-                2) Custom modules included in NPMap.config
-
-                - If the "name" property doesn't match up to a built-in module, it is a custom module
-                - If "html" property isn't specified, it isn't valid so skip it
-                - If icon isn't specified, use a generic icon
-
-                Available config properties:
-
-                - expanded {Boolean} Defaults to false
-           */
-
+        if (configModules && configModules.length) {
           var build = [];
 
-          for (var i = 0; i < NPMap.config.modules.length; i++) {
-            var module = NPMap.config.modules[i],
+          for (var i = 0; i < configModules.length; i++) {
+            var module = configModules[i],
                 name = module.name;
 
             if (name) {
@@ -631,6 +611,7 @@ define([
 
               module.id = id.split(' ').join('_');
 
+              // TODO: The built-in modules should not be manually specified here. You should load matrix.json and "query" it for information like this.
               if (typeof module.html === 'string' && id !== 'edit' && id !== 'route') {
                 build.push(module);
               }
@@ -638,17 +619,20 @@ define([
           }
 
           if (build.length) {
-            var htmlModules = '',
+            var active = null,
+                htmlModules = '',
                 htmlTabs = '';
 
             for (var i = 0; i < build.length; i++) {
-              var module = NPMap.config.modules[i],
+              var module = build[i],
                   id = module.id;
 
+              module.html = module.html || '';
               htmlModules += '<div id="npmap-modules-' + id + '" class="npmap-module">' + module.html + '</div>';
               htmlTabs += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.openModule(this);return false;">';
-
+              
               if (typeof module.icon === 'string') {
+                // TODO: You should also support custom icons that aren't included in the library.
                 htmlTabs += '<div class="npmap-module-tab-' + module.icon + '"></div>';
               } else {
                 // TODO: Need to replace with a generic tab icon.
@@ -656,6 +640,10 @@ define([
               }
 
               htmlTabs += '</div>';
+
+              if (module.visible) {
+                active = 'npmap-module-tab-' + id;
+              }
             }
 
             divModules.id = 'npmap-modules';
@@ -667,7 +655,14 @@ define([
             divModuleTabs.innerHTML = htmlTabs;
 
             elements.push({
-              el: divModuleTabs
+              el: divModuleTabs,
+              func: function() {
+                if (active) {
+                  NPMap.Event.add('NPMap.Map', 'ready', function() {
+                    NPMap.Map.openModule(document.getElementById(active));
+                  });
+                }
+              }
             });
             divNpmap.insertBefore(divModules, divMap);
             divNpmap.insertBefore(divModulesClose, divMap);
@@ -686,7 +681,7 @@ define([
         }
 
         // TODO: This is currently Bing specific.
-        if ((toolsConfig.overviewMap || toolsConfig.overview) && NPMap.config.api === 'bing') {
+        if ((configTools.overviewMap || configTools.overview) && NPMap.config.api === 'bing') {
           var divOverview = document.createElement('div');
 
           divOverview.id = 'npmap-overview';
