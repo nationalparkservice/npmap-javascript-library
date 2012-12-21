@@ -619,9 +619,9 @@ define([
           }
 
           if (build.length) {
-            var active = null,
-                htmlModules = '',
-                htmlTabs = '';
+            var htmlModules = '',
+                htmlTabs = '',
+                visible = null;
 
             for (var i = 0; i < build.length; i++) {
               var module = build[i],
@@ -630,7 +630,7 @@ define([
               module.html = module.html || '';
               htmlModules += '<div id="npmap-modules-' + id + '" class="npmap-module">' + module.html + '</div>';
               htmlTabs += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.openModule(this);return false;">';
-              
+
               if (typeof module.icon === 'string') {
                 // TODO: You should also support custom icons that aren't included in the library.
                 htmlTabs += '<div class="npmap-module-tab-' + module.icon + '"></div>';
@@ -642,7 +642,7 @@ define([
               htmlTabs += '</div>';
 
               if (!visible && module.visible) {
-                active = 'npmap-module-tab-' + id;
+                visible = 'npmap-module-tab-' + id;
               }
             }
 
@@ -657,9 +657,9 @@ define([
             elements.push({
               el: divModuleTabs,
               func: function() {
-                if (active) {
+                if (visible) {
                   NPMap.Event.add('NPMap.Map', 'ready', function() {
-                    NPMap.Map.openModule(document.getElementById(active));
+                    NPMap.Map.openModule(document.getElementById(visible));
                   });
                 }
               }
@@ -681,6 +681,7 @@ define([
         }
 
         // TODO: This is currently Bing specific.
+        // TODO: The overviewMap property is DEPRECATED. Retire it soon.
         if ((configTools.overviewMap || configTools.overview) && NPMap.config.api === 'bing') {
           var divOverview = document.createElement('div');
 
