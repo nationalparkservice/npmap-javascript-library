@@ -1,4 +1,7 @@
-﻿define([
+﻿/**
+ * NPMap.Layer.GoogleFusion module.
+ */
+define([
   'Event',
   'Layer/Layer'
 ], function(Event, Layer) {
@@ -17,11 +20,11 @@
       }
     },
     /**
-     * Creates a GoogleFusion layer.
+     * Adds a GoogleFusion layer.
      * @param {Object} config
      * @return null
      */
-    create: function(config) {
+    add: function(config) {
       var layer;
 
       Event.trigger('NPMap.Layer', 'beforeadd', config);

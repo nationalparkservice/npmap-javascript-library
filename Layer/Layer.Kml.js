@@ -1,10 +1,12 @@
-﻿// TODO: Add support for "extent" to layer.
-// TODO: Add support for all types: http://www.nps.gov/npmap/support/examples/data/kml-samples.kml
+﻿/**
+ * NPMap.Layer.Kml module.
+ */
 define([
   'Layer/Layer',
   'Util/Util.Xml.Kml',
-  'Util/Util.Xml'
-], function(Layer, UtilKml, UtilXml) {
+  'Util/Util.Xml',
+  'Util/Util.Json.GeoJson'
+], function(Layer, UtilKml, UtilXml, UtilGeoJson) {
   return NPMap.Layer.Kml = {
     /**
      * Handles the click operation for ArcGisServerRest layers.
@@ -32,7 +34,6 @@ define([
         if (target.npmap.shapeType === 'Marker') {
           to = target;
         } else {
-          // TODO: If a polygon or line shape is passed in as eventOrTarget parameter, you need a way to get its center lat/lng. You should do that here.
           to = NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].eventGetLatLng(eventOrTarget));
         }
 
@@ -55,86 +56,31 @@ define([
         ], null, to);
       }
     },
+    /**
+     *
+     */
     _handleHover: function(e) {
 
     },
     /**
-     * Creates a Kml layer.
+     * Adds a Kml layer.
      * @param {Object} config
+     * @param {Function} callback (Optional)
+     * @return null
      */
-    create: function(config) {
-      var layerName = config.name,
-          layerType = config.type;
-
-      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
-
-      config.shapes = [];
-
+    add: function(config, callback) {
       UtilXml.load(config.url, function(response) {
-        var features = UtilKml.parse(response);
-
-        for (var i = 0; i < features.length; i++) {
-          var feature = features[i],
-              shape,
-              shapeType = feature.shapeType,
-              style = null;
-
-          if (typeof config.style !== 'undefined' && config.style[shapeType.toLowerCase()] !== 'undefined') {
-            style = config.style[shapeType.toLowerCase()];
-          }
-
-          switch (shapeType) {
-            case 'Line':
-              //shape = NPMap.Map.createLine(feature.ll, style);
-              break;
-            case 'Marker':
-              shape = NPMap.Map._createMarker({
-                lat: feature.ll.lat,
-                lng: feature.ll.lng
-              }, style);
-              break;
-            case 'Polygon':
-              shape = NPMap.Map._createPolygon(feature.ll, style);
-              break;
-          }
-
-          if (shape) {
-            shape.npmap = {
-              data: feature.data,
-              layerName: layerName,
-              layerType: layerType,
-              shapeType: feature.shapeType
-            };
-
-            config.shapes.push(shape);
-            NPMap.Map.addShape(shape);
-          }
+        config.shapes = UtilGeoJson.toShapes(UtilKml.toGeoJson(response), {
+          layerName: config.name,
+          layerType: 'Kml'
+        }, config.styleNpmap);
+        
+        NPMap.Map.addShapes(config.shapes);
+        
+        if (callback) {
+          callback();
         }
-
-        NPMap.Event.trigger('NPMap.Layer', 'added', config);
       });
-    },
-    /**
-     * Hides the layer.
-     * @param {Object} config
-     */
-    hide: function(config) {
-
-    },
-    /**
-     *
-     */
-    remove: function(config) {
-      NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
-      // TODO: Not yet implemented.
-      NPMap.Event.trigger('NPMap.Layer', 'removed', config);
-    },
-    /**
-     * Shows the layer.
-     * @param {Object} config
-     */
-    show: function(config) {
-      
     }
   };
 });

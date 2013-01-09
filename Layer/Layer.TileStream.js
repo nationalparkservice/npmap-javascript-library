@@ -1,4 +1,7 @@
-﻿define([
+﻿/**
+ * NPMap.Layer.TileStream module.
+ */
+define([
   'Event',
   'InfoBox',
   'Layer/Layer',
@@ -132,46 +135,27 @@
       }
     },
     /**
-     * Builds an attribution string for a layer config, including all composited layers.
-     * @param {Object} config
-     * @param {String}
-     */
-    buildAttribution: function(config) {
-      var attribution = [];
-
-      if (config.composited) {
-        for (var i = 0; i < config.composited.length; i++) {
-          var a = config.composited[i].attribution;
-
-          if (a && _.indexOf(attribution, a) === -1) {
-            attribution.push(a);
-          }
-        }
-      } else if (config.attribution) {
-        attribution.push(config.attribution);
-      }
-
-      return attribution;
-    },
-    /**
      * Loads all of the TileStream layers that have been added to the map and are visible.
      * @param {Object} config
      * @param {Function} callback (Optional)
      * @param {Boolean} silent (Optional)
      * @return null
      */
-    create: function(config, callback, silent) {
-      var baseLayer = this._getVisibleBaseLayer(),
+    add: function(config, callback, silent) {
+      // TODO: Why is this the window object?
+      var baseLayer = NPMap.Layer.TileStream._getVisibleBaseLayer(),
           composited = config.composited,
           layerString = config.id,
           me = this,
           url = config.url || 'http://api.tiles.mapbox.com/v3/';
 
+      /*
       silent = silent || false;
 
       if (!silent) {
         Event.trigger('NPMap.Layer', 'beforeadd', config);
       }
+      */
 
       if (composited) {
         var currentIndex,
@@ -305,9 +289,11 @@
             });
           }
 
+          /*
           if (!silent) {
             Event.trigger('NPMap.Layer', 'added', config);
           }
+          */
 
           if (callback) {
             callback();
@@ -318,13 +304,35 @@
       });
     },
     /**
+     * Builds an attribution string for a layer config, including all composited layers.
+     * @param {Object} config
+     * @param {String}
+     */
+    buildAttribution: function(config) {
+      var attribution = [];
+
+      if (config.composited) {
+        for (var i = 0; i < config.composited.length; i++) {
+          var a = config.composited[i].attribution;
+
+          if (a && _.indexOf(attribution, a) === -1) {
+            attribution.push(a);
+          }
+        }
+      } else if (config.attribution) {
+        attribution.push(config.attribution);
+      }
+
+      return attribution;
+    },
+    /**
      * Refreshes the TileStream layer.
      * @param {Object} config
      * @return null
      */
     refresh: function(config) {
       this.remove(config);
-      this.create(config, null, true);
+      this.add(config, null, true);
     },
     /**
      * Removes a TileStream layer from the map.

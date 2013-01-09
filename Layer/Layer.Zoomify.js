@@ -1,12 +1,15 @@
-﻿define([
+﻿/**
+ * NPMap.Layer.Xml module.
+ */
+define([
   'Layer/Layer'
 ], function(Layer) {
   return NPMap.Layer.Zoomify = {
     /**
-     * Creates a Zoomify layer.
+     * Adds a Zoomify layer.
      ** @param {Object} config.
      */
-    create: function(config) {
+    add: function(config) {
       var layer;
 
       NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);

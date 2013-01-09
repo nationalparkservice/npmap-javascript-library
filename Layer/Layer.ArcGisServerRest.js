@@ -1,4 +1,6 @@
-﻿// TODO: Start using underscore's templating (or mustache.js) to clean this code up.
+﻿/**
+ * NPMap.Layer.ArcGisServerRest module.
+ */
 define([
   'Event',
   'InfoBox',
@@ -367,12 +369,12 @@ define([
       InfoBox.show(InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
     },
     /**
-     * Creates an ArcGisServerRest layer.
+     * Adds an ArcGisServerRest layer.
      * @param {Object} config
      * @param {Boolean} silent (Optional) If true, the NPMap.Layer events will not be called.
      * @return null
      */
-    create: function(config, silent) {
+    add: function(config, silent) {
       var tileLayer,
           uriConstructor = config.url + '/tile/{{z}}/{{y}}/{{x}}';
 
@@ -451,7 +453,7 @@ define([
 
       config.visible = true;
 
-      this.create(config, true);
+      this.add(config, true);
     },
     /**
      * Removes the layer.

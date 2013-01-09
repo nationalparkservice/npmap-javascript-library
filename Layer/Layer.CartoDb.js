@@ -1,4 +1,7 @@
-﻿define([
+﻿/**
+ * NPMap.Layer.CartoDb module.
+ */
+define([
   'Event',
   'InfoBox',
   'Layer/Layer',
@@ -104,11 +107,11 @@
       }
     },
     /**
-     * Creates a CartoDb layer.
+     * Adds a CartoDb layer.
      * @param {Object} config Required properties: 'table' and 'user'. Optional properties: 'query' and 'style'.
      * @return null
      */
-    create: function(config) {
+    add: function(config) {
       var table = config.table,
           user = config.user,
           options = {

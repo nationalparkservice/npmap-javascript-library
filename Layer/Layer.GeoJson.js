@@ -1,4 +1,6 @@
-﻿// TODO: Add support for "extent" to layer.
+﻿/**
+ * NPMap.Layer.GeoJson module.
+ */
 define([
   'Layer/Layer',
   'Util/Util.Json',
@@ -16,11 +18,10 @@ define([
         var config = Layer.getLayerByName(target.npmap.layerName),
             content,
             data = target.npmap.data,
-            shapeType = target.npmap.shapeType,
             title,
             to;
 
-        if (shapeType === 'Marker') {
+        if (target.npmap.type === 'Marker') {
           to = target;
         } else {
           to = NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].eventGetLatLng(e));
@@ -46,83 +47,29 @@ define([
       }
     },
     /**
-     * Creates a GeoJson layer.
-     * @param {Object} config
-     */
-    create: function(config) {
-      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
-
-      var layerName = config.name,
-          layerType = config.type,
-          maxZoom = config.maxZoom || 22,
-          minZoom = config.minZoom || 0;
-
-      config.shapes = [];
-
-      UtilJson.load(config.url, function(response) {
-        var features = UtilGeoJson.parse(response);
-
-        for (var i = 0; i < features.length; i++) {
-          var feature = features[i],
-              shape,
-              shapeType = feature.shapeType,
-              style = null;
-              
-          if (typeof config.style !== 'undefined' && config.style[shapeType.toLowerCase()] !== 'undefined') {
-            style = config.style[shapeType.toLowerCase()];
-          }
-
-          switch (shapeType) {
-            case 'Line':
-              //shape = NPMap.Map._createLine();
-              break;
-            case 'Marker':
-              shape = NPMap.Map._createMarker({
-                lat: feature.ll.lat,
-                lng: feature.ll.lng
-              }, style);
-              break;
-            case 'Polygon':
-              shape = NPMap.Map._createPolygon(feature.ll, style);
-              break;
-          }
-
-          if (shape) {
-            shape.npmap = {
-              data: feature.data,
-              layerName: layerName,
-              layerType: layerType,
-              shapeType: feature.shapeType
-            };
-
-            config.shapes.push(shape);
-            NPMap.Map.addShape(shape);
-          }
-        }
-
-        NPMap.Event.trigger('NPMap.Layer', 'added', config);
-      });
-    },
-    /**
-     * Hides the layer.
-     * @param {Object} config
-     */
-    hide: function(config) {
-
-    },
-    /**
      *
      */
-    remove: function(config) {
-      NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
-      NPMap.Event.trigger('NPMap.Layer', 'removed', config);
+    _handleHover: function(e) {
+
     },
     /**
-     * Shows the layer.
+     * Adds a GeoJson layer.
      * @param {Object} config
+     * @param {Function} callback (Optional)
      */
-    show: function(config) {
-      
+    add: function(config, callback) {
+      UtilJson.load(config.url, function(response) {
+        config.shapes = UtilGeoJson.toShapes(response, {
+          layerName: config.name,
+          layerType: 'GeoJson'
+        }, config.styleNpmap);
+        
+        NPMap.Map.addShapes(config.shapes);
+
+        if (callback) {
+          callback();
+        }
+      });
     }
   };
 });

@@ -1,151 +1,97 @@
-﻿define(function() {
-  var 
-      // A queue of layers to load when the JSON files are loaded and ready to go.
-      queue = [];
-  
-  /**
-   *
-   */
-  function createGeometries(layer, json) {
-    layer.geometries = [];
-
-    if (layer.root) {
-      json = json[layer.root];
-    }
-
-    _.each(json, function(v, i) {
-      var d = {
-            layerName: layer.name,
-            layerType: 'Json'
-          },
-          o = {},
-          m;
-                
-      function go() {
-        if (layer.overIcon) {
-          if (typeof layer.overIcon === 'string') {
-            d.overIcon = layer.overIcon;
-          } else {
-            d.overIcon = layer.overIcon(d);
-          }
-        }
-
-        m = NPMap.Map.createMarker(v[layer.lat] + ',' + v[layer.lng], o, d);
-            
-        layer.geometries.push(m);
-        NPMap.Map.addShape(m);
-      }
-      
-      _.each(v, function(v2, i2) {
-        if (i2 !== layer.lat && i2 !== layer.lng) {
-          d[i2] = v2;
-        }
-      });
-            
-      if (layer.icon) {
-        if (typeof layer.icon === 'string') {
-          o.icon = layer.icon;
-        } else {
-          o.icon = layer.icon(d);
-        }
-
-        // TODO: Should this apply to all APIs?
-        if (NPMap.config.api === 'bing') {
-          var image = new Image(),
-              interval;
-          
-          image.src = o.icon;
-
-          interval = setInterval(function() {
-            if (image.height > 0 && image.width > 0) {
-              clearInterval(interval);
-
-              o.height = image.height;
-              o.width = image.width;
-
-              go();
-            }
-          }, 10);
-        } else {
-          go();
-        }
-      } else {
-        go();
-      }
-    });
-  }
-
+﻿/**
+ * NPMap.Layer.Json module.
+ */
+define([
+  'Layer/Layer',
+  'Util/Util.Json'
+], function(Layer, UtilJson) {
   return NPMap.Layer.Json = {
     /**
-     * This function gets called by the JSON file loaded via JSONP.
-     * @param {Object} json
+     * Handles the click operation for Json layers.
+     * @param {Object} e
      * @return null
      */
-    _callback: function(json) {
-      function cycle() {
-        var remove = [];
-      
-        for (var i = 0; i < queue.length; i++) {
-          if (json.hasOwnProperty(queue[i].root)) {
-            remove.push(i);
-            createGeometries(queue[i], json);
-          }
+    _handleClick: function(e) {
+      var target = NPMap.Map[NPMap.config.api].eventGetShape(e);
+
+      if (target && target.npmap && target.npmap.layerType === 'Json') {
+        var config = Layer.getLayerByName(target.npmap.layerName),
+            data = target.npmap.data;
+
+        NPMap.InfoBox.show(NPMap.InfoBox._build(config, data, 'content'), NPMap.InfoBox._build(config, data, 'title'), NPMap.InfoBox._build(config, data, 'footer'), [
+          'zoomable'
+        ], null, target);
+      }
+    },
+    /**
+     *
+     */
+    _handleHover: function(e) {
+
+    },
+    /**
+     * Adds a Json layer.
+     * @param {Object} config
+     * @param {Function} callback (Optional)
+     * @return null
+     */
+    add: function(config, callback) {
+      var properties = config.properties;
+
+      if (!properties) {
+        throw new Error('The "properties" object is required for "Json" layers.');
+      }
+
+      if (!properties.lat) {
+        throw new Error('The "lat" property must be set on the "properties" object for "Json" layers.');
+      }
+
+      if (!properties.lng) {
+        throw new Error('The "lng" property must be set on the "properties" object for "Json" layers.');
+      }
+
+      if (!properties.root) {
+        throw new Error('The "root" property must be set on the "properties" object for "Json" layers.');
+      }
+
+      UtilJson.load(config.url, function(response) {
+        var lat = properties.lat,
+            layerName = config.name,
+            lng = properties.lng,
+            shapes = [];
+
+        _.each(response[config.properties.root], function(feature) {
+          var npmap = {
+                data: {},
+                layerName: layerName,
+                layerType: 'Json',
+                shapeType: 'Marker'
+              },
+              shape = NPMap.Map._createMarker({
+                lat: parseFloat(feature[lat]),
+                lng: parseFloat(feature[lng])
+              }, config.styleNpmap.marker);
+
+          delete feature[lat];
+          delete feature[lng];
+
+          _.extend(npmap.data, feature);
+
+          shape.npmap = npmap;
+
+          shapes.push(shape);
+        });
+
+        config.shapes = shapes;
+
+        NPMap.Map.addShapes(config.shapes);
+
+        if (callback) {
+          callback();
         }
-
-        _.each(remove, function(v, i) {
-          queue.splice(v, 1);
-        });
-      }
-
-      if (queue.length > 0) {
-        cycle();
-      }
-    },
-    /**
-     * Adds a Json layer to the map.
-     * @return null
-     */
-    create: function(layer) {
-      queue.push(layer);
-      require([
-        layer.url
-      ]);
-    },
-    /**
-     * Hides the Json layer.
-     * @param {Object} The layer config object of the layer to hide.
-     * @return null
-     */
-    hide: function(layer) {
-      _.each(layer.geometries, function(v, i) {
-        NPMap.Map.setMarkerOptions(v, {
-          visible: false
-        });
+      }, {
+        callback: config.callback
       });
-
-      layer.visible = false;
-    },
-    /**
-     * Removes the layer.
-     * @param {Object} layer
-     * @return null
-     */
-    remove: function(layer) {
-    
-    },
-    /**
-     * Shows the KML layer.
-     * @param {Object} layer
-     * @return null
-     */
-    show: function(layer) {
-      _.each(layer.geometries, function(v) {
-        NPMap.Map.setMarkerOptions(v, {
-          visible: true
-        });
-      });
-
-      layer.visible = true;
     }
   };
 });

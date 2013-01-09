@@ -1,4 +1,7 @@
-﻿define([
+﻿/**
+ * NPMap.Layer.Tiled module.
+ */
+define([
   'Event',
   'Layer/Layer',
   'Map/Map'
@@ -33,11 +36,11 @@
       
     },
     /**
-     * Creates a Tiled layer and adds it to the map.
+     * Adds a Tiled layer and adds it to the map.
      * @param {Object} config
      * @return null
      */
-    create: function(config) {
+    add: function(config) {
       var constructor;
 
       if (typeof config.url === 'function') {

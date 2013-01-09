@@ -1,15 +1,25 @@
-﻿define(function() {
+﻿/**
+ * NPMap.Layer.Xml module.
+ */
+define([
+  'Event',
+  'InfoBox',
+  'Layer/Layer',
+  'Map/Map',
+  'Util/Util.Xml'
+], function(Event, InfoBox, Layer, Map, UtilXml) {
   var queue = [];
 
   /**
    * Creates a marker.
-   * @param {Object} layer
+   * @param {Object} config
    * @param {String} lat
    * @param {String} lng
    * @param {Object} o
    * @param {Object} d
+   * @return null
    */
-  function createMarker(layer, lat, lng, o, d) {
+  function createMarker(config, lat, lng, o, d) {
     if (layer.overIcon) {
       if (typeof layer.overIcon === 'string') {
         d.overIcon = layer.overIcon;
@@ -20,17 +30,96 @@
 
     m = NPMap.Map.createMarker(lat + ',' + lng, o, d);
         
-    layer.geometries.push(m);
+    config.shapes.push(m);
     NPMap.Map.addShape(m);
   }
+  /**
+   *
+   */
+  function displayError() {
+    Map.notify('The XML did not load correctly. Please verify that the URL is correct and the layer is configured properly.', null, 'error', 4000);
+  }
 
-  NPMap.layers = NPMap.layers || {};
-  
-  return NPMap.layers.Xml = {
-    addLayer: function(layer) {
-      queue.push(layer);
+  return NPMap.Layer.Xml = {
+    add: function(config) {
+      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+      queue.push(config);
+      UtilXml.load(config.url, function(xml) {
+        if (xml) {
+          var root = config.root || 'Document',
+              jxon = UtilXml.stringToJxon(xml, root);
+
+          console.log(jxon);
+
+          if (jxon.success) {
+            var elements = jxon[config.element];
+
+            for (var i = 0; i < elements.length; i++) {
+              var element = elements[i];
+
+              //console.log(element);
+
+
+            }
+
+
+            /*
+            for (var i = 0; i < elements.length; i++) {
+              var element = elements[i],
+                  currentLatRoot = element,
+                  elementLat = config.lat.split('.'),
+                  elementLng = config.lng.split('.'),
+                  lat,
+                  lng,
+                  shape,
+                  style = null;
+                  
+              console.log(element);
+
+              for (var j = 0; j < elementLat.length; j++) {
+                currentLatRoot = currentLatRoot[elementLat[j]];
+
+                console.log(currentLatRoot);
+              }
+
+              if (typeof config.style !== 'undefined' && config.style.marker !== 'undefined') {
+                style = config.style.marker;
+              }
+
+              shape = NPMap.Map._createMarker({
+                lat: lat,
+                lng: feature.ll.lng
+              }, style);
+
+              if (shape) {
+                shape.npmap = {
+                  data: feature.data,
+                  layerName: layerName,
+                  layerType: layerType,
+                  shapeType: feature.shapeType
+                };
+
+                config.shapes.push(shape);
+                NPMap.Map.addShape(shape);
+              }
+            }
+            */
+
+            NPMap.Event.trigger('NPMap.Layer', 'added', config);
+          } else {
+            displayError();
+          }
+        } else {
+          displayError();
+        }
+      });
+
+
+      /*
       reqwest({
         success: function(js) {
+          console.log(js);
+
           /*
           var $xml = $($.parseXML(js.d));
           
@@ -89,11 +178,12 @@
           if (layer.events && layer.events.load) {
             layer.events.load(layer);
           }
-          */
+          
         },
         type: 'jsonp',
-        url: 'http://maps.nps.gov/proxy/kml?url=' + layer.url + '&callback=?'
+        url: 'http://maps.nps.gov/proxy/kml?url=' + config.url + '&callback=?'
       });
+*/
     },
     hideLayer: function(layer) {
 
