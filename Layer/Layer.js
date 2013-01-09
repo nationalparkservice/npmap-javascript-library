@@ -7,8 +7,9 @@
  */
 define([
   'Event',
-  'Map/Map'
-], function(Event, Map) {
+  'Map/Map',
+  'Meta'
+], function(Event, Map, META) {
   var
       // A count of the number of visible layers that the map is initialized with.
       initializedActiveLayerCount = (function() {
@@ -39,54 +40,31 @@ define([
       })(),
       //
       interval,
-      // Information about all of NPMap's layer handlers.
-      LAYER_HANDLERS = {
-        ArcGisServerRest: {
-          clickable: true,
-          type: 'raster'
-        },
-        CartoDb: {
-          clickable: true,
-          type: 'vector'
-        },
-        GeoJson: {
-          clickable: true,
-          type: 'vector'
-        },
-        GoogleFusion: {
-          clickable: true,
-          type: 'vector'
-        },
-        Json: {
-          clickable: true,
-          type: 'vector'
-        },
-        Kml: {
-          clickable: true,
-          type: 'vector'
-        },
-        NativeVectors: {
-          clickable: true,
-          type: 'vector'
-        },
-        Tiled: {
-          clickable: true,
-          type: 'raster'
-        },
-        TileStream: {
-          clickable: true,
-          type: 'vector'
-        },
-        Xml: {
-          clickable: true,
-          type: 'vector'
-        },
-        Zoomify: {
-          clickable: false,
-          type: 'raster'
-        }
+      // The default line style.
+      lineStyle = {
+        strokeColor: '000000',
+        strokeOpacity: 200,
+        strokeWidth: 2
       },
-      // The layer names that have already been added to the map.
+      // The default marker style.
+      markerStyle = {
+        anchor: {
+          x: 6.5,
+          y: 0
+        },
+        height: 13,
+        url: NPMap.config.server + '/resources/img/markers/brown-circle-13x13.png',
+        width: 13
+      },
+      // The default polygon style.
+      polygonStyle = {
+        fillColor: '5e7630',
+        fillOpacity: 174,
+        strokeColor: '5e7630',
+        strokeOpacity: 200,
+        strokeWidth: 1
+      },
+      // All of the layer names that have been added to the map.
       usedNames = [];
 
   Event.add('NPMap.Layer', 'added', function(config) {
@@ -94,6 +72,8 @@ define([
     Map.updateAttribution();
   });
   Event.add('NPMap.Layer', 'beforeadd', function(config) {
+    var meta = NPMap.Layer.getLayerHandlerMeta(config.type);
+
     if (!config.name) {
       config.name = 'Layer_' + new Date().getTime();
 
@@ -114,27 +94,8 @@ define([
       throw new Error('All layers must have a "type".');
     }
 
-    var meta = LAYER_HANDLERS[config.type];
-    
     if (meta.type === 'vector') {
-      var lineStyle = {};
-          markerStyle = {
-            anchor: {
-              x: 6.5,
-              y: 0
-            },
-            height: 13,
-            url: NPMap.config.server + '/resources/img/markers/brown-circle-13x13.png',
-            width: 13
-          },
-          polygonStyle = {
-            fillColor: '5e7630',
-            fillOpacity: 174,
-            strokeColor: '5e7630',
-            strokeOpacity: 200,
-            strokeWidth: 1
-          },
-          style = config.style;
+      var style = config.style;
 
       if (style) {
         if (style.line) {
@@ -160,11 +121,9 @@ define([
         if (style.polygon) {
           polygonStyle = style.polygon;
         }
-      } else {
-        style = {};
       }
 
-      config.style = {
+      config.styleNpmap = {
         line: Map[NPMap.config.api].convertLineOptions(lineStyle),
         marker: Map[NPMap.config.api].convertMarkerOptions(markerStyle),
         polygon: Map[NPMap.config.api].convertPolygonOptions(polygonStyle)
@@ -176,24 +135,24 @@ define([
     Map.updateAttribution();
   });
   Event.add('NPMap.Map', 'click', function(e) {
-    if (NPMap.config.layers && NPMap.config.layers.length > 0) {
+    if (NPMap.config.layers && NPMap.config.layers.length) {
       for (var i = 0; i < NPMap.config.layers.length; i++) {
         var layerType = NPMap.config.layers[i].type,
-            meta = LAYER_HANDLERS[layerType];
+            meta = NPMap.Layer.getLayerHandlerMeta(layerType);
 
-        if (meta.type === 'raster' && meta.clickable === true) {
+        if (meta.type === 'raster' && meta.identify) {
           NPMap.Layer[layerType]._handleClick(e);
         }
       }
     }
   });
   Event.add('NPMap.Map', 'shapeclick', function(e) {
-    if (NPMap.config.layers && NPMap.config.layers.length > 0) {
+    if (NPMap.config.layers && NPMap.config.layers.length) {
       for (var j = 0; j < NPMap.config.layers.length; j++) {
         var layerType = NPMap.config.layers[j].type,
-            meta = LAYER_HANDLERS[layerType];
+            meta = NPMap.Layer.getLayerHandlerMeta(layerType);
             
-        if (meta.type === 'vector' && meta.clickable === true) {
+        if (meta.type === 'vector' && meta.identify) {
           NPMap.Layer[layerType]._handleClick(e);
         }
       }
@@ -273,6 +232,22 @@ define([
           return layer;
         }
       }
+    },
+    /**
+     * Get the META information for a layer handler.
+     * @param {String} name
+     * @return {Object}
+     */
+    getLayerHandlerMeta: function(name) {
+      for (var i = 0; i < META.layerHandlers.length; i++) {
+        var layerHandler = META.layerHandlers[i];
+
+        if (layerHandler.name === name) {
+          return layerHandler;
+        }
+      }
+
+      return null;
     },
     /**
      * Gets the layer name.
