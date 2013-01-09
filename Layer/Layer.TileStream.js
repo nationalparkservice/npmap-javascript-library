@@ -146,16 +146,7 @@ define([
       var baseLayer = NPMap.Layer.TileStream._getVisibleBaseLayer(),
           composited = config.composited,
           layerString = config.id,
-          me = this,
           url = config.url || 'http://api.tiles.mapbox.com/v3/';
-
-      /*
-      silent = silent || false;
-
-      if (!silent) {
-        Event.trigger('NPMap.Layer', 'beforeadd', config);
-      }
-      */
 
       if (composited) {
         var currentIndex,
@@ -268,32 +259,26 @@ define([
 
           if (!interaction && response.grids && waxShort) {
             config.interaction = interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
-              me._interactivityActive = true;
+              NPMap.Layer.TileStream._interactivityActive = true;
 
               Map.setCursor('pointer');
 
               if (o.e.type === 'click') {
                 //NPMap.Event.trigger('NPMap.Map', 'shapeclick', o);
-                me._handleClick(o);
+                NPMap.Layer.TileStream._handleClick(o);
               }
             }).on('off', function(o) {
-              me._interactivityActive = false;
+              NPMap.Layer.TileStream._interactivityActive = false;
 
               if (NPMap.Layer.CartoDb) {
                 if (NPMap.Layer.CartoDb._interactivityActive === false) {
-                  Map.setCursor('default');
+                  Map.setCursor('');
                 }
               } else {
-                Map.setCursor('default');
+                Map.setCursor('');
               }
             });
           }
-
-          /*
-          if (!silent) {
-            Event.trigger('NPMap.Layer', 'added', config);
-          }
-          */
 
           if (callback) {
             callback();
@@ -332,7 +317,7 @@ define([
      */
     refresh: function(config) {
       this.remove(config);
-      this.add(config, null, true);
+      this.add(config);
     },
     /**
      * Removes a TileStream layer from the map.
@@ -349,7 +334,6 @@ define([
       }
 
       delete config.api;
-      delete config.style;
 
       Event.trigger('NPMap.Layer', 'removed', config);
     }
