@@ -3,7 +3,7 @@
  */
 define([
   'Util/Util.Json'
-], function(utilJson) {
+], function(UtilJson) {
   /**
    * Converts a GeoJSON coordinate object to an NPMap latLng object.
    * @param {Object} coordinate
