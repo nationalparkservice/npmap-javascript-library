@@ -91,6 +91,14 @@ define(function() {
       bindEvent(el, name, handler);
     },
     /**
+     * Converts a 0-255 opacity to 0-1.0.
+     * @param {Number} opacity
+     * @return {Number}
+     */
+    convertOpacity: function(opacity) {
+      return (opacity / 25.5) * 0.1;
+    },
+    /**
      * Given an object, does a property exist?
      * @param {Object} obj The object to test.
      * @param {String} prop The property to look for. Ex: 'NPMap.config.tools.keyboard'.
@@ -406,6 +414,12 @@ define(function() {
      */
     isInt: function(n) {
       return n % 1 === 0;
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    isLocalUrl: function(url) {
+      return !(url.indexOf('http://') !== -1 && url.indexOf(location.host) === -1);
     },
     /**
      * Detects if a MouseEvent is a right-click event.
