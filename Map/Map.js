@@ -1225,6 +1225,18 @@ define([
       return this.latLngFromApi(NPMap.Map[NPMap.config.api].getCenter());
     },
     /**
+     * UNDOCUMENTED
+     */
+    getLineLatLngs: function(line) {
+      var latLngs = [];
+
+      _.each(NPMap.Map[NPMap.config.api].getLineLatLngs(line), function(latLng) {
+        latLngs.push(this.latLngFromApi(latLng));
+      });
+
+      return latLngs;
+    },
+    /**
      * Gets the map element.
      * @return {Object}
      */
@@ -1269,6 +1281,18 @@ define([
      */
     getMinZoom: function() {
       return NPMap.Map[NPMap.config.api].getMinZoom();
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    getPolygonLatLngs: function(polygon) {
+      var latLngs = [];
+
+      _.each(NPMap.Map[NPMap.config.api].getLineLatLngs(polygon), function(latLng) {
+        latLngs.push(this.latLngFromApi(latLng));
+      });
+
+      return latLngs;
     },
     /**
      * Gets the zoom level of the map.
@@ -1941,6 +1965,35 @@ define([
      */
     toMarkers: function(markers) {
       NPMap.Map[NPMap.config.api].toMarkers(markers);
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    toShape: function(shape) {
+
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    toShapes: function(shapes) {
+      var latLngs = [],
+          me = this;
+
+      _.each(shapes, function(shape) {
+        switch (shape.npmap.type) {
+          case 'Line':
+            latLngs.push(me.getLineLatLngs(shape));
+            break;
+          case 'Marker':
+            latLngs.push(me.getMarkerLatLng(shape));
+            break;
+          case 'Polygon':
+            latLngs.push(me.getPolygonLatLngs(shape));
+            break;
+        }
+      });
+
+      this.toLatLngs(_.flatten(latLngs));
     },
     /**
      * Updates the map attribution. Looks at the NPMap.Map[NPMap.config.api]._attribution property and iterates through all of the visible baseLayers and layers and looks at their attribution property, as well.

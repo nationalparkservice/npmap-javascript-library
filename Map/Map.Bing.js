@@ -755,6 +755,14 @@ define([
       return new Microsoft.Maps.Point(position.left - offset.left, position.top - offset.top);
     },
     /**
+     * Gets the latLngs {Microsoft.Maps.Location} of the line.
+     * @param {Object} line The line to get the latLngs for.
+     * @return {Array}
+     */
+    getLineLatLngs: function(line) {
+      return line.getLocations();
+    },
+    /**
      * Gets the map element.
      * @return {Object}
      */
@@ -824,6 +832,14 @@ define([
      */
     getMinZoom: function() {
       return min;
+    },
+    /**
+     * Gets the latLngs {Microsoft.Maps.Location} of the polygon.
+     * @param {Object} polygon The polygon to get the latLngs for.
+     * @return {Array}
+     */
+    getPolygonLatLngs: function(polygon) {
+      return polygon.getLocations();
     },
     /**
      * Gets the zoom level of the map.

@@ -852,6 +852,14 @@ define([
       return new L.Point(position.left - offset.left, position.top - offset.top);
     },
     /**
+     * Gets the latLngs {L.LatLng} of the line.
+     * @param {Object} line The line to get the latLngs for.
+     * @return {Array}
+     */
+    getLineLatLngs: function(line) {
+      return line.getLatLngs();
+    },
+    /**
      * Gets the map element.
      * @return {Object}
      */
@@ -879,6 +887,14 @@ define([
      */
     getMinZoom: function() {
       return mapConfig.minZoom;
+    },
+    /**
+     * Gets the latLngs {L.LatLng} of the polygon.
+     * @param {Object} polygon The polygon to get the latLngs for.
+     * @return {Array}
+     */
+    getPolygonLatLngs: function(polygon) {
+      return polygon.getLatLngs();
     },
     /**
      * Gets the zoom level of the map.

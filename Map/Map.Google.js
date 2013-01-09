@@ -766,6 +766,20 @@
       return overlay.getProjection().fromContainerPixelToLatLng(point);
     },
     /**
+     * Gets the latLngs {google.maps.LatLng} of the line.
+     * @param {Object} line The line to get the latLngs for.
+     * @return {Array}
+     */
+    getLineLatLngs: function(line) {
+      var latLngs = [];
+
+      line.getPath().forEach(function(latLng) {
+        latLngs.push(latLng);
+      });
+
+      return latLngs;
+    },
+    /**
      * Gets the map element.
      * @return {Object}
      */
@@ -790,7 +804,7 @@
     },
     /**
      * Gets the latLng {google.maps.LatLng} of the marker.
-     * @param {Object} marker The marker to get the latLng for.
+     * @param {Object} marker The marker to get the latLngs for.
      * @return {Object}
      */
     getMarkerLatLng: function(marker) {
@@ -809,6 +823,20 @@
      */
     getMinZoom: function() {
       return min;
+    },
+    /**
+     * Gets the latLngs {google.maps.LatLng} of the polygon.
+     * @param {Object} polygon The polygon to get the latLngs for.
+     * @return {Array}
+     */
+    getPolygonLatLngs: function(polygon) {
+      var latLngs = [];
+
+      polygon.getPath().forEach(function(latLng) {
+        latLngs.push(latLng);
+      });
+
+      return latLngs;
     },
     /**
      * Gets the zoom level of the map.
