@@ -668,7 +668,7 @@ define([
       if (target) {
         NPMap.Map[NPMap.config.api].positionClickDot(target);
 
-        if (typeof target === 'string' || (typeof target === 'object' && typeof target.lat === 'number')) {
+        if (typeof target.lat === 'number') {
           NPMap.InfoBox.latLng = target;
         } else {
           NPMap.InfoBox.latLng = NPMap.Map.getMarkerLatLng(target);
