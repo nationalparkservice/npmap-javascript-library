@@ -494,9 +494,23 @@ define([
      * Converts NPMap line options to Bing Maps line options.
      * @param {Object} options
      * @return {Object}
+     * Notes: Valid Bing Maps options: strokeColor (a (opacity), r, g, b), strokeDashArray, strokeThickness, visible
      */
     convertLineOptions: function(options) {
+      var o = {};
 
+      if (options.strokeColor) {
+        var strokeColor = Util.hexToRgb(options.strokeColor),
+            strokeOpacity = options.strokeOpacity || 255;
+
+        o.strokeColor = new Microsoft.Maps.Color(strokeOpacity, strokeColor[0], strokeColor[1], strokeColor[2]);
+      }
+      
+      if (options.strokeWidth) {
+        o.strokeThickness = options.strokeWidth;
+      }
+      
+      return o;
     },
     /**
      * Converts NPMap marker options to Bing Maps marker options.
