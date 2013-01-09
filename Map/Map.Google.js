@@ -89,14 +89,6 @@
       overlay = null;
   
   /**
-   * Converts a 0-255 opacity to 0-1.0.
-   * @param {Number} opacity
-   * @return {Number}
-   */
-  function convertOpacity(opacity) {
-    return (opacity / 25.5) * 0.1;
-  }
-  /**
    * Hooks up a google.maps.event click handler to a shape.
    * @param {Object} shape
    * @return null
@@ -483,9 +475,24 @@
      * Converts NPMap line options to Google Maps line options.
      * @param {Object} options
      * @return {Object}
+     * Notes: Valid Google Maps options: clickable, editable, geodesic, icons, map, path, strokeColor, strokeOpacity, strokeWeight, visible, zIndex
      */
     convertLineOptions: function(options) {
-      return {};
+      var o = {};
+
+      if (options.strokeColor) {
+        o.strokeColor = options.strokeColor;
+      }
+
+      if (options.strokeOpacity) {
+        o.strokeOpacity = Util.convertOpacity(options.strokeOpacity);
+      }
+      
+      if (options.strokeWidth) {
+        o.strokeWeight = options.strokeWidth;
+      }
+      
+      return o;
     },
     /**
      * Converts NPMap marker options to Google Maps marker options.
@@ -527,7 +534,7 @@
       }
 
       if (options.fillOpacity) {
-        o.fillOpacity = convertOpacity(options.fillOpacity);
+        o.fillOpacity = Util.convertOpacity(options.fillOpacity);
       }
 
       if (options.strokeColor) {
@@ -535,7 +542,7 @@
       }
 
       if (options.strokeOpacity) {
-        o.strokeOpacity = convertOpacity(options.strokeOpacity);
+        o.strokeOpacity = Util.convertOpacity(options.strokeOpacity);
       }
       
       if (options.strokeWidth) {
@@ -818,6 +825,12 @@
       google.maps.event.trigger(map, 'resize');
     },
     /**
+     * UNDOCUMENTED
+     */
+    hideShape: function(shape) {
+      shape.setVisible(false);
+    },
+    /**
      * Tests to see if a latLng is within the map's current bounds.
      * @param latLng {Object/String} {Required} The latitude/longitude, either a {google.maps.LatLng} object or a string in "latitude,longitude" format, to test.
      * @return {Boolean}
@@ -944,6 +957,12 @@
      */
     projection: null,
     /**
+     *
+     */
+    removeLayer: function(config) {
+      // TODO: If vector, iterate through shapes and remove them and delete config.shapes
+    },
+    /**
      * Removes a shape from the map.
      * @param {Object} shape The shape to remove from the map. This can be a {google.maps}.Marker, Polyline, Polygon, Rectangle, or Circle object.
      * @return null
@@ -991,6 +1010,12 @@
      */
     setMarkerIcon: function(marker, url) {
       
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    showShape: function(shape) {
+      shape.setVisible(true);
     },
     /**
      * Switches the base map.
