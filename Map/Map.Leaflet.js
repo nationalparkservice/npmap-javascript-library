@@ -22,15 +22,6 @@ define([
       activeBaseLayer,
       // An array of the default base layers for the Leaflet baseAPI.
       DEFAULT_BASE_LAYERS = {
-        /*
-        aerial: {
-          cls: 'aerial',
-          icon: 'aerial',
-          mapTypeId: 'Aerial',
-          name: 'Aerial View',
-          type: 'Api'
-        },
-        */
         aerial: {
           icon: 'aerial',
           id: 'nps.map-n9nxe12m',
@@ -58,22 +49,6 @@ define([
           name: 'Street View',
           type: 'TileStream'
         },
-        /*
-        hybrid: {
-          cls: 'hybrid',
-          icon: 'aerial',
-          mapTypeId: 'AerialWithLabels',
-          name: 'Hybrid View',
-          type: 'Api'
-        },
-        streets: {
-          cls: 'streets',
-          icon: 'street',
-          mapTypeId: 'Road',
-          name: 'Street View',
-          type: 'Api'
-        },
-        */
         terrain: {
           attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
           icon: 'topo',
@@ -105,6 +80,38 @@ define([
    */
   function handleResize() {
     map.invalidateSize();
+  }
+  /**
+   *
+   */
+  function hookUpShapeClick(shape) {
+    shape.on('click', function(e) {
+      doubleClicked = false;
+
+      setTimeout(function() {
+        if (!doubleClicked) {
+          var cloned = _.clone(e.originalEvent);
+
+          _.extend(cloned, e);
+
+          delete cloned.originalEvent;
+
+          Event.trigger('NPMap.Map', 'shapeclick', cloned);
+        }
+      }, 350);
+    });
+    shape.on('dblclick', function(e) {
+      var latLng = e.latlng,
+          Leaflet = NPMap.Map.Leaflet;
+
+      doubleClicked = true;
+
+      if (!latLng) {
+        latLng = Leaflet.getMarkerLatLng(e.target);
+      }
+
+      Leaflet.centerAndZoom(latLng, Leaflet.getZoom() + 1);
+    });
   }
 
   /**
@@ -590,25 +597,91 @@ define([
      * Converts NPMap line options to Leaflet line options.
      * @param {Object} options
      * @return {Object}
+     * Notes: Valid Leaflet options: clickable, color, dashArray, fill, fillColor, fillOpacity, opacity, stroke, weight
      */
     convertLineOptions: function(options) {
-      return '"Not yet implemented"';
+      var o = {};
+
+      if (options.strokeColor) {
+        o.color = '#' + options.strokeColor;
+      }
+
+      if (options.strokeOpacity) {
+        o.opacity = Util.convertOpacity(options.strokeOpacity);
+      }
+      
+      if (options.strokeWidth) {
+        o.weight = options.strokeWidth;
+      }
+      
+      return o;
     },
     /**
      * Converts NPMap marker options to Leaflet marker options.
      * @param {Object} options
      * @return {Object}
+     * Notes: Valid Leaflet options: clickable, draggable, icon, opacity, title, zIndex
      */
     convertMarkerOptions: function(options) {
-      return '"Not yet implemented"';
+      var o = {};
+
+      if (options.url) {
+        var anchor = options.anchor,
+            height = options.height,
+            width = options.width;
+
+        if (!anchor) {
+          anchor = {
+            x: width / 2,
+            y: 0
+          };
+        }
+
+        o.icon = L.icon({
+          iconAnchor: [
+            anchor.x,
+            anchor.y
+          ],
+          iconSize: [
+            width,
+            height
+          ],
+          iconUrl: options.url
+        });
+      }
+
+      return o;
     },
     /**
      * Converts NPMap polygon options to Leaflet polygon options.
      * @param {Object} options
      * @return {Object}
+     * Notes: Valid Leaflet options: clickable, color, dashArray, fill, fillColor, fillOpacity, opacity, stroke, weight
      */
     convertPolygonOptions: function(options) {
-      return '"Not yet implemented"';
+      var o = {};
+
+      if (options.fillColor) {
+        o.fillColor = '#' + options.fillColor;
+      }
+
+      if (options.fillOpacity) {
+        o.fillOpacity = Util.convertOpacity(options.fillOpacity);
+      }
+
+      if (options.strokeColor) {
+        o.color = '#' + options.strokeColor;
+      }
+
+      if (options.strokeOpacity) {
+        o.opacity = Util.convertOpacity(options.strokeOpacity);
+      }
+      
+      if (options.strokeWidth) {
+        o.weight = options.strokeWidth;
+      }
+      
+      return o;
     },
     /**
      * Creates a CartoDb layer.
@@ -629,7 +702,11 @@ define([
      * @return {Object}
      */
     createLine: function(latLngs, options) {
-      return '"Not yet implemented"';
+      var line = L.polyline(latLngs, options);
+
+      hookUpShapeClick(line);
+
+      return line;
     },
     /**
      * Creates a marker shape.
@@ -638,7 +715,11 @@ define([
      * @return {Object}
      */
     createMarker: function(latLng, options) {
-      return new L.Marker(latLng);
+      var marker = L.marker(latLng, options);
+
+      hookUpShapeClick(marker);
+
+      return marker;
     },
     /**
      * Creates a polygon shape.
@@ -647,7 +728,11 @@ define([
      * @return {Object}
      */
     createPolygon: function(latLngs, options) {
-      return '"Not yet implemented"';
+      var polygon =  L.polygon(latLngs, options);
+
+      hookUpShapeClick(polygon);
+
+      return polygon;
     },
     /**
      * Creates a tile layer.
@@ -733,7 +818,7 @@ define([
      * @return {Object}
      */
     eventGetShape: function(e) {
-      
+      return e.target;
     },
     /**
      * Gets the current bounds of the map.
@@ -813,6 +898,12 @@ define([
       if (callback) {
         callback();
       }
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    hideShape: function(shape) {
+      this.removeShape(shape);
     },
     /**
      * Returns true if the input latLng is contained within the current map bounds.
@@ -917,9 +1008,7 @@ define([
           latLng = (function() {
             var latLng = null;
 
-            if (typeof to.distanceTo !== 'function') {
-              latLng = to;
-            } else if (typeof to.lat === 'number') {
+            if (typeof to.lat === 'number') {
               latLng = new L.LatLng(to.lat, to.lng);
             } else {
               latLng = to.getLatLng();
@@ -931,6 +1020,14 @@ define([
 
       clickDot.style.left = pixel.x + 'px';
       clickDot.style.top = pixel.y + 'px';
+    },
+    /**
+     * Removes a shape from the map.
+     * @param {Object} shape The shape to remove from the map. This can be a {L}.Marker, Polyline, Polygon, Rectangle, or Circle object.
+     * @return null
+     */
+    removeShape: function(shape) {
+      map.removeLayer(shape);
     },
     /**
      * Removes a tile layer from the map.
@@ -977,6 +1074,12 @@ define([
       }
       
       // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    showShape: function(shape) {
+      this.addShape(shape);
     },
     /**
      * Switches the base map.
