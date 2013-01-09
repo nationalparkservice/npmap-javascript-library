@@ -24,6 +24,18 @@ define([
       divAttribution = document.createElement('div'),
       // The clickdot div.
       divClickdot = document.createElement('div'),
+
+
+
+
+
+      divToolsBottomCenter = document.createElement('div'),
+      divToolsBottomLeft = document.createElement('div'),
+      divToolsBottomRight = document.createElement('div'),
+      divToolsTopCenter = document.createElement('div'),
+      divToolsTopLeft = document.createElement('div'),
+      divToolsTopRight = document.createElement('div'),
+
       // The map div.
       divMap = document.getElementById(NPMap.config.div),
       // The modules div.
@@ -433,21 +445,44 @@ define([
           });
         }
 
+        //console.log(configTools);
+
+        //throw new Error();
+
+        /*
+        tools: {
+          fullscreen: true||false,
+          navigation: true||false,
+          navigationOptions: {
+            pan: false||'home'||'north', // Defaults to 'home'
+            position: null||'top left'||'top center'||'top right', // Defaults to 'top left'
+            zoom: false||'small'||'large' // Defaults to 'small'
+          },
+          overview: true||false // Defaults to false
+          print: true||false // Defaults to false
+          share: true||false // Defaults to false
+        }
+        */
+
+
+
+
+
         if (configTools.navigation) {
           var
               // An array of callback functions.
               callbacksNavigation = [],
               // The navigation controls div.
-              navigation = document.createElement('div'),
+              divNavigation = document.createElement('div'),
               // HTML string for the navigation div.
               navigationHtml = '',
               // The position string for the navigation tools.
               position = configTools.navigation.position.split(' ');
-              
+
           if (configTools.navigation.pan) {
             var compass = configTools.navigation.pan;
 
-            navigation.style.width = '58px';
+            divNavigation.style.width = '58px';
 
             navigationHtml += '<div id="npmap-navigation-compass" class="npmap-navigation-compass-' + compass + '"><a id="npmap-navigation-compass-east" class="pointer"></a><a id="npmap-navigation-compass-north" class="pointer"></a><a id="npmap-navigation-compass-south" class="pointer"></a><a id="npmap-navigation-compass-west" class="pointer"></a>';
             
@@ -481,15 +516,15 @@ define([
               
               for (var i = 0; i < buttons.length; i++) {
                 var button = buttons[i],
-                    compassEl = document.getElementById('npmap-navigation-compass');
+                    elCompass = document.getElementById('npmap-navigation-compass');
                     
                 button.direction = button.id.split('-')[3];
                 
                 bean.add(button, 'mouseenter', function(e) {
-                  compassEl.className = compassEl.className.replace('npmap-navigation-compass-' + compass, ' npmap-navigation-compass-' + compass + '-' + this.direction + '-over');
+                  elCompass.className = elCompass.className.replace('npmap-navigation-compass-' + compass, ' npmap-navigation-compass-' + compass + '-' + this.direction + '-over');
                 });
                 bean.add(button, 'mouseleave', function(e) {
-                  compassEl.className = compassEl.className.replace(' npmap-navigation-compass-' + compass + '-' + this.direction + '-over', 'npmap-navigation-compass-' + compass);
+                  elCompass.className = elCompass.className.replace(' npmap-navigation-compass-' + compass + '-' + this.direction + '-over', 'npmap-navigation-compass-' + compass);
                 });
               }
             });
@@ -531,27 +566,28 @@ define([
           }
 
           if (position[0] === 'bottom') {
-            navigation.style.bottom = '15px';
+            divNavigation.style.bottom = '15px';
           } else {
-            navigation.style.top = '15px';
-          }
-          
-          if (position[1]) {
-            if (position[1] === 'left') {
-              navigation.style.left = '15px';
-            } else {
-              navigation.style.right = '15px';
-            }
-          } else {
-            navigation.style.left = '15px';
+            divNavigation.style.top = '15px';
           }
 
-          navigation.id = 'npmap-navigation';
-          navigation.innerHTML = navigationHtml;
-          navigation.style.position = 'absolute';
-          navigation.style.zIndex = '30';
+          if (position[1]) {
+            if (position[1] === 'left') {
+              divNavigation.style.left = '15px';
+            } else {
+              divNavigation.style.right = '15px';
+            }
+          } else {
+            divNavigation.style.left = '15px';
+          }
+
+          divNavigation.id = 'npmap-navigation';
+          divNavigation.innerHTML = navigationHtml;
+          divNavigation.style.position = 'absolute';
+          divNavigation.style.zIndex = '30';
+
           elements.push({
-            el: navigation,
+            el: divNavigation,
             func: function() {
               for (var i = 0; i < callbacksNavigation.length; i++) {
                 callbacksNavigation[i]();
@@ -562,8 +598,8 @@ define([
         
         if (configTools.fullscreen || configTools.print || configTools.share) {
           var callbacks = [],
-              html = '<ul id="npmap-tools">',
-              toolbar = document.createElement('div');
+              divToolbar = document.createElement('div'),
+              html = '<ul id="npmap-tools">';
 
           if (configTools.fullscreen) {
             html += '<li id="npmap-toolbar-fullscreen"><div class="npmap-toolbar-fullscreen"></div></li>';
@@ -575,22 +611,33 @@ define([
             });
           }
 
+          // TODO: Implement.
           if (configTools.print) {
             html += '<li id="npmap-toolbar-print"><div class="npmap-toolbar-print"></div></li>';
-            //callbacks.push();
+            
+            callbacks.push(function() {
+              hookUpClickEvent('npmap-toolbar-print', function() {
+                alert('The print tool has not yet been implemented.');
+              });
+            });
           }
 
+          // TODO: Implement.
           if (configTools.share) {
             html += '<li id="npmap-toolbar-share"><div class="npmap-toolbar-share"></div></li>';
-            //callbacks.push();
+            
+            callbacks.push(function() {
+              hookUpClickEvent('npmap-toolbar-share', function() {
+                alert('The share tool has not yet been implemented.');
+              });
+            });
           }
 
-          toolbar.innerHTML = html + '</ul>';
-          toolbar.id = 'npmap-toolbar';
-          
+          divToolbar.innerHTML = html + '</ul>';
+          divToolbar.id = 'npmap-toolbar';
           divMap.style.top = '28px';
 
-          divNpmap.insertBefore(toolbar, divMap);
+          divNpmap.insertBefore(divToolbar, divMap);
 
           for (var i = 0; i < callbacks.length; i++) {
             callbacks[i]();
@@ -682,7 +729,7 @@ define([
 
         // TODO: This is currently Bing specific.
         // TODO: The overviewMap property is DEPRECATED. Retire it soon.
-        if ((configTools.overviewMap || configTools.overview) && NPMap.config.api === 'bing') {
+        if (configTools.overview && NPMap.config.api.toLowerCase() === 'bing') {
           var divOverview = document.createElement('div');
 
           divOverview.id = 'npmap-overview';
@@ -1016,12 +1063,42 @@ define([
       }
     },
     /**
+     * UNDOCUMENTED
+     */
+    addLayer: function(config) {
+      var type = config.type,
+          func = NPMap.Layer[type].add,
+          meta = NPMap.Layer.getLayerHandlerMeta(type);
+
+      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+
+      if (typeof func === 'function') {
+        func(config, function() {
+          NPMap.Event.trigger('NPMap.Layer', 'added', config);
+        });
+      } else {
+        NPMap.Event.trigger('NPMap.Layer', 'added', config);
+      }
+    },
+    /**
      * Adds a shape (marker, line, or polygon) to the map.
      * @param {Object} shape The shape to add to the map. This can be a base API marker, line, or polygon object.
      * @return null
      */
     addShape: function(shape) {
       NPMap.Map[NPMap.config.api].addShape(shape);
+    },
+    /**
+     * Adds an array of shapes (markers, lines, and/or polygons) to the map.
+     * @param {Array} shapes The shapes to add to the map. The array can contain base API marker, line, or polygon objects.
+     * @return null
+     */
+    addShapes: function(shapes) {
+      var me = this;
+
+      _.each(shapes, function(shape) {
+        me.addShape(shape);
+      });
     },
     /**
      * Adds a tile layer to the map.
@@ -1154,10 +1231,6 @@ define([
     getMapElement: function() {
       return NPMap.Map[NPMap.config.api].getMapElement();
     },
-
-
-
-
     /**
      * Get the marker latitude and longitude.
      * @param {Object} marker
@@ -1183,10 +1256,6 @@ define([
     getMarkerVisibility: function(marker) {
       return NPMap.Map[NPMap.config.api].getMarkerVisibility(marker);
     },
-
-
-
-
     /**
      * Gets the maximum zoom level for the map.
      * @return {Number}
@@ -1227,14 +1296,12 @@ define([
      */
     hasClusteredLayer: function() {
       hasClustered = false;
-      
-      if (NPMap.Layer) {
-        NPMap.Layer.iterateThroughAllLayers(function(l) {
-          if (l.type === 'NativeVectors' && l.clustered === true) {
-            hasClustered = true;
-          }
-        });
-      }
+
+      NPMap.Layer.iterateThroughAllLayers(function(l) {
+        if (l.type === 'NativeVectors' && l.clustered === true) {
+          hasClustered = true;
+        }
+      });
       
       return hasClustered;
     },
@@ -1245,15 +1312,43 @@ define([
     hasTiledLayer: function() {
       hasTiled = false;
 
-      if (NPMap.Layer) {
-        NPMap.Layer.iterateThroughAllLayers(function(l) {
-          if ((l.type === 'NativeVectors' && l.tiled) || (l.type === 'ArcGisServerRest' || l.type === 'CartoDb' || l.type === 'TileStream')) {
-            hasTiled = true;
-          }
+      NPMap.Layer.iterateThroughAllLayers(function(l) {
+        if ((l.type === 'NativeVectors' && l.tiled) || (l.type === 'ArcGisServerRest' || l.type === 'CartoDb' || l.type === 'TileStream')) {
+          hasTiled = true;
+        }
+      });
+
+      return hasTiled;
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    hideLayer: function(config) {
+      var type = config.type,
+          func = NPMap.Layer[type].hide,
+          me = this,
+          meta = NPMap.Layer.getLayerHandlerMeta(type);
+
+      NPMap.Event.trigger('NPMap.Layer', 'beforehide', config);
+      InfoBox.hide();
+
+      if (meta.type === 'raster') {
+        
+      } else {
+        _.each(config.shapes, function(shape) {
+          me.hideShape(shape);
         });
       }
 
-      return hasTiled;
+      config.visible = false;
+
+      if (typeof func === 'function') {
+        func(config, function() {
+          NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
+        });
+      } else {
+        NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
+      }
     },
     /**
      * Hides the progress bar.
@@ -1509,6 +1604,33 @@ define([
       return NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].pixelToLatLng(NPMap.Map[NPMap.config.api].pixelToApi(pixel)));
     },
     /**
+     * UNDOCUMENTED
+     */
+    removeLayer: function(config) {
+      var type = config.type,
+          func = NPMap.Layer[type].remove,
+          meta = NPMap.Layer.getLayerHandlerMeta(type);
+
+      NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
+
+      if (meta.type === 'raster') {
+        // TODO: Clean up raster layer.
+      } else {
+        _.each(config.shapes, function(shape) {
+          NPMap.Map.removeShape(shape);
+        });
+        delete config.shapes;
+        delete config.styleNpmap;
+      }
+
+      if (typeof func === 'function') {
+        func(config);
+      }
+
+      InfoBox.hide();
+      Event.trigger('NPMap.Layer', 'removed', config);
+    },
+    /**
      * Removes a shape from the map.
      * @param {Object} shape The shape to remove from the map.
      * @return null
@@ -1586,6 +1708,35 @@ define([
      */
     setZoomRestrictions: function(restrictions) {
       NPMap.Map[NPMap.config.api].setZoomRestrictions(restrictions);
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    showLayer: function(config) {
+      var type = config.type,
+          func = NPMap.Layer[type].show,
+          me = this,
+          meta = NPMap.Layer.getLayerHandlerMeta(type);
+
+      NPMap.Event.trigger('NPMap.Layer', 'beforeshow', config);
+
+      if (meta.type === 'raster') {
+        
+      } else {
+        _.each(config.shapes, function(shape) {
+          me.showShape(shape);
+        });
+      }
+
+      config.visible = true;
+
+      if (typeof func === 'function') {
+        func(config, function() {
+          NPMap.Event.trigger('NPMap.Layer', 'shown', config);
+        });
+      } else {
+        NPMap.Event.trigger('NPMap.Layer', 'shown', config);
+      }
     },
     /**
      * Shows the progress bar.
@@ -1700,6 +1851,7 @@ define([
 
           divNpmap.style.height = '100%';
           divNpmap.style.width = '100%';
+          divMap.style.position = 'absolute';
 
           divNpmapParent.appendChild(divNpmap);
 
@@ -1720,6 +1872,7 @@ define([
           Util.addClass(divNpmap, 'npmap-fullscreen-map');
           divNpmap.style.height = dimensionsWindow.height + 'px';
           divNpmap.style.width = dimensionsWindow.width + 'px';
+          divMap.style.position = 'fixed';
 
           divMask.appendChild(divNpmap);
 
