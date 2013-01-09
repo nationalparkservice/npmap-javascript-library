@@ -58,14 +58,28 @@ define([
         var lat = properties.lat,
             layerName = config.name,
             lng = properties.lng,
-            shapes = [];
+            root,
+            shapes = [],
+            traverse = config.properties.root.split('.');
 
-        _.each(response[config.properties.root], function(feature) {
+        _.each(traverse, function(property) {
+          try {
+            if (!root) {
+              root = response[property];
+            } else {
+              root = root[property];
+            }
+          } catch (e) {
+            throw new Error('The specified "root" property does not exist.');
+          }
+        });
+
+        _.each(root, function(feature) {
           var npmap = {
                 data: {},
                 layerName: layerName,
                 layerType: 'Json',
-                shapeType: 'Marker'
+                type: 'Marker'
               },
               shape = NPMap.Map._createMarker({
                 lat: parseFloat(feature[lat]),

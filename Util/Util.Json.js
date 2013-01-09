@@ -11,7 +11,7 @@ define([
      */
     load: function(url, callback, options) {
       options = options || {};
-
+      
       if (options.callback || !Util.isLocalUrl(url)) {
         reqwest({
           jsonpCallback: options.callback || null,
