@@ -5,6 +5,38 @@ define([
   'Layer/Layer',
   'Util/Util.Json'
 ], function(Layer, UtilJson) {
+  /**
+   * "Walks" an object tree down to the desired property.
+   * @param {String} str
+   * @param {Object} obj
+   * @return {Object}
+   */
+  function walkTheTree(str, obj) {
+    var value;
+
+    str = str.split('.');
+
+    if (str.length === 1) {
+      value = obj[str[0]];
+    } else {
+      for (var i = 0; i < str.length; i++) {
+        var property = str[i];
+
+        try {
+          if (!value) {
+            value = obj[property];
+          } else {
+            value = value[property];
+          }
+        } catch (e) {
+          break;
+        }
+      }
+    }
+
+    return value;
+  }
+
   return NPMap.Layer.Json = {
     /**
      * Handles the click operation for Json layers.
@@ -55,35 +87,23 @@ define([
       }
 
       UtilJson.load(config.url, function(response) {
-        var lat = properties.lat,
-            layerName = config.name,
-            lng = properties.lng,
-            root,
+        var layerName = config.name,
+            root = walkTheTree(properties.root, response),
             shapes = [],
             traverse = config.properties.root.split('.');
 
-        _.each(traverse, function(property) {
-          try {
-            if (!root) {
-              root = response[property];
-            } else {
-              root = root[property];
-            }
-          } catch (e) {
-            throw new Error('The specified "root" property does not exist.');
-          }
-        });
-
         _.each(root, function(feature) {
-          var npmap = {
+          var lat = walkTheTree(properties.lat, feature),
+              lng = walkTheTree(properties.lng, feature),
+              npmap = {
                 data: {},
                 layerName: layerName,
                 layerType: 'Json',
                 type: 'Marker'
               },
               shape = NPMap.Map._createMarker({
-                lat: parseFloat(feature[lat]),
-                lng: parseFloat(feature[lng])
+                lat: parseFloat(lat),
+                lng: parseFloat(lng)
               }, config.styleNpmap.marker);
 
           delete feature[lat];
