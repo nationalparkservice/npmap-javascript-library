@@ -57,7 +57,8 @@ define([
           layerType: 'GoogleFusion'
         };
 
-        Event.trigger('NPMap.Map', 'shapeclick', e);
+        this._handleClick(e);
+        //Event.trigger('NPMap.Map', 'shapeclick', e);
       });
     }
   };

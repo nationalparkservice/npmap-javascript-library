@@ -25,7 +25,10 @@ define([
 
     feature.npmap = options.npmap;
 
-    NPMap.Event.trigger('NPMap.Map', 'shapeclick', feature);
+    console.log(feature);
+
+    NPMap.Layer.CartoDb._handleClick(feature);
+    //NPMap.Event.trigger('NPMap.Map', 'shapeclick', feature);
   }
   /**
    * Handles the CartoDb out events.
