@@ -76,7 +76,7 @@
     <tr>
       <td><code>identify</code></td>
       <td><code>{Object}</code></td>
-      <td><p>An object with <code>'content'</code>, <code>'title'</code> and optionally <code>'footer'</code> and <code>'cluster'</code> configs that are used by NPMap to configure the InfoBox display for this layer. If these configs aren't specified in the initial layer config object, NPMap will use the default display parameters to display information for an identify operation.</p></td>
+      <td><p>An object with <code>'content'</code>, <code>'title'</code>, and optionally <code>'footer'</code> and <code>'cluster'</code> configs that are used by NPMap to configure the InfoBox display for this layer. If these configs aren't specified in the initial layer config object, NPMap will use the default display parameters to display information for an identify operation.</p></td>
     </tr>
     <tr>
       <td><code>shapes</code></td>
@@ -84,9 +84,9 @@
       <td><p>An array of the <a href="#specifications-shape">shapes</a> that have been added to the map for this layer.</p></td>
     </tr>
     <tr>
-      <td><code>style</code></td>
+      <td><code>styleNpmap</code></td>
       <td><code>{Object}</code></td>
-      <td><p>The set of marker, line, and polygon styles that will be used to style the shapes on the map. If these styles aren't specified in the initial layer config object, NPMap will utilize the default styles.</p>
+      <td><p>The set of marker, line, and polygon styles that will be used to style the shapes on the map. If the <code>style</code> config isn't specified in the layer config object, NPMap will utilize a set of default styles.</p>
     </tr>
   </tbody>
 </table>
@@ -108,7 +108,7 @@
     <tr>
       <td><code>identify</code></td>
       <td><code>{Object}</code></td>
-      <td><p>An object with <code>'content'</code>, <code>'title'</code> and optionally <code>'footer'</code> and <code>'cluster'</code> configs that are used by NPMap to configure the InfoBox display for this layer. If these configs aren't specified in the initial layer config object, NPMap will use the default display parameters to display information for an identify operation.</p></td>
+      <td><p>An object with <code>'content'</code>, <code>'title'</code> and optionally <code>'footer'</code> and <code>'cluster'</code> configs that are used by NPMap to configure the InfoBox display for this layer. If these configs aren't specified in the initial layer config object, NPMap will use a set of default display parameters for click (identify) operations.</p></td>
     </tr>
   </tbody>
 </table>
@@ -155,7 +155,7 @@
       <td><code>{String}</code></td>
     </tr>
     <tr>
-      <td><code>shapeType</code></td>
+      <td><code>type</code></td>
       <td><code>{String}</code></td>
     </tr>
   </tbody>
@@ -290,6 +290,7 @@ NPMap.config = {
 <p>The map is the core component of NPMap. The <code>NPMap.Map</code> module facilitates creating and interacting with a map built with one of the supported base APIs. To create a map, you will need to create a <code>NPMap.config</code> object and then load the NPMap library into your web page.</p>
 <h2 id="npmap.map-dependencies">Dependencies</h2>
 <ul>
+  <li>CartoDB</li>
   <li><a href="http://mapbox.com/wax/">MapBox Wax</a></li>
 </ul>
 <h2 id="npmap.map-methods">Methods</h2>
@@ -843,6 +844,11 @@ NPMap.config = {
       <td><p>Gets a layer config object by layer id.</p></td>
     </tr>
     <tr>
+      <td><code>getLayerHandlerMeta(name)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Get the META information for a layer handler.</p></td>
+    </tr>
+    <tr>
       <td><code>getLayerByName(name, layers?)</code></td>
       <td><code>{Object}</code></td>
       <td><p>Gets a layer config object by layer name.</p></td>
@@ -997,6 +1003,11 @@ NPMap.Event.remove(eventId);
       <td><code>bindEventToElement(el, name, handler)</code></td>
       <td><code>null</code></td>
       <td><p>Adds a CSS class to an element.</p></td>
+    </tr>
+    <tr>
+      <td><code>convertOpacity(opacity)</code></td>
+      <td><code>{Number}</code></td>
+      <td><p>Converts a 0-255 opacity to 0-1.0.</p></td>
     </tr>
     <tr>
       <td><code>doesPropertyExist(obj, prop)</code></td>
