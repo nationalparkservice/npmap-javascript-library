@@ -1,5 +1,3 @@
-NPMap = NPMap || {};
-
 define(function() {
   return NPMap.META = {
     "baseApis": [{
@@ -57,8 +55,12 @@ define(function() {
       "layerHandlers": [
         "ArcGisServerRest",
         "CartoDb",
+        "GeoJson",
+        "Json",
+        "Kml",
         "Tiled",
-        "TileStream"
+        "TileStream",
+        "Xml"
       ],
       "modules": [
         "Route"
