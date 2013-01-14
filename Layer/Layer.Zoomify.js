@@ -12,7 +12,7 @@ define([
     add: function(config) {
       var layer;
 
-      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+      //NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       if (!config.height) {
         throw new Error('"height" is required.');
@@ -25,7 +25,7 @@ define([
       layer = NPMap.Map.createZoomifyLayer(config);
       
       NPMap.Map.addTileLayer(layer);
-      NPMap.Event.trigger('NPMap.Layer', 'added', config);
+      //NPMap.Event.trigger('NPMap.Layer', 'added', config);
     }
   };
 });

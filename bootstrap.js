@@ -217,7 +217,7 @@ if (typeof bean === 'undefined') {
             (function() {
               var layerHandlerType = (function() {
                 var availableLayerHandlers = META.layerHandlers;
-
+                
                 for (var l = 0; l < availableLayerHandlers.length; l++) {
                   if (availableLayerHandlers[l].name.toLowerCase() === layerHandler.toLowerCase()) {
                     return availableLayerHandlers[l].name;
