@@ -419,7 +419,13 @@ define(function() {
      * UNDOCUMENTED
      */
     isLocalUrl: function(url) {
-      return (url.indexOf('http://') !== -1 && url.indexOf(location.host) === -1);
+      var isLocal = true;
+
+      if ((url.indexOf('http://') !== -1 || url.indexOf('https://') !== -1) && url.indexOf(location.host === -1)) {
+        isLocal = false;
+      }
+
+      return isLocal;
     },
     /**
      * Detects if a MouseEvent is a right-click event.
