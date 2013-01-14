@@ -25,9 +25,10 @@ define([
      * @return null
      */
     add: function(config) {
-      var layer;
+      var layer,
+          me = this;
 
-      Event.trigger('NPMap.Layer', 'beforeadd', config);
+      //Event.trigger('NPMap.Layer', 'beforeadd', config);
 
       if (!config.query) {
         throw new Error('The "query" config is required for GoogleFusion layers.');
@@ -57,7 +58,7 @@ define([
           layerType: 'GoogleFusion'
         };
 
-        this._handleClick(e);
+        NPMap.Layer.GoogleFusion._handleClick(e);
         //Event.trigger('NPMap.Map', 'shapeclick', e);
       });
     }
