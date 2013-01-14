@@ -337,7 +337,7 @@ define([
     // Taken from https://github.com/migurski/canvas-warp
     getTileUrl: function(xy) {
       var zoom = Map.getZoom();
-
+      
       return this._url + 'TileGroup' + this._coordinateGroup({
         column: xy.x,
         row: xy.y,
