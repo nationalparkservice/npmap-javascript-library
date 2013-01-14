@@ -60,7 +60,8 @@ define(function() {
         "Kml",
         "Tiled",
         "TileStream",
-        "Xml"
+        "Xml",
+        "Zoomify"
       ],
       "modules": [
         "Route"
@@ -178,6 +179,13 @@ define(function() {
       ],
       "name": "Xml",
       "type": "vector"
+    },{
+      "display": true,
+      "hover": false,
+      "identify": false,
+      "modules": [],
+      "name": "Zoomify",
+      "type": "raster"
     }],
     "modules": [{
       "name": "Edit"
