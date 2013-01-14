@@ -9,12 +9,12 @@ if (!NPMap.config.div) {
 }
 
 if (NPMap.config.api) {
-  if (NPMap.config.api === 'bing' || NPMap.config.api === 'esri' || NPMap.config.api === 'google' || NPMap.config.api === 'leaflet') {
+  if (NPMap.config.api === 'bing' || NPMap.config.api === 'google' || NPMap.config.api === 'leaflet') {
     NPMap.config.api = NPMap.config.api.charAt(0).toUpperCase() + NPMap.config.api.slice(1);
   } else if (NPMap.config.api === 'modestmaps') {
     NPMap.config.api = 'ModestMaps';
   } else {
-    throw new Error('The NPMap.config.api config is invalid!');
+    throw new Error('The NPMap.config.api property is invalid!');
   }
 } else {
   NPMap.config.api = 'Bing';
@@ -196,11 +196,13 @@ if (typeof bean === 'undefined') {
               return a.zIndex > b.zIndex;
             });
 
-            _.each(NPMap.config.layers, function(layer) {
+            for (var i = 1; i < NPMap.config.layers.length; i++) {
+              var layer = NPMap.config.layers[i];
+
               if (layer.zIndex - NPMap.config.layers[i - 1].zIndex !== 1) {
                 layer.zIndex = NPMap.config.layers[i - 1].zIndex + 1;
               }
-            });
+            }
 
             _.each(NPMap.config.layers, function(layer) {
               var layerType = layer.type;
@@ -363,18 +365,6 @@ if (typeof bean === 'undefined') {
             }, 5);
           };
           break;
-        case 'Esri':
-          // TODO: Upgrade to 3.0 ('http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0' or 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0compact') when Esri and/or Dojo get their act together with AMD.
-          apiUrl = 'http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.8';
-          callback = function() {
-            var interval = setInterval(function() {
-              if (typeof esri !== 'undefined') {
-                clearInterval(interval);
-                NPMap.apiLoaded();
-              }
-            }, 5);
-          };
-          break;
         case 'Google':
           if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
             callback = NPMap.apiLoaded();
@@ -464,7 +454,7 @@ if (typeof bean === 'undefined') {
     });
   }
 
-  s.src = 'http://www.nps.gov/npmap/libs/require-2.0.4.min.js';
+  s.src = 'http://www.nps.gov/npmap/libs/require/2.1.2.min.js';
 
   if (window.attachEvent && document.all) {
     s.onreadystatechange = function() {
