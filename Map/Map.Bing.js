@@ -1121,10 +1121,10 @@ define([
         } else {
           mapTypeId = Microsoft.Maps.MapTypeId.mercator;
 
-          NPMap.Layer[baseLayer.type].create(baseLayer);
+          NPMap.Layer[baseLayer.type].add(baseLayer);
         }
       } else {
-        NPMap.Layer[baseLayer.type].create(baseLayer);
+        NPMap.Layer[baseLayer.type].add(baseLayer);
 
         mapTypeId = Microsoft.Maps.MapTypeId.mercator;
       }

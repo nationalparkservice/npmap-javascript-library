@@ -1142,7 +1142,7 @@ define([
           map.addLayer(baseLayer.api, true);
         }
       } else {
-        NPMap.Layer[baseLayer.type].create(baseLayer);
+        NPMap.Layer[baseLayer.type].add(baseLayer);
       }
 
       baseLayer.visible = true;
