@@ -1,5 +1,5 @@
 ﻿/**
- * NPMap.Layer.Xml module.
+ * NPMap.Layer.Zoomify module.
  */
 define([
   'Layer/Layer'
@@ -7,13 +7,11 @@ define([
   return NPMap.Layer.Zoomify = {
     /**
      * Adds a Zoomify layer.
-     ** @param {Object} config.
+     * @param {Object} config
+     * @param {Function} callback
+     * @return null
      */
-    add: function(config) {
-      var layer;
-
-      //NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
-
+    add: function(config, callback) {
       if (!config.height) {
         throw new Error('"height" is required.');
       }
@@ -21,11 +19,12 @@ define([
       if (!config.width) {
         throw new Error('"width" is required.');
       }
-
-      layer = NPMap.Map.createZoomifyLayer(config);
       
-      NPMap.Map.addTileLayer(layer);
-      //NPMap.Event.trigger('NPMap.Layer', 'added', config);
+      NPMap.Map.addTileLayer(NPMap.Map.createZoomifyLayer(config));
+      
+      if (callback) {
+        callback();
+      }
     }
   };
 });
