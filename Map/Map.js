@@ -1356,6 +1356,14 @@ define([
       NPMap.Event.trigger('NPMap.Layer', 'beforehide', config);
       InfoBox.hide();
 
+      if (typeof func === 'function') {
+        func(config, function() {
+          NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
+        });
+      } else {
+        NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
+      }
+
       if (meta.type === 'raster') {
         
       } else {
@@ -1365,14 +1373,6 @@ define([
       }
 
       config.visible = false;
-
-      if (typeof func === 'function') {
-        func(config, function() {
-          NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
-        });
-      } else {
-        NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
-      }
     },
     /**
      * Hides the progress bar.
@@ -1636,9 +1636,13 @@ define([
           meta = NPMap.Layer.getLayerHandlerMeta(type);
 
       NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
+      
+      if (typeof func === 'function') {
+        func(config);
+      }
 
       if (meta.type === 'raster') {
-        // TODO: Clean up raster layer.
+        delete config.api;
       } else {
         _.each(config.shapes, function(shape) {
           NPMap.Map.removeShape(shape);
@@ -1647,9 +1651,7 @@ define([
         delete config.styleNpmap;
       }
 
-      if (typeof func === 'function') {
-        func(config);
-      }
+      config.visible = false;
 
       InfoBox.hide();
       Event.trigger('NPMap.Layer', 'removed', config);
