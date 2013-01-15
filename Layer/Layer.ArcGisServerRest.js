@@ -457,19 +457,13 @@ define([
      * @return null
      */
     remove: function(config) {
-      InfoBox.hide();
       Map[NPMap.config.api].removeTileLayer(config.api);
       
       if (config.identifiable === true) {
         identifyLayers--;
       }
-
-      config.visible = false;
       
-      delete config.api;
       delete config.identifiable;
-
-      Event.trigger('NPMap.Layer', 'removed', config);
     },
     /**
      * Shows the layer.
