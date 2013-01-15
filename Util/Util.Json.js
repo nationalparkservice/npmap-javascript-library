@@ -11,13 +11,23 @@ define([
      */
     load: function(url, callback, options) {
       options = options || {};
-      
-      if (options.callback || !Util.isLocalUrl(url)) {
+
+      if (options.callback && !Util.isLocalUrl(url)) {
         reqwest({
-          jsonpCallback: options.callback || null,
+          jsonpCallback: options.callback,
           success: callback,
           type: 'jsonp',
           url: url
+        });
+      } else if (!Util.isLocalUrl(url)) {
+        reqwest({
+          data: {
+            url: url
+          },
+          jsonpCallback: 'callback',
+          success: callback,
+          type: 'jsonp',
+          url: 'http://maps.nps.gov/proxy/json'
         });
       } else {
         reqwest({
