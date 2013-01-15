@@ -371,16 +371,12 @@ define([
     /**
      * Adds an ArcGisServerRest layer.
      * @param {Object} config
-     * @param {Boolean} silent (Optional) If true, the NPMap.Layer events will not be called.
+     * @param {Function} callback
      * @return null
      */
-    add: function(config, silent) {
+    add: function(config, callback) {
       var tileLayer,
           uriConstructor = config.url + '/tile/{{z}}/{{y}}/{{x}}';
-
-      if (!silent) {
-        Event.trigger('NPMap.Layer', 'beforeadd', config);
-      }
 
       if (!config.tiled) {
         uriConstructor = function(x, y, z) {
@@ -419,8 +415,8 @@ define([
 
       Map.addTileLayer(tileLayer);
 
-      if (!silent) {
-        Event.trigger('NPMap.Layer', 'added', config);
+      if (callback) {
+        callback();
       }
     },
     /**

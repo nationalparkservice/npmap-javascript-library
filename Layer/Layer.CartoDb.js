@@ -112,9 +112,10 @@ define([
     /**
      * Adds a CartoDb layer.
      * @param {Object} config Required properties: 'table' and 'user'. Optional properties: 'query' and 'style'.
+     * @param {Function} callback
      * @return null
      */
-    add: function(config) {
+    add: function(config, callback) {
       var table = config.table,
           user = config.user,
           options = {
@@ -163,7 +164,10 @@ define([
             }
 
             config.api = Map[NPMap.config.api].createCartoDbLayer(options);
-            Event.trigger('NPMap.Layer', 'added', config);
+            
+            if (callback) {
+              callback();
+            }
           },
           type: 'jsonp',
           url: 'https://' + user + '.cartodb.com/api/v2/sql?q=SELECT * FROM ' + table + ' LIMIT 1&callback=?'
@@ -172,7 +176,10 @@ define([
         config.api = Map[NPMap.config.api].createTileLayer('https://' + user + '.cartodb.com/tiles/' + table + '/{{z}}/{{x}}/{{y}}.png', options);
 
         Map.addTileLayer(config.api);
-        Event.trigger('NPMap.Layer', 'added', config);
+        
+        if (callback) {
+          callback();
+        }
       }
     }
   };

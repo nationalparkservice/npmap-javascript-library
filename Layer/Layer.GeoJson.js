@@ -55,7 +55,7 @@ define([
     /**
      * Adds a GeoJson layer.
      * @param {Object} config
-     * @param {Function} callback (Optional)
+     * @param {Function} callback
      */
     add: function(config, callback) {
       UtilJson.load(config.url, function(response) {

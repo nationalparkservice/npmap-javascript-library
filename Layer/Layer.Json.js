@@ -64,7 +64,7 @@ define([
     /**
      * Adds a Json layer.
      * @param {Object} config
-     * @param {Function} callback (Optional)
+     * @param {Function} callback
      * @return null
      */
     add: function(config, callback) {

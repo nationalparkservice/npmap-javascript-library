@@ -137,11 +137,10 @@ define([
     /**
      * Loads all of the TileStream layers that have been added to the map and are visible.
      * @param {Object} config
-     * @param {Function} callback (Optional)
-     * @param {Boolean} silent (Optional)
+     * @param {Function} callback
      * @return null
      */
-    add: function(config, callback, silent) {
+    add: function(config, callback) {
       // TODO: Why is this the window object?
       var baseLayer = NPMap.Layer.TileStream._getVisibleBaseLayer(),
           composited = config.composited,

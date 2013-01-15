@@ -38,9 +38,10 @@ define([
     /**
      * Adds a Tiled layer and adds it to the map.
      * @param {Object} config
+     * @param {Function} callback
      * @return null
      */
-    add: function(config) {
+    add: function(config, callback) {
       var constructor;
 
       if (typeof config.url === 'function') {
@@ -59,6 +60,10 @@ define([
         url: config.url,
         zIndex: config.zIndex
       }));
+
+      if (callback) {
+        callback();
+      }
     }
   };
 });

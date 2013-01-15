@@ -41,13 +41,26 @@ define([
   }
 
   return NPMap.Layer.Xml = {
-    add: function(config) {
-      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+    /**
+     * Adds a Xml layer.
+     * @param {Object} config
+     * @param {Function} callback
+     * @return null
+     */
+    add: function(config, callback) {
       queue.push(config);
       UtilXml.load(config.url, function(xml) {
+        console.log(xml);
+
+
+
+
+
+
+
         if (xml) {
           var root = config.root || 'Document',
-              jxon = UtilXml.stringToJxon(xml, root);
+              jxon = UtilXml.toJxon(xml);
 
           console.log(jxon);
 
@@ -104,8 +117,6 @@ define([
               }
             }
             */
-
-            NPMap.Event.trigger('NPMap.Layer', 'added', config);
           } else {
             displayError();
           }
