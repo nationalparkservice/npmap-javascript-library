@@ -122,13 +122,13 @@ if (typeof bean === 'undefined') {
       NPMap.Util.injectCss(NPMap.config.server + '/resources/css/base.css');
       
       if (NPMap.config.api === 'Leaflet') {
-        NPMap.Util.injectCss('http://www.nps.gov/npmap/libs/leaflet/master/leaflet.css');
+        NPMap.Util.injectCss(NPMap.config.server + '/libs/leaflet/leaflet.css');
         
         // http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
         var ie=function(){for(var a=3,b=document.createElement("div"),c=b.getElementsByTagName("i");b.innerHTML="<\!--[if gt IE "+ ++a+"]><i></i><![endif]--\>",c[0];);return 4<a?a:void 0}();
         
         if (ie < 8) {
-          NPMap.Util.injectCss('http://www.nps.gov/npmap/libs/leaflet/master/leaflet.ie.css');
+          NPMap.Util.injectCss(NPMap.config.server + '/libs/leaflet/leaflet.ie.css');
         }
       }
       
@@ -237,7 +237,7 @@ if (typeof bean === 'undefined') {
                       
                       if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
                         baseLayer.visible = true;
-
+                        
                         NPMap.Map.addLayer(baseLayer);
                         break;
                       }
@@ -399,7 +399,7 @@ if (typeof bean === 'undefined') {
           
           break;
         case 'Leaflet':
-          apiUrl = 'http://www.nps.gov/npmap/libs/leaflet/master/leaflet.js';
+          apiUrl = NPMap.config.server + '/libs/leaflet/leaflet.js';
           callback = function() {
             var interval = setInterval(function() {
               if (typeof L !== 'undefined') {
@@ -410,7 +410,7 @@ if (typeof bean === 'undefined') {
           };
           break;
         case 'ModestMaps':
-          apiUrl = 'http://www.nps.gov/npmap/libs/modestmaps/3.3.5.min.js';
+          apiUrl = NPMap.config.server + '/libs/modestmaps/3.3.5.min.js';
           callback = function() {
             var interval = setInterval(function() {
               if (typeof MM  !== 'undefined' && typeof MM.Map !== 'undefined') {
@@ -453,7 +453,7 @@ if (typeof bean === 'undefined') {
     });
   }
 
-  s.src = 'http://www.nps.gov/npmap/libs/require/2.1.2.min.js';
+  s.src = NPMap.config.server + '/libs/requirejs/2.1.2.min.js';
 
   if (window.attachEvent && document.all) {
     s.onreadystatechange = function() {

@@ -8,17 +8,22 @@ define([
   'Map/Map'
 ], function(Event, InfoBox, Layer, Map) {
   var
-      // The interaction object.
-      interaction = null,
       // The base URI template for a TileStream tile.
-      uriTemplate = 'http://{{subdomain}}.tiles.mapbox.com/v3/{{layers}}/{{z}}/{{x}}/{{y}}.png';
+      _uriTemplate = 'http://{{s}}.tiles.mapbox.com/v3/{{layers}}/{{z}}/{{x}}/{{y}}.png',
+      //
+      _WAX_SHORT = {
+        Esri: 'esri',
+        Google: 'g',
+        Leaflet: 'leaf',
+        ModestMaps: 'mm'
+      };
 
   /**
    * Constructs a URL string for a composited layer.
    * @param {Array} composited
    * @return {String}
    */
-  function constructCompositedString(composited) {
+  function _constructCompositedString(composited) {
     var layerString = '';
 
     _.each(composited, function(composite, i) {
@@ -40,8 +45,46 @@ define([
    * @param {Object} layer
    * @return {Boolean}
    */
-  function isVisibleAndTileStream(layer) {
+  function _isVisibleAndTileStream(layer) {
     return (layer.type === 'TileStream' && (typeof layer.visible === 'undefined' || layer.visible));
+  }
+  /**
+   * Toggles interaction on or off.
+   * @param {Object} config
+   * @param {Boolean} on
+   * @return null
+   */
+  function _toggleInteraction(config, on) {
+    if (on) {
+      config.interaction = wax[_WAX_SHORT[NPMap.config.api]].interaction().map(Map[NPMap.config.api].map).tilejson(config.tileJson).on('on', function(o) {
+        NPMap.Layer.TileStream._interactivityActive = true;
+
+        Map.setCursor('pointer');
+
+        if (o.e.type === 'click') {
+          NPMap.Layer.TileStream._handleClick(o);
+        }
+      }).on('off', function(o) {
+        NPMap.Layer.TileStream._interactivityActive = false;
+
+        if (NPMap.Layer.CartoDb) {
+          if (NPMap.Layer.CartoDb._interactivityActive === false) {
+            Map.setCursor('');
+          }
+        } else {
+          Map.setCursor('');
+        }
+      });
+    } else {
+      config.interaction.off('on');
+      config.interaction.off('off');
+
+      try {
+        config.interaction.remove();
+      } catch (error) {
+
+      }
+    }
   }
   /**
    * Constructs a URI for a tile.
@@ -52,11 +95,9 @@ define([
    * @param {String} subdomain
    * Return {String}
    */
-  function uriConstructor(x, y, z, url, subdomain) {
-    var template = _.template(url);
-
-    return template({
-      subdomain: subdomain,
+  function _uriConstructor(x, y, z, url, subdomain) {
+    return _.template(url)({
+      s: subdomain,
       x: x,
       y: y,
       z: z
@@ -64,8 +105,132 @@ define([
   }
 
   return NPMap.Layer.TileStream = {
+    /**
+     * Adds a TileStream layer to the map.
+     * @param {Object} config
+     * @param {Function} callback
+     * @return null
+     */
+    _add: function(config, callback) {
+      var composited = config.composited,
+          layerString = config.id,
+          url = config.url || 'http://api.tiles.mapbox.com/v3/';
+
+      if (composited) {
+        var currentIndex,
+            zIndexes = [],
+            zIndexesCreate = [];
+        
+        if (composited.length > 15) {
+          throw new Error('TileStream only supports up to 15 composited layer per tileset. Your layer has ' + composited.length + ' composited layers.');
+        }
+
+        _.each(composited, function(composite) {
+          if (typeof composite.visible !== 'boolean') {
+            composite.visible = true;
+          }
+
+          if (typeof composite.zIndex === 'number') {
+            zIndexes.push(composite);
+          } else {
+            zIndexesCreate.push(composite);
+          }
+        });
+
+        if (zIndexes.length > 0) {
+          zIndexes.sort();
+
+          currentIndex = zIndexes[zIndexes.length - 1];
+        } else {
+          currentIndex = -1;
+        }
+
+        _.each(zIndexesCreate, function(composite) {
+          currentIndex++;
+
+          composite.zIndex = currentIndex;
+
+          zIndexes.push(composite);
+        });
+
+        layerString = _constructCompositedString(config.composited);
+      }
+
+      url += layerString;
+
+      reqwest({
+        jsonpCallbackName: 'grid',
+        success: function(response) {
+          var MapApi = Map[NPMap.config.api],
+              tileLayer,
+              zIndex = config.zIndex;
+
+          if (typeof response.id === 'undefined' || response.id === null) {
+            response.id = config.id || config.name;
+          }
+
+          if (typeof MapApi._addTileStreamLayer === 'function') {
+            tileLayer = MapApi._addTileStreamLayer({
+              tileJson: response,
+              zIndex: zIndex
+            });
+          } else {
+            tileLayer = MapApi._addTileLayer({
+              constructor: _uriConstructor,
+              subdomains: [
+                'a',
+                'b',
+                'c',
+                'd'
+              ],
+              url: _uriTemplate.replace('{{layers}}', layerString),
+              zIndex: zIndex
+            });
+          }
+
+          tileLayer.npmap = {
+            layerName: config.name,
+            layerType: config.type
+          };
+          config.api = tileLayer;
+          config.tileJson = response;
+          
+          if (response.grids && _WAX_SHORT[NPMap.config.api]) {
+            _toggleInteraction(config, true);
+          }
+
+          if (callback) {
+            callback();
+          }
+        },
+        type: 'jsonp',
+        url: url + '.jsonp'
+      });
+    },
     // True if mouseover or click interactivity is currently active.
     _interactivityActive: false,
+    /**
+     * Builds an attribution string for a layer config, including all composited layers.
+     * @param {Object} config
+     * @param {String}
+     */
+    _buildAttribution: function(config) {
+      var attribution = [];
+
+      if (config.composited) {
+        for (var i = 0; i < config.composited.length; i++) {
+          var a = config.composited[i].attribution;
+
+          if (a && _.indexOf(attribution, a) === -1) {
+            attribution.push(a);
+          }
+        }
+      } else if (config.attribution) {
+        attribution.push(config.attribution);
+      }
+
+      return attribution;
+    },
     /**
      * Gets the number of visible TileStream layers.
      * @return {Array}
@@ -93,7 +258,7 @@ define([
       for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
         var baseLayer = NPMap.config.baseLayers[i];
 
-        if (isVisibleAndTileStream(baseLayer)) {
+        if (_isVisibleAndTileStream(baseLayer)) {
           return baseLayer;
         }
       }
@@ -111,7 +276,7 @@ define([
         for (var i = 0; i < NPMap.config.layers.length; i++) {
           var layer = NPMap.config.layers[i];
           
-          if (isVisibleAndTileStream(layer)) {
+          if (_isVisibleAndTileStream(layer)) {
             visible.push(layer);
           }
         }
@@ -135,206 +300,87 @@ define([
       }
     },
     /**
-     * Loads all of the TileStream layers that have been added to the map and are visible.
+     * Hides the layer.
      * @param {Object} config
-     * @param {Function} callback
+     * @param {Function} callback (Optional)
+     */
+    _hide: function(config, callback) {
+      var MapApi = Map[NPMap.config.api];
+
+      if (typeof MapApi._hideTileStreamLayer === 'function') {
+        MapApi._hideTileStreamLayer(config.api);
+
+        if (config.interaction) {
+          _toggleInteraction(config, false);
+        }
+      } else {
+        MapApi._hideTileLayer(config.api);
+      }
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * Removes a layer from the map.
+     * @param {Object} config
+     * @param {Function} callback (Optional)
      * @return null
      */
-    add: function(config, callback) {
-      // TODO: Why is this the window object?
-      var baseLayer = NPMap.Layer.TileStream._getVisibleBaseLayer(),
-          composited = config.composited,
-          layerString = config.id,
-          url = config.url || 'http://api.tiles.mapbox.com/v3/';
+    _remove: function(config, callback) {
+      var MapApi = Map[NPMap.config.api];
 
-      if (composited) {
-        var currentIndex,
-            zIndexes = [],
-            zIndexesCreate = [];
+      if (typeof MapApi._removeTileStreamLayer === 'function') {
+        MapApi._removeTileStreamLayer(config.api);
 
-        for (var i = 0; i < composited.length; i++) {
-          var composite = composited[i];
+        if (config.interaction) {
+          _toggleInteraction(config, false);
 
-          if (typeof composite.visible !== 'boolean') {
-            composite.visible = true;
-          }
-
-          if (typeof composite.zIndex === 'number') {
-            zIndexes.push(composite);
-          } else {
-            zIndexesCreate.push(composite);
-          }
+          delete config.interaction;
         }
-
-        if (zIndexes.length > 0) {
-          zIndexes.sort();
-
-          currentIndex = zIndexes[zIndexes.length - 1];
-        } else {
-          currentIndex = -1;
-        }
-
-        for (var j = 0; j < zIndexesCreate.length; j++) {
-          var compositeJ = composited[j];
-
-          currentIndex++;
-
-          compositeJ.zIndex = currentIndex;
-
-          zIndexes.push(compositeJ);
-        }
-
-        layerString = constructCompositedString(config.composited);
+        
+        delete config.tileJson;
+      } else {
+        MapApi._removeTileLayer(config.api);
       }
 
-      if (config.interaction) {
-        config.interaction = null;
-
-        if (interaction) {
-          interaction.remove();
-          interaction = null;
-        }
+      if (callback) {
+        callback();
       }
-
-      url += layerString;
-
-      reqwest({
-        jsonpCallbackName: 'grid',
-        success: function(response) {
-          var api = NPMap.config.api,
-              apiMap = Map[api],
-              map = apiMap.map,
-              tileLayer,
-              waxShort = null,
-              zIndex = config.zIndex;
-
-          if (typeof response.id === 'undefined' || response.id === null) {
-            response.id = config.id || config.name;
-          }
-
-          if (typeof apiMap.createTileStreamLayer === 'function') {
-            tileLayer = apiMap.createTileStreamLayer(response, {
-              zIndex: zIndex
-            });
-
-            if (typeof apiMap.addTileStreamLayer === 'function') {
-              apiMap.addTileStreamLayer(response);
-            } else {
-              apiMap.addTileLayer(tileLayer);
-            }
-          } else {
-            tileLayer = apiMap.createTileLayer(uriConstructor, {
-              subdomains: [
-                'a',
-                'b',
-                'c',
-                'd'
-              ],
-              url: uriTemplate.replace('{{layers}}', layerString),
-              zIndex: config.zIndex
-            });
-
-            apiMap.addTileLayer(tileLayer);
-          }
-
-          config.api = tileLayer;
-
-          switch (api) {
-            case 'Esri':
-              waxShort = 'esri';
-              break;
-            case 'Google':
-              waxShort = 'g';
-              break;
-            case 'Leaflet':
-              waxShort = 'leaf';
-              break;
-            case 'ModestMaps':
-              waxShort = 'mm';
-              break;
-            default:
-              break;
-          }
-
-          if (!interaction && response.grids && waxShort) {
-            config.interaction = interaction = wax[waxShort].interaction().map(map).tilejson(response).on('on', function(o) {
-              NPMap.Layer.TileStream._interactivityActive = true;
-
-              Map.setCursor('pointer');
-
-              if (o.e.type === 'click') {
-                //NPMap.Event.trigger('NPMap.Map', 'shapeclick', o);
-                NPMap.Layer.TileStream._handleClick(o);
-              }
-            }).on('off', function(o) {
-              NPMap.Layer.TileStream._interactivityActive = false;
-
-              if (NPMap.Layer.CartoDb) {
-                if (NPMap.Layer.CartoDb._interactivityActive === false) {
-                  Map.setCursor('');
-                }
-              } else {
-                Map.setCursor('');
-              }
-            });
-          }
-
-          if (callback) {
-            callback();
-          }
-        },
-        type: 'jsonp',
-        url: url + '.jsonp'
-      });
     },
     /**
-     * Builds an attribution string for a layer config, including all composited layers.
+     * Shows the layer.
      * @param {Object} config
-     * @param {String}
+     * @param {Function} callback (Optional)
      */
-    buildAttribution: function(config) {
-      var attribution = [];
+    _show: function(config, callback) {
+      var MapApi = Map[NPMap.config.api];
 
-      if (config.composited) {
-        for (var i = 0; i < config.composited.length; i++) {
-          var a = config.composited[i].attribution;
-
-          if (a && _.indexOf(attribution, a) === -1) {
-            attribution.push(a);
-          }
+      if (typeof MapApi._showTileStreamLayer === 'function') {
+        MapApi._showTileStreamLayer(config.api);
+        
+        if (config.interaction) {
+          _toggleInteraction(config, true);
         }
-      } else if (config.attribution) {
-        attribution.push(config.attribution);
+      } else {
+        MapApi._showTileLayer(config.api);
       }
 
-      return attribution;
+      if (callback) {
+        callback();
+      }
     },
     /**
-     * Refreshes the TileStream layer.
+     * Refreshes the layer.
      * @param {Object} config
      * @return null
      */
     refresh: function(config) {
-      this.remove(config);
-      this.add(config);
-    },
-    /**
-     * Removes a TileStream layer from the map.
-     * @param {Object} config
-     * @return null
-     */
-    remove: function(config) {
-      var apiMap = Map[NPMap.config.api];
-
-      if (typeof apiMap.removeTileStreamLayer === 'function') {
-        apiMap.removeTileStreamLayer(config.api);
-      } else {
-        apiMap.removeTileLayer(config.api);
+      if (config.api) {
+        Map.removeLayer(config, true);
       }
-
-      delete config.api;
-
-      Event.trigger('NPMap.Layer', 'removed', config);
+      
+      Map.addLayer(config, true);
     }
   };
 });

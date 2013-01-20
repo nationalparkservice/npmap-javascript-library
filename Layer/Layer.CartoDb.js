@@ -18,14 +18,12 @@ define([
    * @param {Object} data
    * @return null
    */
-  function click(feature, latLng, pos, data, options) {
+  function _click(feature, latLng, pos, data, options) {
     _.extend(options.npmap, {
       data: data
     });
 
     feature.npmap = options.npmap;
-
-    console.log(feature);
 
     NPMap.Layer.CartoDb._handleClick(feature);
     //NPMap.Event.trigger('NPMap.Map', 'shapeclick', feature);
@@ -34,7 +32,7 @@ define([
    * Handles the CartoDb out events.
    * @return null
    */
-  function out() {
+  function _out() {
     /*
     if (point) {
       NPMap.Map.removeShape(point);
@@ -46,10 +44,10 @@ define([
 
     if (NPMap.Layer.TileStream) {
       if (NPMap.Layer.TileStream._interactivityActive === false) {
-        Map.setCursor('default');
+        Map.setCursor('');
       }
     } else {
-      Map.setCursor('default');
+      Map.setCursor('');
     }
   }
   /**
@@ -60,7 +58,7 @@ define([
    * @param {Object} data
    * @return null
    */
-  function over (feature, latLng, pos, data) {
+  function _over(feature, latLng, pos, data) {
     NPMap.Layer.CartoDb._interactivityActive = true;
 
     Map.setCursor('pointer');
@@ -92,6 +90,89 @@ define([
     // True if mouseover or click interactivity is currently active.
     _interactivityActive: false,
     /**
+     * Adds a CartoDb layer.
+     * @param {Object} config Required properties: 'table' and 'user'. Optional properties: 'query' and 'style'.
+     * @param {Function} callback
+     * @return null
+     */
+    _add: function(config, callback) {
+      var options = {
+            npmap: {
+              layerName: config.name,
+              layerType: config.type
+            },
+            opacity: typeof config.opacity !== 'number' ? 1 : config.opacity,
+            zIndex: typeof config.zIndex === 'number' ? config.zIndex : null,
+            zoomRange: config.zoomRange
+          },
+          table = config.table,
+          user = config.user;
+
+      if (!table) {
+        throw new Error('The "table" config is required for CartoDb layers.');
+      }
+
+      if (!user) {
+        throw new Error('The "user" config is required for CartoDb layers.');
+      }
+
+      if (typeof Map[NPMap.config.api]._addCartoDbLayer === 'function') {
+        reqwest({
+          success: function(response) {
+            var interactivity = '',
+                query,
+                row = response.rows[0];
+
+            options.query = config.query || 'SELECT * FROM {{table_name}}';
+            options.table_name = table;
+            options.tile_style = config.style || null;
+            options.user_name = user;
+
+            for (var prop in row) {
+              interactivity += prop + ',';
+            }
+
+            if (interactivity.length > 0) {
+              interactivity = interactivity.slice(0, interactivity.length - 1);
+              options.interactivity = interactivity + ',geometry';
+              options.query = 'SELECT ' + interactivity + ',ST_ASGEOJSON(the_geom) as geometry FROM {{table_name}}';
+              options.featureClick = function(feature, latLng, pos, data) {
+                _click(feature, latLng, pos, data, options);
+              };
+              options.featureOut = _out;
+              options.featureOver = _over;
+            } else {
+              interactivity = null;
+            }
+
+            config.api = Map[NPMap.config.api]._addCartoDbLayer(options);
+            config.api.npmap = {
+              layerName: config.name,
+              layerType: 'CartoDb'
+            };
+
+            if (callback) {
+              callback();
+            }
+          },
+          type: 'jsonp',
+          url: 'https://' + user + '.cartodb.com/api/v2/sql?q=SELECT * FROM ' + table + ' LIMIT 1&callback=?'
+        });
+      } else {
+        options.constructor = 'https://' + user + '.cartodb.com/tiles/' + table + '/{{z}}/{{x}}/{{y}}.png';
+        options.name = config.name;
+        config.api = Map._addTileLayer(options);
+        config.api.npmap = {
+          layerName: config.name,
+          layerType: 'CartoDb'
+        };
+
+        if (callback) {
+          callback();
+        }
+      }
+    },
+    /**
      * Handles the click operation for CartoDb layers.
      * @param {Object} e
      * @return null
@@ -110,76 +191,60 @@ define([
       }
     },
     /**
-     * Adds a CartoDb layer.
-     * @param {Object} config Required properties: 'table' and 'user'. Optional properties: 'query' and 'style'.
-     * @param {Function} callback
+     * Hides the layer.
+     * @param {Object} config
+     * @param {Function} callback (Optional)
      * @return null
      */
-    add: function(config, callback) {
-      var table = config.table,
-          user = config.user,
-          options = {
-            npmap: {
-              layerName: config.name,
-              layerType: config.type
-            },
-            opacity: typeof config.opacity !== 'number' ? 1 : config.opacity,
-            query: config.query || 'SELECT * FROM {{table_name}}',
-            table_name: table,
-            tile_style: config.style || null,
-            user_name: user,
-            zIndex: typeof config.zIndex === 'undefined' ? null : config.zIndex
-          };
-
-      if (!table) {
-        throw new Error('The "table" config is required for CartoDb layers.');
-      }
-
-      if (!user) {
-        throw new Error('The "user" config is required for CartoDb layers.');
-      }
-
-      if (typeof NPMap.Map[NPMap.config.api].createCartoDbLayer === 'function') {
-        reqwest({
-          success: function(response) {
-            var interactivity = '',
-                query,
-                row = response.rows[0];
-
-            for (var prop in row) {
-              interactivity += prop + ',';
-            }
-
-            if (interactivity.length > 0) {
-              interactivity = interactivity.slice(0, interactivity.length - 1);
-              options.interactivity = interactivity + ',geometry';
-              options.query = 'SELECT ' + interactivity + ',ST_ASGEOJSON(the_geom) as geometry FROM {{table_name}}';
-              options.featureClick = function(feature, latLng, pos, data) {
-                click(feature, latLng, pos, data, options);
-              };
-              options.featureOut = out;
-              options.featureOver = over;
-            } else {
-              interactivity = null;
-            }
-
-            config.api = Map[NPMap.config.api].createCartoDbLayer(options);
-            
-            if (callback) {
-              callback();
-            }
-          },
-          type: 'jsonp',
-          url: 'https://' + user + '.cartodb.com/api/v2/sql?q=SELECT * FROM ' + table + ' LIMIT 1&callback=?'
-        });
+    _hide: function(config, callback) {
+      if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
+        Map[NPMap.config.api]._hideCartoDbLayer(config.api);
       } else {
-        config.api = Map[NPMap.config.api].createTileLayer('https://' + user + '.cartodb.com/tiles/' + table + '/{{z}}/{{x}}/{{y}}.png', options);
+        Map[NPMap.config.api]._hideTileLayer(config.api);
+      }
 
-        Map.addTileLayer(config.api);
-        
-        if (callback) {
-          callback();
-        }
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * Removes the layer.
+     * @param {Object} config
+     * @param {Function} callback (Optional)
+     * @return null
+     */
+    _remove: function(config, callback) {
+      if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
+        Map[NPMap.config.api]._removeCartoDbLayer(config.api);
+      } else {
+        Map[NPMap.config.api]._removeTileLayer(config.api);
+      }
+
+      if (config.identifiable === true) {
+        identifyLayers--;
+      }
+
+      delete config.identifiable;
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * Shows the layer.
+     * @param {Object} config
+     * @param {Function} callback (Optional)
+     * @return null
+     */
+    _show: function(config, callback) {
+      if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
+        Map[NPMap.config.api]._showCartoDbLayer(config.api);
+      } else {
+        Map[NPMap.config.api]._showTileLayer(config.api);
+      }
+
+      if (callback) {
+        callback();
       }
     }
   };

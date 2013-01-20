@@ -9,19 +9,19 @@ define([
   'Util/Util'
 ], function(Event, Map, Util) {
   /**
-   * wax - 7.0.0dev11 - v6.0.4-113-g6b1c56c, customized a bit to filter out Bing layers.
+   * wax - 7.0.0dev11 - v6.0.4-113-g6b1c56c, customized a bit to filter out Bing layers and properly set opacity and zIndex on layers.
    */
-  wax.leaf={};wax.leaf.interaction=function(){function a(){h=!0}var h=!1,f,c;return wax.interaction().attach(function(g){if(!arguments.length)return c;c=g;for(var d=["moveend"],b=0;b<d.length;b++)c.on(d[b],a)}).detach(function(g){if(!arguments.length)return c;c=g;for(var d=["moveend"],b=0;b<d.length;b++)c.off(d[b],a)}).parent(function(){return c._container}).grid(function(){if(!h&&f)return f;var a=c._layers,d=[],b;for(b in a){var e=a[b]._url;if("undefined"!==typeof e&&("string"===typeof e&&-1===e.indexOf("virtualearth")||"function"===typeof e)&&a[b]._tiles)for(var j in a[b]._tiles)if(e=a[b]._tiles[j],e.src){var i=wax.u.offset(e);d.push([i.top,i.left,e])}}return f=d})};wax.leaf.connector=L.TileLayer.extend({initialize:function(a){a=a||{};a.minZoom=a.minzoom||0;a.maxZoom=a.maxzoom||22;L.TileLayer.prototype.initialize.call(this,a.tiles[0],a)}});
+  wax.leaf={};wax.leaf.interaction=function(){function a(){b=!0}var b=!1,g,d;return wax.interaction().attach(function(j){if(!arguments.length)return d;d=j;for(var b=["moveend"],c=0;c<b.length;c++)d.on(b[c],a)}).detach(function(b){if(!arguments.length)return d;d=b;for(var f=["moveend"],c=0;c<f.length;c++)d.off(f[c],a)}).parent(function(){return d._container}).grid(function(){if(!b&&g)return g;var a=d._layers,f=[],c;for(c in a){var e=a[c]._url;if("undefined"!==typeof e&&("string"===typeof e&&-1===e.indexOf("virtualearth")||"function"===typeof e)&&a[c]._tiles)for(var k in a[c]._tiles)if(e=a[c]._tiles[k],e.src){var h=wax.u.offset(e);f.push([h.top,h.left,e])}}return g=f})};wax.leaf.connector=L.TileLayer.extend({initialize:function(a,b){a=a||{};b=b||{};a.minZoom=a.minzoom||0;a.maxZoom=a.maxzoom||22;a.opacity=b.opacity||1;"number"===typeof b.zIndex&&(a.zIndex=b.zIndex);L.TileLayer.prototype.initialize.call(this,a.tiles[0],a)}});
   /**
-   * CartoDb - v0.55
+   * CartoDb - v0.55, slightly modified by NPS.
    */
-  L.CartoDBLayer=L.Class.extend({version:"0.55",includes:L.Mixin.Events,options:{query:"SELECT * FROM {{table_name}}",opacity:0.99,auto_bound:false,attribution:"CartoDB",debug:false,visible:true,added:false,tiler_domain:"cartodb.com",tiler_port:"80",tiler_protocol:"http",sql_domain:"cartodb.com",sql_port:"80",sql_protocol:"http",extra_params:{},cdn_url:null,subdomains:"abc"},initialize:function(a){L.Util.setOptions(this,a);if(!a.table_name||!a.map){if(a.debug){throw ("cartodb-leaflet needs at least a CartoDB table name and the Leaflet map object :(")}else{return}}if(a.auto_bound){this.setBounds()}},onAdd:function(a){this._addLayer();this.fire("added");this.options.added=true},onRemove:function(a){this._remove();this.options.added=false},setOpacity:function(a){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(isNaN(a)||a>1||a<0){if(this.options.debug){throw (a+" is not a valid value")}else{return}}this.options.opacity=a;if(this.options.visible){this.layer.setOpacity(a==1?0.99:a);this.fire("updated")}},setQuery:function(a){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(!isNaN(a)){if(this.options.debug){throw (a+" is not a valid query")}else{return}}this.options.query=a;this._update()},setStyle:function(a){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(!isNaN(a)){if(this.options.debug){throw (a+" is not a valid style")}else{return}}this.options.tile_style=a;this._update()},setInteractivity:function(a){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(!isNaN(a)){if(this.options.debug){throw (a+" is not a valid setInteractivity value")}else{return}}this.options.interactivity=a;this._update()},setLayerOrder:function(a){},setInteraction:function(b){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(b!==false&&b!==true){if(this.options.debug){throw (b+" is not a valid setInteraction value")}else{return}}if(this.interaction){if(b){var a=this;this.interaction.on("on",function(c){a._bindWaxOnEvents(a.options.map,c)});this.interaction.on("off",function(c){a._bindWaxOffEvents()})}else{this.interaction.off("on");this.interaction.off("off")}}},setAttribution:function(a){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(!isNaN(a)){if(this.options.debug){throw (a+" is not a valid attribution")}else{return}}this.options.map.attributionControl.removeAttribution(this.options.attribution);this.options.attribution=a;this.options.map.attributionControl.addAttribution(this.options.attribution);this.layer.options.attribution=this.options.attribution;this.tilejson.attribution=this.options.attribution;this.fire("updated")},setOptions:function(a){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(typeof a!="object"||a.length){if(this.options.debug){throw (a+" options has to be an object")}else{return}}L.Util.setOptions(this,a);this._update()},isVisible:function(){return this.options.visible},isAdded:function(){return this.options.added},hide:function(){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(!this.options.visible){if(this.options.debug){throw ("the layer is already hidden")}else{return}}this.layer.setOpacity(0);this.setInteraction(false);this.options.visible=false;this.fire("hidden")},show:function(){if(!this.options.added){if(this.options.debug){throw ("the layer is not still added to the map")}else{return}}if(this.options.visible){if(this.options.debug){throw ("the layer is already shown")}else{return}}this.layer.setOpacity(this.options.opacity);this.setInteraction(true);this.options.visible=true;this.fire("shown")},_remove:function(){this.setInteraction(false);this.layer.off("loading").off("load");if(this.interaction){this.interaction.remove()}this.options.map.removeLayer(this.layer);this.fire("removed")},_update:function(){this._remove();this._addLayer();this.fire("updated")},setBounds:function(c){var a=this,b="";if(c){b=c}else{b=this.options.query}reqwest({url:this._generateCoreUrl("sql")+"/api/v2/sql/?q="+escape("SELECT ST_XMin(ST_Extent(the_geom)) as minx,ST_YMin(ST_Extent(the_geom)) as miny,ST_XMax(ST_Extent(the_geom)) as maxx,ST_YMax(ST_Extent(the_geom)) as maxy from ("+b.replace(/\{\{table_name\}\}/g,this.options.table_name)+") as subq"),type:"jsonp",jsonpCallback:"callback",success:function(q){if(q.rows[0].maxx!=null){var p=q.rows[0];var l=p.maxx;var j=p.maxy;var k=p.minx;var i=p.miny;var e=-85.0511;var g=85.0511;var m=-179;var n=179;var h=function(s,t,r){return s<t?t:s>r?r:s};l=h(l,m,n);k=h(k,m,n);j=h(j,e,g);i=h(i,e,g);var o=new L.LatLng(j,l);var f=new L.LatLng(i,k);var d=new L.LatLngBounds(o,f);a.options.map.fitBounds(d)}},error:function(d,f){if(this.options.debug){throw ("Error getting table bounds: "+f)}}})},_addLayer:function(){var a=this;this.tilejson=this._generateTileJson();this.layer=new wax.leaf.connector(this.tilejson).on("loading",function(){a.fire("loading",this)}).on("load",function(){a.fire("load",this)});this._checkTiles();this.options.map.addLayer(this.layer,false);if(this.options.interactivity){this.interaction=wax.leaf.interaction().map(this.options.map).tilejson(this.tilejson).on("on",function(b){a._bindWaxOnEvents(a.options.map,b)}).on("off",function(b){a._bindWaxOffEvents()})}},_bindWaxOnEvents:function(b,c){var a=this._findPos(b,c),d=b.layerPointToLatLng(a);switch(c.e.type){case"mousemove":if(this.options.featureOver){return this.options.featureOver(c.e,d,{x:c.e.clientX,y:c.e.clientY},c.data)}else{if(this.options.debug){throw ("featureOver function not defined")}}break;case"click":if(this.options.featureClick){this.options.featureClick(c.e,d,{x:c.e.clientX,y:c.e.clientY},c.data)}else{if(this.options.debug){throw ("featureClick function not defined")}}break;case"touchend":if(this.options.featureClick){this.options.featureClick(c.e,d,{x:c.e.clientX,y:c.e.clientY},c.data)}else{if(this.options.debug){throw ("featureClick function not defined")}}break;default:break}},_bindWaxOffEvents:function(){if(this.options.featureOut){return this.options.featureOut&&this.options.featureOut()}else{if(this.options.debug){throw ("featureOut function not defined")}}},_generateTileJson:function(){var c=this._generateTileUrls();var d=c.grid_url;if(c.grid_url.indexOf("{s}")!=-1){d=[];var a=this.options.subdomains;if(Object.prototype.toString.call(a)!=="[object Array]"){a.split("")}for(var b=0;b<a.length;b++){d.push(c.grid_url.replace(/\{s\}/g,a[b]))}}return{blankImage:NPMap.config.server+"/resources/img/blank-tile.png",tilejson:"1.0.0",scheme:"xyz",attribution:this.options.attribution,tiles:[c.tile_url],grids:d,tiles_base:c.tile_url,grids_base:d,opacity:this.options.opacity,formatter:function(e,f){return f}}},_parseUri:function(e){var d={strictMode:false,key:["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],q:{name:"queryKey",parser:/(?:^|&)([^&=]*)=?([^&]*)/g},parser:{strict:/^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,loose:/^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/}},a=d.parser[d.strictMode?"strict":"loose"].exec(e),c={},b=14;while(b--){c[d.key[b]]=a[b]||""}c[d.q.name]={};c[d.key[12]].replace(d.q.parser,function(g,f,h){if(f){c[d.q.name][f]=h}});return c},_addUrlData:function(a,b){a+=(this._parseUri(a).query)?"&":"?";return a+=b},_generateCoreUrl:function(a){if(this.options.cdn_url){return this.options.cdn_url}if(a=="sql"){return this.options.sql_protocol+"://"+((this.options.user_name)?this.options.user_name+".":"")+this.options.sql_domain+((this.options.sql_port!="")?(":"+this.options.sql_port):"")}else{return this.options.tiler_protocol+"://"+((this.options.user_name)?this.options.user_name+".":"")+this.options.tiler_domain+((this.options.tiler_port!="")?(":"+this.options.tiler_port):"")}},_generateTileUrls:function(){var b=this._generateCoreUrl("tiler"),g=b+"/tiles/"+this.options.table_name+"/{z}/{x}/{y}",h=g+".png",a=g+".grid.json";if(this.options.query){var f=encodeURIComponent(this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name));f=f.replace(/%7Bx%7D/g,"{x}").replace(/%7By%7D/g,"{y}").replace(/%7Bz%7D/g,"{z}");var e="sql="+f;h=this._addUrlData(h,e);a=this._addUrlData(a,e)}for(_param in this.options.extra_params){h=this._addUrlData(h,_param+"="+this.options.extra_params[_param]);a=this._addUrlData(a,_param+"="+this.options.extra_params[_param])}if(this.options.tile_style){var c="style="+encodeURIComponent(this.options.tile_style.replace(/\{\{table_name\}\}/g,this.options.table_name));h=this._addUrlData(h,c);a=this._addUrlData(a,c)}if(this.options.interactivity){var d="interactivity="+encodeURIComponent(this.options.interactivity.replace(/ /g,""));h=this._addUrlData(h,d);a=this._addUrlData(a,d)}return{core_url:b,base_url:g,tile_url:h,grid_url:a}},_findPos:function(b,c){var d=curtop=0;var a=b._container;if(a.offsetParent){do{d+=a.offsetLeft;curtop+=a.offsetTop}while(a=a.offsetParent);return b.containerPointToLayerPoint(new L.Point((c.e.clientX||c.e.changedTouches[0].clientX)-d,(c.e.clientY||c.e.changedTouches[0].clientY)-curtop))}else{return b.mouseEventToLayerPoint(c.e)}},_checkTiles:function(){var c={z:4,x:6,y:6},b=this,a=new Image(),e=this._generateTileUrls();e.tile_url=e.tile_url.replace(/\{z\}/g,c.z).replace(/\{x\}/g,c.x).replace(/\{y\}/g,c.y);e.grid_url=e.grid_url.replace(/\{z\}/g,c.z).replace(/\{x\}/g,c.x).replace(/\{y\}/g,c.y);reqwest({method:"get",url:e.grid_url.replace(/\{s\}/g,"a"),type:"jsonp",jsonpCallback:"callback",jsonpCallbackName:"grid",success:function(){clearTimeout(d)},error:function(f,g){if(b.interaction){b.interaction.remove()}if(b.options.debug){throw ("There is an error in your query or your interaction parameter")}b.fire("layererror",g)}});var d=setTimeout(function(){clearTimeout(d);if(b.options.debug){throw ("There is an error in your query or your interaction parameter")}b.fire("layererror","There is a problem in your SQL or interaction parameter")},2000)}});
-  
+  L.CartoDBLayer=L.TileLayer.extend({version:"0.55",includes:L.Mixin.Events,options:{query:"SELECT * FROM {{table_name}}",opacity:0.99,auto_bound:!1,attribution:"CartoDB",debug:!1,visible:!0,added:!1,tiler_domain:"cartodb.com",tiler_port:"80",tiler_protocol:"http",sql_domain:"cartodb.com",sql_port:"80",sql_protocol:"http",extra_params:{},cdn_url:null,subdomains:"abc"},initialize:function(a){L.Util.setOptions(this,a);if(!a.table_name||!a.map){if(a.debug)throw"cartodb-leaflet needs at least a CartoDB table name and the Leaflet map object :(";}else a.auto_bound&&this.setBounds()},onAdd:function(){this._addLayer();this.fire("added");this.options.added=!0},onRemove:function(){this._remove();this.options.added=!1},setOpacity:function(a){if(this.options.added)if(isNaN(a)||1<a||0>a){if(this.options.debug)throw a+" is not a valid value";}else this.options.opacity=a,this.options.visible&&(this.layer.setOpacity(1==a?0.99:a),this.fire("updated"));else if(this.options.debug)throw"the layer is not still added to the map";},setQuery:function(a){if(this.options.added)if(isNaN(a))this.options.query=a,this._update();else{if(this.options.debug)throw a+" is not a valid query";}else if(this.options.debug)throw"the layer is not still added to the map";},setStyle:function(a){if(this.options.added)if(isNaN(a))this.options.tile_style=a,this._update();else{if(this.options.debug)throw a+" is not a valid style";}else if(this.options.debug)throw"the layer is not still added to the map";},setInteractivity:function(a){if(this.options.added)if(isNaN(a))this.options.interactivity=a,this._update();else{if(this.options.debug)throw a+" is not a valid setInteractivity value";}else if(this.options.debug)throw"the layer is not still added to the map";},setLayerOrder:function(){},setInteraction:function(a){if(this.options.added)if(!1!==a&&!0!==a){if(this.options.debug)throw a+" is not a valid setInteraction value";}else{if(this.interaction)if(a){var b=this;this.interaction.on("on",function(a){b._bindWaxOnEvents(b.options.map,a)});this.interaction.on("off",function(){b._bindWaxOffEvents()})}else this.interaction.off("on"),this.interaction.off("off")}else if(this.options.debug)throw"the layer is not still added to the map";},setAttribution:function(a){if(this.options.added)if(isNaN(a))this.options.map.attributionControl.removeAttribution(this.options.attribution),this.options.attribution=a,this.options.map.attributionControl.addAttribution(this.options.attribution),this.layer.options.attribution=this.options.attribution,this.tilejson.attribution=this.options.attribution,this.fire("updated");else{if(this.options.debug)throw a+" is not a valid attribution";}else if(this.options.debug)throw"The layer is still not added to the map";},setOptions:function(a){if(this.options.added)if("object"!=typeof a||a.length){if(this.options.debug)throw a+" options has to be an object";}else L.Util.setOptions(this,a),this._update();else if(this.options.debug)throw"the layer is not still added to the map";},isVisible:function(){return this.options.visible},isAdded:function(){return this.options.added},hide:function(){if(this.options.added)if(this.options.visible)this.layer.setOpacity(0),this.setInteraction(!1),this.options.visible=!1,this.fire("hidden");else{if(this.options.debug)throw"the layer is already hidden";}else if(this.options.debug)throw"the layer is not still added to the map";},show:function(){if(this.options.added)if(this.options.visible){if(this.options.debug)throw"the layer is already shown";}else this.layer.setOpacity(this.options.opacity),this.setInteraction(!0),this.options.visible=!0,this.fire("shown");else if(this.options.debug)throw"the layer is not still added to the map";},_remove:function(){this.setInteraction(!1);this.layer.off("loading").off("load");this.interaction&&this.interaction.remove();this.options.map.removeLayer(this.layer);this.fire("removed")},_update:function(){this._remove();this._addLayer();this.fire("updated")},setBounds:function(a){var b=this,c="",c=a?a:this.options.query;reqwest({url:this._generateCoreUrl("sql")+"/api/v2/sql/?q="+escape("SELECT ST_XMin(ST_Extent(the_geom)) as minx,ST_YMin(ST_Extent(the_geom)) as miny,ST_XMax(ST_Extent(the_geom)) as maxx,ST_YMax(ST_Extent(the_geom)) as maxy from ("+c.replace(/\{\{table_name\}\}/g,this.options.table_name)+") as subq"),type:"jsonp",jsonpCallback:"callback",success:function(a){if(null!=a.rows[0].maxx){var c=a.rows[0],f=c.maxx,g=c.maxy;a=c.minx;c=c.miny;a=-179>a?-179:179<a?179:a;c=-85.0511>c?-85.0511:85.0511<c?85.0511:c;f=new L.LatLng(-85.0511>g?-85.0511:85.0511<g?85.0511:g,-179>f?-179:179<f?179:f);a=new L.LatLng(c,a);a=new L.LatLngBounds(f,a);b.options.map.fitBounds(a)}},error:function(a,b){if(this.options.debug)throw"Error getting table bounds: "+b;}})},_addLayer:function(){var a=this;this.tilejson=this._generateTileJson();this.layer=(new wax.leaf.connector(this.tilejson)).on("loading",function(){a.fire("loading",this)}).on("load",function(){a.fire("load",this)});this._checkTiles();this.options.map.addLayer(this.layer,!1);this.options.interactivity&&(this.interaction=wax.leaf.interaction().map(this.options.map).tilejson(this.tilejson).on("on",function(b){a._bindWaxOnEvents(a.options.map,b)}).on("off",function(){a._bindWaxOffEvents()}))},_bindWaxOnEvents:function(a,b){var c=this._findPos(a,b),c=a.layerPointToLatLng(c);switch(b.e.type){case "mousemove":if(this.options.featureOver)return this.options.featureOver(b.e,c,{x:b.e.clientX,y:b.e.clientY},b.data);if(this.options.debug)throw"featureOver function not defined";break;case "click":if(this.options.featureClick)this.options.featureClick(b.e,c,{x:b.e.clientX,y:b.e.clientY},b.data);else if(this.options.debug)throw"featureClick function not defined";break;case "touchend":if(this.options.featureClick)this.options.featureClick(b.e,c,{x:b.e.clientX,y:b.e.clientY},b.data);else if(this.options.debug)throw"featureClick function not defined";}},_bindWaxOffEvents:function(){if(this.options.featureOut)return this.options.featureOut&&this.options.featureOut();if(this.options.debug)throw"featureOut function not defined";},_generateTileJson:function(){var a=this._generateTileUrls(),b=a.grid_url;if(-1!=a.grid_url.indexOf("{s}")){var b=[],c=this.options.subdomains;"[object Array]"!==Object.prototype.toString.call(c)&&c.split("");for(var d=0;d<c.length;d++)b.push(a.grid_url.replace(/\{s\}/g,c[d]))}return{blankImage:NPMap.config.server+"/resources/img/blank-tile.png",tilejson:"1.0.0",scheme:"xyz",attribution:this.options.attribution,tiles:[a.tile_url],grids:b,tiles_base:a.tile_url,grids_base:b,opacity:this.options.opacity,formatter:function(a,b){return b}}},_parseUri:function(a){var b="source protocol authority userInfo user password host port relative path directory file query anchor".split(" ");a=/^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(a);for(var c={},d=14;d--;)c[b[d]]=a[d]||"";c.queryKey={};c[b[12]].replace(/(?:^|&)([^&=]*)=?([^&]*)/g,function(a,b,d){b&&(c.queryKey[b]=d)});return c},_addUrlData:function(a,b){a+=this._parseUri(a).query?"&":"?";return a+b},_generateCoreUrl:function(a){return this.options.cdn_url?this.options.cdn_url:"sql"==a?this.options.sql_protocol+"://"+(this.options.user_name?this.options.user_name+".":"")+this.options.sql_domain+(""!=this.options.sql_port?":"+this.options.sql_port:""):this.options.tiler_protocol+"://"+(this.options.user_name?this.options.user_name+".":"")+this.options.tiler_domain+(""!=this.options.tiler_port?":"+this.options.tiler_port:"")},_generateTileUrls:function(){var a=this._generateCoreUrl("tiler"),b=a+"/tiles/"+this.options.table_name+"/{z}/{x}/{y}",c=b+".png",d=b+".grid.json";if(this.options.query)var e=encodeURIComponent(this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name)),e=e.replace(/%7Bx%7D/g,"{x}").replace(/%7By%7D/g,"{y}").replace(/%7Bz%7D/g,"{z}"),e="sql="+e,c=this._addUrlData(c,e),d=this._addUrlData(d,e);for(_param in this.options.extra_params)c=this._addUrlData(c,_param+"="+this.options.extra_params[_param]),d=this._addUrlData(d,_param+"="+this.options.extra_params[_param]);this.options.tile_style&&(e="style="+encodeURIComponent(this.options.tile_style.replace(/\{\{table_name\}\}/g,this.options.table_name)),c=this._addUrlData(c,e),d=this._addUrlData(d,e));this.options.interactivity&&(e="interactivity="+encodeURIComponent(this.options.interactivity.replace(/ /g,"")),c=this._addUrlData(c,e),d=this._addUrlData(d,e));return{core_url:a,base_url:b,tile_url:c,grid_url:d}},_findPos:function(a,b){var c=curtop=0,d=a._container;if(d.offsetParent){do c+=d.offsetLeft,curtop+=d.offsetTop;while(d=d.offsetParent);return a.containerPointToLayerPoint(new L.Point((b.e.clientX||b.e.changedTouches[0].clientX)-c,(b.e.clientY||b.e.changedTouches[0].clientY)-curtop))}return a.mouseEventToLayerPoint(b.e)},_checkTiles:function(){var a=this;new Image;var b=this._generateTileUrls();b.tile_url=b.tile_url.replace(/\{z\}/g,4).replace(/\{x\}/g,6).replace(/\{y\}/g,6);b.grid_url=b.grid_url.replace(/\{z\}/g,4).replace(/\{x\}/g,6).replace(/\{y\}/g,6);reqwest({method:"get",url:b.grid_url.replace(/\{s\}/g,"a"),type:"jsonp",jsonpCallback:"callback",jsonpCallbackName:"grid",success:function(){clearTimeout(c)},error:function(b,c){a.interaction&&a.interaction.remove();if(a.options.debug)throw"There is an error in your query or your interaction parameter";a.fire("layererror",c)}});var c=setTimeout(function(){clearTimeout(c);if(a.options.debug)throw"There is an error in your query or your interaction parameter";a.fire("layererror","There is a problem in your SQL or interaction parameter")},2E3)}});
+
   var
       // The currently active baseLayer config.
-      activeBaseLayer,
+      _activeBaseLayer,
       // An array of the default base layers for the Leaflet baseAPI.
-      DEFAULT_BASE_LAYERS = {
+      _DEFAULT_BASE_LAYERS = {
         aerial: {
           icon: 'aerial',
           id: 'nps.map-n9nxe12m',
@@ -58,19 +58,20 @@ define([
         }
       },
       // Helps handle map single and double-click events.
-      doubleClicked = false,
+      _doubleClicked = false,
       // The center {L.LatLng} to initialize the map with.
-      initialCenter = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
+      _initialCenter = NPMap.config.center ? new L.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new L.LatLng(39, -96),
       // The zoom level to initialize the map with.
-      initialZoom = NPMap.config.zoom ? NPMap.config.zoom : 4,
+      _initialZoom = NPMap.config.zoom ? NPMap.config.zoom : 4,
       // The {L.Map} object.
-      map,
+      _map,
       // The map config object.
-      mapConfig = {
+      _mapConfig = {
         attributionControl: false,
-        center: initialCenter,
+        boxZoom: false,
+        center: _initialCenter,
         inertia: false, // TODO: Turned off because 'move' event is not called by Leaflet when the map is "thrown".
-        zoom: initialZoom,
+        zoom: _initialZoom,
         zoomControl: false
       };
 
@@ -78,18 +79,20 @@ define([
    * Handles the map resize.
    * @return null
    */
-  function handleResize() {
-    map.invalidateSize();
+  function _handleResize() {
+    _map.invalidateSize();
   }
   /**
-   *
+   * Hooks up shape click and dblclick (allows propagation through to map).
+   * @param {Object} shape
+   * @return null
    */
-  function hookUpShapeClick(shape) {
+  function _hookUpShapeClick(shape) {
     shape.on('click', function(e) {
-      doubleClicked = false;
+      _doubleClicked = false;
 
       setTimeout(function() {
-        if (!doubleClicked) {
+        if (!_doubleClicked) {
           var cloned = _.clone(e.originalEvent);
 
           _.extend(cloned, e);
@@ -104,7 +107,7 @@ define([
       var latLng = e.latlng,
           Leaflet = NPMap.Map.Leaflet;
 
-      doubleClicked = true;
+      _doubleClicked = true;
 
       if (!latLng) {
         latLng = Leaflet.getMarkerLatLng(e.target);
@@ -145,13 +148,13 @@ define([
         
         if ((zoom <= p.zoomMax && zoom >= p.zoomMin) && bounds.intersects(p.bounds)) {
           if (!p.active) {
-            activeBaseLayer.attribution.push(p.attrib);
+            _activeBaseLayer.attribution.push(p.attrib);
           }
 
           p.active = true;
         } else {
           if (p.active) {
-            activeBaseLayer.attribution.splice(_.indexOf(activeBaseLayer.attribution, p.attrib), 1);
+            _activeBaseLayer.attribution.splice(_.indexOf(_activeBaseLayer.attribution, p.attrib), 1);
           }
 
           p.active = false;
@@ -171,7 +174,7 @@ define([
     initialize: function(key, options) {
       L.Util.setOptions(this, options);
 
-      activeBaseLayer.attribution = [];
+      _activeBaseLayer.attribution = [];
       this._key = key;
       this._url = null;
       this.meta = {};
@@ -239,9 +242,9 @@ define([
         }
       }
 
-      activeBaseLayer.attribution = [];
+      _activeBaseLayer.attribution = [];
       
-      L.TileLayer.prototype.onRemove.apply(this, [map]);
+      L.TileLayer.prototype.onRemove.apply(this, [_map]);
     },
     tile2quad: function(x, y, z) {
       var quad = '';
@@ -393,16 +396,16 @@ define([
   });
 
   if (NPMap.config.baseLayers) {
-    Map._matchBaseLayers(DEFAULT_BASE_LAYERS);
+    Map._matchBaseLayers(_DEFAULT_BASE_LAYERS);
 
     for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
       var baseLayerI = NPMap.config.baseLayers[i];
       
       if (baseLayerI.visible) {
-        activeBaseLayer = baseLayerI;
+        _activeBaseLayer = baseLayerI;
 
         if (baseLayerI.type === 'Zoomify') {
-          mapConfig.crs = L.Util.extend({}, L.CRS, {
+          _mapConfig.crs = L.Util.extend({}, L.CRS, {
             code: 'Direct',
             projection: {
               project: function(latlng) {
@@ -414,7 +417,7 @@ define([
             },
             transformation: new L.Transformation(1, 0, 1, 0)
           });
-          mapConfig.worldCopyJump = false;
+          _mapConfig.worldCopyJump = false;
         }
         
         break;
@@ -422,32 +425,32 @@ define([
     }
   } else if (typeof NPMap.config.baseLayers === 'undefined') {
     NPMap.config.baseLayers = [
-      DEFAULT_BASE_LAYERS['streets']
+      _DEFAULT_BASE_LAYERS['streets']
     ];
     NPMap.config.baseLayers[0].visible = true;
-    activeBaseLayer = NPMap.config.baseLayers[0];
+    _activeBaseLayer = NPMap.config.baseLayers[0];
   } else {
     NPMap.config.baseLayers = [
-      DEFAULT_BASE_LAYERS['blank']
+      _DEFAULT_BASE_LAYERS['blank']
     ];
     NPMap.config.baseLayers[0].visible = true;
-    activeBaseLayer = NPMap.config.baseLayers[0];
+    _activeBaseLayer = NPMap.config.baseLayers[0];
   }
   
   if (typeof NPMap.config.zoomRange !== 'undefined') {
     if (typeof NPMap.config.zoomRange.max !== 'undefined') {
-      mapConfig.maxZoom = NPMap.config.zoomRange.max;
+      _mapConfig.maxZoom = NPMap.config.zoomRange.max;
     }
     
     if (typeof NPMap.config.zoomRange.min !== 'undefined') {
-      mapConfig.minZoom = NPMap.config.zoomRange.min;
+      _mapConfig.minZoom = NPMap.config.zoomRange.min;
     }
   } else {
-    mapConfig.maxZoom = 19;
-    mapConfig.minZoom = 0;
+    _mapConfig.maxZoom = 19;
+    _mapConfig.minZoom = 0;
   }
   
-  map = new L.Map(NPMap.config.div, mapConfig);
+  _map = new L.Map(NPMap.config.div, _mapConfig);
 
   for (var j = 0; j < NPMap.config.baseLayers.length; j++) {
     var baseLayerJ = NPMap.config.baseLayers[j];
@@ -459,7 +462,7 @@ define([
           baseLayerJ.api = new L.TileLayer.Bing('Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65', {
             type: baseLayerJ.mapTypeId
           });
-          map.addLayer(baseLayerJ.api, true);
+          _map.addLayer(baseLayerJ.api, true);
         }
       }
 
@@ -468,81 +471,328 @@ define([
     }
   }
 
-  L.DomEvent.on(map.getContainer(), 'mousedown', function(e) {
+  L.DomEvent.on(_map.getContainer(), 'mousedown', function(e) {
     Event.trigger('NPMap.Map', 'mousedown', e);
     L.DomEvent.preventDefault(e);
   });
-  L.DomEvent.on(map.getContainer(), 'mouseenter', function(e) {
+  L.DomEvent.on(_map.getContainer(), 'mouseenter', function(e) {
     Event.trigger('NPMap.Map', 'mouseover', e);
     L.DomEvent.preventDefault(e);
   });
-  L.DomEvent.on(map.getContainer(), 'mouseleave', function(e) {
+  L.DomEvent.on(_map.getContainer(), 'mouseleave', function(e) {
     Event.trigger('NPMap.Map', 'mouseout', e);
     L.DomEvent.preventDefault(e);
   });
-  L.DomEvent.on(map.getContainer(), 'mousemove', function(e) {
+  L.DomEvent.on(_map.getContainer(), 'mousemove', function(e) {
     Event.trigger('NPMap.Map', 'mousemove', e);
     L.DomEvent.preventDefault(e);
   });
-  L.DomEvent.on(map.getContainer(), 'mouseup', function(e) {
+  L.DomEvent.on(_map.getContainer(), 'mouseup', function(e) {
     Event.trigger('NPMap.Map', 'mouseup', e);
     L.DomEvent.preventDefault(e);
   });
   // TODO: For mouse events on map, maybe combine e.originalEvent and e - minus the originalEvent property?
-  map.on('click', function(e) {
-    doubleClicked = false;
+  _map.on('click', function(e) {
+    _doubleClicked = false;
 
     setTimeout(function() {
-      if (!doubleClicked) {
+      if (!_doubleClicked) {
         Event.trigger('NPMap.Map', 'click', e.originalEvent);
       }
     }, 350);
   });
-  map.on('contextmenu', function(e) {
+  _map.on('contextmenu', function(e) {
     Event.trigger('NPMap.Map', 'rightclick', e);
   });
-  map.on('dblclick', function(e) {
-    doubleClicked = true;
+  _map.on('dblclick', function(e) {
+    _doubleClicked = true;
 
     Event.trigger('NPMap.Map', 'dblclick', e.originalEvent);
   });
-  map.on('move', function() {
+  _map.on('move', function() {
     NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
-  map.on('moveend', function() {
+  _map.on('moveend', function() {
     NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
-  map.on('movestart', function() {
+  _map.on('movestart', function() {
     NPMap.Event.trigger('NPMap.Map', 'viewchanging');
   });
-  map.on('zoomstart', function() {
+  _map.on('zoomstart', function() {
     NPMap.Event.trigger('NPMap.Map', 'zoomstart');
   });
   Map._init();
-  handleResize();
+  _handleResize();
   
   return NPMap.Map.Leaflet = {
     // The current attribution for the map {Array}.
     _attribution: [],
     // Is the map loaded and ready to be interacted with programatically?
     _isReady: true,
+    /**
+     * Creates and adds a CartoDb layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     */
+    _addCartoDbLayer: function(options) {
+      var layer;
+
+      options.map = _map;
+      layer = new L.CartoDBLayer(options);
+
+      _map.addLayer(layer);
+
+      return layer;
+    },
+    /**
+     * Creates and adds a tile layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     */
+    _addTileLayer: function(options) {
+      var getSubdomain,
+          layer,
+          uriConstructor;
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
+
+      if (typeof options.constructor === 'string') {
+        uriConstructor = function(xy) {
+          return _.template(options.constructor)({
+            s: typeof getSubdomain == 'function' ? getSubdomain() : null,
+            x: xy.x,
+            y: xy.y,
+            z: _map.getZoom()
+          });
+        };
+      } else {
+        uriConstructor = function(xy) {
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return options.constructor(xy.x, xy.y, _map.getZoom(), options.url ? options.url : null, subdomain);
+        };
+      }
+
+      layer = new L.TileLayer.Simple(uriConstructor, {
+        errorTileUrl: NPMap.config.server + '/resources/img/blank-tile.png',
+        maxZoom: typeof options.maxZoom === 'number' ? options.maxZoom : 18,
+        minZoom: typeof options.minZoom === 'number' ? options.minZoom : 0,
+        opacity: typeof options.opacity === 'number' ? options.opacity : 1.0,
+        zIndex: typeof options.zIndex === 'number' ? options.zIndex : null
+      });
+
+      _map.addLayer(layer);
+
+      return layer;
+    },
+    /**
+     * Creates and adds a TileStream layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     */
+    _addTileStreamLayer: function(options) {
+      var layer = new wax.leaf.connector(options.tileJson, options);
+
+      _map.addLayer(layer);
+
+      return layer;
+    },
+    /**
+     * Creates and adds a TileStream layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     */
+    _addZoomifyLayer: function(options) {
+      var layer = new L.TileLayer.Zoomify(options.url, {
+        height: options.height,
+        width: options.width
+      });
+
+      _map.addLayer(layer);
+
+      return layer;
+    },
+    /**
+     * Hides a CartoDb layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideCartoDbLayer: function(layer) {
+      this._hideTileLayer(layer);
+    },
+    /**
+     * Hides a tile layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideTileLayer: function(layer) {
+      var config = NPMap.Layer.getLayerByName(layer.npmap.layerName);
+
+      if (typeof config.opacityNpmap === 'undefined') {
+        if (typeof config.opacity === 'undefined') {
+          config.opacityNpmap = 1.0;
+        } else {
+          config.opacityNpmap = config.opacity;
+        }
+      }
+
+      layer.setOpacity(0);
+    },
+    /**
+     * Hides a TileStream layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideTileStreamLayer: function(layer) {
+      this._hideTileLayer(layer);
+    },
+    /**
+     * Hides a Zoomify layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideZoomifyLayer: function(layer) {
+      
+    },
+    /**
+     * Removes a CartoDb layer from the map.
+     * @param {Object} layer
+     * @return null
+     */
+    _removeCartoDbLayer: function(layer) {
+      this._removeTileLayer(layer);
+    },
+    /**
+     * Removes a tile layer from the map.
+     * @param {Object} layer
+     * @return null
+     */
+    _removeTileLayer: function(layer) {
+      _map.removeLayer(layer);
+    },
+    /**
+     *
+     */
+    _removeTileStreamLayer: function(layer) {
+      this._removeTileLayer(layer);
+    },
+    /**
+     * Sets the base layer.
+     * @param {Object} baseLayer
+     * @return null
+     */
+    _setBaseLayer: function(baseLayer) {
+      var api,
+          cls = baseLayer.cls,
+          mapTypeId,
+          me = this,
+          removeAttribution = [];
+
+      for (var k = 0; k < NPMap.config.baseLayers.length; k++) {
+        var bl = NPMap.config.baseLayers[k];
+
+        if (bl.visible) {
+          _activeBaseLayer = bl;
+        }
+
+        bl.visible = false;
+      }
+
+      if (_activeBaseLayer.type === 'Api') {
+        if (_activeBaseLayer.mapTypeId !== 'Blank') {
+          _map.removeLayer(_activeBaseLayer.api);
+          delete _activeBaseLayer.api;
+        }
+      } else {
+        NPMap.Layer[_activeBaseLayer.type].remove(_activeBaseLayer);
+      }
+
+      _activeBaseLayer = baseLayer;
+
+      if (cls) {
+        cls = cls.toLowerCase();
+      }
+
+      if (baseLayer.type === 'Api') {
+        if (baseLayer.mapTypeId !== 'blank') {
+          baseLayer.api = new L.TileLayer.Bing('Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65', {
+            type: baseLayer.mapTypeId
+          });
+          _map.addLayer(baseLayer.api, true);
+        }
+      } else {
+        NPMap.Layer[baseLayer.type].add(baseLayer);
+      }
+
+      baseLayer.visible = true;
+
+      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
+    },
+    /**
+     * Sets tile layer options.
+     * @param {Object} layer
+     * @param {Object} options
+     * Currently supported: opacity.
+     */
+    _setTileLayerOptions: function(layer, options) {
+      var opacity = options.opacity;
+
+      if (typeof opacity === 'number') {
+        layer.setOpacity(opacity);
+
+        NPMap.Layer.getLayerByName(layer.npmap.layerName).opacityNpmap = opacity;
+      }
+    },
+    /**
+     * Shows a CartoDb layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _showCartoDbLayer: function(layer) {
+      this._showTileLayer(layer);
+    },
+    /**
+     * Shows a tile layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _showTileLayer: function(layer) {
+      layer.setOpacity(NPMap.Layer.getLayerByName(layer.npmap.layerName).opacityNpmap);
+    },
+    /**
+     * Shows a TileStream layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _showTileStreamLayer: function(layer) {
+      this._showTileLayer(layer);
+    },
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
-    map: map,
+    map: _map,
+    
     /**
      * Adds a shape to the map.
      * @param {Object} shape The shape to add to the map.
      * @return null
      */
     addShape: function(shape) {
-      shape.addTo(map);
-    },
-    /**
-     * Adds a tile layer to the map.
-     * @param {Object} layer
-     * @return null
-     */
-    addTileLayer: function(layer) {
-      map.addLayer(layer, layer.zIndex === 0);
+      shape.addTo(_map);
     },
     /**
      * Sets the bounds of the map.
@@ -550,7 +800,7 @@ define([
      * @return null
      */
     bounds: function(bounds) {
-      map.fitBounds(bounds);
+      _map.fitBounds(bounds);
     },
     /**
      * Converts an API bounds to a NPMap bounds.
@@ -591,7 +841,7 @@ define([
      * @return null
      */
     centerAndZoom: function(latLng, zoom) {
-      map.setView(latLng, zoom);
+      _map.setView(latLng, zoom);
     },
     /**
      * Converts NPMap line options to Leaflet line options.
@@ -684,16 +934,10 @@ define([
       return o;
     },
     /**
-     * Creates a CartoDb layer.
-     * @param {Object} options
-     * @return {Object}
+     * DEPRECATED
      */
     createCartoDbLayer: function(options) {
-      options.auto_bound = false;
-      options.debug = false;
-      options.map = map;
-      
-      map.addLayer(new L.CartoDBLayer(options));
+
     },
     /**
      * Creates a line shape.
@@ -704,7 +948,7 @@ define([
     createLine: function(latLngs, options) {
       var line = L.polyline(latLngs, options);
 
-      hookUpShapeClick(line);
+      _hookUpShapeClick(line);
 
       return line;
     },
@@ -717,7 +961,7 @@ define([
     createMarker: function(latLng, options) {
       var marker = L.marker(latLng, options);
 
-      hookUpShapeClick(marker);
+      _hookUpShapeClick(marker);
 
       return marker;
     },
@@ -730,75 +974,21 @@ define([
     createPolygon: function(latLngs, options) {
       var polygon =  L.polygon(latLngs, options);
 
-      hookUpShapeClick(polygon);
+      _hookUpShapeClick(polygon);
 
       return polygon;
     },
     /**
-     * Creates a tile layer.
-     * @param {String/Function} constructor
-     * @param {Object} options (Optional)
-     * @return {Object}
+     * DEPRECATED
      */
     createTileLayer: function(constructor, options) {
-      var getSubdomain = null,
-          uriConstructor;
-
-      options = options || {};
-
-      if (options.subdomains) {
-        var currentSubdomain = 0;
-
-        getSubdomain = function() {
-          if (currentSubdomain + 1 === options.subdomains.length) {
-            currentSubdomain = 0;
-          } else {
-            currentSubdomain++;
-          }
-
-          return options.subdomains[currentSubdomain];
-        };
-      }
-
-      if (typeof constructor === 'string') {
-        uriConstructor = function(xy) {
-          var template = _.template(constructor),
-              uri = template({
-                x: xy.x,
-                y: xy.y,
-                z: map.getZoom()
-              });
-
-          if (getSubdomain) {
-            uri = uri.replace('{{s}}', getSubdomain());
-          }
-          
-          return uri;
-        };
-      } else {
-        uriConstructor = function(xy) {
-          var subdomain = null;
-
-          if (getSubdomain) {
-            subdomain = getSubdomain();
-          }
-
-          return constructor(xy.x, xy.y, map.getZoom(), options.url ? options.url : null, subdomain);
-        };
-      }
-
-      return new L.TileLayer.Simple(uriConstructor, options);
+      
     },
     /**
-     * Creates a Zoomify layer.
-     * @param {Object} config
-     * @return {Object}
+     * DEPRECATED
      */
     createZoomifyLayer: function(config) {
-      return new L.TileLayer.Zoomify(config.url, {
-        height: config.height,
-        width: config.width
-      });
+      
     },
     /**
      * Gets a latLng from a click event object.
@@ -809,7 +999,7 @@ define([
       if (e.latlng) {
         return e.latlng;
       } else {
-        return map.mouseEventToLatLng(e);
+        return _map.mouseEventToLatLng(e);
       }
     },
     /**
@@ -825,14 +1015,14 @@ define([
      * @return {Object}
      */
     getBounds: function() {
-      return map.getBounds();
+      return _map.getBounds();
     },
     /**
      * Gets the center {L.LatLng} of the map.
      * @return {Object}
      */
     getCenter: function() {
-      return map.getCenter();
+      return _map.getCenter();
     },
     /**
      * Returns the {L.LatLng} for the #npmap-clickdot div.
@@ -879,14 +1069,14 @@ define([
      * @return {Number}
      */
     getMaxZoom: function() {
-      return mapConfig.maxZoom;
+      return _mapConfig.maxZoom;
     },
     /**
      * Gets the minimum zoom level for this map.
      * @return {Number}
      */
     getMinZoom: function() {
-      return mapConfig.minZoom;
+      return _mapConfig.minZoom;
     },
     /**
      * Gets the latLngs {L.LatLng} of the polygon.
@@ -901,7 +1091,7 @@ define([
      * @return {Number}
      */
     getZoom: function() {
-      return map.getZoom();
+      return _map.getZoom();
     },
     /**
      * Handles any necessary sizing and positioning for the map when its div is resized.
@@ -909,14 +1099,16 @@ define([
      * @return null
      */
     handleResize: function(callback) {
-      handleResize();
+      _handleResize();
       
       if (callback) {
         callback();
       }
     },
     /**
-     * UNDOCUMENTED
+     * Hides a shape.
+     * @param {Object} shape
+     * @return null
      */
     hideShape: function(shape) {
       this.removeShape(shape);
@@ -954,7 +1146,7 @@ define([
      * @return {Object}
      */
     latLngToPixel: function(latLng) {
-      return map.latLngToContainerPoint(latLng);
+      return _map.latLngToContainerPoint(latLng);
     },
     /**
      * Pans the map horizontally and vertically based on the pixels passed in.
@@ -966,24 +1158,24 @@ define([
       var point = new L.Point(-pixels.x, -pixels.y);
 
       if (NPMap.InfoBox.visible) {
-        map._rawPanBy(point);
-        map.fireEvent('movestart');
-        map.fireEvent('move');
-        map.fireEvent('moveend');
+        _map._rawPanBy(point);
+        _map.fireEvent('movestart');
+        _map.fireEvent('move');
+        _map.fireEvent('moveend');
 
         if (callback) {
           callback();
         }
       } else {
-        map.panBy(point);
+        _map.panBy(point);
 
         if (callback) {
           function callbackPanByPixels() {
-            map.off('moveend', callbackPanByPixels);
+            _map.off('moveend', callbackPanByPixels);
             callback();
           }
 
-          map.on('moveend', callbackPanByPixels);
+          _map.on('moveend', callbackPanByPixels);
         }
       }
     },
@@ -1012,7 +1204,7 @@ define([
      * @return {Object}
      */
     pixelToLatLng: function(pixel) {
-      return map.containerPointToLatLng(pixel);
+      return _map.containerPointToLatLng(pixel);
     },
     /**
      * Positions the #npmap-clickdot div on top of the {L.Marker} or {L.LatLng} that is passed in.
@@ -1038,20 +1230,24 @@ define([
       clickDot.style.top = pixel.y + 'px';
     },
     /**
+     * DEPRECATED
+     */
+    removeCartoDbLayer: function(layer) {
+      
+    },
+    /**
      * Removes a shape from the map.
      * @param {Object} shape The shape to remove from the map. This can be a {L}.Marker, Polyline, Polygon, Rectangle, or Circle object.
      * @return null
      */
     removeShape: function(shape) {
-      map.removeLayer(shape);
+      _map.removeLayer(shape);
     },
     /**
-     * Removes a tile layer from the map.
-     * @param {Object} layer
-     * @return null
+     * DEPRECATED
      */
     removeTileLayer: function(layer) {
-      map.removeLayer(layer);
+      
     },
     /**
      * Sets the initial center of the map.
@@ -1059,7 +1255,7 @@ define([
      * @return null
      */
     setInitialCenter: function(center) {
-      initialCenter = center;
+      _initialCenter = center;
       NPMap.config.center = {
         lat: center.lat,
         lng: center.lng
@@ -1092,62 +1288,12 @@ define([
       // TODO: Cannot currently set zoom restrictions dynamically using Leaflet API.
     },
     /**
-     * UNDOCUMENTED
+     * Shows a shape.
+     * @param {Object} shape
+     * @return null
      */
     showShape: function(shape) {
       this.addShape(shape);
-    },
-    /**
-     * Switches the base map.
-     * @param {Object} baseLayer The base layer to switch to.
-     * @return null
-     */
-    switchBaseLayer: function(baseLayer) {
-      var api,
-          cls = baseLayer.cls,
-          mapTypeId,
-          me = this,
-          removeAttribution = [];
-
-      for (var k = 0; k < NPMap.config.baseLayers.length; k++) {
-        var bl = NPMap.config.baseLayers[k];
-
-        if (bl.visible) {
-          activeBaseLayer = bl;
-        }
-
-        bl.visible = false;
-      }
-
-      if (activeBaseLayer.type === 'Api') {
-        if (activeBaseLayer.mapTypeId !== 'Blank') {
-          map.removeLayer(activeBaseLayer.api);
-          delete activeBaseLayer.api;
-        }
-      } else {
-        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
-      }
-
-      activeBaseLayer = baseLayer;
-
-      if (cls) {
-        cls = cls.toLowerCase();
-      }
-
-      if (baseLayer.type === 'Api') {
-        if (baseLayer.mapTypeId !== 'blank') {
-          baseLayer.api = new L.TileLayer.Bing('Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65', {
-            type: baseLayer.mapTypeId
-          });
-          map.addLayer(baseLayer.api, true);
-        }
-      } else {
-        NPMap.Layer[baseLayer.type].add(baseLayer);
-      }
-
-      baseLayer.visible = true;
-
-      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
     },
     /**
      * Zooms the map to a {L.LatLngBounds}.
@@ -1155,7 +1301,7 @@ define([
      * @return null
      */
     toBounds: function(bounds) {
-      map.fitBounds(bounds);
+      _map.fitBounds(bounds);
     },
     /**
      * Zooms and/or pans the map to its initial extent.
@@ -1165,7 +1311,7 @@ define([
       if (NPMap.InfoBox.visible) {
         NPMap.InfoBox.hide();
       }
-      map.setView(initialCenter, initialZoom);
+      _map.setView(_initialCenter, _initialZoom);
     },
     /**
      * Zooms the map to the extent of an array of latLng objects.
@@ -1173,7 +1319,7 @@ define([
      * @return null
      */
     toLatLngs: function(latLngs) {
-      map.setExtent(latLngs);
+      _map.setExtent(latLngs);
     },
     /**
      * Zooms the map to the extent of an array of markers.
@@ -1196,21 +1342,21 @@ define([
      * @return null
      */
     zoom: function(zoom) {
-      map.setView(this.getCenter(), zoom);
+      _map.setView(this.getCenter(), zoom);
     },
     /**
      * Zooms the map in by one zoom level.
      * @return null
      */
     zoomIn: function() {
-      map.zoomIn();
+      _map.zoomIn();
     },
     /**
      * Zooms the map out by one zoom level.
      * @return null
      */
     zoomOut: function() {
-      map.zoomOut();
+      _map.zoomOut();
     }
   };
 });

@@ -4,9 +4,9 @@
   'Util/Util'
 ], function(Event, Map, Util) {
   /**
-   * wax - 7.0.0dev11 - v6.0.4-113-g6b1c56c
+   * wax - 7.0.0dev13 - v6.0.4-142-ga157a2d
    */
-  wax.g={};wax.g.interaction=function(){function a(){d=!0}var d=!1,c,b;return wax.interaction().attach(function(c){if(!arguments.length)return b;b=c;google.maps.event.addListener(b,"tileloaded",a);google.maps.event.addListener(b,"idle",a)}).detach(function(){google.maps.event.removeListener(b,"tileloaded",a);google.maps.event.removeListener(b,"idle",a)}).parent(function(){return b.getDiv()}).grid(function(){if(d||!c){c=[];var a=b.getZoom();wax.u.offset(b.getDiv());var f=function(b){if(b.interactive)for(var d in b.cache)if(d.split("/")[0]==a){var f=wax.u.offset(b.cache[d]);c.push([f.top,f.left,b.cache[d]])}},g;for(g in b.mapTypes)f(b.mapTypes[g]);b.overlayMapTypes.forEach(f)}return c})};wax.g.connector=function(a){a=a||{};this.options={tiles:a.tiles,scheme:a.scheme||"xyz",blankImage:a.blankImage||"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="};this.minZoom=a.minzoom||0;this.maxZoom=a.maxzoom||22;this.name=a.name||"";this.description=a.description||"";this.interactive=!0;this.tileSize=new google.maps.Size(256,256);this.cache={}};wax.g.connector.prototype.getTile=function(a,d){var c=d+"/"+a.x+"/"+a.y;if(!this.cache[c]){var b=this.cache[c]=new Image(256,256);this.cache[c].src=this.getTileUrl(a,d);this.cache[c].setAttribute("gTileKey",c);this.cache[c].onerror=function(){b.style.display="none"}}return this.cache[c]};wax.g.connector.prototype.releaseTile=function(a){var d=a.getAttribute("gTileKey");this.cache[d]&&delete this.cache[d];a.parentNode&&a.parentNode.removeChild(a)};wax.g.connector.prototype.getTileUrl=function(a,d){var c=Math.pow(2,d),b="tms"===this.options.scheme?c-1-a.y:a.y,e=a.x%c,e=0>e?a.x%c+c:e;return 0>b?this.options.blankImage:this.options.tiles[parseInt(e+b,10)%this.options.tiles.length].replace(/\{z\}/g,d).replace(/\{x\}/g,e).replace(/\{y\}/g,b)};
+  wax.g={};wax.g.bwdetect=function(a,c){c=c||{};var e=c.png||".png128",d=c.jpg||".jpg70";if(!a.mapTypes["mb-low"]){for(var b=a.mapTypes.mb,f={tiles:[],scheme:b.options.scheme,blankImage:b.options.blankImage,minzoom:b.minZoom,maxzoom:b.maxZoom,name:b.name,description:b.description},g=0;g<b.options.tiles.length;g++)f.tiles.push(b.options.tiles[g].replace(".png",e).replace(".jpg",d));m.mapTypes.set("mb-low",new wax.g.connector(f))}return wax.bwdetect(c,function(c){a.setMapTypeId(c?"mb":"mb-low")})};wax.g.interaction=function(){function a(){e=!0}var c,e=!1,d,b=null,f=null;return wax.interaction().attach(function(c){if(!arguments.length)return d;d=c;f=google.maps.event.addListener(d,"idle",a);b=google.maps.event.addListener(d,"tileloaded",a)}).detach(function(){b&&google.maps.event.removeListener(b);f&&google.maps.event.removeListener(f)}).parent(function(){return d.getDiv()}).grid(function(){if(e||!c){wax.u.offset(d.getDiv());var a=d.getZoom();c=[];var b=function(b){if(b.interactive)for(var d in b.cache)if(d.split("/")[0]==a){var e=wax.u.offset(b.cache[d]);c.push([e.top,e.left,b.cache[d]])}},f;for(f in d.mapTypes)b(d.mapTypes[f]);d.overlayMapTypes.forEach(b)}return c})};wax.g.connector=function(a){a=a||{};this.options={tiles:a.tiles,scheme:a.scheme||"xyz",blankImage:a.blankImage||"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="};this.minZoom=a.minzoom||0;this.maxZoom=a.maxzoom||22;this.name=a.name||"";this.description=a.description||"";this.interactive=!0;this.tileSize=new google.maps.Size(256,256);this.cache={}};wax.g.connector.prototype.getTile=function(a,c){var e=c+"/"+a.x+"/"+a.y;if(!this.cache[e]){var d=this.cache[e]=new Image(256,256);this.cache[e].src=this.getTileUrl(a,c);this.cache[e].setAttribute("gTileKey",e);this.cache[e].onerror=function(){d.style.display="none"}}return this.cache[e]};wax.g.connector.prototype.releaseTile=function(a){var c=a.getAttribute("gTileKey");this.cache[c]&&delete this.cache[c];a.parentNode&&a.parentNode.removeChild(a)};wax.g.connector.prototype.getTileUrl=function(a,c){var e=Math.pow(2,c),d="tms"===this.options.scheme?e-1-a.y:a.y,b=a.x%e,b=0>b?a.x%e+e:b;return 0>d?this.options.blankImage:this.options.tiles[parseInt(b+d,10)%this.options.tiles.length].replace(/\{z\}/g,c).replace(/\{x\}/g,b).replace(/\{y\}/g,d)};
   /**
    * CartoDb - v0.54
    */
@@ -89,11 +89,19 @@
       overlay = null;
   
   /**
+   * Hides a layer.
+   * @param {Object} layer
+   * @return null
+   */
+  function _hideLayer(layer) {
+    layer.setMap(null);
+  }
+  /**
    * Hooks up a google.maps.event click handler to a shape.
    * @param {Object} shape
    * @return null
    */
-  function hookUpShapeClickHandler(shape) {
+  function _hookUpShapeClickHandler(shape) {
     google.maps.event.addListener(shape, 'click', function(e) {
       e.shape = shape;
       Event.trigger('NPMap.Map', 'shapeclick', e);
@@ -149,8 +157,9 @@
   mapConfig.zoom = initialZoom = oldZoom = (NPMap.config.zoom ? NPMap.config.zoom : 4);
   map = new google.maps.Map(document.getElementById(NPMap.config.div), mapConfig);
 
+  map.mapTypes.set('blank', blankMapType);
+
   if (mapTypeId === 'blank') {
-    map.mapTypes.set('blank', blankMapType);
     map.setMapTypeId('blank');
   } else {
     map.setMapTypeId(mapTypeId);
@@ -386,8 +395,241 @@
     _attribution: null,
     // Is the map loaded and ready to be interacted with programatically?
     _isReady: false,
+    /**
+     * Adds a CartoDb layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     */
+    _addCartoDbLayer: function(options) {
+      var layer;
+
+      options.layer_order = typeof options.zIndex === 'number' ? options.zIndex : 'top',
+      options.map = map;
+
+      return new CartoDBLayer(options);
+    },
+    /**
+     * Adds a tile layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     */
+    _addTileLayer: function(options) {
+      var getSubdomain,
+          tileLayer,
+          uriConstructor;
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
+
+      if (typeof options.constructor === 'string') {
+        uriConstructor = function(coord, zoom) {
+          return _.template(options.constructor)({
+            s: typeof getSubdomain == 'function' ? getSubdomain() : null,
+            x: coord.x,
+            y: coord.y,
+            z: zoom
+          });
+        };
+      } else {
+        uriConstructor = function(coord, zoom) {
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return options.constructor(coord.x, coord.y, zoom, options.url ? options.url : null, subdomain);
+        };
+      }
+
+      tileLayer = new google.maps.ImageMapType({
+        getTileUrl: uriConstructor,
+        tileSize: new google.maps.Size(256, 256),
+        maxZoom: typeof options.maxZoom === 'number' ? options.maxZoom : 19,
+        minZoom: typeof options.minZoom === 'number' ? options.minZoom : 0,
+        name: options.name,
+        opacity: typeof options.opacity === 'number' ? options.opacity : 1.0
+      });
+
+      if (options.zIndex === 0) {
+        map.mapTypes.set(options.name, tileLayer);
+        map.setMapTypeId(options.name);
+      } else {
+        map.overlayMapTypes.insertAt(options.zIndex - 1, tileLayer);
+      }
+
+      return tileLayer;
+    },
+    /**
+     * Adds a TileStream layer to the map.
+     * @param {Object} options
+     * @return null
+     */
+    _addTileStreamLayer: function(options) {
+      var layer = new wax.g.connector(options.tileJson);
+
+      if (options.zIndex === 0) {
+        map.mapTypes.set(options.tileJson.id, layer);
+        map.setMapTypeId(options.tileJson.id);
+      } else {
+        map.overlayMapTypes.insertAt(options.zIndex - 1, layer);
+      }
+
+      return layer;
+    },
+    /**
+     * Hides a CartoDb layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideCartoDbLayer: function(layer) {
+      _hideLayer(layer);
+    },
+    /**
+     * Hides a tile layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideTileLayer: function(layer) {
+      this._removeTileLayer(layer);
+    },
+    /**
+     * Hides a TileStream layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideTileStreamLayer: function(layer) {
+      this._removeTileStreamLayer(layer);
+    },
+    /**
+     * Removes a CartoDb layer from the map..
+     * @param {Object} layer
+     * @return null
+     */
+    _removeCartoDbLayer: function(layer) {
+      _hideLayer(layer);
+      // TODO: Delete reference to layer?
+    },
+    /**
+     * Removes a tile layer from the map. Do not use to remove a base layer. Use _setBaseLayer for that.
+     * @param {Object} layer
+     * @return null
+     */
+    _removeTileLayer: function(layer) {
+      var overlayMapTypes = map.overlayMapTypes;
+
+      overlayMapTypes.forEach(function(overlayMapType, i) {
+        if (layer === overlayMapType) {
+          overlayMapTypes.removeAt(i);
+        }
+      });
+    },
+    /**
+     * Removes a TileStream layer from the map. Do not use to remove a base layer. Use _setBaseLayer for that.
+     * @param {Object} layer
+     * @return null
+     */
+    _removeTileStreamLayer: function(layer) {
+      this._removeTileLayer(layer);
+    },
+    /**
+     * Sets the base layer.
+     * @param {Object} baseLayer
+     * @return null
+     */
+    _setBaseLayer: function(baseLayer) {
+      var activeBaseLayer,
+          api,
+          cls = baseLayer.cls,
+          mapTypeId;
+
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var bl = NPMap.config.baseLayers[i];
+
+        if (bl.visible) {
+          activeBaseLayer = bl;
+        }
+
+        bl.visible = false;
+      }
+
+      if (activeBaseLayer.type !== 'Api') {
+        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+      }
+
+      if (cls) {
+        cls = cls.toLowerCase();
+      }
+
+      api = DEFAULT_BASE_LAYERS[cls];
+
+      if (api) {
+        if (api.mapTypeId) {
+          mapTypeId = api.mapTypeId;
+        } else {
+          mapTypeId = 'BLANK';
+
+          NPMap.Layer[baseLayer.type].create(baseLayer);
+        }
+      } else {
+        NPMap.Layer[baseLayer.type].create(baseLayer);
+
+        mapTypeId = 'BLANK';
+      }
+
+      map.setMapTypeId(google.maps.MapTypeId[baseLayer.mapTypeId]);
+
+      baseLayer.visible = true;
+    },
+    /**
+     * Sets tile layer options.
+     * @param {Object} layer
+     * @param {Object} options
+     * Currently supported: .
+     */
+    _setTileLayerOptions: function(layer, options) {
+    
+    },
+    /**
+     * Shows a CartoDb layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _showCartoDbLayer: function(layer) {
+      layer.setMap(map);
+    },
+    /**
+     * Shows a tile layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _showTileLayer: function(layer) {
+      map.overlayMapTypes.insertAt(NPMap.Layer.getLayerByName(layer.npmap.layerName).zIndex - 1, layer);
+    },
+    /**
+     * Shows a TileStream layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _showTileStreamLayer: function(layer) {
+      this._showTileLayer(layer);
+
+      //this._addTileStreamLayer(NPMap.Layer.getLayerByName(layer.npmap.layerName));
+    },
     // The google.maps.Map object.
     map: map,
+
     /**
      * Adds a shape to the map.
      * @param {Object} shape The shape to add to the map. This can be a google.maps.Marker, Polyline, Polygon, Rectangle, or Circle object.
@@ -395,35 +637,6 @@
      */
     addShape: function(shape) {
       shape.setMap(map);
-    },
-    /**
-     * Adds a tile layer to the map.
-     * @param {Object} layer
-     * @param {Boolean} baseLayer (Optional)
-     * @return null
-     */
-    addTileLayer: function(layer, baseLayer) {
-      baseLayer = baseLayer || false;
-
-      if (baseLayer) {
-        map.mapTypes.set(layer.name, layer);
-        map.setMapTypeId(layer.name);
-      } else {
-        map.overlayMapTypes.insertAt(0, layer);
-      }
-    },
-    /**
-     * Adds a TileStream layer to the map.
-     * @return null
-     */
-    addTileStreamLayer: function() {
-      for (var i in map.mapTypes) {
-        if (map.mapTypes[i].interactive) {
-          map.overlayMapTypes.insertAt(0, map.mapTypes[i]);
-        }
-      }
-
-      // TODO: Support adding it as a baseLayer: (map.setMapTypeId(tileJson.id)).
     },
     /**
      * Converts an API bounds to a NPMap bounds.
@@ -552,16 +765,6 @@
       return o;
     },
     /**
-     * Creates a CartoDb layer.
-     * @param {Object} options
-     * @return {Object}
-     */
-    createCartoDbLayer: function(options) {
-      options.map = map;
-
-      return new CartoDBLayer(options);
-    },
-    /**
      * Creates a google.maps.Polyline object.
      * @param {Array} latLngs An array of google.maps.LatLng objects.
      * @param {Object} options (Optional) Any additional options to apply to the polygon.
@@ -574,7 +777,7 @@
       options.path = latLngs;
       line = new google.maps.Polyline(options);
 
-      hookUpShapeClickHandler(line);
+      _hookUpShapeClickHandler(line);
 
       return line;
     },
@@ -591,7 +794,7 @@
       options.position = latLng;
       marker = new google.maps.Marker(options);
 
-      hookUpShapeClickHandler(marker);
+      _hookUpShapeClickHandler(marker);
 
       return marker;
     },
@@ -608,83 +811,9 @@
       options.paths = latLngs;
       polygon = new google.maps.Polygon(options);
 
-      hookUpShapeClickHandler(polygon);
+      _hookUpShapeClickHandler(polygon);
 
       return polygon;
-    },
-    /**
-     * Creates a tile layer.
-     * @param {String/Function} constructor
-     * @param {Object} options (Optional)
-     * @return {Object}
-     */
-    createTileLayer: function(constructor, options) {
-      var getSubdomain = null,
-          uriConstructor;
-
-      options = options || {};
-
-      if (options.subdomains) {
-        var currentSubdomain = 0;
-
-        getSubdomain = function() {
-          if (currentSubdomain + 1 === options.subdomains.length) {
-            currentSubdomain = 0;
-          } else {
-            currentSubdomain++;
-          }
-
-          return options.subdomains[currentSubdomain];
-        };
-      }
-
-      if (typeof constructor === 'string') {
-        uriConstructor = function(coord, zoom) {
-          var template = _.template(constructor),
-              uri = template({
-                x: coord.x,
-                y: coord.y,
-                z: zoom
-              });
-
-          if (getSubdomain) {
-            uri = uri.replace('{{s}}', getSubdomain());
-          }
-          
-          return uri;
-        };
-      } else {
-        uriConstructor = function(coord, zoom) {
-          var subdomain = null;
-
-          if (getSubdomain) {
-            subdomain = getSubdomain();
-          }
-
-          return constructor(coord.x, coord.y, zoom, options.url ? options.url : null, subdomain);
-        };
-      }
-
-      return new google.maps.ImageMapType({
-        getTileUrl: uriConstructor,
-        tileSize: new google.maps.Size(256, 256),
-        maxZoom: options.maxZoom || 19,
-        minZoom: options.minZoom || 0,
-        name: options.name,
-        opacity: options.opacity || 1.0
-      });
-    },
-    /**
-     * Creates a TileStream layer.
-     * @param {Object} tileJson
-     * @return {Object}
-     */
-    createTileStreamLayer: function(tileJson) {
-      var connector = new wax.g.connector(tileJson);
-
-      map.mapTypes.set(tileJson.id, connector);
-
-      return connector;
     },
     /**
      * Gets a latLng from an event object.
@@ -853,7 +982,9 @@
       google.maps.event.trigger(map, 'resize');
     },
     /**
-     * UNDOCUMENTED
+     * Hides a shape.
+     * @param {Object} shape
+     * @return null
      */
     hideShape: function(shape) {
       shape.setVisible(false);
@@ -985,40 +1116,12 @@
      */
     projection: null,
     /**
-     * UNDOCUMENTED
-     */
-    removeCartoDbLayer: function(layer) {
-      layer.setMap(null);
-    },
-    /**
      * Removes a shape from the map.
      * @param {Object} shape The shape to remove from the map. This can be a {google.maps}.Marker, Polyline, Polygon, Rectangle, or Circle object.
      * @return null
      */
     removeShape: function(shape) {
       shape.setMap(null);
-    },
-    /**
-     * Removes a tile layer from the map.
-     * @param {Object} layer
-     * @param {Boolean} baseLayer (Optional)
-     * @return null
-     */
-    removeTileLayer: function(layer, baseLayer) {
-      var overlayMapTypes = map.overlayMapTypes;
-      
-      if (baseLayer) {
-        /*
-        map.mapTypes.set(layer.name, layer);
-        map.setMapTypeId(layer.name);
-        */
-      } else {
-        overlayMapTypes.forEach(function(mapType, i) {
-          if (layer === mapType) {
-            overlayMapTypes.removeAt(i);
-          }
-        });
-      }
     },
     /**
      * Sets the map cursor.
@@ -1044,55 +1147,6 @@
      */
     showShape: function(shape) {
       shape.setVisible(true);
-    },
-    /**
-     * Switches the base map.
-     * @param {Object} baseLayer The base layer to switch to.
-     * @return null
-     */
-    switchBaseLayer: function(baseLayer) {
-      var activeBaseLayer,
-          api,
-          cls = baseLayer.cls,
-          mapTypeId;
-
-      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-        var bl = NPMap.config.baseLayers[i];
-
-        if (bl.visible) {
-          activeBaseLayer = bl;
-        }
-
-        bl.visible = false;
-      }
-
-      if (activeBaseLayer.type !== 'Api') {
-        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
-      }
-
-      if (cls) {
-        cls = cls.toLowerCase();
-      }
-
-      api = DEFAULT_BASE_LAYERS[cls];
-
-      if (api) {
-        if (api.mapTypeId) {
-          mapTypeId = api.mapTypeId;
-        } else {
-          mapTypeId = 'BLANK';
-
-          NPMap.Layer[baseLayer.type].create(baseLayer);
-        }
-      } else {
-        NPMap.Layer[baseLayer.type].create(baseLayer);
-
-        mapTypeId = 'BLANK';
-      }
-
-      map.setMapTypeId(google.maps.MapTypeId[baseLayer.mapTypeId]);
-
-      baseLayer.visible = true;
     },
     /**
      * Zooms the map to a bounding box.

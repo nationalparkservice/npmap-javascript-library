@@ -2,8 +2,9 @@
  * NPMap.Layer.Zoomify module.
  */
 define([
-  'Layer/Layer'
-], function(Layer) {
+  'Layer/Layer',
+  'Map/Map'
+], function(Layer, Map) {
   return NPMap.Layer.Zoomify = {
     /**
      * Adds a Zoomify layer.
@@ -11,7 +12,7 @@ define([
      * @param {Function} callback
      * @return null
      */
-    add: function(config, callback) {
+    _add: function(config, callback) {
       if (!config.height) {
         throw new Error('"height" is required.');
       }
@@ -20,7 +21,7 @@ define([
         throw new Error('"width" is required.');
       }
       
-      NPMap.Map.addTileLayer(NPMap.Map.createZoomifyLayer(config));
+      Map[NPMap.config.api]._addZoomifyLayer(config);
       
       if (callback) {
         callback();

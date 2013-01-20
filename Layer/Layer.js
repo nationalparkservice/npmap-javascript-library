@@ -130,8 +130,14 @@ define([
       };
     }
   });
+  Event.add('NPMap.Layer', 'hidden', function(config) {
+    Map.updateAttribution();
+  });
   Event.add('NPMap.Layer', 'removed', function(config) {
     usedNames.splice(_.indexOf(usedNames, config.name), 1);
+    Map.updateAttribution();
+  });
+  Event.add('NPMap.Layer', 'shown', function(config) {
     Map.updateAttribution();
   });
   Event.add('NPMap.Map', 'click', function(e) {
@@ -217,19 +223,29 @@ define([
     /**
      * Gets a layer config object by layer name.
      * @param {String} name The name of the layer to search for.
-     * @param {Array} layers (Optional) The array of layers to search. If this is undefined or null, the NPMap.config.layers array will be searched.
      * @return {Object}
      */
-    getLayerByName: function(name, layers) {
-      if (!layers) {
-        layers = NPMap.config.layers;
+    getLayerByName: function(name) {
+      var baseLayers = NPMap.config.baseLayers,
+          layers = NPMap.config.layers;
+
+      if (layers && layers.length) {
+        for (var i = 0; i < layers.length; i++) {
+          var layer = layers[i];
+
+          if (layer.name === name) {
+            return layer;
+          }
+        }
       }
+      
+      if (baseLayers && baseLayers.length) {
+        for (var j = 0; j < baseLayers.length; j++) {
+          var baseLayer = baseLayers[j];
 
-      for (var i = 0; i < layers.length; i++) {
-        var layer = layers[i];
-
-        if (layer.name === name) {
-          return layer;
+          if (baseLayer.name === name) {
+            return baseLayer;
+          }
         }
       }
     },

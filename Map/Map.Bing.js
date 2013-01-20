@@ -115,10 +115,18 @@ define([
     }
   }
   /**
+   * Gets an entity for a layer.
+   * @param {Object} layer
+   * @return {Object}
+   */
+  function _getEntity(layer) {
+    return map.entities.get(map.entities.indexOf(layer));
+  }
+  /**
    * Updates the Bing copyright text.
    * @return null
    */
-  function updateBingCopyright() {
+  function _updateBingCopyright() {
     map.getCopyrights(function(a) {
       var attribution = [];
       
@@ -371,7 +379,7 @@ define([
     zoomStartReported = false;
 
     if (activeBaseLayer.type === 'Api') {
-      updateBingCopyright();
+      _updateBingCopyright();
     }
     
     Event.trigger('NPMap.Map', 'viewchangeend');
@@ -391,6 +399,157 @@ define([
     _attribution: null,
     // Is the map loaded and ready to be interacted with programatically.
     _isReady: true,
+    /**
+     * Adds a tile layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     */
+    _addTileLayer: function(options) {
+      var getSubdomain,
+          tileLayer,
+          uriConstructor;
+
+      if (options.subdomains) {
+        var currentSubdomain = 0;
+
+        getSubdomain = function() {
+          if (currentSubdomain + 1 === options.subdomains.length) {
+            currentSubdomain = 0;
+          } else {
+            currentSubdomain++;
+          }
+
+          return options.subdomains[currentSubdomain];
+        };
+      }
+
+      if (typeof options.constructor === 'string') {
+        uriConstructor = function(tile) {
+          return _.template(options.constructor)({
+            s: typeof getSubdomain == 'function' ? getSubdomain() : null,
+            x: tile.x,
+            y: tile.y,
+            z: tile.levelOfDetail
+          });
+        };
+      } else {
+        uriConstructor = function(tile) {
+          var subdomain = null;
+
+          if (getSubdomain) {
+            subdomain = getSubdomain();
+          }
+
+          return options.constructor(tile.x, tile.y, tile.levelOfDetail, options.url ? options.url : null, subdomain);
+        };
+      }
+
+      tileLayer = new Microsoft.Maps.TileLayer({
+        mercator: new Microsoft.Maps.TileSource({
+          uriConstructor: uriConstructor
+        }),
+        opacity: typeof options.opacity === 'number' ? options.opacity : 1,
+        zIndex: typeof options.zIndex === 'number' ? options.zIndex : null
+      });
+
+      map.entities.push(tileLayer);
+
+      return tileLayer;
+    },
+    /**
+     * Hides a tile layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _hideTileLayer: function(layer) {
+      _getEntity(layer).setOptions({
+        visible: false
+      });
+    },
+    /**
+     * Removes a tile layer from the map.
+     * @param {Object} layer
+     * @return null
+     */
+    _removeTileLayer: function(layer) {
+      map.entities.removeAt(map.entities.indexOf(layer));
+    },
+    /**
+     * Sets the base layer.
+     * @param {Object} baseLayer
+     * @return null
+     */
+    _setBaseLayer: function(baseLayer) {
+      var api,
+          cls = baseLayer.cls,
+          mapTypeId;
+
+      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
+        var bl = NPMap.config.baseLayers[i];
+
+        if (bl.visible) {
+          activeBaseLayer = bl;
+        }
+
+        bl.visible = false;
+      }
+
+      if (activeBaseLayer.type !== 'Api') {
+        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+      }
+
+      activeBaseLayer = baseLayer;
+
+      if (cls) {
+        cls = cls.toLowerCase();
+      }
+
+      api = DEFAULT_BASE_LAYERS[cls];
+
+      if (api) {
+        if (cls === 'aerial') {
+          labelOverlay = Microsoft.Maps.LabelOverlay.hidden;
+        } else {
+          labelOverlay = Microsoft.Maps.LabelOverlay.visible;
+        }
+
+        if (api.mapTypeId) {
+          mapTypeId = api.mapTypeId;
+        } else {
+          mapTypeId = Microsoft.Maps.MapTypeId.mercator;
+
+          NPMap.Layer[baseLayer.type].add(baseLayer);
+        }
+      } else {
+        NPMap.Layer[baseLayer.type].add(baseLayer);
+
+        mapTypeId = Microsoft.Maps.MapTypeId.mercator;
+      }
+
+      map.setView({
+        labelOverlay: labelOverlay,
+        mapTypeId: mapTypeId
+      });
+
+      baseLayer.visible = true;
+
+      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
+
+      if (api && api.mapTypeId) {
+        _updateBingCopyright();
+      }
+    },
+    /**
+     * Shows a tile layer.
+     * @param {Object} layer
+     * @return null
+     */
+    _showTileLayer: function(layer) {
+      _getEntity(layer).setOptions({
+        visible: true
+      });
+    },
+    
     // The {Microsoft.Maps.Map} object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.
     map: map,
     /**
@@ -400,14 +559,6 @@ define([
      */
     addShape: function(shape) {
       map.entities.push(shape);
-    },
-    /**
-     * Adds a tile layer to the map.
-     * @param {Object} layer
-     * @return null
-     */
-    addTileLayer: function(layer) {
-      map.entities.push(layer);
     },
     /**
      * Converts an API bounds to a NPMap bounds.
@@ -630,64 +781,10 @@ define([
       return new Microsoft.Maps.Polygon(latLngs, options);
     },
     /**
-     * Creates a tile layer.
-     * @param {String/Function} constructor
-     * @param {Object} options (Optional)
-     * @return {Object}
+     * DEPRECATED
      */
     createTileLayer: function(constructor, options) {
-      var getSubdomain = null,
-          uriConstructor;
-
-      options = options || {};
-
-      if (options.subdomains) {
-        var currentSubdomain = 0;
-
-        getSubdomain = function() {
-          if (currentSubdomain + 1 === options.subdomains.length) {
-            currentSubdomain = 0;
-          } else {
-            currentSubdomain++;
-          }
-
-          return options.subdomains[currentSubdomain];
-        };
-      }
-
-      if (typeof constructor === 'string') {
-        uriConstructor = function(tile) {
-          var template = _.template(constructor),
-              uri = template({
-                x: tile.x,
-                y: tile.y,
-                z: tile.levelOfDetail
-              });
-
-          if (getSubdomain) {
-            uri = uri.replace('{{s}}', getSubdomain());
-          }
-          
-          return uri;
-        };
-      } else {
-        uriConstructor = function(tile) {
-          var subdomain = null;
-
-          if (getSubdomain) {
-            subdomain = getSubdomain();
-          }
-
-          return constructor(tile.x, tile.y, tile.levelOfDetail, options.url ? options.url : null, subdomain);
-        };
-      }
-
-      return new Microsoft.Maps.TileLayer({
-        mercator: new Microsoft.Maps.TileSource({
-          uriConstructor: uriConstructor
-        }),
-        opacity: options.opacity || 1
-      });
+      
     },
     /**
      * Gets a latLng from a click event object.
@@ -873,14 +970,6 @@ define([
       }
     },
     /**
-     *
-     */
-    hideTileLayer: function(config) {
-      map.entities.get(map.entities.indexOf(config.api)).setOptions({
-        visible: false
-      });
-    },
-    /**
      * Tests to see if a marker is within the map's current bounds.
      * @param latLng {Object/String} {Required} The latitude/longitude, either a Microsoft.Maps.Location object or a string in "latitude,longitude" format, to test.
      * @return {Boolean}
@@ -1002,14 +1091,6 @@ define([
       map.entities.removeAt(map.entities.indexOf(shape));
     },
     /**
-     * Removes a tile layer from the map.
-     * @param {Object} layer
-     * @return null
-     */
-    removeTileLayer: function(layer) {
-      map.entities.removeAt(map.entities.indexOf(layer));
-    },
-    /**
      * DEPRECATED: Sets the marker's icon.
      * @param {Object} marker
      * @param {String} The url of the marker icon.
@@ -1065,81 +1146,6 @@ define([
         shape.setOptions({
           visible: true
         });
-      }
-    },
-    /**
-     * Shows a tile layer.
-     * @param {Object} config
-     * @return null
-     */
-    showTileLayer: function(config) {
-      map.entities.get(map.entities.indexOf(config.api)).setOptions({
-        visible: true
-      });
-    },
-    /**
-     * Switches the base map.
-     * @param {Object} baseLayer The base layer to switch to.
-     * @return null
-     */
-    switchBaseLayer: function(baseLayer) {
-      var api,
-          cls = baseLayer.cls,
-          mapTypeId;
-
-      for (var i = 0; i < NPMap.config.baseLayers.length; i++) {
-        var bl = NPMap.config.baseLayers[i];
-
-        if (bl.visible) {
-          activeBaseLayer = bl;
-        }
-
-        bl.visible = false;
-      }
-
-      if (activeBaseLayer.type !== 'Api') {
-        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
-      }
-
-      activeBaseLayer = baseLayer;
-
-      if (cls) {
-        cls = cls.toLowerCase();
-      }
-
-      api = DEFAULT_BASE_LAYERS[cls];
-
-      if (api) {
-        if (cls === 'aerial') {
-          labelOverlay = Microsoft.Maps.LabelOverlay.hidden;
-        } else {
-          labelOverlay = Microsoft.Maps.LabelOverlay.visible;
-        }
-
-        if (api.mapTypeId) {
-          mapTypeId = api.mapTypeId;
-        } else {
-          mapTypeId = Microsoft.Maps.MapTypeId.mercator;
-
-          NPMap.Layer[baseLayer.type].add(baseLayer);
-        }
-      } else {
-        NPMap.Layer[baseLayer.type].add(baseLayer);
-
-        mapTypeId = Microsoft.Maps.MapTypeId.mercator;
-      }
-
-      map.setView({
-        labelOverlay: labelOverlay,
-        mapTypeId: mapTypeId
-      });
-
-      baseLayer.visible = true;
-
-      NPMap.Event.trigger('NPMap.Map', 'baselayerchanged');
-
-      if (api && api.mapTypeId) {
-        updateBingCopyright();
       }
     },
     /**

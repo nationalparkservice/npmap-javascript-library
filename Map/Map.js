@@ -1,7 +1,7 @@
 ﻿/**
- * wax - 7.0.0dev11 - v6.0.4-113-g6b1c56c
+ * wax - 7.0.0dev13 - v6.0.4-142-ga157a2d
  */
-var html4={atype:{NONE:0,URI:1,URI_FRAGMENT:11,SCRIPT:2,STYLE:3,ID:4,IDREF:5,IDREFS:6,GLOBAL_NAME:7,LOCAL_NAME:8,CLASSES:9,FRAME_TARGET:10},ATTRIBS:{"*::class":9,"*::dir":0,"*::id":4,"*::lang":0,"*::onclick":2,"*::ondblclick":2,"*::onkeydown":2,"*::onkeypress":2,"*::onkeyup":2,"*::onload":2,"*::onmousedown":2,"*::onmousemove":2,"*::onmouseout":2,"*::onmouseover":2,"*::onmouseup":2,"*::style":3,"*::title":0,"a::accesskey":0,"a::coords":0,"a::href":1,"a::hreflang":0,"a::name":7,"a::onblur":2,"a::onfocus":2,"a::rel":0,"a::rev":0,"a::shape":0,"a::tabindex":0,"a::target":10,"a::type":0,"area::accesskey":0,"area::alt":0,"area::coords":0,"area::href":1,"area::nohref":0,"area::onblur":2,"area::onfocus":2,"area::shape":0,"area::tabindex":0,"area::target":10,"bdo::dir":0,"blockquote::cite":1,"br::clear":0,"button::accesskey":0,"button::disabled":0,"button::name":8,"button::onblur":2,"button::onfocus":2,"button::tabindex":0,"button::type":0,"button::value":0,"canvas::height":0,"canvas::width":0,"caption::align":0,"col::align":0,"col::char":0,"col::charoff":0,"col::span":0,"col::valign":0,"col::width":0,"colgroup::align":0,"colgroup::char":0,"colgroup::charoff":0,"colgroup::span":0,"colgroup::valign":0,"colgroup::width":0,"del::cite":1,"del::datetime":0,"dir::compact":0,"div::align":0,"dl::compact":0,"font::color":0,"font::face":0,"font::size":0,"form::accept":0,"form::action":1,"form::autocomplete":0,"form::enctype":0,"form::method":0,"form::name":7,"form::onreset":2,"form::onsubmit":2,"form::target":10,"h1::align":0,"h2::align":0,"h3::align":0,"h4::align":0,"h5::align":0,"h6::align":0,"hr::align":0,"hr::noshade":0,"hr::size":0,"hr::width":0,"iframe::align":0,"iframe::frameborder":0,"iframe::height":0,"iframe::marginheight":0,"iframe::marginwidth":0,"iframe::width":0,"img::align":0,"img::alt":0,"img::border":0,"img::height":0,"img::hspace":0,"img::ismap":0,"img::name":7,"img::src":1,"img::usemap":11,"img::vspace":0,"img::width":0,"input::accept":0,"input::accesskey":0,"input::align":0,"input::alt":0,"input::autocomplete":0,"input::checked":0,"input::disabled":0,"input::ismap":0,"input::maxlength":0,"input::name":8,"input::onblur":2,"input::onchange":2,"input::onfocus":2,"input::onselect":2,"input::readonly":0,"input::size":0,"input::src":1,"input::tabindex":0,"input::type":0,"input::usemap":11,"input::value":0,"ins::cite":1,"ins::datetime":0,"label::accesskey":0,"label::for":5,"label::onblur":2,"label::onfocus":2,"legend::accesskey":0,"legend::align":0,"li::type":0,"li::value":0,"map::name":7,"menu::compact":0,"ol::compact":0,"ol::start":0,"ol::type":0,"optgroup::disabled":0,"optgroup::label":0,"option::disabled":0,"option::label":0,"option::selected":0,"option::value":0,"p::align":0,"pre::width":0,"q::cite":1,"select::disabled":0,"select::multiple":0,"select::name":8,"select::onblur":2,"select::onchange":2,"select::onfocus":2,"select::size":0,"select::tabindex":0,"table::align":0,"table::bgcolor":0,"table::border":0,"table::cellpadding":0,"table::cellspacing":0,"table::frame":0,"table::rules":0,"table::summary":0,"table::width":0,"tbody::align":0,"tbody::char":0,"tbody::charoff":0,"tbody::valign":0,"td::abbr":0,"td::align":0,"td::axis":0,"td::bgcolor":0,"td::char":0,"td::charoff":0,"td::colspan":0,"td::headers":6,"td::height":0,"td::nowrap":0,"td::rowspan":0,"td::scope":0,"td::valign":0,"td::width":0,"textarea::accesskey":0,"textarea::cols":0,"textarea::disabled":0,"textarea::name":8,"textarea::onblur":2,"textarea::onchange":2,"textarea::onfocus":2,"textarea::onselect":2,"textarea::readonly":0,"textarea::rows":0,"textarea::tabindex":0,"tfoot::align":0,"tfoot::char":0,"tfoot::charoff":0,"tfoot::valign":0,"th::abbr":0,"th::align":0,"th::axis":0,"th::bgcolor":0,"th::char":0,"th::charoff":0,"th::colspan":0,"th::headers":6,"th::height":0,"th::nowrap":0,"th::rowspan":0,"th::scope":0,"th::valign":0,"th::width":0,"thead::align":0,"thead::char":0,"thead::charoff":0,"thead::valign":0,"tr::align":0,"tr::bgcolor":0,"tr::char":0,"tr::charoff":0,"tr::valign":0,"ul::compact":0,"ul::type":0},eflags:{OPTIONAL_ENDTAG:1,EMPTY:2,CDATA:4,RCDATA:8,UNSAFE:16,FOLDABLE:32,SCRIPT:64,STYLE:128},ELEMENTS:{a:0,abbr:0,acronym:0,address:0,applet:16,area:2,b:0,base:18,basefont:18,bdo:0,big:0,blockquote:0,body:49,br:2,button:0,canvas:0,caption:0,center:0,cite:0,code:0,col:2,colgroup:1,dd:1,del:0,dfn:0,dir:0,div:0,dl:0,dt:1,em:0,fieldset:0,font:0,form:0,frame:18,frameset:16,h1:0,h2:0,h3:0,h4:0,h5:0,h6:0,head:49,hr:2,html:49,i:0,iframe:4,img:2,input:2,ins:0,isindex:18,kbd:0,label:0,legend:0,li:1,link:18,map:0,menu:0,meta:18,nobr:0,noembed:4,noframes:20,noscript:20,object:16,ol:0,optgroup:0,option:1,p:1,param:18,pre:0,q:0,s:0,samp:0,script:84,select:0,small:0,span:0,strike:0,strong:0,style:148,sub:0,sup:0,table:0,tbody:1,td:1,textarea:8,tfoot:1,th:1,thead:1,title:24,tr:1,tt:0,u:0,ul:0,"var":0},ueffects:{NOT_LOADED:0,SAME_DOCUMENT:1,NEW_DOCUMENT:2},URIEFFECTS:{"a::href":2,"area::href":2,"blockquote::cite":0,"body::background":1,"del::cite":0,"form::action":2,"img::src":1,"input::src":1,"ins::cite":0,"q::cite":0},ltypes:{UNSANDBOXED:2,SANDBOXED:1,DATA:0},LOADERTYPES:{"a::href":2,"area::href":2,"blockquote::cite":2,"body::background":1,"del::cite":2,"form::action":2,"img::src":1,"input::src":1,"ins::cite":2,"q::cite":2}},html=function(a){function c(a,b){var d;d=e(b);if(j.hasOwnProperty(d))d=j[d];else{var c=d.match(p);d=c?String.fromCharCode(parseInt(c[1],10)):(c=d.match(l))?String.fromCharCode(parseInt(c[1],16)):""}return d}function f(a){return a.replace(t,c)}function b(a){return a.replace(s,"&amp;").replace(m,"&lt;").replace(v,"&gt;").replace(w,"&#34;").replace(x,"&#61;")}function g(a){return a.replace(i,"&amp;$1").replace(m,"&lt;").replace(v,"&gt;")}function d(b){return function(d,c){var d=String(d),i=null,h=!1,j=[],q=void 0,l=void 0,u=void 0;for(b.startDoc&&b.startDoc(c);d;){var k=d.match(h?y:z),d=d.substring(k[0].length);if(h)if(k[1]){var m=e(k[1]);if(k[2]){k=k[3];switch(k.charCodeAt(0)){case 34:case 39:k=k.substring(1,k.length-1)}k=f(k.replace(r,""))}else k=m;j.push(m,k)}else k[4]&&(void 0!==l&&(u?b.startTag&&b.startTag(q,j,c):b.endTag&&b.endTag(q,c)),u&&l&(a.eflags.CDATA|a.eflags.RCDATA)&&(i=null===i?e(d):i.substring(i.length-d.length),h=i.indexOf("</"+q),0>h&&(h=d.length),h&&(l&a.eflags.CDATA?b.cdata&&b.cdata(d.substring(0,h),c):b.rcdata&&b.rcdata(g(d.substring(0,h)),c),d=d.substring(h))),q=l=u=void 0,j.length=0,h=!1);else k[1]?b.pcdata&&b.pcdata(k[0],c):k[3]?(u=!k[2],h=!0,q=e(k[3]),l=a.ELEMENTS.hasOwnProperty(q)?a.ELEMENTS[q]:void 0):k[4]?b.pcdata&&b.pcdata(k[4],c):k[5]&&b.pcdata&&(m=k[5],b.pcdata("<"===m?"&lt;":">"===m?"&gt;":"&amp;",c))}b.endDoc&&b.endDoc(c)}}function h(c){var i,f;return d({startDoc:function(){i=[];f=!1},startTag:function(d,h,g){if(!f&&a.ELEMENTS.hasOwnProperty(d)){var e=a.ELEMENTS[d];if(!(e&a.eflags.FOLDABLE))if(e&a.eflags.UNSAFE)f=!(e&a.eflags.EMPTY);else if(h=c(d,h)){e&a.eflags.EMPTY||i.push(d);g.push("<",d);d=0;for(e=h.length;d<e;d+=2){var l=h[d],j=h[d+1];null!==j&&void 0!==j&&g.push(" ",l,'="',b(j),'"')}g.push(">")}}},endTag:function(b,d){if(f)f=!1;else if(a.ELEMENTS.hasOwnProperty(b)){var c=a.ELEMENTS[b];if(!(c&(a.eflags.UNSAFE|a.eflags.EMPTY|a.eflags.FOLDABLE))){if(c&a.eflags.OPTIONAL_ENDTAG)for(c=i.length;0<=--c;){var h=i[c];if(h===b)break;if(!(a.ELEMENTS[h]&a.eflags.OPTIONAL_ENDTAG))return}else for(c=i.length;0<=--c&&i[c]!==b;);if(!(0>c)){for(var e=i.length;--e>c;)h=i[e],a.ELEMENTS[h]&a.eflags.OPTIONAL_ENDTAG||d.push("</",h,">");i.length=c;d.push("</",b,">")}}}},pcdata:function(a,b){f||b.push(a)},rcdata:function(a,b){f||b.push(a)},cdata:function(a,b){f||b.push(a)},endDoc:function(a){for(var b=i.length;0<=--b;)a.push("</",i[b],">");i.length=0}})}var e;e=function(a){return a.toLowerCase()};var j={lt:"<",gt:">",amp:"&",nbsp:"\u00a0",quot:'"',apos:"'"},n=/^(?:https?|mailto|data)$/i,p=/^#(\d+)$/,l=/^#x([0-9A-Fa-f]+)$/,r=/\0/g,t=/&(#\d+|#x[0-9A-Fa-f]+|\w+);/g,s=/&/g,i=/&([^a-z#]|#(?:[^0-9x]|x(?:[^0-9a-f]|$)|$)|$)/gi,m=/</g,v=/>/g,w=/\"/g,x=/\=/g,y=RegExp("^\\s*(?:(?:([a-z][a-z-]*)(\\s*=\\s*(\"[^\"]*\"|'[^']*'|(?=[a-z][a-z-]*\\s*=)|[^>\"'\\s]*))?)|(/?>)|[\\s\\S][^a-z\\s>]*)","i"),z=RegExp("^(?:&(\\#[0-9]+|\\#[x][0-9a-f]+|\\w+);|<\!--[\\s\\S]*?--\>|<!\\w[^>]*>|<\\?[^>*]*>|<(/)?([a-z][a-z0-9]*)|([^<&>]+)|([<&>]))","i"),A=/^(?:([^:/?#]+):)?/;return{escapeAttrib:b,makeHtmlSanitizer:h,makeSaxParser:d,normalizeRCData:g,sanitize:function(b,d,c){var i=[];h(function(b,i){for(var h=0;h<i.length;h+=2){var f=i[h],e=i[h+1],g=null,j;if((j=b+"::"+f,a.ATTRIBS.hasOwnProperty(j))||(j="*::"+f,a.ATTRIBS.hasOwnProperty(j)))g=a.ATTRIBS[j];if(null!==g)switch(g){case a.atype.NONE:break;case a.atype.SCRIPT:case a.atype.STYLE:e=null;break;case a.atype.ID:case a.atype.IDREF:case a.atype.IDREFS:case a.atype.GLOBAL_NAME:case a.atype.LOCAL_NAME:case a.atype.CLASSES:e=c?c(e):e;break;case a.atype.URI:e=(f=(""+e).match(A))?!f[1]||n.test(f[1])?d&&d(e):null:null;break;case a.atype.URI_FRAGMENT:e&&"#"===e.charAt(0)?(e=c?c(e):e)&&(e="#"+e):e=null;break;default:e=null}else e=null;i[h+1]=e}return i})(b,i);return i.join("")},unescapeEntities:f}}(html4),html_sanitize=html.sanitize;"undefined"!==typeof window&&(window.html=html,window.html_sanitize=html_sanitize);html4.ATTRIBS["*::style"]=0;html4.ELEMENTS.style=0;html4.ATTRIBS["a::target"]=0;html4.ELEMENTS.video=0;html4.ATTRIBS["video::src"]=0;html4.ATTRIBS["video::poster"]=0;html4.ATTRIBS["video::controls"]=0;html4.ELEMENTS.audio=0;html4.ATTRIBS["audio::src"]=0;html4.ATTRIBS["video::autoplay"]=0;html4.ATTRIBS["video::controls"]=0;var wax={};wax.formatter=function(a){var c={},f;if(a&&"string"===typeof a)try{eval("f = "+a)}catch(b){console&&console.log(b)}else f=a&&"function"===typeof a?a:function(){};c.format=function(a,b){try{return wax.u.sanitize(f(a,b))}catch(c){console&&console.log(c)}};return c};wax.gi=function(a,c){var c=c||{},f={},b=c.resolution||4,g=c.tileSize||256;f.grid_tile=function(){return a};f.getKey=function(d,c){if(a&&a.grid&&!(0>c||0>d))if(!(Math.floor(c)>=g||Math.floor(d)>=g)){var e=a.grid[Math.floor(c/b)].charCodeAt(Math.floor(d/b));93<=e&&e--;35<=e&&e--;return e-32}};f.gridFeature=function(b,c){var e=this.getKey(b,c),f=a.keys;if(f&&f[e]&&a.data[f[e]])return a.data[f[e]]};f.tileFeature=function(b,c,e){if(a)return e=wax.u.offset(e),feature=this.gridFeature(b-e.left,c-e.top)};return f};wax.gm=function(){var a=4,c={},f,b,g=function(a){if(a)return a.replace(/(\.png|\.jpg|\.jpeg)(\d*)/,".grid.json")};c.formatter=function(a){if(!arguments.length)return b;b=wax.formatter(a);return c};c.template=function(a){if(!arguments.length)return b;b=wax.template(a);return c};c.gridUrl=function(a){if(!arguments.length)return g;if(a){var b;if("function"===typeof a)b=a;else{var e=a;"string"===typeof e&&(e=[e]);b=function(a){if(a&&(a=/\/(\d+)\/(\d+)\/(\d+)\.[\w\._]+/.exec(a)))return e[parseInt(a[2],10)%e.length].replace(/\{z\}/g,a[1]).replace(/\{x\}/g,a[2]).replace(/\{y\}/g,a[3])}}g=b}else g=function(){return null};return c};c.getGrid=function(d,f){var e=g(d);if(!b||!e)return f(null,null);wax.request.get(e,function(c,d){if(c)return f(c,null);f(null,wax.gi(d,{formatter:b,resolution:a}))});return c};c.tilejson=function(d){if(!arguments.length)return f;d.template?c.template(d.template):d.formatter?c.formatter(d.formatter):b=void 0;c.gridUrl(d.grids);d.resolution&&(a=d.resolution);f=d;return c};return c};wax.interaction=function(){function a(a){var e;d?(window.clearTimeout(d),d=null,e=!0):e=!1;e||(g=!0,h=wax.u.eventoffset(a),"mousedown"===a.type?(bean.add(document.body,"click",c),bean.add(document.body,"mouseup",c)):"touchstart"===a.type&&1===a.touches.length&&(bean.fire(b,"off"),bean.add(a.srcElement,s)))}function c(a){var f={},l=wax.u.eventoffset(a);g=!1;for(var j in a)f[j]=a[j];bean.remove(document.body,"mouseup",c);bean.remove(a.srcElement,s);"touchend"===a.type?b.click(a,h):Math.round(l.y/e)===Math.round(h.y/e)&&Math.round(l.x/e)===Math.round(h.x/e)&&(d=window.setTimeout(function(){d=null;b.click(f,l)},300));return c}var f=wax.gm(),b={},g=!1,d=!1,h,e=4,j,n,p,l,r,t={mousemove:function(a){if(!g){var c=wax.u.eventoffset(a);b.screen_feature(c,function(c){c?bean.fire(b,"on",{parent:l(),data:c,formatter:f.formatter().format,e:a}):bean.fire(b,"off")})}},touchstart:a,mousedown:a},s={touchend:c,touchmove:c,touchcancel:function(a){bean.remove(a.srcElement,s);g=!1}};b.click=function(a,c){b.screen_feature(c,function(c){c&&bean.fire(b,"on",{parent:l(),data:c,formatter:f.formatter().format,e:a})})};b.screen_feature=function(a,b){var c;a:{for(var d=j(),e=0;e<d.length;e++)if(d[e][0]<a.y&&d[e][0]+256>a.y&&d[e][1]<a.x&&d[e][1]+256>a.x){c=d[e][2];break a}c=!1}c||b(null);f.getGrid(c.src,function(d,e){if(d||!e)return b(null);var f=e.tileFeature(a.x,a.y,c);b(f)})};b.attach=function(a){if(!arguments.length)return n;n=a;return b};b.detach=function(a){if(!arguments.length)return p;p=a;return b};b.map=function(c){if(!arguments.length)return r;r=c;n&&n(r);bean.add(l(),t);bean.add(l(),"touchstart",a);return b};b.grid=function(a){if(!arguments.length)return j;j=a;return b};b.remove=function(){p&&p(r);bean.remove(l(),t);bean.fire(b,"remove");return b};b.tilejson=function(a){if(!arguments.length)return f.tilejson();f.tilejson(a);return b};b.formatter=function(){return f.formatter()};b.on=function(a,c){bean.add(b,a,c);return b};b.off=function(a,c){bean.remove(b,a,c);return b};b.gridmanager=function(a){if(!arguments.length)return f;f=a;return b};b.parent=function(a){l=a;return b};return b};wax.request={cache:{},locks:{},promises:{},get:function(a,c){if(this.cache[a])return c(this.cache[a][0],this.cache[a][1]);this.promises[a]=this.promises[a]||[];this.promises[a].push(c);if(!this.locks[a]){var f=this;this.locks[a]=!0;reqwest({url:a+(~a.indexOf("?")?"&":"?")+"callback=grid",type:"jsonp",jsonpCallback:"callback",success:function(b){f.locks[a]=!1;f.cache[a]=[null,b];for(b=0;b<f.promises[a].length;b++)f.promises[a][b](f.cache[a][0],f.cache[a][1])},error:function(b){f.locks[a]=!1;f.cache[a]=[b,null];for(b=0;b<f.promises[a].length;b++)f.promises[a][b](f.cache[a][0],f.cache[a][1])}})}}};wax.template=function(a){return{format:function(c,f){var b={},g;for(g in f)b[g]=f[g];c.format&&(b["__"+c.format+"__"]=!0);return wax.u.sanitize(Mustache.to_html(a,b))}}};wax.u={offset:function(a){var c=a.offsetWidth||parseInt(a.style.width,10),f=a.offsetHeight||parseInt(a.style.height,10),b=document.body,g=0,d=0,h=function(a){if(!(a===b||a===document.documentElement))if(g+=a.offsetTop,d+=a.offsetLeft,a=a.style.transform||a.style.WebkitTransform||a.style.OTransform||a.style.MozTransform||a.style.msTransform){var c;if(c=a.match(/translate\((.+)[px]?, (.+)[px]?\)/))g+=parseInt(c[2],10),d+=parseInt(c[1],10);else if(c=a.match(/translate3d\((.+)[px]?, (.+)[px]?, (.+)[px]?\)/))g+=parseInt(c[2],10),d+=parseInt(c[1],10);else if(c=a.match(/matrix3d\(([\-\d,\s]+)\)/))a=c[1].split(","),g+=parseInt(a[13],10),d+=parseInt(a[12],10);else if(c=a.match(/matrix\(.+, .+, .+, .+, (.+), (.+)\)/))g+=parseInt(c[2],10),d+=parseInt(c[1],10)}};if("undefined"!==typeof a.getBoundingClientRect)var e=document.body,j=a.ownerDocument.documentElement,h=document.clientTop||e.clientTop||0,e=document.clientLeft||e.clientLeft||0,n=window.pageYOffset||j.scrollTop,j=window.pageXOffset||j.scrollLeft,a=a.getBoundingClientRect(),g=a.top+n-h,d=a.left+j-e;else{h(a);try{for(;a=a.offsetParent;)h(a)}catch(p){}}g+=b.offsetTop;d+=b.offsetLeft;g+=b.parentNode.offsetTop;d+=b.parentNode.offsetLeft;a=document.defaultView?window.getComputedStyle(b.parentNode,null):b.parentNode.currentStyle;b.parentNode.offsetTop!==parseInt(a.marginTop,10)&&!isNaN(parseInt(a.marginTop,10))&&(g+=parseInt(a.marginTop,10),d+=parseInt(a.marginLeft,10));return{top:g,left:d,height:f,width:c}},$:function(a){return"string"===typeof a?document.getElementById(a):a},eventoffset:function(a){a||(a=window.event);if(a.pageX||a.pageY)return{x:a.pageX,y:a.pageY};if(a.clientX||a.clientY)return{x:a.clientX,y:a.clientY};if(a.touches&&1===a.touches.length)return{x:a.touches[0].pageX,y:a.touches[0].pageY}},limit:function(a,c,f){var b;return function(){var g=this,d=arguments,h=function(){b=null;a.apply(g,d)};f&&clearTimeout(b);if(f||!b)b=setTimeout(h,c)}},throttle:function(a,c){return this.limit(a,c,!1)},sanitize:function(a){return!a?"":html_sanitize(a,function(a){if(/^(https?:\/\/|data:image)/.test(a))return a},function(a){return a})}};
+ var html4={atype:{NONE:0,URI:1,URI_FRAGMENT:11,SCRIPT:2,STYLE:3,ID:4,IDREF:5,IDREFS:6,GLOBAL_NAME:7,LOCAL_NAME:8,CLASSES:9,FRAME_TARGET:10},ATTRIBS:{"*::class":9,"*::dir":0,"*::id":4,"*::lang":0,"*::onclick":2,"*::ondblclick":2,"*::onkeydown":2,"*::onkeypress":2,"*::onkeyup":2,"*::onload":2,"*::onmousedown":2,"*::onmousemove":2,"*::onmouseout":2,"*::onmouseover":2,"*::onmouseup":2,"*::style":3,"*::title":0,"a::accesskey":0,"a::coords":0,"a::href":1,"a::hreflang":0,"a::name":7,"a::onblur":2,"a::onfocus":2,"a::rel":0,"a::rev":0,"a::shape":0,"a::tabindex":0,"a::target":10,"a::type":0,"area::accesskey":0,"area::alt":0,"area::coords":0,"area::href":1,"area::nohref":0,"area::onblur":2,"area::onfocus":2,"area::shape":0,"area::tabindex":0,"area::target":10,"bdo::dir":0,"blockquote::cite":1,"br::clear":0,"button::accesskey":0,"button::disabled":0,"button::name":8,"button::onblur":2,"button::onfocus":2,"button::tabindex":0,"button::type":0,"button::value":0,"canvas::height":0,"canvas::width":0,"caption::align":0,"col::align":0,"col::char":0,"col::charoff":0,"col::span":0,"col::valign":0,"col::width":0,"colgroup::align":0,"colgroup::char":0,"colgroup::charoff":0,"colgroup::span":0,"colgroup::valign":0,"colgroup::width":0,"del::cite":1,"del::datetime":0,"dir::compact":0,"div::align":0,"dl::compact":0,"font::color":0,"font::face":0,"font::size":0,"form::accept":0,"form::action":1,"form::autocomplete":0,"form::enctype":0,"form::method":0,"form::name":7,"form::onreset":2,"form::onsubmit":2,"form::target":10,"h1::align":0,"h2::align":0,"h3::align":0,"h4::align":0,"h5::align":0,"h6::align":0,"hr::align":0,"hr::noshade":0,"hr::size":0,"hr::width":0,"iframe::align":0,"iframe::frameborder":0,"iframe::height":0,"iframe::marginheight":0,"iframe::marginwidth":0,"iframe::width":0,"img::align":0,"img::alt":0,"img::border":0,"img::height":0,"img::hspace":0,"img::ismap":0,"img::name":7,"img::src":1,"img::usemap":11,"img::vspace":0,"img::width":0,"input::accept":0,"input::accesskey":0,"input::align":0,"input::alt":0,"input::autocomplete":0,"input::checked":0,"input::disabled":0,"input::ismap":0,"input::maxlength":0,"input::name":8,"input::onblur":2,"input::onchange":2,"input::onfocus":2,"input::onselect":2,"input::readonly":0,"input::size":0,"input::src":1,"input::tabindex":0,"input::type":0,"input::usemap":11,"input::value":0,"ins::cite":1,"ins::datetime":0,"label::accesskey":0,"label::for":5,"label::onblur":2,"label::onfocus":2,"legend::accesskey":0,"legend::align":0,"li::type":0,"li::value":0,"map::name":7,"menu::compact":0,"ol::compact":0,"ol::start":0,"ol::type":0,"optgroup::disabled":0,"optgroup::label":0,"option::disabled":0,"option::label":0,"option::selected":0,"option::value":0,"p::align":0,"pre::width":0,"q::cite":1,"select::disabled":0,"select::multiple":0,"select::name":8,"select::onblur":2,"select::onchange":2,"select::onfocus":2,"select::size":0,"select::tabindex":0,"table::align":0,"table::bgcolor":0,"table::border":0,"table::cellpadding":0,"table::cellspacing":0,"table::frame":0,"table::rules":0,"table::summary":0,"table::width":0,"tbody::align":0,"tbody::char":0,"tbody::charoff":0,"tbody::valign":0,"td::abbr":0,"td::align":0,"td::axis":0,"td::bgcolor":0,"td::char":0,"td::charoff":0,"td::colspan":0,"td::headers":6,"td::height":0,"td::nowrap":0,"td::rowspan":0,"td::scope":0,"td::valign":0,"td::width":0,"textarea::accesskey":0,"textarea::cols":0,"textarea::disabled":0,"textarea::name":8,"textarea::onblur":2,"textarea::onchange":2,"textarea::onfocus":2,"textarea::onselect":2,"textarea::readonly":0,"textarea::rows":0,"textarea::tabindex":0,"tfoot::align":0,"tfoot::char":0,"tfoot::charoff":0,"tfoot::valign":0,"th::abbr":0,"th::align":0,"th::axis":0,"th::bgcolor":0,"th::char":0,"th::charoff":0,"th::colspan":0,"th::headers":6,"th::height":0,"th::nowrap":0,"th::rowspan":0,"th::scope":0,"th::valign":0,"th::width":0,"thead::align":0,"thead::char":0,"thead::charoff":0,"thead::valign":0,"tr::align":0,"tr::bgcolor":0,"tr::char":0,"tr::charoff":0,"tr::valign":0,"ul::compact":0,"ul::type":0},eflags:{OPTIONAL_ENDTAG:1,EMPTY:2,CDATA:4,RCDATA:8,UNSAFE:16,FOLDABLE:32,SCRIPT:64,STYLE:128},ELEMENTS:{a:0,abbr:0,acronym:0,address:0,applet:16,area:2,b:0,base:18,basefont:18,bdo:0,big:0,blockquote:0,body:49,br:2,button:0,canvas:0,caption:0,center:0,cite:0,code:0,col:2,colgroup:1,dd:1,del:0,dfn:0,dir:0,div:0,dl:0,dt:1,em:0,fieldset:0,font:0,form:0,frame:18,frameset:16,h1:0,h2:0,h3:0,h4:0,h5:0,h6:0,head:49,hr:2,html:49,i:0,iframe:4,img:2,input:2,ins:0,isindex:18,kbd:0,label:0,legend:0,li:1,link:18,map:0,menu:0,meta:18,nobr:0,noembed:4,noframes:20,noscript:20,object:16,ol:0,optgroup:0,option:1,p:1,param:18,pre:0,q:0,s:0,samp:0,script:84,select:0,small:0,span:0,strike:0,strong:0,style:148,sub:0,sup:0,table:0,tbody:1,td:1,textarea:8,tfoot:1,th:1,thead:1,title:24,tr:1,tt:0,u:0,ul:0,"var":0},ueffects:{NOT_LOADED:0,SAME_DOCUMENT:1,NEW_DOCUMENT:2},URIEFFECTS:{"a::href":2,"area::href":2,"blockquote::cite":0,"body::background":1,"del::cite":0,"form::action":2,"img::src":1,"input::src":1,"ins::cite":0,"q::cite":0},ltypes:{UNSANDBOXED:2,SANDBOXED:1,DATA:0},LOADERTYPES:{"a::href":2,"area::href":2,"blockquote::cite":2,"body::background":1,"del::cite":2,"form::action":2,"img::src":1,"input::src":1,"ins::cite":2,"q::cite":2}},html=function(a){function c(a,d){var b;b=h(d);if(j.hasOwnProperty(b))b=j[b];else{var c=b.match(q);b=c?String.fromCharCode(parseInt(c[1],10)):(c=b.match(m))?String.fromCharCode(parseInt(c[1],16)):""}return b}function e(a){return a.replace(t,c)}function f(a){return a.replace(v,"&amp;").replace(l,"&lt;").replace(n,"&gt;").replace(x,"&#34;").replace(y,"&#61;")}function d(a){return a.replace(u,"&amp;$1").replace(l,"&lt;").replace(n,"&gt;")}function b(b){return function(c,f){c=String(c);var l=null,g=!1,j=[],r=void 0,m=void 0,w=void 0;for(b.startDoc&&b.startDoc(f);c;){var k=c.match(g?z:A);c=c.substring(k[0].length);if(g)if(k[1]){var n=h(k[1]);if(k[2]){k=k[3];switch(k.charCodeAt(0)){case 34:case 39:k=k.substring(1,k.length-1)}k=e(k.replace(p,""))}else k=n;j.push(n,k)}else k[4]&&(void 0!==m&&(w?b.startTag&&b.startTag(r,j,f):b.endTag&&b.endTag(r,f)),w&&m&(a.eflags.CDATA|a.eflags.RCDATA)&&(l=null===l?h(c):l.substring(l.length-c.length),g=l.indexOf("</"+r),0>g&&(g=c.length),g&&(m&a.eflags.CDATA?b.cdata&&b.cdata(c.substring(0,g),f):b.rcdata&&b.rcdata(d(c.substring(0,g)),f),c=c.substring(g))),r=m=w=void 0,j.length=0,g=!1);else k[1]?b.pcdata&&b.pcdata(k[0],f):k[3]?(w=!k[2],g=!0,r=h(k[3]),m=a.ELEMENTS.hasOwnProperty(r)?a.ELEMENTS[r]:void 0):k[4]?b.pcdata&&b.pcdata(k[4],f):k[5]&&b.pcdata&&(n=k[5],b.pcdata("<"===n?"&lt;":">"===n?"&gt;":"&amp;",f))}b.endDoc&&b.endDoc(f)}}function g(c){var d,l;return b({startDoc:function(){d=[];l=!1},startTag:function(b,e,h){if(!l&&a.ELEMENTS.hasOwnProperty(b)){var g=a.ELEMENTS[b];if(!(g&a.eflags.FOLDABLE))if(g&a.eflags.UNSAFE)l=!(g&a.eflags.EMPTY);else if(e=c(b,e)){g&a.eflags.EMPTY||d.push(b);h.push("<",b);b=0;for(g=e.length;b<g;b+=2){var j=e[b],m=e[b+1];null!==m&&void 0!==m&&h.push(" ",j,'="',f(m),'"')}h.push(">")}}},endTag:function(b,c){if(l)l=!1;else if(a.ELEMENTS.hasOwnProperty(b)){var f=a.ELEMENTS[b];if(!(f&(a.eflags.UNSAFE|a.eflags.EMPTY|a.eflags.FOLDABLE))){if(f&a.eflags.OPTIONAL_ENDTAG)for(f=d.length;0<=--f;){var e=d[f];if(e===b)break;if(!(a.ELEMENTS[e]&a.eflags.OPTIONAL_ENDTAG))return}else for(f=d.length;0<=--f&&d[f]!==b;);if(!(0>f)){for(var g=d.length;--g>f;)e=d[g],a.ELEMENTS[e]&a.eflags.OPTIONAL_ENDTAG||c.push("</",e,">");d.length=f;c.push("</",b,">")}}}},pcdata:function(a,b){l||b.push(a)},rcdata:function(a,b){l||b.push(a)},cdata:function(a,b){l||b.push(a)},endDoc:function(a){for(var b=d.length;0<=--b;)a.push("</",d[b],">");d.length=0}})}var h;h=function(a){return a.toLowerCase()};var j={lt:"<",gt:">",amp:"&",nbsp:"\u00a0",quot:'"',apos:"'"},s=/^(?:https?|mailto|data)$/i,q=/^#(\d+)$/,m=/^#x([0-9A-Fa-f]+)$/,p=/\0/g,t=/&(#\d+|#x[0-9A-Fa-f]+|\w+);/g,v=/&/g,u=/&([^a-z#]|#(?:[^0-9x]|x(?:[^0-9a-f]|$)|$)|$)/gi,l=/</g,n=/>/g,x=/\"/g,y=/\=/g,z=RegExp("^\\s*(?:(?:([a-z][a-z-]*)(\\s*=\\s*(\"[^\"]*\"|'[^']*'|(?=[a-z][a-z-]*\\s*=)|[^>\"'\\s]*))?)|(/?>)|[\\s\\S][^a-z\\s>]*)","i"),A=RegExp("^(?:&(\\#[0-9]+|\\#[x][0-9a-f]+|\\w+);|\x3c!--[\\s\\S]*?--\x3e|<!\\w[^>]*>|<\\?[^>*]*>|<(/)?([a-z][a-z0-9]*)|([^<&>]+)|([<&>]))","i"),B=/^(?:([^:/?#]+):)?/;return{escapeAttrib:f,makeHtmlSanitizer:g,makeSaxParser:b,normalizeRCData:d,sanitize:function(b,d,c){var f=[];g(function(b,f){for(var e=0;e<f.length;e+=2){var l=f[e],g=f[e+1],h=null,j;if((j=b+"::"+l,a.ATTRIBS.hasOwnProperty(j))||(j="*::"+l,a.ATTRIBS.hasOwnProperty(j)))h=a.ATTRIBS[j];if(null!==h)switch(h){case a.atype.NONE:break;case a.atype.SCRIPT:case a.atype.STYLE:g=null;break;case a.atype.ID:case a.atype.IDREF:case a.atype.IDREFS:case a.atype.GLOBAL_NAME:case a.atype.LOCAL_NAME:case a.atype.CLASSES:g=c?c(g):g;break;case a.atype.URI:g=(l=(""+g).match(B))?!l[1]||s.test(l[1])?d&&d(g):null:null;break;case a.atype.URI_FRAGMENT:g&&"#"===g.charAt(0)?(g=c?c(g):g)&&(g="#"+g):g=null;break;default:g=null}else g=null;f[e+1]=g}return f})(b,f);return f.join("")},unescapeEntities:e}}(html4),html_sanitize=html.sanitize;"undefined"!==typeof window&&(window.html=html,window.html_sanitize=html_sanitize);html4.ATTRIBS["*::style"]=0;html4.ELEMENTS.style=0;html4.ATTRIBS["a::target"]=0;html4.ELEMENTS.video=0;html4.ATTRIBS["video::src"]=0;html4.ATTRIBS["video::poster"]=0;html4.ATTRIBS["video::controls"]=0;html4.ELEMENTS.audio=0;html4.ATTRIBS["audio::src"]=0;html4.ATTRIBS["video::autoplay"]=0;html4.ATTRIBS["video::controls"]=0;wax={bwdetect:function(a,c){var e={},f=a.threshold||400,d="http://a.tiles.mapbox.com/mapbox/1.0.0/blue-marble-topo-bathy-jul/0/0/0.png?preventcache="+ +new Date,b=1,g=void 0===a.auto?!0:a.auto;e.bw=function(a){if(!arguments.length)return b;if(wax.bwlisteners&&wax.bwlisteners.length){listeners=wax.bwlisteners;wax.bwlisteners=[];for(i=0;i<listeners;i++)listeners[i](a)}wax.bw=a;b!=(b=a)&&c(a)};e.add=function(){if(g){wax.bw=-1;var a=new Image;a.src=d;var b=!0,c=setTimeout(function(){b&&-1==wax.bw&&(e.bw(0),b=!1)},f);a.onload=function(){b&&-1==wax.bw&&(clearTimeout(c),e.bw(1),b=!1)}}return this};-1==wax.bw?(wax.bwlisteners=wax.bwlisteners||[],wax.bwlisteners.push(e.bw)):void 0!==wax.bw?e.bw(wax.bw):e.add();return e},gi:function(a,c){c=c||{};var e={},f=c.resolution||4,d=c.tileSize||256;e.grid_tile=function(){return a};e.getKey=function(b,c){if(a&&a.grid&&!(0>c||0>b))if(!(Math.floor(c)>=d||Math.floor(b)>=d)){var e=a.grid[Math.floor(c/f)].charCodeAt(Math.floor(b/f));93<=e&&e--;35<=e&&e--;return e-32}};e.gridFeature=function(b,c){var d=this.getKey(b,c),f=a.keys;if(f&&f[d]&&a.data[f[d]])return a.data[f[d]]};e.tileFeature=function(b,c,d){if(a)return d=wax.u.offset(d),feature=this.gridFeature(b-d.left,c-d.top)};return e},gm:function(){var a=4,c={},e,f,d=function(a){if(a)return a.replace(/(\.png|\.jpg|\.jpeg)(\d*)/,".grid.json")};c.formatter=function(a){if(!arguments.length)return f;f=wax.formatter(a);return c};c.template=function(a){if(!arguments.length)return f;f=wax.template(a);return c};c.gridUrl=function(a){if(!arguments.length)return d;if(a){var f;if("function"===typeof a)f=a;else{var e=a;"string"===typeof e&&(e=[e]);f=function(a){if(a&&(a=/\/(\d+)\/(\d+)\/(\d+)\.[\w\._]+/.exec(a)))return e[parseInt(a[2],10)%e.length].replace(/\{z\}/g,a[1]).replace(/\{x\}/g,a[2]).replace(/\{y\}/g,a[3])}}d=f}else d=function(){return null};return c};c.getGrid=function(b,e){var h=d(b);if(!f||!h)return e(null,null);wax.request.get(h,function(b,c){if(b)return e(b,null);e(null,wax.gi(c,{formatter:f,resolution:a}))});return c};c.tilejson=function(b){if(!arguments.length)return e;b.template?c.template(b.template):b.formatter?c.formatter(b.formatter):f=void 0;c.gridUrl(b.grids);b.resolution&&(a=b.resolution);e=b;return c};return c},interaction:function(){function a(){b=!1}function c(c){b=!0;h=wax.u.eventoffset(c);"mousedown"===c.type?(bean.add(document.body,"click",e),bean.add(document.body,"mouseup",a)):"touchstart"===c.type&&1===c.touches.length&&(bean.fire(d,"off"),bean.add(c.srcElement,u))}function e(a){var c={},f=wax.u.eventoffset(a);b=!1;for(var m in a)c[m]=a[m];bean.remove(document.body,"mouseup",e);bean.remove(a.srcElement,u);"touchend"===a.type?d.click(a,h):Math.round(f.y/j)===Math.round(h.y/j)&&Math.round(f.x/j)===Math.round(h.x/j)&&(g?g&&(window.clearTimeout(g),g=null):g=window.setTimeout(function(){g=null;d.click(c,f)},300));return e}var f=wax.gm(),d={},b=!1,g=null,h,j=4,s,q,m,p,t,v={mousemove:function(a){if(!b){var c=wax.u.eventoffset(a);d.screen_feature(c,function(b){b?bean.fire(d,"on",{parent:p(),data:b,formatter:f.formatter().format,e:a}):bean.fire(d,"off")})}},touchstart:c,mousedown:c},u={touchend:e,touchmove:e,touchcancel:function(a){bean.remove(a.srcElement,u);b=!1}};d.click=function(a,b){d.screen_feature(b,function(b){b&&bean.fire(d,"on",{parent:p(),data:b,formatter:f.formatter().format,e:a})})};d.screen_feature=function(a,b){var c;a:{for(var d=s(),e=0;e<d.length;e++)if(d[e][0]<a.y&&d[e][0]+256>a.y&&d[e][1]<a.x&&d[e][1]+256>a.x){c=d[e][2];break a}c=!1}c||b(null);f.getGrid(c.src,function(d,f){if(d||!f)return b(null);var e=f.tileFeature(a.x,a.y,c);b(e)})};d.attach=function(a){if(!arguments.length)return q;q=a;return d};d.detach=function(a){if(!arguments.length)return m;m=a;return d};d.map=function(a){if(!arguments.length)return t;t=a;q&&q(t);bean.add(p(),v);bean.add(p(),"touchstart",c);return d};d.grid=function(a){if(!arguments.length)return s;s=a;return d};d.remove=function(){m&&m(t);bean.remove(p(),v);bean.fire(d,"remove");return d};d.tilejson=function(a){if(!arguments.length)return f.tilejson();f.tilejson(a);return d};d.formatter=function(){return f.formatter()};d.on=function(a,b){bean.add(d,a,b);return d};d.off=function(a,b){bean.remove(d,a,b);return d};d.gridmanager=function(a){if(!arguments.length)return f;f=a;return d};d.parent=function(a){p=a;return d};return d},legend:function(){var a,c={},e;c.element=function(){return e};c.content=function(f){if(!arguments.length)return a.innerHTML;a.innerHTML=wax.u.sanitize(f);a.style.display="block";""===a.innerHTML&&(a.style.display="none");return c};c.add=function(){e=document.createElement("div");e.className="map-legends wax-legends";a=e.appendChild(document.createElement("div"));a.className="map-legend wax-legend";a.style.display="none";return c};return c.add()},location:function(){function a(a){if("mousemove"!==a.e.type&&a.e.type&&(a=a.formatter({format:"location"},a.data)))window.top.location.href=a}return{events:function(){return{on:a}}}},request:{cache:{},locks:{},promises:{},get:function(a,c){if(this.cache[a])return c(this.cache[a][0],this.cache[a][1]);this.promises[a]=this.promises[a]||[];this.promises[a].push(c);if(!this.locks[a]){var e=this;this.locks[a]=!0;reqwest({url:a+(~a.indexOf("?")?"&":"?")+"callback=?",type:"jsonp",success:function(c){e.locks[a]=!1;e.cache[a]=[null,c];for(c=0;c<e.promises[a].length;c++)e.promises[a][c](e.cache[a][0],e.cache[a][1])},error:function(c){e.locks[a]=!1;e.cache[a]=[c,null];for(c=0;c<e.promises[a].length;c++)e.promises[a][c](e.cache[a][0],e.cache[a][1])}})}}},template:function(a){return{format:function(c,e){var f={},d;for(d in e)f[d]=e[d];c.format&&(f["__"+c.format+"__"]=!0);return wax.u.sanitize(Mustache.to_html(a,f))}}}};if(!wax)var wax={};wax.tilejson=function(a,c){reqwest({url:a+(~a.indexOf("?")?"&":"?")+"callback=?",type:"jsonp",success:c,error:c})};wax.u={offset:function(a){var c=a.offsetWidth||parseInt(a.style.width,10),e=a.offsetHeight||parseInt(a.style.height,10),f=document.body,d=0,b=0,g=function(a){if(!(a===f||a===document.documentElement))if(d+=a.offsetTop,b+=a.offsetLeft,a=a.style.transform||a.style.WebkitTransform||a.style.OTransform||a.style.MozTransform||a.style.msTransform){var c;if(c=a.match(/translate\((.+)[px]?, (.+)[px]?\)/))d+=parseInt(c[2],10),b+=parseInt(c[1],10);else if(c=a.match(/translate3d\((.+)[px]?, (.+)[px]?, (.+)[px]?\)/))d+=parseInt(c[2],10),b+=parseInt(c[1],10);else if(c=a.match(/matrix3d\(([\-\d,\s]+)\)/))a=c[1].split(","),d+=parseInt(a[13],10),b+=parseInt(a[12],10);else if(c=a.match(/matrix\(.+, .+, .+, .+, (.+), (.+)\)/))d+=parseInt(c[2],10),b+=parseInt(c[1],10)}};if("undefined"!==typeof a.getBoundingClientRect){var h=document.body,j=a.ownerDocument.documentElement,g=document.clientTop||h.clientTop||0,h=document.clientLeft||h.clientLeft||0,s=window.pageYOffset||j.scrollTop,j=window.pageXOffset||j.scrollLeft;a=a.getBoundingClientRect();d=a.top+s-g;b=a.left+j-h}else{g(a);try{for(;a=a.offsetParent;)g(a)}catch(q){}}d+=f.offsetTop;b+=f.offsetLeft;d+=f.parentNode.offsetTop;b+=f.parentNode.offsetLeft;a=document.defaultView?window.getComputedStyle(f.parentNode,null):f.parentNode.currentStyle;f.parentNode.offsetTop!==parseInt(a.marginTop,10)&&!isNaN(parseInt(a.marginTop,10))&&(d+=parseInt(a.marginTop,10),b+=parseInt(a.marginLeft,10));return{top:d,left:b,height:e,width:c}},$:function(a){return"string"===typeof a?document.getElementById(a):a},eventoffset:function(a){a||(a=window.event);if(a.pageX||a.pageY)return{x:a.pageX,y:a.pageY};if(a.clientX||a.clientY)return{x:a.clientX,y:a.clientY};if(a.touches&&1===a.touches.length)return{x:a.touches[0].pageX,y:a.touches[0].pageY}},limit:function(a,c,e){var f;return function(){var d=this,b=arguments,g=function(){f=null;a.apply(d,b)};e&&clearTimeout(f);if(e||!f)f=setTimeout(g,c)}},throttle:function(a,c){return this.limit(a,c,!1)},sanitize:function(a){return!a?"":html_sanitize(a,function(a){if(/^(https?:\/\/|data:image)/.test(a))return a},function(a){return a})}};
 
 /**
  * @module NPMap.Map
@@ -24,18 +24,14 @@ define([
       divAttribution = document.createElement('div'),
       // The clickdot div.
       divClickdot = document.createElement('div'),
-
-
-
-
-
+      /*
       divToolsBottomCenter = document.createElement('div'),
       divToolsBottomLeft = document.createElement('div'),
       divToolsBottomRight = document.createElement('div'),
       divToolsTopCenter = document.createElement('div'),
       divToolsTopLeft = document.createElement('div'),
       divToolsTopRight = document.createElement('div'),
-
+      */
       // The map div.
       divMap = document.getElementById(NPMap.config.div),
       // The modules div.
@@ -279,6 +275,37 @@ define([
   });
 
   return NPMap.Map = {
+    /**
+     * Adds a tile layer to the map.
+     * @param {Object} options
+     * @return {Object}
+     * Valid options: constructor, name, opacity, zIndex, zoomRange (currently honored by Google and Leaflet)
+     */
+    _addTileLayer: function(options) {
+      options = options || {};
+
+      if (!options.constructor) {
+        throw new Error('To add a TileLayer, you must specify the "constructor" property.');
+      }
+
+      if (!options.name) {
+        throw new Error('To add a TileLayer, you must specify the "name" property.');
+      }
+
+      if (options.zoomRange) {
+        if (typeof options.zoomRange.max === 'number') {
+          options.maxZoom = options.zoomRange.max;
+        }
+
+        if (typeof options.zoomRange.min === 'number') {
+          options.minZoom = options.zoomRange.min;
+        }
+
+        delete options.zoomRange;
+      }
+
+      return this[NPMap.config.api]._addTileLayer(options);
+    },
     /**
      * Creates a line using the baseApi's line class, if it exists.
      * @param {Array} latLngs An array of the latitude/longitude strings, in "latitude,longitude" format, to use to create the line.
@@ -954,7 +981,7 @@ define([
                         if (item.name === currentLabel) {
                           setIcon(item.icon.replace('large', 'small'));
                           setLabel(item.name);
-                          NPMap.Map[NPMap.config.api].switchBaseLayer(item);
+                          NPMap.Map[NPMap.config.api]._setBaseLayer(item);
                         }
                       }
                     }
@@ -1063,21 +1090,30 @@ define([
       }
     },
     /**
-     * UNDOCUMENTED
+     * Adds a layer to the map.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
      */
-    addLayer: function(config) {
-      var type = config.type,
-          func = NPMap.Layer[type].add,
-          meta = NPMap.Layer.getLayerHandlerMeta(type);
+    addLayer: function(config, silent) {
+      var func = NPMap.Layer[config.type]._add;
 
-      NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+      function callback() {
+        if (!silent) {
+          NPMap.Event.trigger('NPMap.Layer', 'added', config);
+        }
+      }
+
+      config.visible = true;
+
+      if (!silent) {
+        NPMap.Event.trigger('NPMap.Layer', 'beforeadd', config);
+      }
 
       if (typeof func === 'function') {
-        func(config, function() {
-          NPMap.Event.trigger('NPMap.Layer', 'added', config);
-        });
+        func(config, callback);
       } else {
-        NPMap.Event.trigger('NPMap.Layer', 'added', config);
+        callback();
       }
     },
     /**
@@ -1101,17 +1137,13 @@ define([
       });
     },
     /**
-     * Adds a tile layer to the map.
-     * @param {Object} layer The layer to add to the map. This object should be created with the base API.
-     * @return null
+     * DEPRECATED
      */
     addTileLayer: function(layer) {
       NPMap.Map[NPMap.config.api].addTileLayer(layer);
     },
     /**
-     * Adds a Zoomify layer to the map.
-     * @param {Object} layer The layer to add to the map. This object should be created with the base API.
-     * @return null
+     * DEPRECATED
      */
     addZoomifyLayer: function(layer) {
       NPMap.Map[NPMap.config.api].addZoomifyLayer(layer);
@@ -1125,7 +1157,9 @@ define([
       return NPMap.Map[NPMap.config.api].boundsFromApi(bounds);
     },
     /**
-     * UNDOCUMENTED
+     * Gets the center lat/lng of a bounds object.
+     * @param {Object} bounds
+     * @return {Object}
      */
     boundsGetCenter: function(bounds) {
       return {
@@ -1203,9 +1237,7 @@ define([
       return this._createPolygon(latLngs, NPMap.Map[NPMap.config.api].convertPolygonOptions(options));
     },
     /**
-     * Creates a Zoomify layer.
-     * @param {Object} config
-     * @return {Object}
+     * DEPRECATED
      */
     createZoomifyLayer: function(config) {
       return NPMap.Map[NPMap.config.api].createZoomifyLayer(config);
@@ -1225,7 +1257,9 @@ define([
       return this.latLngFromApi(NPMap.Map[NPMap.config.api].getCenter());
     },
     /**
-     * UNDOCUMENTED
+     * Gets the lat/lngs of a line.
+     * @param {Object} line
+     * @return {Array}
      */
     getLineLatLngs: function(line) {
       var latLngs = [];
@@ -1283,7 +1317,9 @@ define([
       return NPMap.Map[NPMap.config.api].getMinZoom();
     },
     /**
-     * UNDOCUMENTED
+     * Gets the lat/lngs of a polygon.
+     * @param {Object} polygon
+     * @return {Array}
      */
     getPolygonLatLngs: function(polygon) {
       var latLngs = [];
@@ -1345,34 +1381,44 @@ define([
       return hasTiled;
     },
     /**
-     * UNDOCUMENTED
+     * Hides a layer.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
      */
-    hideLayer: function(config) {
+    hideLayer: function(config, silent) {
       var type = config.type,
-          func = NPMap.Layer[type].hide,
+          func = NPMap.Layer[type]._hide,
           me = this,
           meta = NPMap.Layer.getLayerHandlerMeta(type);
 
-      NPMap.Event.trigger('NPMap.Layer', 'beforehide', config);
+      function callback() {
+        if (meta.type === 'raster') {
+        
+        } else {
+          _.each(config.shapes, function(shape) {
+            me.hideShape(shape);
+          });
+        }
+
+        config.visible = false;
+
+        if (!silent) {
+          NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
+        }
+      }
+
       InfoBox.hide();
 
+      if (!silent) {
+        NPMap.Event.trigger('NPMap.Layer', 'beforehide', config);
+      }
+
       if (typeof func === 'function') {
-        func(config, function() {
-          NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
-        });
+        func(config, callback);
       } else {
-        NPMap.Event.trigger('NPMap.Layer', 'hidden', config);
+        callback();
       }
-
-      if (meta.type === 'raster') {
-        
-      } else {
-        _.each(config.shapes, function(shape) {
-          me.hideShape(shape);
-        });
-      }
-
-      config.visible = false;
     },
     /**
      * Hides the progress bar.
@@ -1628,33 +1674,46 @@ define([
       return NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].pixelToLatLng(NPMap.Map[NPMap.config.api].pixelToApi(pixel)));
     },
     /**
-     * UNDOCUMENTED
+     * Removes a layer from the map.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
      */
-    removeLayer: function(config) {
+    removeLayer: function(config, silent) {
       var type = config.type,
-          func = NPMap.Layer[type].remove,
+          func = NPMap.Layer[type]._remove,
           meta = NPMap.Layer.getLayerHandlerMeta(type);
 
-      NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
-      
-      if (typeof func === 'function') {
-        func(config);
-      }
+      function callback() {
+        if (meta.type === 'raster') {
+          delete config.api;
+        } else {
+          _.each(config.shapes, function(shape) {
+            NPMap.Map.removeShape(shape);
+          });
 
-      if (meta.type === 'raster') {
-        delete config.api;
-      } else {
-        _.each(config.shapes, function(shape) {
-          NPMap.Map.removeShape(shape);
-        });
-        delete config.shapes;
-        delete config.styleNpmap;
-      }
+          delete config.shapes;
+          delete config.styleNpmap;
+        }
 
-      config.visible = false;
+        config.visible = false;
+
+        if (!silent) {
+          Event.trigger('NPMap.Layer', 'removed', config);
+        }
+      }
 
       InfoBox.hide();
-      Event.trigger('NPMap.Layer', 'removed', config);
+
+      if (!silent) {
+        NPMap.Event.trigger('NPMap.Layer', 'beforeremove', config);
+      }
+      
+      if (typeof func === 'function') {
+        func(config, callback);
+      } else {
+        callback();
+      }
     },
     /**
      * Removes a shape from the map.
@@ -1707,6 +1766,20 @@ define([
       NPMap.Map[NPMap.config.api].setInitialZoom(zoom);
     },
     /**
+     * UNDOCUMENTED
+     */
+    setLayerOptions: function(config, options) {
+      var func = NPMap.Layer[config.type]._setOptions;
+
+      if (typeof options !== 'object') {
+        throw new Error('The options parameter must be an object.');
+      }
+
+      if (func) {
+        func(config, options);
+      }
+    },
+    /**
      * Sets a marker's options.
      * @param {Object} marker The baseApi marker object.
      * @param {Object} options The options to set. Currently the valid options are: 'class', 'icon', 'label', 'visible', and 'zIndex'.
@@ -1736,32 +1809,41 @@ define([
       NPMap.Map[NPMap.config.api].setZoomRestrictions(restrictions);
     },
     /**
-     * UNDOCUMENTED
+     * Shows a layer.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
      */
-    showLayer: function(config) {
+    showLayer: function(config, silent) {
       var type = config.type,
-          func = NPMap.Layer[type].show,
+          func = NPMap.Layer[type]._show,
           me = this,
           meta = NPMap.Layer.getLayerHandlerMeta(type);
 
-      NPMap.Event.trigger('NPMap.Layer', 'beforeshow', config);
+      function callback() {
+        if (meta.type === 'raster') {
+          
+        } else {
+          _.each(config.shapes, function(shape) {
+            me.showShape(shape);
+          });
+        }
 
-      if (meta.type === 'raster') {
-        
-      } else {
-        _.each(config.shapes, function(shape) {
-          me.showShape(shape);
-        });
+        config.visible = true;
+
+        if (!silent) {
+          NPMap.Event.trigger('NPMap.Layer', 'shown', config);
+        }
       }
 
-      config.visible = true;
+      if (!silent) {
+        NPMap.Event.trigger('NPMap.Layer', 'beforeshow', config);
+      }
 
       if (typeof func === 'function') {
-        func(config, function() {
-          NPMap.Event.trigger('NPMap.Layer', 'shown', config);
-        });
+        func(config, callback);
       } else {
-        NPMap.Event.trigger('NPMap.Layer', 'shown', config);
+        callback();
       }
     },
     /**
@@ -1961,6 +2043,7 @@ define([
       }
     },
     /**
+     * DEPRECATED
      * Zooms the map to the extent of an array of marker objects.
      * @param {Array} markers The array of marker objects.
      * @return null
@@ -1969,13 +2052,9 @@ define([
       NPMap.Map[NPMap.config.api].toMarkers(markers);
     },
     /**
-     * UNDOCUMENTED
-     */
-    toShape: function(shape) {
-
-    },
-    /**
-     * UNDOCUMENTED
+     * Zooms the map to the extent of an array of shapes (markers, lines, and polygons).
+     * @param {Array} shapes
+     * @return null
      */
     toShapes: function(shapes) {
       var latLngs = [],

@@ -6,6 +6,8 @@ define([
   'Layer/Layer',
   'Map/Map'
 ], function(Event, Layer, Map) {
+  var MapApi = Map[NPMap.config.api];
+
   /**
    * Constructs a URI for a tile.
    * @param {Number} x
@@ -15,11 +17,9 @@ define([
    * @param {String} subdomain (Optional)
    * @return {String}
    */
-  function uriConstructor(x, y, z, url, subdomain) {
-    var template = _.template(url);
-
-    return template({
-      subdomain: subdomain,
+  function _uriConstructor(x, y, z, url, subdomain) {
+    return _.template(url)({
+      s: subdomain,
       x: x,
       y: y,
       z: z
@@ -28,38 +28,72 @@ define([
 
   return NPMap.Layer.Tiled = {
     /**
-     * Handles the click operation for Tiled layers.
-     * @param {Object} e
-     * @return null
-     */
-    _handleClick: function(e) {
-      
-    },
-    /**
-     * Adds a Tiled layer and adds it to the map.
+     * Creates a Tiled layer and adds it to the map.
      * @param {Object} config
      * @param {Function} callback
      * @return null
      */
-    add: function(config, callback) {
-      var constructor;
+    _add: function(config, callback) {
+      var constructor,
+          tileLayer;
 
-      if (typeof config.url === 'function') {
+      if (typeof config.url === 'string') {
         constructor = config.url;
       } else {
-        constructor = uriConstructor;
+        constructor = _uriConstructor;
       }
 
-      NPMap.Map[NPMap.config.api].addTileLayer(NPMap.Map[NPMap.config.api].createTileLayer(constructor, {
-        subdomains: [
-          'a',
-          'b',
-          'c',
-          'd'
-        ],
-        url: config.url,
-        zIndex: config.zIndex
-      }));
+      tileLayer = config.api = Map._addTileLayer({
+        constructor: constructor,
+        name: config.name,
+        opacity: config.opacity,
+        subdomains: config.subdomains,
+        zIndex: config.zIndex,
+        zoomRange: config.zoomRange
+      });
+      tileLayer.npmap = {
+        layerName: config.name,
+        layerType: config.type
+      };
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * Hides a layer.
+     * @param {Object} config
+     * @param {Function} callback
+     * @return null
+     */
+    _hide: function(config, callback) {
+      MapApi._hideTileLayer(config.api);
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * Removes a layer from the map.
+     * @param {Object} config
+     * @param {Function} callback
+     * @return null
+     */
+    _remove: function(config, callback) {
+      MapApi._removeTileLayer(config.api);
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * Shows a layer.
+     * @param {Object} config
+     * @param {Function} callback
+     * @return null
+     */
+    _show: function(config, callback) {
+      MapApi._showTileLayer(config.api);
 
       if (callback) {
         callback();
