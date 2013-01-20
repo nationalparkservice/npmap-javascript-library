@@ -290,7 +290,7 @@ NPMap.config = {
 <p>The map is the core component of NPMap. The <code>NPMap.Map</code> module facilitates creating and interacting with a map built with one of the supported base APIs. To create a map, you will need to create a <code>NPMap.config</code> object and then load the NPMap library into your web page.</p>
 <h2 id="npmap.map-dependencies">Dependencies</h2>
 <ul>
-  <li>CartoDB</li>
+  <li>CartoDB (<a href="https://github.com/nationalparkservice/cartodb-gmapsv3">Google</a> and <a href="https://github.com/nationalparkservice/cartodb-leaflet">Leaflet</a>)</li>
   <li><a href="http://mapbox.com/wax/">MapBox Wax</a></li>
 </ul>
 <h2 id="npmap.map-methods">Methods</h2>
@@ -307,6 +307,11 @@ NPMap.config = {
       <td style="max-width:450px;word-wrap:break-word;"><code>addControl(el:HtmlElement, callback:Function, stopPropagation:Boolean)</code></td>
       <td><code>null</code></td>
       <td><p>Adds an HTML element to the map div.</p></td>
+    </tr>
+    <tr>
+      <td><code>addLayer(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Adds a layer to the map.</p></td>
     </tr>
     <tr>
       <td><code>addShape(shape)</code></td>
@@ -327,6 +332,11 @@ NPMap.config = {
       <td><code>boundsFromApi(bounds)</code></td>
       <td><code>{Object}</code></td>
       <td><p>Converts an API bounds to an NPMap bounds.</p></td>
+    </tr>
+    <tr>
+      <td><code>boundsGetCenter(bounds)</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>Gets the center lat/lng of a bounds object.</p></td>
     </tr>
     <tr>
       <td><code>boundsToApi(bounds)</code></td>
@@ -389,6 +399,11 @@ NPMap.config = {
       <td><p>Gets the map bounds.</p></td>
     </tr>
     <tr>
+      <td><code>getLineLatLngs(line)</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>Gets the lat/lngs of a line.</p></td>
+    </tr>
+    <tr>
       <td><code>getMaxZoom()</code></td>
       <td><code>{Number}</code></td>
       <td><p>Gets the maximum zoom level for the map.</p></td>
@@ -397,6 +412,11 @@ NPMap.config = {
       <td><code>getMinZoom()</code></td>
       <td><code>{Number}</code></td>
       <td><p>Gets the minimum zoom level for the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>getPolygonLatLngs(polygon)</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>Gets the lat/lngs of a polygon.</p></td>
     </tr>
     <tr>
       <td><code>getZoom()</code></td>
@@ -417,6 +437,11 @@ NPMap.config = {
       <td><code>hasTiledLayer()</code></td>
       <td><code>{Boolean}</code></td>
       <td><p>Checks to see if a tiled layer has been added to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>hideLayer(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Hides a layer.</p></td>
     </tr>
     <tr>
       <td><code>hideProgressBar()</code></td>
@@ -499,6 +524,11 @@ NPMap.config = {
       <td><p>Converts an NPMap pixel object to an NPMap lat/lng object.</p></td>
     </tr>
     <tr>
+      <td><code>removeLayer(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Removes a layer from the map.</p></td>
+    </tr>
+    <tr>
       <td><code>removeShape(shape)</code></td>
       <td><code>null</code></td>
       <td><p>Removes a shape from the map.</p></td>
@@ -539,6 +569,11 @@ NPMap.config = {
       <td><p>Sets min and/or max zoom restrictions on the map.</p></td>
     </tr>
     <tr>
+      <td><code>showLayer(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Shows a layer.</p></td>
+    </tr>
+    <tr>
       <td><code>showProgressBar(value)</code></td>
       <td><code>null</code></td>
       <td><p>Shows the progress bar.</p></td>
@@ -574,14 +609,14 @@ NPMap.config = {
       <td><p>Zooms the map to the extent of an array of lat/lng objects.</p></td>
     </tr>
     <tr>
-      <td><code>toMarkers(markers)</code></td>
+      <td><code>toShapes(shapes)</code></td>
       <td><code>null</code></td>
-      <td><p>Zooms the map to the extent of an array of marker objects.</p></td>
+      <td><p>Zooms the map to the extent of an array of shapes (markers, lines, and polygons).</p></td>
     </tr>
     <tr>
       <td><code>updateAttribution()</code></td>
       <td><code>null</code></td>
-      <td><p>Updates the map attribution. Looks at the NPMap.Map[NPMap.config.api]._attribution property and iterates through all of the visible baseLayers and layers and looks at their attribution property, as well.</p></td>
+      <td><p>Updates the map attribution. Looks at the <Code>NPMap.Map[NPMap.config.api]._attribution</code> property and iterates through all of the visible baseLayers and layers and looks at their attribution property as well.</p></td>
     </tr>
     <tr>
       <td><code>updateProgressBar(value)</code></td>
