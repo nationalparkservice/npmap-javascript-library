@@ -495,7 +495,7 @@ define([
       }
 
       if (activeBaseLayer.type !== 'Api') {
-        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+        NPMap.Layer[activeBaseLayer.type]._remove(activeBaseLayer);
       }
 
       activeBaseLayer = baseLayer;
@@ -518,10 +518,10 @@ define([
         } else {
           mapTypeId = Microsoft.Maps.MapTypeId.mercator;
 
-          NPMap.Layer[baseLayer.type].add(baseLayer);
+          NPMap.Layer[baseLayer.type]._add(baseLayer);
         }
       } else {
-        NPMap.Layer[baseLayer.type].add(baseLayer);
+        NPMap.Layer[baseLayer.type]._add(baseLayer);
 
         mapTypeId = Microsoft.Maps.MapTypeId.mercator;
       }

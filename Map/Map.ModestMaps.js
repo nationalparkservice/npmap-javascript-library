@@ -392,7 +392,7 @@ define([
       }
 
       if (activeBaseLayer.type !== 'Api') {
-        NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
+        NPMap.Layer[activeBaseLayer.type]._remove(activeBaseLayer);
       }
       
       activeBaseLayer = baseLayer;
@@ -402,7 +402,7 @@ define([
       }
       
       if (baseLayer.type !== 'Api') {
-        NPMap.Layer[baseLayer.type].create(baseLayer);
+        NPMap.Layer[baseLayer.type]._add(baseLayer);
       }
 
       baseLayer.visible = true;

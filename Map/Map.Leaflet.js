@@ -720,7 +720,7 @@ define([
           delete _activeBaseLayer.api;
         }
       } else {
-        NPMap.Layer[_activeBaseLayer.type].remove(_activeBaseLayer);
+        NPMap.Layer[_activeBaseLayer.type]._remove(_activeBaseLayer);
       }
 
       _activeBaseLayer = baseLayer;
@@ -737,7 +737,7 @@ define([
           _map.addLayer(baseLayer.api, true);
         }
       } else {
-        NPMap.Layer[baseLayer.type].add(baseLayer);
+        NPMap.Layer[baseLayer.type]._add(baseLayer);
       }
 
       baseLayer.visible = true;

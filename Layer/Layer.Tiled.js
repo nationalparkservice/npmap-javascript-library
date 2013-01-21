@@ -19,7 +19,7 @@ define([
    */
   function _uriConstructor(x, y, z, url, subdomain) {
     return _.template(url)({
-      s: subdomain,
+      s: subdomain !== 'undefined' ? subdomain : null,
       x: x,
       y: y,
       z: z
