@@ -1,10 +1,3 @@
-/**
- * @module NPMap.Layer
- * @event 'added'
- * @event 'beforeadd'
- * @event 'ready'
- * @event 'removed'
- */
 define([
   'Event',
   'Map/Map',
@@ -12,7 +5,7 @@ define([
 ], function(Event, Map, META) {
   var
       // A count of the number of visible layers that the map is initialized with.
-      initializedActiveLayerCount = (function() {
+      _initializedActiveLayerCount = (function() {
         var count = 0;
 
         if (NPMap.config.baseLayers) {
@@ -39,15 +32,15 @@ define([
         return count;
       })(),
       //
-      interval,
+      _interval,
       // The default line style.
-      lineStyle = {
+      _lineStyle = {
         strokeColor: '000000',
         strokeOpacity: 200,
         strokeWidth: 2
       },
       // The default marker style.
-      markerStyle = {
+      _markerStyle = {
         anchor: {
           x: 6.5,
           y: 0
@@ -57,7 +50,7 @@ define([
         width: 13
       },
       // The default polygon style.
-      polygonStyle = {
+      _polygonStyle = {
         fillColor: '5e7630',
         fillOpacity: 174,
         strokeColor: '5e7630',
@@ -65,11 +58,11 @@ define([
         strokeWidth: 1
       },
       // All of the layer names that have been added to the map.
-      usedNames = [];
+      _usedNames = [];
 
   Event.add('NPMap.Layer', 'added', function(config) {
     this._countAdded++;
-    Map.updateAttribution();
+    Map._updateAttribution();
   });
   Event.add('NPMap.Layer', 'beforeadd', function(config) {
     var meta = NPMap.Layer.getLayerHandlerMeta(config.type);
@@ -77,15 +70,15 @@ define([
     if (!config.name) {
       config.name = 'Layer_' + new Date().getTime();
 
-      if (_.indexOf(usedNames, config.name) !== -1) {
+      if (_.indexOf(_usedNames, config.name) !== -1) {
         var random = Math.floor(Math.random() * (999999999 - 0 + 1)) + 0;
 
         config.name = config.name + random;
       }
     }
 
-    if (_.indexOf(usedNames, config.name) === -1) {
-      usedNames.push(config.name);
+    if (_.indexOf(_usedNames, config.name) === -1) {
+      _usedNames.push(config.name);
     } else {
       throw new Error('All layer names must be unique. "' + config.name + '" is used more than once.');
     }
@@ -99,7 +92,7 @@ define([
 
       if (style) {
         if (style.line) {
-          lineStyle = style.line;
+          _lineStyle = style.line;
         }
 
         if (style.marker && style.marker.url) {
@@ -111,34 +104,34 @@ define([
               };
             }
 
-            markerStyle = style.marker;
+            _markerStyle = style.marker;
           } else {
             // TODO: You need to load the image and calculate the height, width, and anchor here.
-            markerStyle = style.marker;
+            _markerStyle = style.marker;
           }
         }
 
         if (style.polygon) {
-          polygonStyle = style.polygon;
+          _polygonStyle = style.polygon;
         }
       }
 
       config.styleNpmap = {
-        line: Map[NPMap.config.api].convertLineOptions(lineStyle),
-        marker: Map[NPMap.config.api].convertMarkerOptions(markerStyle),
-        polygon: Map[NPMap.config.api].convertPolygonOptions(polygonStyle)
+        line: Map[NPMap.config.api].convertLineOptions(_lineStyle),
+        marker: Map[NPMap.config.api].convertMarkerOptions(_markerStyle),
+        polygon: Map[NPMap.config.api].convertPolygonOptions(_polygonStyle)
       };
     }
   });
   Event.add('NPMap.Layer', 'hidden', function(config) {
-    Map.updateAttribution();
+    Map._updateAttribution();
   });
   Event.add('NPMap.Layer', 'removed', function(config) {
-    usedNames.splice(_.indexOf(usedNames, config.name), 1);
-    Map.updateAttribution();
+    _usedNames.splice(_.indexOf(_usedNames, config.name), 1);
+    Map._updateAttribution();
   });
   Event.add('NPMap.Layer', 'shown', function(config) {
-    Map.updateAttribution();
+    Map._updateAttribution();
   });
   Event.add('NPMap.Map', 'click', function(e) {
     if (NPMap.config.layers && NPMap.config.layers.length) {
@@ -170,11 +163,11 @@ define([
     }
   });
 
-  interval = setInterval(function() {
+  _interval = setInterval(function() {
     var Layer = NPMap.Layer;
 
-    if (typeof Layer !== 'undefined' && typeof Layer._countAdded !== 'undefined' && Layer._countAdded === initializedActiveLayerCount) {
-      clearInterval(interval);
+    if (typeof Layer !== 'undefined' && typeof Layer._countAdded !== 'undefined' && Layer._countAdded === _initializedActiveLayerCount) {
+      clearInterval(_interval);
       delete Layer._countAdded;
       Event.trigger('NPMap.Layer', 'ready');
     }
@@ -183,6 +176,33 @@ define([
   return NPMap.Layer = {
     // The number of layers that have been added. This property is deleted after the NPMap.Map ready event is triggered.
     _countAdded: 0,
+    /**
+     * Adds a layer to the map.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
+     */
+    add: function(config, silent) {
+      var func = this[config.type]._add;
+
+      function callback() {
+        if (!silent) {
+          Event.trigger('NPMap.Layer', 'added', config);
+        }
+      }
+
+      config.visible = true;
+
+      if (!silent) {
+        Event.trigger('NPMap.Layer', 'beforeadd', config);
+      }
+
+      if (typeof func === 'function') {
+        func(config, callback);
+      } else {
+        callback();
+      }
+    },
     /**
      * Gets the active layer types for both the baseLayers and layers configs.
      * @return {Array}
@@ -297,6 +317,45 @@ define([
       return layers;
     },
     /**
+     * Hides a layer.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
+     */
+    hide: function(config, silent) {
+      var type = config.type,
+          func = this[type]._hide,
+          meta = this.getLayerHandlerMeta(type);
+
+      function callback() {
+        if (meta.type === 'raster') {
+        
+        } else {
+          _.each(config.shapes, function(shape) {
+            Map.hideShape(shape);
+          });
+        }
+
+        config.visible = false;
+
+        if (!silent) {
+          Event.trigger('NPMap.Layer', 'hidden', config);
+        }
+      }
+
+      NPMap.InfoBox.hide();
+
+      if (!silent) {
+        Event.trigger('NPMap.Layer', 'beforehide', config);
+      }
+
+      if (typeof func === 'function') {
+        func(config, callback);
+      } else {
+        callback();
+      }
+    },
+    /**
      * Iterates through all the objects in the NPMap.config.baseLayers and NPMap.config.layers configs. The function will be passed each of the layer config objects as a parameter.
      * @param {Function} func
      * @return null
@@ -323,6 +382,85 @@ define([
     iterateThroughLayers: function(func) {
       if (NPMap.config.layers) {
         _.each(NPMap.config.layers, func);
+      }
+    },
+    /**
+     * Removes a layer.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
+     */
+    remove: function(config, silent) {
+      var type = config.type,
+          func = this[type]._remove,
+          meta = this.getLayerHandlerMeta(type);
+
+      function callback() {
+        if (meta.type === 'raster') {
+          delete config.api;
+        } else {
+          _.each(config.shapes, function(shape) {
+            Map.removeShape(shape);
+          });
+
+          delete config.shapes;
+          delete config.styleNpmap;
+        }
+
+        config.visible = false;
+
+        if (!silent) {
+          Event.trigger('NPMap.Layer', 'removed', config);
+        }
+      }
+
+      NPMap.InfoBox.hide();
+
+      if (!silent) {
+        Event.trigger('NPMap.Layer', 'beforeremove', config);
+      }
+      
+      if (typeof func === 'function') {
+        func(config, callback);
+      } else {
+        callback();
+      }
+    },
+    /**
+     * Shows a layer.
+     * @param {Object} config
+     * @param {Boolean} silent (Optional)
+     * @return null
+     */
+    show: function(config, silent) {
+      var type = config.type,
+          func = this[type]._show,
+          meta = this.getLayerHandlerMeta(type);
+
+      function callback() {
+        if (meta.type === 'raster') {
+          
+        } else {
+          _.each(config.shapes, function(shape) {
+            Map.showShape(shape);
+          });
+        }
+
+        config.visible = true;
+
+        if (!silent) {
+          Event.trigger('NPMap.Layer', 'shown', config);
+        }
+      }
+
+      if (!silent) {
+        Event.trigger('NPMap.Layer', 'beforeshow', config);
+      }
+
+      if (typeof func === 'function') {
+        func(config, callback);
+      } else {
+        callback();
       }
     }
   };

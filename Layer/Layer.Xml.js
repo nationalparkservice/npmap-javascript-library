@@ -47,7 +47,7 @@ define([
      * @param {Function} callback
      * @return null
      */
-    add: function(config, callback) {
+    _add: function(config, callback) {
       queue.push(config);
       UtilXml.load(config.url, function(xml) {
         console.log(xml);
@@ -195,15 +195,6 @@ define([
         url: 'http://maps.nps.gov/proxy/kml?url=' + config.url + '&callback=?'
       });
 */
-    },
-    hideLayer: function(layer) {
-
-    },
-    removeLayer: function(layer) {
-
-    },
-    showLayer: function(layer) {
-
     }
   };
 });

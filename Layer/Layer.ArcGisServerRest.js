@@ -489,10 +489,10 @@ define([
      */
     refresh: function(config) {
       if (config.api) {
-        Map.removeLayer(config, true);
+        Layer.remove(config, true);
       }
       
-      Map.addLayer(config, true);
+      Layer.add(config, true);
     },
     /**
      * Toggles a layer's sublayer on or off.
@@ -533,7 +533,7 @@ define([
 
       if (changed) {
         if (subLayers.length === 0) {
-          NPMap.Map.removeLayer(config);
+          Layer.remove(config);
         } else {
           this.refresh(config);
         }

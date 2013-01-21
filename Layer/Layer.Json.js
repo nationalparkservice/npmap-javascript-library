@@ -11,7 +11,7 @@ define([
    * @param {Object} obj
    * @return {Object}
    */
-  function walkTheTree(str, obj) {
+  function _walkTheTree(str, obj) {
     var value;
 
     str = str.split('.');
@@ -39,35 +39,12 @@ define([
 
   return NPMap.Layer.Json = {
     /**
-     * Handles the click operation for Json layers.
-     * @param {Object} e
-     * @return null
-     */
-    _handleClick: function(e) {
-      var target = NPMap.Map[NPMap.config.api].eventGetShape(e);
-
-      if (target && target.npmap && target.npmap.layerType === 'Json') {
-        var config = Layer.getLayerByName(target.npmap.layerName),
-            data = target.npmap.data;
-
-        NPMap.InfoBox.show(NPMap.InfoBox._build(config, data, 'content'), NPMap.InfoBox._build(config, data, 'title'), NPMap.InfoBox._build(config, data, 'footer'), [
-          'zoomable'
-        ], null, target);
-      }
-    },
-    /**
-     *
-     */
-    _handleHover: function(e) {
-
-    },
-    /**
      * Adds a Json layer.
      * @param {Object} config
      * @param {Function} callback
      * @return null
      */
-    add: function(config, callback) {
+    _add: function(config, callback) {
       var properties = config.properties;
 
       if (!properties) {
@@ -85,16 +62,16 @@ define([
       if (!properties.root) {
         throw new Error('The "root" property must be set on the "properties" object for "Json" layers.');
       }
-
+      
       UtilJson.load(config.url, function(response) {
         var layerName = config.name,
-            root = walkTheTree(properties.root, response),
+            root = _walkTheTree(properties.root, response),
             shapes = [],
             traverse = config.properties.root.split('.');
 
         _.each(root, function(feature) {
-          var lat = walkTheTree(properties.lat, feature),
-              lng = walkTheTree(properties.lng, feature),
+          var lat = _walkTheTree(properties.lat, feature),
+              lng = _walkTheTree(properties.lng, feature),
               npmap = {
                 data: {},
                 layerName: layerName,
@@ -126,6 +103,29 @@ define([
       }, {
         callback: config.callback
       });
+    },
+    /**
+     * Handles the click operation for Json layers.
+     * @param {Object} e
+     * @return null
+     */
+    _handleClick: function(e) {
+      var target = NPMap.Map[NPMap.config.api].eventGetShape(e);
+
+      if (target && target.npmap && target.npmap.layerType === 'Json') {
+        var config = Layer.getLayerByName(target.npmap.layerName),
+            data = target.npmap.data;
+
+        NPMap.InfoBox.show(NPMap.InfoBox._build(config, data, 'content'), NPMap.InfoBox._build(config, data, 'title'), NPMap.InfoBox._build(config, data, 'footer'), [
+          'zoomable'
+        ], null, target);
+      }
+    },
+    /**
+     *
+     */
+    _handleHover: function(e) {
+
     }
   };
 });

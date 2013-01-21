@@ -161,7 +161,7 @@ define([
         }
       }
       
-      Map.updateAttribution();
+      Map._updateAttribution();
     },
     getTileUrl: function(p, z) {
       var subdomains = this.options.subdomains,

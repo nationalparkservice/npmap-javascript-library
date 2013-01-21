@@ -238,7 +238,7 @@ if (typeof bean === 'undefined') {
                       if (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true) {
                         baseLayer.visible = true;
                         
-                        NPMap.Map.addLayer(baseLayer);
+                        Layer.add(baseLayer);
                         break;
                       }
                     }
@@ -253,7 +253,7 @@ if (typeof bean === 'undefined') {
                       if (typeof layer.visible === 'undefined' || layer.visible === true) {
                         layer.visible = true;
 
-                        NPMap.Map.addLayer(layer);
+                        Layer.add(layer);
                       }
                     }
                   });

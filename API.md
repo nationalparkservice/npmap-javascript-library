@@ -309,24 +309,14 @@ NPMap.config = {
       <td><p>Adds an HTML element to the map div.</p></td>
     </tr>
     <tr>
-      <td><code>addLayer(config, silent?)</code></td>
-      <td><code>null</code></td>
-      <td><p>Adds a layer to the map.</p></td>
-    </tr>
-    <tr>
       <td><code>addShape(shape)</code></td>
       <td><code>null</code></td>
+      <td><p>Adds an array of shapes (markers, lines, and/or polygons) to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>addShapes(shapes)</code></td>
+      <td><code>null</code></td>
       <td><p>Adds a shape (marker, line, or polygon) to the map.</p></td>
-    </tr>
-    <tr>
-      <td><code>addTileLayer(layer)</code></td>
-      <td><code>null</code></td>
-      <td><p>Adds a tile layer to the map.</p></td>
-    </tr>
-    <tr>
-      <td><code>addZoomifyLayer(layer)</code></td>
-      <td><code>null</code></td>
-      <td><p>Adds a Zoomify layer to the map.</p></td>
     </tr>
     <tr>
       <td><code>boundsFromApi(bounds)</code></td>
@@ -374,11 +364,6 @@ NPMap.config = {
       <td><p>Creates a polygon.</p></td>
     </tr>
     <tr>
-      <td><code>createZoomifyLayer(config)</code></td>
-      <td><code>{Object}</code></td>
-      <td><p>Creates a Zoomify layer.</p></td>
-    </tr>
-    <tr>
       <td><code>getBounds()</code></td>
       <td><code>{Object}</code></td>
       <td><p>Gets the map bounds.</p></td>
@@ -389,19 +374,19 @@ NPMap.config = {
       <td><p>Gets the center of the map.</p></td>
     </tr>
     <tr>
+      <td><code>getLineLatLngs(line)</code></td>
+      <td><code>{Array}</code></td>
+      <td><p>Gets the lat/lngs of a line.</p></td>
+    </tr>
+    <tr>
       <td><code>getMapElement()</code></td>
       <td><code>{Object}</code></td>
       <td><p>Gets the map element.</p></td>
     </tr>
     <tr>
-      <td><code>getBounds()</code></td>
+      <td><code>getMarkerLatLng(marker)</code></td>
       <td><code>{Object}</code></td>
-      <td><p>Gets the map bounds.</p></td>
-    </tr>
-    <tr>
-      <td><code>getLineLatLngs(line)</code></td>
-      <td><code>{Array}</code></td>
-      <td><p>Gets the lat/lngs of a line.</p></td>
+      <td><p>Gets the lat/lng of a marker.</p></td>
     </tr>
     <tr>
       <td><code>getMaxZoom()</code></td>
@@ -424,11 +409,6 @@ NPMap.config = {
       <td><p>Gets the zoom level of the map.</p></td>
     </tr>
     <tr>
-      <td><code>handleResize()</code></td>
-      <td><code>null</code></td>
-      <td><p>Handles any necessary sizing and positioning for the map when its parent HTML element is resized. You should not need to call this manually.</p></td>
-    </tr>
-    <tr>
       <td><code>hasClusteredLayer()</code></td>
       <td><code>{Boolean}</code></td>
       <td><p>Checks to see if a clustered layer has been added to the map.</p></td>
@@ -437,11 +417,6 @@ NPMap.config = {
       <td><code>hasTiledLayer()</code></td>
       <td><code>{Boolean}</code></td>
       <td><p>Checks to see if a tiled layer has been added to the map.</p></td>
-    </tr>
-    <tr>
-      <td><code>hideLayer(config, silent?)</code></td>
-      <td><code>null</code></td>
-      <td><p>Hides a layer.</p></td>
     </tr>
     <tr>
       <td><code>hideProgressBar()</code></td>
@@ -524,11 +499,6 @@ NPMap.config = {
       <td><p>Converts an NPMap pixel object to an NPMap lat/lng object.</p></td>
     </tr>
     <tr>
-      <td><code>removeLayer(config, silent?)</code></td>
-      <td><code>null</code></td>
-      <td><p>Removes a layer from the map.</p></td>
-    </tr>
-    <tr>
       <td><code>removeShape(shape)</code></td>
       <td><code>null</code></td>
       <td><p>Removes a shape from the map.</p></td>
@@ -569,11 +539,6 @@ NPMap.config = {
       <td><p>Sets min and/or max zoom restrictions on the map.</p></td>
     </tr>
     <tr>
-      <td><code>showLayer(config, silent?)</code></td>
-      <td><code>null</code></td>
-      <td><p>Shows a layer.</p></td>
-    </tr>
-    <tr>
       <td><code>showProgressBar(value)</code></td>
       <td><code>null</code></td>
       <td><p>Shows the progress bar.</p></td>
@@ -612,11 +577,6 @@ NPMap.config = {
       <td><code>toShapes(shapes)</code></td>
       <td><code>null</code></td>
       <td><p>Zooms the map to the extent of an array of shapes (markers, lines, and polygons).</p></td>
-    </tr>
-    <tr>
-      <td><code>updateAttribution()</code></td>
-      <td><code>null</code></td>
-      <td><p>Updates the map attribution. Looks at the <Code>NPMap.Map[NPMap.config.api]._attribution</code> property and iterates through all of the visible baseLayers and layers and looks at their attribution property as well.</p></td>
     </tr>
     <tr>
       <td><code>updateProgressBar(value)</code></td>
@@ -869,6 +829,11 @@ NPMap.config = {
   </thead>
   <tbody>
     <tr>
+      <td><code>add(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Creates and adds a layer.</p></td>
+    </tr>
+    <tr>
       <td><code>getActiveLayerTypes()</code></td>
       <td><code>{Array}</code></td>
       <td><p>Gets the active layer types for both the baseLayers and layers configs.</p></td>
@@ -904,6 +869,11 @@ NPMap.config = {
       <td><p>Gets the layers that are currently visible.</p></td>
     </tr>
     <tr>
+      <td><code>hide(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Hides a layer.</p></td>
+    </tr>
+    <tr>
       <td><code>iterateThroughAllLayers(func)</code></td>
       <td><code>{Function}</code></td>
       <td><p>Iterates through all the objects in the NPMap.config.baseLayers and NPMap.config.layers configs.</p><p>The function will be passed each of the layer config objects as a parameter.</p></td>
@@ -917,6 +887,16 @@ NPMap.config = {
       <td><code>iterateThroughLayers(func)</code></td>
       <td><code>{Function}</code></td>
       <td><p>Iterates through all the objects in the NPMap.config.layers config.</p><p>The function will be passed each of the layer config objects as a parameter.</p></td>
+    </tr>
+    <tr>
+      <td><code>remove(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Removes a layer from the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>show(config, silent?)</code></td>
+      <td><code>null</code></td>
+      <td><p>Shows a layer.</p></td>
     </tr>
   </tbody>
 </table>
@@ -936,12 +916,32 @@ NPMap.config = {
     <tr>
       <td><code>added</code></td>
       <td><code>{Object}</code></td>
-      <td><p>This event is fired when a new baseLayer or layer is added to the map.</p></td>
+      <td><p>This event is fired when a new layer is added to the map.</p></td>
     </tr>
     <tr>
       <td><code>beforeadd</code></td>
       <td><code>{Object}</code></td>
-      <td><p>This event is fired before a new baseLayer or layer is added to the map.</p></td>
+      <td><p>This event is fired before a new layer is added to the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>beforehide</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired before a layer is hidden.</p></td>
+    </tr>
+    <tr>
+      <td><code>beforeremove</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired before a layer is removed from the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>beforeshow</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired before a layer is shown.</p></td>
+    </tr>
+    <tr>
+      <td><code>hidden</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired when a layer is hidden.</p></td>
     </tr>
     <tr>
       <td><code>ready</code></td>
@@ -951,7 +951,12 @@ NPMap.config = {
     <tr>
       <td><code>removed</code></td>
       <td><code>{Object}</code></td>
-      <td><p>This event is fired when a baseLayer or layer is removed from the map.</p></td>
+      <td><p>This event is fired when a layer is removed from the map.</p></td>
+    </tr>
+    <tr>
+      <td><code>shown</code></td>
+      <td><code>{Object}</code></td>
+      <td><p>This event is fired when a layer is shown.</p></td>
     </tr>
   </tbody>
 </table>

@@ -361,7 +361,7 @@
 
               attribution = a;
 
-              Map.updateAttribution();
+              Map._updateAttribution();
             }
 
             for (var i = 0; i < elementsNoPrint.length; i++) {

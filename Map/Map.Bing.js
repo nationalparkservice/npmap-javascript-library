@@ -142,7 +142,7 @@ define([
 
       activeBaseLayer.attribution = attribution;
 
-      Map.updateAttribution();
+      Map._updateAttribution();
     });
   }
 

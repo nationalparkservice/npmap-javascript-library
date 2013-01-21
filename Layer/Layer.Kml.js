@@ -9,6 +9,26 @@ define([
 ], function(Layer, UtilKml, UtilXml, UtilGeoJson) {
   return NPMap.Layer.Kml = {
     /**
+     * Adds a Kml layer.
+     * @param {Object} config
+     * @param {Function} callback
+     * @return null
+     */
+    _add: function(config, callback) {
+      UtilXml.load(config.url, function(response) {
+        config.shapes = UtilGeoJson.toShapes(UtilKml.toGeoJson(response), {
+          layerName: config.name,
+          layerType: 'Kml'
+        }, config.styleNpmap);
+        
+        NPMap.Map.addShapes(config.shapes);
+        
+        if (callback) {
+          callback();
+        }
+      });
+    },
+    /**
      * Handles the click operation for ArcGisServerRest layers.
      * @param {Object} eventOrTarget The click event object OR the target itself.
      * @return null
@@ -61,26 +81,6 @@ define([
      */
     _handleHover: function(e) {
 
-    },
-    /**
-     * Adds a Kml layer.
-     * @param {Object} config
-     * @param {Function} callback
-     * @return null
-     */
-    add: function(config, callback) {
-      UtilXml.load(config.url, function(response) {
-        config.shapes = UtilGeoJson.toShapes(UtilKml.toGeoJson(response), {
-          layerName: config.name,
-          layerType: 'Kml'
-        }, config.styleNpmap);
-        
-        NPMap.Map.addShapes(config.shapes);
-        
-        if (callback) {
-          callback();
-        }
-      });
     }
   };
 });

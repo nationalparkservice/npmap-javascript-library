@@ -8,6 +8,25 @@ define([
 ], function(Layer, UtilJson, UtilGeoJson) {
   return NPMap.Layer.GeoJson = {
     /**
+     * Adds a GeoJson layer.
+     * @param {Object} config
+     * @param {Function} callback
+     */
+    _add: function(config, callback) {
+      UtilJson.load(config.url, function(response) {
+        config.shapes = UtilGeoJson.toShapes(response, {
+          layerName: config.name,
+          layerType: 'GeoJson'
+        }, config.styleNpmap);
+        
+        NPMap.Map.addShapes(config.shapes);
+
+        if (callback) {
+          callback();
+        }
+      });
+    },
+    /**
      * Handles the click operation for GeoJson layers.
      * @param {Object} e
      */
@@ -51,25 +70,6 @@ define([
      */
     _handleHover: function(e) {
 
-    },
-    /**
-     * Adds a GeoJson layer.
-     * @param {Object} config
-     * @param {Function} callback
-     */
-    add: function(config, callback) {
-      UtilJson.load(config.url, function(response) {
-        config.shapes = UtilGeoJson.toShapes(response, {
-          layerName: config.name,
-          layerType: 'GeoJson'
-        }, config.styleNpmap);
-        
-        NPMap.Map.addShapes(config.shapes);
-
-        if (callback) {
-          callback();
-        }
-      });
     }
   };
 });

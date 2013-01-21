@@ -377,10 +377,10 @@ define([
      */
     refresh: function(config) {
       if (config.api) {
-        Map.removeLayer(config, true);
+        Layer.remove(config, true);
       }
       
-      Map.addLayer(config, true);
+      Layer.add(config, true);
     }
   };
 });
