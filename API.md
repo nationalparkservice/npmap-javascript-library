@@ -202,7 +202,7 @@ NPMap.config = {
       <td><code>baseLayers</code></td>
       <td><code>{Array}</code></td>
       <td><code>null</code></td>
-      <td><p>The baseLayers to add to the map. Only one baseLayer can be visible at a time. NPMap will iterate through the baseLayers {Array} and will add the first layer whose <code>visibility</code> property is either <code>undefined</code> or <code>true</code> to the map. The visible baseLayer always lives at the bottom of the map, or, in other words, at <code>z-index</code> of 0.</p></td>
+      <td><p>The baseLayers to add to the map. Only one baseLayer can be visible at a time. NPMap will iterate through the baseLayers {Array} and will add the first layer whose <code>visibility</code> property is either <code>undefined</code> or <code>true</code> to the map. The visible baseLayer always lives at the bottom of the map, or, in other words, at <code>zIndex</code> of 0.</p></td>
     </tr>
     <tr>
       <td><code>center</code></td>
@@ -236,7 +236,7 @@ NPMap.config = {
       <td><code>hideLogo</code></td>
       <td><code>{Boolean}</code></td>
       <td><code>false</code></td>
-      <td><p>Tells NPMap to hide the NPMap logo. If possible, help us spread the word about this project by leaving the logo on the map!</p></td>
+      <td><p>Tells NPMap to hide the NPMap logo. If possible, help us spread the word by leaving the logo on the map!</p></td>
     </tr>
     <tr>
       <td><code>infobox</code></td>
@@ -311,12 +311,12 @@ NPMap.config = {
     <tr>
       <td><code>addShape(shape)</code></td>
       <td><code>null</code></td>
-      <td><p>Adds an array of shapes (markers, lines, and/or polygons) to the map.</p></td>
+      <td><p>Adds a shape (marker, line, or polygon) to the map.</p></td>
     </tr>
     <tr>
       <td><code>addShapes(shapes)</code></td>
       <td><code>null</code></td>
-      <td><p>Adds a shape (marker, line, or polygon) to the map.</p></td>
+      <td><p>Adds an array of shapes (markers, lines, and/or polygons) to the map.</p></td>
     </tr>
     <tr>
       <td><code>boundsFromApi(bounds)</code></td>
@@ -341,7 +341,7 @@ NPMap.config = {
     <tr>
       <td><code>centerAndZoom(latLng, zoom, callback?)</code></td>
       <td><code>null</code></td>
-      <td><p>Centers the map.</p></td>
+      <td><p>Centers and zooms the map.</p></td>
     </tr>
     <tr>
       <td><code>closeModules()</code></td>
@@ -604,9 +604,9 @@ NPMap.config = {
 <p><code>NPMap.Map</code> does not expose any public properties.</p>
 <h2 id="npmap.map-events">Events</h2>
 <p>The <code>NPMap.Map</code> module exposes both mouse and map events. You can subscribe to and unsubscribe from these events using the <a href="#npmap.event"><code>NPMap.Event</code></a> module.</p>
-<p>You can see these events in action on the [map events example](http://www.nps.gov/npmap/support/library/examples/map-events.html).</p>
+<p>You can see these events in action on the <a href="http://www.nps.gov/npmap/support/library/examples/map-events.html">map events example</a> page.</p>
 <h3 id="npmap.map-events-mouse">Mouse Events</h3>
-<p>Once you subscribe to one of these events, your handler will receive the {MouseEvent} as a parameter when the event is fired.</p>
+<p>Once you subscribe to one of these events, your handler will receive the <code>{MouseEvent}</code> as a parameter when the event is fired.</p>
 <table class="table table-bordered table-condensed table-striped">
   <thead>
     <tr>
@@ -652,9 +652,14 @@ NPMap.config = {
       <td><p>This event is fired whenever the left mouse button is released after is has been pushed down.</p></td>
     </tr>
     <tr>
+      <td><code>rightclick</code></td>
+      <td><code>{MouseEvent}</code></td>
+      <td><p>This event is fired whenever the map is right clicked.</p></td>
+    </tr>
+    <tr>
       <td><code>shapeclick</code></td>
       <td><code>{MouseEvent}</code></td>
-      <td><p>This event a shape object (marker, line, or polygon) is clicked on the map.</p></td>
+      <td><p>This event is fired when a shape object (marker, line, or polygon) is clicked on the map.</p></td>
     </tr>
   </tbody>
 </table>
@@ -743,7 +748,7 @@ NPMap.config = {
     <tr>
       <td><code>removeAction(el)</code></td>
       <td><code>null</code></td>
-      <td><p>Removes an action HTML element (<code>&lt;a&gt;</code>)from the InfoBox.</p></td>
+      <td><p>Removes an action HTML element (<code>&lt;a&gt;</code>) from the InfoBox.</p></td>
     </tr>
     <tr>
       <td><code>reposition()</code></td>
@@ -751,7 +756,7 @@ NPMap.config = {
       <td><p>Repositions the npmap-clickdot div then repositions the InfoBox. If the marker or npmap-clickdot is not in the current map bounds, it is hidden.</p></td>
     </tr>
     <tr>
-      <td style="max-width:450px;word-wrap:break-word;"><code>show(content, title, footer, actions, styles, target?)</code></td>
+      <td style="max-width:450px;word-wrap:break-word;"><code>show(content, title, footer?, actions?, styles?, target?)</code></td>
       <td><code>null</code></td>
       <td><p>Shows the InfoBox.</p></td>
     </tr>
@@ -891,7 +896,7 @@ NPMap.config = {
     <tr>
       <td><code>remove(config, silent?)</code></td>
       <td><code>null</code></td>
-      <td><p>Removes a layer from the map.</p></td>
+      <td><p>Removes a layer.</p></td>
     </tr>
     <tr>
       <td><code>show(config, silent?)</code></td>
