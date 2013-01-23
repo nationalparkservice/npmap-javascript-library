@@ -264,10 +264,18 @@ if (typeof bean === 'undefined') {
 
           if (NPMap.config.modules) {
             _.each(NPMap.config.modules, function(module) {
-              var name = module.name;
+              var name = module.name.toLowerCase();
 
-              if (name === 'Edit' || name === 'Route') {
-                scripts.push(NPMap.config.server + '/Module/Module.' + name + '.js');
+              if (name === 'edit' || name === 'route') {
+                switch (name) {
+                  case 'edit':
+                    name = 'Edit';
+                    break;
+                  case 'route':
+                    name = 'Route';
+                    break;
+                }
+                scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
               }
             });
           }
@@ -369,13 +377,13 @@ if (typeof bean === 'undefined') {
             callback = NPMap.apiLoaded();
             preLoaded = true;
           } else {
-            apiUrl = 'http://maps.googleapis.com/maps/api/js?v=3&sensor=true&callback=NPMap.apiLoaded';
+            apiUrl = 'http://maps.googleapis.com/maps/api/js?v=3&sensor=false&callback=NPMap.apiLoaded';
             
             if (NPMap.config.credentials) {
               if (NPMap.config.credentials.slice(0, 1) === '&') {
                 apiUrl += NPMap.config.credentials;
               }
-            } else {
+            } else if (window.location.origin.indexOf('file://') === -1) {
               var host = window.location.host;
 
               if (host.indexOf('inpniscsfern1.nps.doi.net') !== -1 || host.indexOf('inside.nps.gov') !== -1 || host.indexOf('insidemaps.nps.gov' !== -1)) {
