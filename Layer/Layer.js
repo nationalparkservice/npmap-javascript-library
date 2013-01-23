@@ -135,26 +135,36 @@ define([
   });
   Event.add('NPMap.Map', 'click', function(e) {
     if (NPMap.config.layers && NPMap.config.layers.length) {
-      for (var i = 0; i < NPMap.config.layers.length; i++) {
-        var layerType = NPMap.config.layers[i].type,
+      var layerHandlers = [];
+
+      _.each(NPMap.config.layers, function(layer) {
+        var layerType = layer.type,
             meta = NPMap.Layer.getLayerHandlerMeta(layerType);
 
         if (meta.type === 'raster' && meta.identify) {
-          NPMap.Layer[layerType]._handleClick(e);
+          layerHandlers.push(layerType);
         }
-      }
+      });
+      _.each(_.uniq(layerHandlers), function(layerType) {
+        NPMap.Layer[layerType]._handleClick(e);
+      });
     }
   });
   Event.add('NPMap.Map', 'shapeclick', function(e) {
     if (NPMap.config.layers && NPMap.config.layers.length) {
-      for (var j = 0; j < NPMap.config.layers.length; j++) {
-        var layerType = NPMap.config.layers[j].type,
+      var layerHandlers = [];
+
+      _.each(NPMap.config.layers, function(layer) {
+        var layerType = layer.type,
             meta = NPMap.Layer.getLayerHandlerMeta(layerType);
-            
+
         if (meta.type === 'vector' && meta.identify) {
-          NPMap.Layer[layerType]._handleClick(e);
+          layerHandlers.push(layerType);
         }
-      }
+      });
+      _.each(_.uniq(layerHandlers), function(layerType) {
+        NPMap.Layer[layerType]._handleClick(e);
+      });
     }
   });
   Event.add('NPMap.Map', 'zoomstart', function() {
