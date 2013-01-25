@@ -693,6 +693,10 @@
     convertLineOptions: function(options) {
       var o = {};
 
+      if (options.editable) {
+        o.editable = options.editable;
+      }
+
       if (options.strokeColor) {
         o.strokeColor = options.strokeColor;
       }
@@ -715,6 +719,10 @@
      */
     convertMarkerOptions: function(options) {
       var o = {};
+
+      if (options.draggable) {
+        o.draggable = options.draggable;
+      }
 
       if (options.url) {
         var anchor = options.anchor,
@@ -741,6 +749,10 @@
      */
     convertPolygonOptions: function(options) {
       var o = {};
+
+      if (options.editable) {
+        o.editable = options.editable;
+      }
 
       if (options.fillColor) {
         o.fillColor = options.fillColor;
