@@ -52,10 +52,6 @@ define([
       },
       // Has the map been double-clicked?
       doubleClicked = false,
-      // Is there at least one clustered layer in the map?
-      hasClustered = NPMap.Map.hasClusteredLayer(),
-      // Is there at least one tiled layer in the map?
-      hasTiled = NPMap.Map.hasTiledLayer(),
       // The initial center lat/lng of the map.
       initialCenter,
       // The initial zoom of the map.
