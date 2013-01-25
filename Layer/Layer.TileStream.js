@@ -118,16 +118,17 @@ define([
 
       if (composited) {
         var currentIndex,
+            visible = 0,
             zIndexes = [],
             zIndexesCreate = [];
-        
-        if (composited.length > 15) {
-          throw new Error('TileStream only supports up to 15 composited layer per tileset. Your layer has ' + composited.length + ' composited layers.');
-        }
 
         _.each(composited, function(composite) {
           if (typeof composite.visible !== 'boolean') {
             composite.visible = true;
+          }
+
+          if (composite.visible) {
+            visible++;
           }
 
           if (typeof composite.zIndex === 'number') {
@@ -154,6 +155,10 @@ define([
         });
 
         layerString = _constructCompositedString(config.composited);
+
+        if (visible > 15) {
+          throw new Error('TileStream only supports up to 15 composited layer per tileset. Your layer has ' + visible + ' composited layers.');
+        }
       }
 
       url += layerString;
