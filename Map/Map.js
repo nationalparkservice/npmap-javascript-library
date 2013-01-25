@@ -11,8 +11,9 @@
 define([
   'Event',
   'InfoBox',
+  'Layer/Layer',
   'Util/Util'
-], function(Event, InfoBox, Util) {
+], function(Event, InfoBox, Layer, Util) {
   var
       // The active notification messages.
       activeNotificationMessages = [],
@@ -1352,7 +1353,7 @@ define([
     hasClusteredLayer: function() {
       hasClustered = false;
 
-      NPMap.Layer.iterateThroughAllLayers(function(l) {
+      Layer.iterateThroughAllLayers(function(l) {
         if (l.type === 'NativeVectors' && l.clustered === true) {
           hasClustered = true;
         }
@@ -1367,7 +1368,7 @@ define([
     hasTiledLayer: function() {
       hasTiled = false;
 
-      NPMap.Layer.iterateThroughAllLayers(function(l) {
+      Layer.iterateThroughAllLayers(function(l) {
         if ((l.type === 'NativeVectors' && l.tiled) || (l.type === 'ArcGisServerRest' || l.type === 'CartoDb' || l.type === 'TileStream')) {
           hasTiled = true;
         }
