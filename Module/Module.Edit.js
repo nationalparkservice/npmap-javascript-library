@@ -1,24 +1,35 @@
-﻿define(function() {
+﻿define([
+  'Module/Module'
+],function(Module) {
   // The module config object.
-  var config = (function() {
+  var _config = (function() {
     for (var i = 0; i < NPMap.config.modules.length; i++) {
       if (NPMap.config.modules[i].name === 'edit') {
         return NPMap.config.modules[i];
       }
     }
   })();
+
+  //NPMap.Map[NPMap.config.api]._initializeDrawingTools();
   
-  return NPMap.Edit = {
-    // The module config object.
-    config: config,
+  return NPMap.Module.Edit = {
+    //
+    _shapes: [],
     /**
-     * Removes all of the shapes that have been created by the edit module from the map.
+     *
      */
-    removeAllShapes: function() {
-      _.each(NPMap[NPMap.config.api].modules.edit.shapes, function(shape) {
-        NPMap[NPMap.config.api].map.removeShape(shape);
+    _getConfig: function() {
+      return _config;
+    },
+    /**
+     *
+     */
+    clearShapes: function() {
+      _.each(this._shapes, function(shape) {
+        NPMap.Map.removeShape(shape);
       });
-      NPMap[NPMap.config.api].modules.edit.shapes = [];
+
+      this._shapes = [];
     }
   };
 });

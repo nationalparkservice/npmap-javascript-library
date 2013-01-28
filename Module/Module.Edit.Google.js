@@ -1,147 +1,88 @@
-﻿define([
+﻿/*
+ TODO:
+   1. Migrate this up to NPMap.Map.Google
+   2. In Module.Edit.js, hook up to 'shapedrawn' event.
+   3. Add new events like 'shapeselected', 'shapedeselected'
+*/
+define([
   'Module/Module.Edit'
-], function(edit) {
+], function(Edit) {
   var
-      // The module config object.
-      config = (function() {
-        for (var i = 0; i < NPMap.config.modules.length; i++) {
-          if (NPMap.config.modules[i].name === 'edit') {
-            return NPMap.config.modules[i];
-          }
-        }
-      })(),
       // The {google.maps.Map} object.
-      map = NPMap[NPMap.config.api].map.Map,
+      _map = NPMap.Map[NPMap.config.api].map,
       // The DrawingManager.
-      manager = new google.maps.drawing.DrawingManager({
+      _manager = new google.maps.drawing.DrawingManager({
         drawingControl: false,
-        map: map
+        map: _map
       }),
-      // ?
-      selected = null;
+      // The currently-selected shape.
+      _selected = null;
   
   /**
-   *
+   * Clears the selected shape.
+   * @return null
    */
-  function clearSelection() {
-    if (selected) {
-      selected.setEditable(false);
-      selected = null;
+  function _clearSelection() {
+    if (_selected) {
+      _selected.setEditable(false);
+      _selected = null;
     }
   }
-  /**
-   *
-   */
-  function selectColor(color) {
-    selectedColor = color;
 
-    var polylineOptions = manager.get('polylineOptions');
-    polylineOptions.strokeColor = color;
-    manager.set('polylineOptions', polylineOptions);
-
-    var rectangleOptions = manager.get('rectangleOptions');
-    rectangleOptions.fillColor = color;
-    manager.set('rectangleOptions', rectangleOptions);
-
-    var circleOptions = manager.get('circleOptions');
-    circleOptions.fillColor = color;
-    manager.set('circleOptions', circleOptions);
-
-    var polygonOptions = manager.get('polygonOptions');
-    polygonOptions.fillColor = color;
-    manager.set('polygonOptions', polygonOptions);
-  }
-  /**
-   *
-   */
-  function setSelectedShapeColor(color) {
-    if (selected) {
-      if (selected.type == google.maps.drawing.OverlayType.POLYLINE) {
-        selected.set('strokeColor', color);
-      } else {
-        selected.set('fillColor', color);
-      }
-    }
-  }
-  /**
-   *
-   */
-  function setSelection(shape) {
-    clearSelection();
-
-    selected = shape;
-    
-    shape.setEditable(true);
-    selectColor(shape.get('fillColor') || shape.get('strokeColor'));
-  }
-
-  google.maps.event.addListener(manager, 'drawingmode_changed', clearSelection);  
-  google.maps.event.addListener(manager, 'overlaycomplete', function(event) {
-    var latLngsNpmap = [],
+  google.maps.event.addListener(_manager, 'drawingmode_changed', _clearSelection);
+  google.maps.event.addListener(_manager, 'overlaycomplete', function(event) {
+    var latLngs = [],
         shape = event.overlay;
 
     switch (event.type) {
       case 'circle':
         //getCenter()
         //getRadius()
-        type = 'polygon';
+        type = 'Polygon';
         break;
       case 'marker':
-        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(event.overlay.getPosition()));
-        type = 'point';
+        latLngs.push(NPMap.Map.Google.latLngFromApi(event.overlay.getPosition()));
+        type = 'Marker';
         break;
       case 'polygon':
-        type = 'polygon';
+        type = 'Polygon';
 
         event.overlay.getPath().forEach(function(latLng, i) {
-          latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(latLng));
+          latLngs.push(NPMap.Map.Google.latLngFromApi(latLng));
         });
         break;
       case 'polyline':
         event.overlay.getPath().forEach(function(latLng, i) {
-          latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(latLng));
+          latLngs.push(NPMap.Map.Google.latLngFromApi(latLng));
         });
-        type = 'line';
+        type = 'Line';
         break;
       case 'rectangle':
         var bounds = event.overlay.getBounds(),
             ne = bounds.getNorthEast(),
             sw = bounds.getSouthWest();
         
-        type = 'polygon';
+        type = 'Polygon';
 
-        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(ne));
-        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(new google.maps.LatLng(ne.lat(), sw.lng())));
-        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(sw));
-        latLngsNpmap.push(NPMap.Map.Google.latLngFromApi(new google.maps.LatLng(sw.lat(), ne.lng())));
+        latLngs.push(NPMap.Map.Google.latLngFromApi(ne));
+        latLngs.push(NPMap.Map.Google.latLngFromApi(new google.maps.LatLng(ne.lat(), sw.lng())));
+        latLngs.push(NPMap.Map.Google.latLngFromApi(sw));
+        latLngs.push(NPMap.Map.Google.latLngFromApi(new google.maps.LatLng(sw.lat(), ne.lng())));
         break;
     }
-    
-    /*
-    if (event.type != google.maps.drawing.OverlayType.MARKER) {
-      google.maps.event.addListener(shape, 'click', function() {
-        setSelection(shape);
-      });
-      setSelection(shape);
-    }
-    */
 
-    manager.setDrawingMode(null);
-    NPMap.google.modules.edit.shapes.push(shape);
-
-    NPMap.Event.trigger('Edit', 'shapedrawn', {
-      latLngs: latLngsNpmap,
+    Edit._shapes.push(shape);
+    NPMap.Event.trigger('NPMap.Map', 'shapedrawn', {
+      latLngs: latLngs,
       shape: shape,
       type: type
     });
   });
-  google.maps.event.addListener(map, 'click', clearSelection);
-  
-  NPMap.google.modules = NPMap.google.modules || {};
+  google.maps.event.addListener(_map, 'click', _clearSelection);
 
-  return NPMap.google.modules.edit = {
+  return NPMap.Module.Edit.Google = {
     // The {google.maps.drawing.DrawingManager} object.
-    manager: manager,
+    manager: _manager,
     // The shapes that have been added to the map.
     shapes: []
   };
