@@ -8,6 +8,10 @@ if (!NPMap.config.div) {
   throw new Error('The NPMap.config.div string does not exist!');
 }
 
+if (typeof document.getElementById(NPMap.config.div) !== 'object') {
+  throw new Error('The HTML element specified in the NPMap.config.div string does not exist on the page!');
+}
+
 if (NPMap.config.api) {
   if (NPMap.config.api === 'bing' || NPMap.config.api === 'google' || NPMap.config.api === 'leaflet') {
     NPMap.config.api = NPMap.config.api.charAt(0).toUpperCase() + NPMap.config.api.slice(1);
@@ -383,10 +387,10 @@ if (typeof bean === 'undefined') {
               if (NPMap.config.credentials.slice(0, 1) === '&') {
                 apiUrl += NPMap.config.credentials;
               }
-            } else if (window.location.origin.indexOf('file://') === -1) {
+            } else if (window.location.protocol !== 'file:') {
               var host = window.location.host;
 
-              if (host.indexOf('inpniscsfern1.nps.doi.net') !== -1 || host.indexOf('inside.nps.gov') !== -1 || host.indexOf('insidemaps.nps.gov' !== -1)) {
+              if (host.indexOf('.nps.doi.net') !== -1 || host.indexOf('inside.nps.gov') !== -1 || host.indexOf('insidemaps.nps.gov' !== -1)) {
                 apiUrl += '&client=gme-nationalparkservice2';
               } else {
                 apiUrl += '&client=gme-nationalparkservice1';
