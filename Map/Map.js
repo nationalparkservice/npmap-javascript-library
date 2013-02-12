@@ -222,6 +222,18 @@ define([
     
     NPMap.Map.setCursor('crosshair');
   });
+  Event.add('NPMap.Map', 'mouseout', function(e) {
+    if (divZoombox.style.display === 'block') {
+      divZoombox.style.display = 'none';
+      divZoombox.style.height = '0px';
+      divZoombox.style.width = '0px';
+
+      NPMap.Map.setCursor('');
+      NPMap.Event.remove(mouseMoveId);
+      
+      pixelMouseDown = null;
+    }
+  });
   Event.add('NPMap.Map', 'mouseup', function(e) {
     if (divZoombox.style.display === 'block') {
       var pixel = getMousePixel(e),
