@@ -1,4 +1,17 @@
 define(function() {
+  if (!base64) {
+    /**
+     *  http://code.google.com/p/stringencoders/source/browse/#svn/trunk/javascript
+     */
+    var base64={PADCHAR:"=",ALPHA:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",getbyte64:function(a,f){var b=base64.ALPHA.indexOf(a.charAt(f));if(-1==b)throw"Cannot decode base64";return b},decode:function(a){a=""+a;var f=base64.getbyte64,b,c,d,e=a.length;if(0==e)return a;if(0!=e%4)throw"Cannot decode base64";b=0;a.charAt(e-1)==base64.PADCHAR&&(b=1,a.charAt(e-2)==base64.PADCHAR&&(b=2),e-=4);var g=[];for(c=0;c<e;c+=4)d=f(a,c)<<18|f(a,c+1)<<12|f(a,c+2)<<6|f(a,c+3),g.push(String.fromCharCode(d>>16,d>>8&255,d&255));switch(b){case 1:d=f(a,c)<<18|f(a,c+1)<<12|f(a,c+2)<<6;g.push(String.fromCharCode(d>>16,d>>8&255));break;case 2:d=f(a,c)<<18|f(a,c+1)<<12,g.push(String.fromCharCode(d>>16))}return g.join("")},getbyte:function(a,f){var b=a.charCodeAt(f);if(255<b)throw"INVALID_CHARACTER_ERR: DOM Exception 5";return b},encode:function(a){if(1!=arguments.length)throw"SyntaxError: Not enough arguments";var f=base64.PADCHAR,b=base64.ALPHA,c=base64.getbyte,d,e,g=[];a=""+a;var h=a.length-a.length%3;if(0==a.length)return a;for(d=0;d<h;d+=3)e=c(a,d)<<16|c(a,d+1)<<8|c(a,d+2),g.push(b.charAt(e>>18)),g.push(b.charAt(e>>12&63)),g.push(b.charAt(e>>6&63)),g.push(b.charAt(e&63));switch(a.length-h){case 1:e=c(a,d)<<16;g.push(b.charAt(e>>18)+b.charAt(e>>12&63)+f+f);break;case 2:e=c(a,d)<<16|c(a,d+1)<<8,g.push(b.charAt(e>>18)+b.charAt(e>>12&63)+b.charAt(e>>6&63)+f)}return g.join("")}};
+  }
+  if (!LazyLoader) {
+    /**
+     * https://github.com/LukeTheDuke/Lazyloader
+     */
+    var LazyLoader=function(i,j){function k(a){var a=a.toLowerCase(),b=a.indexOf("js"),a=a.indexOf("css");return-1==b&&-1==a?!1:b>a?"js":"css"}function m(a){var b=document.createElement("link");b.href=a;b.rel="stylesheet";b.type="text/css";b.onload=c;b.onreadystatechange=function(){("loaded"==this.readyState||"complete"==this.readyState)&&c()};document.getElementsByTagName("head")[0].appendChild(b)}function f(a){try{document.styleSheets[a].cssRules?c():document.styleSheets[a].rules&&document.styleSheets[a].rules.length?c():setTimeout(function(){f(a)},250)}catch(b){setTimeout(function(){f(a)},250)}}function c(){g--;0==g&&j&&j()}for(var g=0,d,l=document.styleSheets.length-1,h=0;h<i.length;h++)if(g++,d=i[h],"css"==k(d)&&(m(d),l++,!window.opera&&-1==navigator.userAgent.indexOf("MSIE")&&f(l)),"js"==k(d)){var e=document.createElement("script");e.type="text/javascript";e.src=d;e.onload=c;document.getElementsByTagName("head")[0].appendChild(e)}};
+  }
+
   var
       // The interval for the div resize.
       elementResizeInterval = null,
@@ -49,13 +62,6 @@ define(function() {
     return classElements;
   }
 
-  if (!LazyLoader) {
-    /**
-     * https://github.com/LukeTheDuke/Lazyloader
-     */
-    var LazyLoader=function(i,j){function k(a){var a=a.toLowerCase(),b=a.indexOf("js"),a=a.indexOf("css");return-1==b&&-1==a?!1:b>a?"js":"css"}function m(a){var b=document.createElement("link");b.href=a;b.rel="stylesheet";b.type="text/css";b.onload=c;b.onreadystatechange=function(){("loaded"==this.readyState||"complete"==this.readyState)&&c()};document.getElementsByTagName("head")[0].appendChild(b)}function f(a){try{document.styleSheets[a].cssRules?c():document.styleSheets[a].rules&&document.styleSheets[a].rules.length?c():setTimeout(function(){f(a)},250)}catch(b){setTimeout(function(){f(a)},250)}}function c(){g--;0==g&&j&&j()}for(var g=0,d,l=document.styleSheets.length-1,h=0;h<i.length;h++)if(g++,d=i[h],"css"==k(d)&&(m(d),l++,!window.opera&&-1==navigator.userAgent.indexOf("MSIE")&&f(l)),"js"==k(d)){var e=document.createElement("script");e.type="text/javascript";e.src=d;e.onload=c;document.getElementsByTagName("head")[0].appendChild(e)}};
-  }
-
   // TODO: Switch all Array.remove() calls over to splice and get rid of this.
   Array.prototype.remove = function(from, to) {
     var rest = this.slice((to || from) + 1 || this.length);
@@ -78,7 +84,7 @@ define(function() {
      * @return null
      */
     addClass: function(el, cls) {
-      el.className = el.className += ' ' + cls;
+      el.className = this.trimString(el.className += ' ' + cls);
     },
     /**
      * Binds an event to an HTML element.
@@ -97,6 +103,12 @@ define(function() {
      */
     convertOpacity: function(opacity) {
       return (opacity / 25.5) * 0.1;
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    decodeBase64: function(string) {
+      return base64.decode(string);
     },
     /**
      * Given an object, does a property exist?
@@ -118,6 +130,12 @@ define(function() {
       }
 
       return true;
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    encodeBase64: function(obj) {
+      return base64.encode(obj);
     },
     /**
      * Cancels a mousewheel event.
@@ -508,7 +526,7 @@ define(function() {
      * @return null
      */
     removeClass: function(el, cls) {
-      el.className = el.className.replace(cls, '');
+      el.className = this.trimString(el.className.replace(cls, ''));
     },
     /**
      * DEPRECATED: STILL USED BY ROUTE MODULE.
@@ -559,6 +577,12 @@ define(function() {
       for (var i = 0; i < propagationEvents.length; i++) {
         bindEvent(el, propagationEvents[i], me.eventCancelPropagation, false);
       }
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    stringGlobalReplace: function(str, r, w) {
+      return str.replace(new RegExp(r, 'g'), w);
     },
     /**
      * Strips all HTML from a string.
