@@ -42,7 +42,7 @@ define([
       maxHeight = null,
       // This variable holds the user-defined maxWidth for the #npmapinfobox div.
       maxWidth = null,
-      // The offset of the map div element (NPMap.config.div).
+      // The offset of the map div element (NPMap.config._div).
       offset,
       // The left offset of the map div element, in pixels.
       offsetLeft,
