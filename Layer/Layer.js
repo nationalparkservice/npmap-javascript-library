@@ -257,6 +257,7 @@ define([
      */
     getLayerByName: function(name) {
       var baseLayers = NPMap.config.baseLayers,
+          found = false,
           layers = NPMap.config.layers;
 
       if (layers && layers.length) {
@@ -264,20 +265,25 @@ define([
           var layer = layers[i];
 
           if (layer.name === name) {
+            found = true;
             return layer;
           }
         }
       }
       
-      if (baseLayers && baseLayers.length) {
-        for (var j = 0; j < baseLayers.length; j++) {
-          var baseLayer = baseLayers[j];
+      if (!found) {
+        if (baseLayers && baseLayers.length) {
+          for (var j = 0; j < baseLayers.length; j++) {
+            var baseLayer = baseLayers[j];
 
-          if (baseLayer.name === name) {
-            return baseLayer;
+            if (baseLayer.name === name) {
+              return baseLayer;
+            }
           }
         }
       }
+      
+      return null;
     },
     /**
      * Get the META information for a layer handler.
@@ -333,6 +339,8 @@ define([
      * @return null
      */
     hide: function(config, silent) {
+      //config = this.getLayerByName(config.name);
+
       var type = config.type,
           func = this[type]._hide,
           meta = this.getLayerHandlerMeta(type);
@@ -366,6 +374,20 @@ define([
       }
     },
     /**
+     * UNDOCUMENTED
+     */
+    isLoaded: function(config) {
+      if (this.getLayerHandlerMeta(config.type).type === 'raster') {
+        if (config.api || config._api) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return typeof config.geometries === 'array';
+      }
+    },
+    /**
      * Iterates through all the objects in the NPMap.config.baseLayers and NPMap.config.layers configs. The function will be passed each of the layer config objects as a parameter.
      * @param {Function} func
      * @return null
@@ -395,12 +417,33 @@ define([
       }
     },
     /**
+     *
+     */
+    refresh: function(config, silent) {
+      //config = this.getLayerByName(config.name);
+
+      var type = config.type,
+          func = this[type]._refresh;
+
+      NPMap.InfoBox.hide();
+
+      if (!silent) {
+        // TODO: Add refresh event.
+      }
+
+      if (typeof func === 'function') {
+        func(config);
+      }
+    },
+    /**
      * Removes a layer.
      * @param {Object} config
      * @param {Boolean} silent (Optional)
      * @return null
      */
     remove: function(config, silent) {
+      //config = this.getLayerByName(config.name);
+
       var type = config.type,
           func = this[type]._remove,
           meta = this.getLayerHandlerMeta(type);
@@ -429,7 +472,7 @@ define([
       if (!silent) {
         Event.trigger('NPMap.Layer', 'beforeremove', config);
       }
-      
+
       if (typeof func === 'function') {
         func(config, callback);
       } else {
@@ -443,6 +486,8 @@ define([
      * @return null
      */
     show: function(config, silent) {
+      //config = this.getLayerByName(config.name);
+
       var type = config.type,
           func = this[type]._show,
           meta = this.getLayerHandlerMeta(type);
