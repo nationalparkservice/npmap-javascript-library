@@ -450,7 +450,7 @@ define([
     _mapConfig.minZoom = 0;
   }
   
-  _map = new L.Map(NPMap.config.div, _mapConfig);
+  _map = new L.Map(NPMap.config._div, _mapConfig);
 
   for (var j = 0; j < NPMap.config.baseLayers.length; j++) {
     var baseLayerJ = NPMap.config.baseLayers[j];
@@ -477,10 +477,6 @@ define([
   });
   L.DomEvent.on(_map.getContainer(), 'mouseenter', function(e) {
     Event.trigger('NPMap.Map', 'mouseover', e);
-    L.DomEvent.preventDefault(e);
-  });
-  L.DomEvent.on(_map.getContainer(), 'mouseleave', function(e) {
-    Event.trigger('NPMap.Map', 'mouseout', e);
     L.DomEvent.preventDefault(e);
   });
   L.DomEvent.on(_map.getContainer(), 'mousemove', function(e) {
@@ -538,6 +534,7 @@ define([
       var layer;
 
       options.map = _map;
+
       layer = new L.CartoDBLayer(options);
 
       _map.addLayer(layer);
@@ -783,6 +780,15 @@ define([
     _showTileStreamLayer: function(layer) {
       this._showTileLayer(layer);
     },
+    /**
+     * Updates the query for a CartoDb layer.
+     * @param {Object} layer
+     * @param {String} query
+     * @return null
+     */
+    _updateCartoDbQuery: function(layer, query) {
+      layer.setQuery(query);
+    },
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
     map: _map,
     
@@ -932,12 +938,6 @@ define([
       }
       
       return o;
-    },
-    /**
-     * DEPRECATED
-     */
-    createCartoDbLayer: function(options) {
-
     },
     /**
      * Creates a line shape.

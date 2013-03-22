@@ -91,7 +91,7 @@ define([
    * Checks to see if the map is currently zoomed in further out/in than it is supposed to and repositions it, if needed.
    * @return null
    */
-  function checkMaxMinZoom() {
+  function _checkMaxMinZoom() {
     var range = map.getZoomRange(),
         max = range.max,
         min = range.min;
@@ -180,7 +180,7 @@ define([
     activeBaseLayer = NPMap.config.baseLayers[0];
   }
   
-  map = new Microsoft.Maps.Map(document.getElementById(NPMap.config.div), {
+  map = new Microsoft.Maps.Map(document.getElementById(NPMap.config._div), {
     center: NPMap.config.center ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new Microsoft.Maps.Location(39, -96),
     credentials: NPMap.config.credentials ? NPMap.config.credentials : 'Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65',
     disableKeyboardInput: NPMap.config.tools && !NPMap.config.tools.keyboard ? true : false,
@@ -238,10 +238,6 @@ define([
         if (e.targetType === 'map' || e.target.allowClickThrow === true) {
           Event.trigger('NPMap.Map', 'click', cloned);
         } else {
-          if (e.target.clickHandler) {
-            e.target.clickHandler(e.target);
-          }
-
           Event.trigger('NPMap.Map', 'shapeclick', e);
         }
       }
@@ -303,9 +299,6 @@ define([
 
     return false;
   });
-  Microsoft.Maps.Events.addHandler(map, 'mouseout', function(e) {
-    Event.trigger('NPMap.Map', 'mouseout', e.originalEvent);
-  });
   Microsoft.Maps.Events.addHandler(map, 'mouseover', function(e) {
     Event.trigger('NPMap.Map', 'mouseover', e.originalEvent);
   });
@@ -359,7 +352,7 @@ define([
 
     viewChanged = true;
     
-    checkMaxMinZoom();
+    _checkMaxMinZoom();
     Event.trigger('NPMap.Map', 'viewchanging');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function() {
@@ -385,7 +378,7 @@ define([
     lastZoom = map.getZoom();
     viewChanged = true;
     
-    checkMaxMinZoom();
+    _checkMaxMinZoom();
     Event.trigger('NPMap.Map', 'viewchangestart');
   });
   Map._init();
@@ -946,7 +939,7 @@ define([
      * @return null
      */
     handleResize: function() {
-      var dimensions = Util.getOuterDimensions(document.getElementById(NPMap.config.div));
+      var dimensions = Util.getOuterDimensions(document.getElementById(NPMap.config._div));
 
       map.setOptions({
         height: dimensions.height,

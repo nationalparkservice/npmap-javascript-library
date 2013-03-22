@@ -32,35 +32,40 @@
           icon: 'aerial',
           mapTypeId: 'SATELLITE',
           name: 'Aerial View',
-          type: 'Api'
+          type: 'Aerial',
+          typeNpmap: 'Api'
         },
         blank: {
           cls: 'blank',
           icon: 'blank',
           mapTypeId: 'BLANK',
           name: 'Blank View',
-          type: 'Api'
+          type: 'Blank',
+          typeNpmap: 'Api'
         },
         hybrid: {
           cls: 'hybrid',
           icon: 'aerial',
           mapTypeId: 'HYBRID',
           name: 'Hybrid View',
-          type: 'Api'
+          type: 'Hybrid',
+          typeNpmap: 'Api'
         },
         streets: {
           cls: 'streets',
           icon: 'street',
           mapTypeId: 'ROADMAP',
           name: 'Street View',
-          type: 'Api'
+          type: 'Streets',
+          typeNpmap: 'Api'
         },
         terrain: {
           cls: 'terrain',
           icon: 'topo',
           mapTypeId: 'TERRAIN',
           name: 'Terrain View',
-          type: 'Api'
+          type: 'Terrain',
+          typeNpmap: 'Api'
         }
       },
       // Helps handle map single and double-click events.
@@ -115,7 +120,7 @@
       var baseLayer = NPMap.config.baseLayers[i];
 
       if (baseLayer.visible) {
-        if (baseLayer.type === 'Api') {
+        if (typeof baseLayer.typeNpmap !== 'undefined' && baseLayer.typeNpmap === 'Api') {
           mapTypeId = google.maps.MapTypeId[baseLayer.mapTypeId];
         } else {
           mapTypeId = 'BLANK';
@@ -155,7 +160,7 @@
 
   mapConfig.center = initialCenter = (NPMap.config.center ? new google.maps.LatLng(NPMap.config.center.lat, NPMap.config.center.lng) : new google.maps.LatLng(39, -96));
   mapConfig.zoom = initialZoom = oldZoom = (NPMap.config.zoom ? NPMap.config.zoom : 4);
-  map = new google.maps.Map(document.getElementById(NPMap.config.div), mapConfig);
+  map = new google.maps.Map(document.getElementById(NPMap.config._div), mapConfig);
 
   map.mapTypes.set('blank', blankMapType);
 
@@ -294,9 +299,6 @@
       });
       google.maps.event.addDomListener(map.getDiv(), 'mousemove', function(e) {
         Event.trigger('NPMap.Map', 'mousemove', e);
-      });
-      google.maps.event.addDomListener(map.getDiv(), 'mouseout', function(e) {
-        Event.trigger('NPMap.Map', 'mouseout', e);
       });
       google.maps.event.addDomListener(map.getDiv(), 'mouseover', function(e) {
         Event.trigger('NPMap.Map', 'mouseover', e);
@@ -564,7 +566,7 @@
         bl.visible = false;
       }
 
-      if (activeBaseLayer.type !== 'Api') {
+      if (activeBaseLayer.typeNpmap !== 'Api') {
         NPMap.Layer[activeBaseLayer.type].remove(activeBaseLayer);
       }
 
@@ -720,8 +722,8 @@
     convertMarkerOptions: function(options) {
       var o = {};
 
-      if (options.draggable) {
-        o.draggable = options.draggable;
+      if (options.draggable === true) {
+        o.draggable = true;
       }
 
       if (options.url) {

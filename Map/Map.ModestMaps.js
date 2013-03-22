@@ -63,7 +63,7 @@ define([
         }
       },
       // The map div.
-      divMap = document.getElementById(NPMap.config.div).parentNode,
+      divMap = document.getElementById(NPMap.config._div).parentNode,
       // The initial center of the map.
       initialCenter,
       // The initial zoom level of the map.
@@ -116,7 +116,7 @@ define([
   }
   
   center = initialCenter = NPMap.config.center ? new MM.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new MM.Location(39, -96);
-  map = new MM.Map(NPMap.config.div, [], null, [
+  map = new MM.Map(NPMap.config._div, [], null, [
     easey_handlers.DragHandler(),
     easey_handlers.TouchHandler(),
     easey_handlers.MouseWheelHandler(),
@@ -227,9 +227,6 @@ define([
   });
   MM.addEvent(map.parent, 'mouseover', function(e) {
     Event.trigger('NPMap.Map', 'mouseover', e);
-  });
-  MM.addEvent(map.parent, 'mouseout', function(e) {
-    Event.trigger('NPMap.Map', 'mouseout', e);
   });
   MM.addEvent(map.parent, 'mouseup', function(e) {
     clicks++;
