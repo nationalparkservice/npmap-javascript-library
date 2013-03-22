@@ -2,7 +2,7 @@
   'Module/Module'
 ],function(Module) {
   // The module config object.
-  var _config = (function() {
+  var config = (function() {
     for (var i = 0; i < NPMap.config.modules.length; i++) {
       if (NPMap.config.modules[i].name === 'edit') {
         return NPMap.config.modules[i];
@@ -19,7 +19,7 @@
      *
      */
     _getConfig: function() {
-      return _config;
+      return config;
     },
     /**
      *

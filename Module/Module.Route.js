@@ -523,7 +523,7 @@
     divDirections.style.position = 'absolute';
     divDirections.style.width = '100%';
     divDirections.style.zIndex = '50';
-    document.getElementById(NPMap.config.div).appendChild(divDirections);
+    document.getElementById(NPMap.config._div).appendChild(divDirections);
     
     divRoute.id = 'npmaproute';
   

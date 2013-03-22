@@ -71,7 +71,7 @@ define([
           default:
             throw new Error('The GeoJSON object is invalid.');
       }
-
+      
       if (shape) {
         shape.npmap = data ? _.extend({}, data) : {};
         shape.npmap.data = shape.npmap.data ? _.extend(shape.npmap.data, geoJson.properties) : geoJson.properties;
