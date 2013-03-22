@@ -140,8 +140,7 @@ define([
      * @return null
      */
     _add: function(config, callback) {
-      var tileLayer,
-          uriConstructor = config.url + '/tile/{{z}}/{{y}}/{{x}}';
+      var uriConstructor = config.url + '/tile/{{z}}/{{y}}/{{x}}';
 
       if (!config.tiled) {
         uriConstructor = function(x, y, z) {
@@ -168,14 +167,14 @@ define([
       }
 
       config.layersStatus = config.layersStatus || config.layers;
-      tileLayer = config.api = Map._addTileLayer({
+      config.api = Map._addTileLayer({
         constructor: uriConstructor,
         name: config.name,
         opacity: config.opacity,
         zIndex: config.zIndex,
         zoomRange: config.zoomRange
       });
-      tileLayer.npmap = {
+      config.api.npmap = {
         layerName: config.name,
         layerType: config.type
       };
@@ -439,6 +438,18 @@ define([
       InfoBox.show(InfoBox._build(layer, attributes, 'content'), '<h2>' + title + '</h2>', null, actions);
     },
     /**
+     * Refreshes the layer.
+     * @param {Object} config
+     * @return null
+     */
+    _refresh: function(config) {
+      if (config.api) {
+        Layer.remove(config, true);
+      }
+      
+      Layer.add(config, true);
+    },
+    /**
      * Removes the layer.
      * @param {Object} config
      * @param {Function} callback (Optional)
@@ -487,18 +498,6 @@ define([
       }
     },
     /**
-     * Refreshes the layer.
-     * @param {Object} config
-     * @return null
-     */
-    refresh: function(config) {
-      if (config.api) {
-        Layer.remove(config, true);
-      }
-      
-      Layer.add(config, true);
-    },
-    /**
      * Toggles a layer's sublayer on or off.
      * @param {Object} config The layer config object.
      * @param {Integer} subLayerIndex The index of the sublayer.
@@ -539,7 +538,7 @@ define([
         if (subLayers.length === 0) {
           Layer.remove(config);
         } else {
-          this.refresh(config);
+          Layer.refresh(config);
         }
 
         if (!on) {
