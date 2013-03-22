@@ -5,11 +5,30 @@ define([
   'Event',
   'InfoBox',
   'Layer/Layer',
-  'Map/Map'
-], function(Event, InfoBox, Layer, Map) {
+  'Map/Map',
+  'Util/Util'
+], function(Event, InfoBox, Layer, Map, Util) {
   //point = null,
   //hoverStyle = {radius:8, color:"#333", weight:3, opacity:1, fillColor: "#FFCC00", fillOpacity:1, clickable:false};
 
+  /** 
+   *
+   */
+  function _buildInteractivity(meta) {
+    var interactivity = '';
+
+    for (var prop in meta) {
+      interactivity += prop + ',';
+    }
+
+    return interactivity + 'geometry';
+  }
+  /**
+   *
+   */
+  function _buildSelect(interactivity) {
+    return 'SELECT ' + interactivity.replace('geometry,', '').replace(',geometry,', '').replace(',geometry', '') + ',ST_ASGEOJSON(the_geom) as geometry '
+  }
   /**
    * Handles CartoDb click events.
    * @param {Object} feature
@@ -27,6 +46,53 @@ define([
 
     NPMap.Layer.CartoDb._handleClick(feature);
     //NPMap.Event.trigger('NPMap.Map', 'shapeclick', feature);
+  }
+  /**
+   * Loads a CartoDB layer from its metadata.
+   * @param {Object} config
+   * @param {Object} meta
+   * @param {Object} options
+   * @param {String} table
+   * @param {String} user
+   * @param {Function} callback (Optional)
+   */
+  function _loadFromMeta(config, meta, options, table, user, callback) {
+    var interactivity = _buildInteractivity(meta),
+        query;
+    
+    options.table_name = table;
+    options.tile_style = config.style || null;
+    options.user_name = user;
+
+    if (interactivity.length) {
+      var select;
+
+      options.featureClick = function(feature, latLng, pos, data) {
+        _click(feature, latLng, pos, data, options);
+      };
+      options.featureOut = _out;
+      options.featureOver = _over;
+      options.interactivity = interactivity;
+      select = _buildSelect(interactivity);
+
+      if (config.query) {
+        options.query = config.query.replace('SELECT * ', select);
+      } else {
+        options.query = select + 'FROM {{table_name}}';
+      }
+    } else {
+      options.query = 'SELECT * FROM {{table_name}}';
+    }
+
+    config._api = Map[NPMap.config.api]._addCartoDbLayer(options);
+    config._api.npmap = {
+      layerName: config.name,
+      layerType: 'CartoDb'
+    };
+
+    if (callback) {
+      callback();
+    }
   }
   /**
    * Handles the CartoDb out events.
@@ -117,52 +183,23 @@ define([
       }
 
       if (typeof Map[NPMap.config.api]._addCartoDbLayer === 'function') {
-        reqwest({
-          success: function(response) {
-            var interactivity = '',
-                query,
-                row = response.rows[0];
-
-            options.query = config.query || 'SELECT * FROM {{table_name}}';
-            options.table_name = table;
-            options.tile_style = config.style || null;
-            options.user_name = user;
-
-            for (var prop in row) {
-              interactivity += prop + ',';
-            }
-
-            if (interactivity.length > 0) {
-              interactivity = interactivity.slice(0, interactivity.length - 1);
-              options.interactivity = interactivity + ',geometry';
-              options.query = 'SELECT ' + interactivity + ',ST_ASGEOJSON(the_geom) as geometry FROM {{table_name}}';
-              options.featureClick = function(feature, latLng, pos, data) {
-                _click(feature, latLng, pos, data, options);
-              };
-              options.featureOut = _out;
-              options.featureOver = _over;
-            } else {
-              interactivity = null;
-            }
-
-            config.api = Map[NPMap.config.api]._addCartoDbLayer(options);
-            config.api.npmap = {
-              layerName: config.name,
-              layerType: 'CartoDb'
-            };
-
-            if (callback) {
-              callback();
-            }
-          },
-          type: 'jsonp',
-          url: 'https://' + user + '.cartodb.com/api/v2/sql?q=SELECT * FROM ' + table + ' LIMIT 1&callback=?'
-        });
+        if (config._meta) {
+          _loadFromMeta(config, config._meta, options, table, user, callback);
+        } else {
+          reqwest({
+            success: function(response) {
+              config._meta = response.rows[0];
+              _loadFromMeta(config, config._meta, options, table, user, callback);
+            },
+            type: 'jsonp',
+            url: 'https://' + user + '.cartodb.com/api/v2/sql?q=SELECT * FROM ' + table + ' LIMIT 1&callback=?'
+          });
+        }
       } else {
-        options.constructor = 'https://' + user + '.cartodb.com/tiles/' + table + '/{{z}}/{{x}}/{{y}}.png';
+        options.constructor = 'https://' + user + '.cartodb.com/tiles/' + table + '/{{z}}/{{x}}/{{y}}.png' + (options.query ? '?q=' + options.query : '');
         options.name = config.name;
-        config.api = Map._addTileLayer(options);
-        config.api.npmap = {
+        config._api = Map._addTileLayer(options);
+        config._api.npmap = {
           layerName: config.name,
           layerType: 'CartoDb'
         };
@@ -198,9 +235,9 @@ define([
      */
     _hide: function(config, callback) {
       if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
-        Map[NPMap.config.api]._hideCartoDbLayer(config.api);
+        Map[NPMap.config.api]._hideCartoDbLayer(config._api);
       } else {
-        Map[NPMap.config.api]._hideTileLayer(config.api);
+        Map[NPMap.config.api]._hideTileLayer(config._api);
       }
 
       if (callback) {
@@ -215,9 +252,9 @@ define([
      */
     _remove: function(config, callback) {
       if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
-        Map[NPMap.config.api]._removeCartoDbLayer(config.api);
+        Map[NPMap.config.api]._removeCartoDbLayer(config._api);
       } else {
-        Map[NPMap.config.api]._removeTileLayer(config.api);
+        Map[NPMap.config.api]._removeTileLayer(config._api);
       }
 
       if (config.identifiable === true) {
@@ -238,9 +275,27 @@ define([
      */
     _show: function(config, callback) {
       if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
-        Map[NPMap.config.api]._showCartoDbLayer(config.api);
+        Map[NPMap.config.api]._showCartoDbLayer(config._api);
       } else {
-        Map[NPMap.config.api]._showTileLayer(config.api);
+        Map[NPMap.config.api]._showTileLayer(config._api);
+      }
+
+      if (callback) {
+        callback();
+      }
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    updateQuery: function(config, query, callback) {
+      query = Util.stringGlobalReplace(query, '"', '\'');
+
+      if (typeof Map[NPMap.config.api]._updateCartoDbQuery === 'function') {
+        config.query = query.replace('SELECT * ', _buildSelect(_buildInteractivity(config._meta)));
+
+        Map[NPMap.config.api]._updateCartoDbQuery(config._api, config.query);
+      } else {
+        console.info('The updateQuery method is not yet supported for this base API.');
       }
 
       if (callback) {
