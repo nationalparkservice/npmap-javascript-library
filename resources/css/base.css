@@ -16,43 +16,13 @@
 #npmap-toolbar {background-color:#908D7C;left:0;height:28px;position:absolute;right:0;top:0;z-index:2;} /*border-bottom-left-radius:3px;border-bottom-right-radius:3px;*/
 
 /* Buttons */
+
 /* DEPRECATED */
-#npmap .sq-btn {
-  background:transparent url(../img/textures/sq-btn.png) repeat-x left top;
-  background-image:-moz-linear-gradient(#b28000,#9d7100);
-  background-image:-webkit-gradient(linear,0% 0%, 0% 100%,from(#b28000),to(#9d7100));
-  background-image:-webkit-linear-gradient(#b28000,#9d7100);
-  background-image:-o-linear-gradient(#b28000,#9d7100);
-  color:#FFFFFF;
-  cursor:pointer;
-  font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;
-  font-size:12px;
-  font-weight:bold;
-  padding:8px 12px 6px;
-  -webkit-border-radius:2px;
-  -moz-border-radius:2px;
-  -o-border-radius:2px;
-  border-radius:2px;
-  -moz-box-shadow:0 0 3px #cbcbcb;
-  -webkit-box-shadow:0 0 3px #cbcbcb;
-  box-shadow:0 0 3px #cbcbcb;
-  text-align:center;
-}
-/* DEPRECATED */
-#npmap button.sq-btn {
-  border: none;
-  height: 28px;
-  padding-top: 5px;
-}
-/* DEPRECATED */
-#npmap button.simple-btn {
-  background-color: transparent;
-  border: none;
-  color: #b28000;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 7px 10px 6px 10px;
-}
+#npmap .sq-btn {background:transparent url(../img/textures/sq-btn.png) repeat-x left top;background-image:-moz-linear-gradient(#b28000,#9d7100);background-image:-webkit-gradient(linear,0% 0%, 0% 100%,from(#b28000),to(#9d7100));background-image:-webkit-linear-gradient(#b28000,#9d7100);background-image:-o-linear-gradient(#b28000,#9d7100);color:#FFFFFF;cursor:pointer;font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;font-size:12px;font-weight:bold;padding:8px 12px 6px;-webkit-border-radius:2px;-moz-border-radius:2px;-o-border-radius:2px;border-radius:2px;-moz-box-shadow:0 0 3px #cbcbcb;-webkit-box-shadow:0 0 3px #cbcbcb;box-shadow:0 0 3px #cbcbcb;text-align:center;}
+#npmap button.sq-btn {border: none;height: 28px;padding-top: 5px;}
+#npmap button.simple-btn {background-color: transparent;border: none;color: #b28000;font-size: 12px;font-weight: bold;padding: 7px 10px 6px 10px;}
+/* END DEPRECATED */
+
 #npmap button {
   border: none;
   color: #FFFFFF;
