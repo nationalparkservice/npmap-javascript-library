@@ -296,13 +296,14 @@ if (typeof bean === 'undefined') {
               divLoading.parentNode.removeChild(divLoading);
 
               try {
-                var location = escape(window.top.location);
+                var location = escape(window.top.location),
+                    query = escape(window.top.location.search);
 
                 if (location.indexOf('localhost') === -1 && location.indexOf('file:') === -1 && location.indexOf('file%3A') === -1) {
                   setTimeout(function() {
                     reqwest({
                       type: 'jsonp',
-                      url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + escape(window.top.location.search) + '&u=' + location.replace(query, '') + '&v=' + NPMap.version + '&callback=?'
+                      url: 'http://maps.nps.gov/track/load?a=' + NPMap.config.api + '&q=' + query + '&u=' + location.replace(query, '') + '&v=' + NPMap.version + '&callback=?'
                     });
                   }, 1000);
                 }
