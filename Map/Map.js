@@ -1322,9 +1322,9 @@ define([
      * @return {Object}
      */
     createMarker: function(latLng, options) {
-      var data = options.data,
-          marker,
-          options = typeof options === 'object' ? NPMap.Map[NPMap.config.api].convertMarkerOptions(options) : {};
+      var marker,
+          options = typeof options === 'object' ? NPMap.Map[NPMap.config.api].convertMarkerOptions(options) : {},
+          data = options.data;
       
       marker = this._createMarker(latLng, options);
       marker.npmap = {
