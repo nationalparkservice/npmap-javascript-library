@@ -169,7 +169,17 @@
   } else {
     map.setMapTypeId(mapTypeId);
   }
-  
+
+  /*
+  interval = setInterval(function() {
+    if (NPMap.Map && NPMap.Map.Google) {
+      clearInterval(interval);
+      NPMap.Map.Google._isReady = true;
+      NPMap.Map._init();
+    }
+  }, 0);
+  */
+
   interval = setInterval(function() {
     bounds = map.getBounds();
 
@@ -236,7 +246,7 @@
           });
         }
       }
-      
+
       google.maps.event.addListener(map, 'bounds_changed', function() {
         if (NPMap.InfoBox.visible) {
           NPMap.InfoBox.reposition();
@@ -339,6 +349,7 @@
         if (divLogo) {
           var attribution,
               divAttribution,
+              divReport,
               intervalHtml;
 
           clearInterval(intervalAttribution);
@@ -346,12 +357,15 @@
           divAttribution = Util.getNextElement(divLogo.parentNode);
           divAttribution.style.display = 'none';
           divLogo.style.display = 'none';
+          divReport = Util.getNextElement(Util.getNextElement(Util.getNextElement(divAttribution)));
+          divReport.style.display = 'none';
+
           attribution = Util.stripHtmlFromString(divAttribution.innerHTML);
-          
           intervalHtml = setInterval(function() {
-            var a = Util.stripHtmlFromString(divAttribution.innerHTML).replace('Map DataMap data', 'Map data').replace(' - Terms of Use', '').replace('Terms of Use - ', '').replace('Terms of Use', '').replace('Map DataImagery', 'Map data'),
-                elementsNoPrint = Util.getElementsByClass('gmnoprint');
+            var a = Util.stripHtmlFromString(divAttribution.innerHTML).replace('Map DataMap data', 'Map data').replace(' - Terms of Use', '').replace('Terms of Use - ', '').replace('Terms of Use', '').replace('Map DataImagery', 'Map data');
                 
+            divReport.style.display = 'none';
+
             if (a !== attribution) {
               if (a === 'Map Data') {
                 NPMap.Map.Google._attribution = null;
@@ -365,14 +379,9 @@
 
               Map._updateAttribution();
             }
-
-            for (var i = 0; i < elementsNoPrint.length; i++) {
-              elementsNoPrint[i].style.display = 'none';
-            }
           }, 250);
         }
       }, 250);
-
       intervalOverlay = setInterval(function() {
         if (!overlay) {
           try {
@@ -722,6 +731,10 @@
     convertMarkerOptions: function(options) {
       var o = {};
 
+      if (options.clickable === false) {
+        o.clickable = false;
+      }
+
       if (options.draggable === true) {
         o.draggable = true;
       }
@@ -805,7 +818,9 @@
       var marker;
 
       options = options || {};
+      options.clickable = typeof options.clickable === 'boolean' ? options.clickable : true;
       options.position = latLng;
+
       marker = new google.maps.Marker(options);
 
       _hookUpShapeClickHandler(marker);

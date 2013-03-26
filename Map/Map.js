@@ -45,7 +45,7 @@ define([
       // The npmap div.
       divNpmap = document.getElementById('npmap'),
       // The npmap-controls div.
-      divNpmapControls = document.getElementById('npmap-map-controls'),
+      //divNpmapControls = document.getElementById('npmap-map-controls'),
       // The parent div.
       divNpmapParent = document.getElementById('npmap').parentNode,
       // The npmap-progressbar div.
@@ -390,7 +390,7 @@ define([
       }
     },
     /**
-     * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created. You should never call this manually.
+     * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created, and should never be called manually.
      * @return null
      */
     _init: function() {
@@ -1087,25 +1087,23 @@ define([
           }
         }
 
-        for (var i = 0; i < elements.length; i++) {
-          var element = elements[i];
-
+        _.each(elements, function(element) {
           me.addControl(element.el, element.func, element.stop);
-        }
+        });
 
         interval = setInterval(function() {
           var Api = NPMap.Map[NPMap.config.api];
 
           if (typeof Api !== 'undefined' && Api._isReady === true) {
-            // TODO: Iterate through all child elements of #npmap-map and detect width and set InfoBox padding. Right now this is hardcoded in NPMap.Infobox module.
-
             clearInterval(interval);
 
             delete Api._isReady;
 
+            /*
             Event.add('NPMap.Layer', 'ready', function() {
               me._updateAttribution();
             });
+            */
             Event.add('NPMap.Map', 'resized', function() {
               setAttributionMaxWidthAndPosition();
               me._handleResize();
@@ -1325,7 +1323,7 @@ define([
       var marker,
           options = typeof options === 'object' ? NPMap.Map[NPMap.config.api].convertMarkerOptions(options) : {},
           data = options.data;
-      
+
       marker = this._createMarker(latLng, options);
       marker.npmap = {
         data: data || null,
