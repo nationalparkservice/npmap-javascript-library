@@ -382,7 +382,7 @@ if (typeof bean === 'undefined') {
             callback = NPMap.apiLoaded();
             preLoaded = true;
           } else {
-            apiUrl = 'http://maps.googleapis.com/maps/api/js?v=3&sensor=false&callback=NPMap.apiLoaded';
+            apiUrl = 'https://maps.googleapis.com/maps/api/js?sensor=false&callback=NPMap.apiLoaded';
             
             if (NPMap.config.credentials) {
               if (NPMap.config.credentials.slice(0, 1) === '&') {
