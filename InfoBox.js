@@ -104,7 +104,7 @@ define([
         p.left = p.left + (mapPosition.west - scrollPosition.x);
         p.top = p.top + (mapPosition.north - scrollPosition.y);
       }
-      
+
       if (pan === 'center') {
         var h = (mapHeight - infoboxDimensions.height) / 2,
             o = Util.getOffset(divMap),
@@ -184,7 +184,7 @@ define([
                   }
                 }
               }
-              
+
               break;
             case 'south':
               // TODO: Implement when you have an InfoBox design that needs it.
@@ -276,7 +276,7 @@ define([
     if (callback) {
       callback();
     }
-    
+
     refreshOffsetsAndWidth();
   }
   /**
@@ -287,7 +287,7 @@ define([
     var offset = Util.getOffset(divMap),
         left = offset.left,
         top = offset.top;
-    
+
     mapPosition.east = left + divMap.offsetWidth;
     mapPosition.north = top;
     mapPosition.south = top + divMap.offsetHeight;
@@ -299,11 +299,11 @@ define([
    */
   function refreshDimensionsAndHeightWidth() {
     refreshDimensions();
-    
+
     if (!maxHeight) {
       setMaxHeight();
     }
-    
+
     if (!maxWidth) {
       setMaxWidth();
     }
@@ -344,7 +344,7 @@ define([
     if (width > mW) {
       obj.style.width = mW + 'px';
     }
-    
+
     if (height > dimensionsContent.height) {
       divInfoBoxContentWrapper.style.height = height + 'px';
     }
@@ -366,7 +366,7 @@ define([
       // Leave it.
     } else {
       maxHeight = valid;
-      
+
       // TODO: Animate.
       divInfoBox.style.maxHeight = maxHeight + 'px';
     }
@@ -377,32 +377,31 @@ define([
    */
   function setMaxWidth() {
     // TODO: If parent is set to 'page', you need to set maxWidth based on available width. This should probably update when the page is scrolled horizontally?
-    
     var valid = mapWidth - (padding * 2);
 
     if (maxWidth && (maxWidth <= valid)) {
       // Leave it.
     } else {
       maxWidth = valid;
-      
+
       // TODO: Animate.
       divInfoBox.style.maxWidth = maxWidth + 'px';
     }
   }
-  
+
   if (design === 'basic') {
     Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/basic.css');
-    
+
     divInfoBox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook' + (Modernizr.boxshadow ? '-shadow' : '') + '.png" style="right:23px;position:absolute;" /></div>';
   } else if (design === 'nps' || design === 'pyv') {
     Util.injectCss(NPMap.config.server + '/resources/css/classes/infobox/nps.css');
-    
+
     // TODO: Add support for non-shadowed "hook".
     divInfoBox.innerHTML = '<div id="npmap-infobox-close" onclick="NPMap.InfoBox.hide();return false;"></div><div id="npmap-infobox-title"></div><div id="npmap-infobox-content-wrapper"><div id="npmap-infobox-content"></div></div><div id="npmap-infobox-footer"></div><div id="npmap-infobox-bottom"><div style="height:25px;margin:auto;width:18px;"><img src="' + NPMap.config.server + '/resources/img/classes/infobox/hook-nps.png" /></div>';
   }
-  
-  divInfoBox.className = 'shadow';
+
   divInfoBox.id = 'npmap-infobox';
+  divInfoBox.className = 'shadow';
   divInfoBox.style.display = 'none';
   divInfoBox.style.position = 'absolute';
 
@@ -420,7 +419,7 @@ define([
       NPMap.Map.addControl(divInfoBox);
     } else {
       divInfoBox.style.zIndex = 999999;
-      
+
       document.body.appendChild(divInfoBox);
     }
 
@@ -455,11 +454,11 @@ define([
         }
       }
     }
-    
+
     if (!maxHeight) {
       setMaxHeight();
     }
-    
+
     if (!maxWidth) {
       setMaxWidth();
     }
@@ -489,7 +488,7 @@ define([
         if (NPMap.InfoBox && NPMap.InfoBox.visible) {
           NPMap.InfoBox.reposition();
         }
-      
+
         refreshDimensions();
       };
     }
@@ -544,7 +543,7 @@ define([
           }
         }
       }
-      
+
       if (!html) {
         if (element === 'content') {
           html = '<ul>';
@@ -608,7 +607,7 @@ define([
         this.visible = false;
         this.latLng = null;
         this.marker = null;
-        
+
         NPMap.Event.trigger('InfoBox', 'hide');
       }
     },
@@ -632,9 +631,9 @@ define([
      */
     reposition: function() {
       var to = this.marker || this.latLng;
-      
+
       NPMap.Map[NPMap.config.api].positionClickDot(to);
-      
+
       if (NPMap.Map[NPMap.config.api].isLatLngWithinMapBounds(NPMap.Map[NPMap.config.api].getClickDotLatLng()) === true) {
         position();
       } else {
@@ -675,7 +674,7 @@ define([
           NPMap.InfoBox.marker = target;
         }
       }
-      
+
       NPMap.Map.hideTip();
 
       divInfoBoxContentWrapper.style.height = 'auto';
@@ -689,7 +688,7 @@ define([
         if (actions.length > 0) {
           var add = [],
               remove = [];
-          
+
           _.each(actions, function(action, i) {
             if (typeof action === 'string') {
               if (action === 'zoomable') {
@@ -710,7 +709,7 @@ define([
             actions.push(action);
           });
         }
-        
+
         if (NPMap.config.modules) {
           _.each(NPMap.config.modules, function(module) {
             if (module.name === 'route') {
@@ -718,7 +717,7 @@ define([
                   lat = me.latLng.lat.toFixed(5),
                   lng = me.latLng.lng.toFixed(5),
                   titleNoHtml = (Util.trimString(Util.stripHtmlFromString(title))).replace(/'/g, '{singlequote}');
-                
+
               if (this.marker && this.marker.data) {
                 if (this.marker.data['address']) {
                   address = this.marker.data['address'];
@@ -728,9 +727,9 @@ define([
                   address = this.marker.data[module.addressAttribute];
                 }
               }
-              
+
               address = address || null;
-              
+
               if (module.mode === 'multi') {
                 actions.push({
                   handler: function() {
@@ -757,29 +756,29 @@ define([
             }
           });
         }
-        
+
         actions.sort(function(a, b) {
           // TODO: Figure out how to work with groups and take into account here.
           return a.text > b.text;
         });
-        
+
         me.actions = actions;
-  
+
         actions = (function() {
           var a = [];
-  
+
           _.each(actions, function(action, i) {
             var h = '<a href="javascript:void(0)"';
 
             if (action.text.indexOf('Back') === 0) {
               h += ' class="back"';
             }
-  
+
             h += ' onclick="NPMap.InfoBox.actions[' + i + '].handler();return false;">' + action.text + '</a>';
-  
+
             a.push(h);
           });
-          
+
           return a;
         })();
       }
@@ -787,18 +786,18 @@ define([
       if (content) {
         content = content.replace(/\'/g, '&#39;');
       }
-      
+
       if (footer) {
         footer = footer.replace(/\'/g, '&#39;');
       }
-      
+
       if (title) {
         title = title.replace(/\'/g, '&#39;');
       }
-      
+
       if (this.marker) {
         this.latLng = NPMap.Map.getMarkerLatLng(this.marker);
-        
+
         if (this.marker.highlightIconUrl) {
           this.marker.oldIconUrl = NPMap.Map[NPMap.config.api].getMarkerIcon(this.marker);
           NPMap.Map[NPMap.config.api].setMarkerIcon(this.marker, this.marker.highlightIconUrl);
@@ -806,16 +805,16 @@ define([
       } else if (!this.latLng) {
         this.latLng = NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].getClickDotLatLng());
       }
-      
+
       if (footer) {
         if (actions.length > 0) {
           _.each(actions, function(action) {
             footer += action + '<br>';
           });
-          
+
           footer = footer.slice(0, footer.length - 4);
         }
-        
+
         divInfoBoxFooter.innerHTML = '<div style="text-align:left;">' + h + '</div>';
         divInfoBoxFooter.style.display = 'block';
         hasFooterContent = true;
@@ -828,7 +827,7 @@ define([
           });
 
           h = h.slice(0, h.length - 4);
-          
+
           divInfoBoxFooter.innerHTML = '<div style="text-align:left;">' + h + '</div>';
           divInfoBoxFooter.style.display = 'block';
           hasFooterContent = true;
@@ -837,7 +836,7 @@ define([
           hasFooterContent = false;
         }
       }
-      
+
       bottomHeight = Util.getOuterDimensions(divInfoBoxBottom).height;
       footerHeight = hasFooterContent ? Util.getOuterDimensions(divInfoBoxFooter).height : 0;
       mH = maxHeight - Util.getOuterDimensions(divInfoBoxTitle).height - bottomHeight;
@@ -845,9 +844,9 @@ define([
       if (padding < (bottomHeight + footerHeight)) {
         padding = bottomHeight + footerHeight;
       }
-      
+
       mH = mH - padding;
-      
+
       // TODO: Animate the height and width resize of the InfoBox, if it is visible.
       divInfoBoxContentWrapper.style.maxHeight = mH + 'px';
       divInfoBoxContentWrapper.style.maxWidth = maxWidth + 'px';
@@ -858,7 +857,7 @@ define([
         divInfoBoxContentWrapper.scrollLeft = 0;
         divInfoBoxContentWrapper.scrollTop = 0;
       } catch(e) {
-      
+
       }
 
       Util.iterateThroughChildNodes(divInfoBox, function(el) {
