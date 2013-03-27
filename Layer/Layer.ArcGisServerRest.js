@@ -18,7 +18,7 @@ define([
       _identifyLayers = 0,
       // An array of results for the current identify operation.
       _identifyResults = [];
-      
+
   /**
    * Builds a HTML string for a layer.
    * @param {Object} layer
@@ -75,18 +75,18 @@ define([
           }
 
           title = InfoBox._build(layerConfig, result, type);
-          
+
           if (!title) {
             title = result[subLayer.displayFieldName];
           }
         } else {
           title = result[subLayer.displayFieldName];
         }
-        
+
         if (type !== 'cluster') {
           title = NPMap.Util.stripHtmlFromString(title);
         }
-        
+
         titles.push({
           result: result,
           title: title,
@@ -96,7 +96,7 @@ define([
       titles.sort(function(a, b) {
         var A = a.title.toUpperCase(),
             B = b.title.toUpperCase();
-            
+
         return (A < B) ? -1 : (A > B) ? 1 : 0;
       });
       _.each(titles, function(title, i2) {
@@ -125,7 +125,7 @@ define([
   function _constructId(layerName, layerId, objectId) {
     return layerName.replace(' ', '') + '-' + layerId + '-' + objectId;
   }
-  
+
   Event.add('NPMap.InfoBox', 'hide', function() {
     NPMap.Layer.ArcGisServerRest._identifyResult = null;
   });
@@ -154,7 +154,7 @@ define([
           if (config.layersStatus && config.layersStatus !== 'all') {
             u += '&layers=show:' + config.layersStatus;
           }
-          
+
           return u;
         };
       }
@@ -209,10 +209,10 @@ define([
 
         title = 'Results';
       }
-      
+
       _backContent = content;
       _backTitle = title = '<h2>' + title + '</h2>';
-      
+
       return {
         content: content,
         title: title
@@ -252,7 +252,7 @@ define([
                 tolerance: 10
               },
               success: function(response) {
-                if (response.results && response.results.length > 0) {
+                if (response && response.results && response.results.length > 0) {
                   results.push({
                     data: response,
                     layerName: layer.name
@@ -267,7 +267,7 @@ define([
           }
         })();
       }
-      
+
       if (count > 0) {
         var interval;
 
@@ -277,16 +277,16 @@ define([
           value = value + 0.1;
 
           Map.updateProgressBar(value);
-          
+
           if (value < 100) {
             if (count === 0) {
               var infobox;
-              
+
               clearInterval(interval);
-              
+
               infobox = me._buildInfoBox(results);
               me._identifyResult = results;
-              
+
               Map.hideProgressBar(value);
               InfoBox.show(infobox.content, infobox.title);
               _clusterPosition = 0;
@@ -446,7 +446,7 @@ define([
       if (config.api) {
         Layer.remove(config, true);
       }
-      
+
       Layer.add(config, true);
     },
     /**
@@ -457,7 +457,7 @@ define([
      */
     _remove: function(config, callback) {
       Map[NPMap.config.api]._removeTileLayer(config.api);
-      
+
       if (config.identifiable) {
         _identifyLayers--;
       }

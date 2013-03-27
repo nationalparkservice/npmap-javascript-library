@@ -118,10 +118,10 @@ define(function() {
      */
     doesPropertyExist: function(obj, prop) {
       var parts = prop.split('.');
-      
+
       for (var i = 0, l = parts.length; i < l; i++) {
         var part = parts[i];
-        
+
         if (obj !== null && typeof obj === "object" && part in obj) {
           obj = obj[part];
         } else {
@@ -226,7 +226,7 @@ define(function() {
       do {
         el = el.nextSibling;
       } while (el && el.nodeType != 1);
-      
+
       return el;
     },
     /**
@@ -236,7 +236,7 @@ define(function() {
      */
     getOffset: function(el) {
       for (var lx=0, ly=0; el !== null; lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent);
-    
+
       return {
         left: lx,
         top: ly
@@ -262,7 +262,7 @@ define(function() {
             node.style.display = 'block';
           }
         }
-        
+
         checkDisplay(el);
 
         if (el.id !== 'npmap' && parentNode) {
@@ -362,7 +362,7 @@ define(function() {
         height = document.body.clientHeight;
         width = document.body.clientWidth;
       }
-      
+
       return {
         height: height,
         width: width
@@ -389,11 +389,11 @@ define(function() {
     hexToRgb: function(hex) {
       var i = 3,
           rgb = hex.replace('#', '').match(/(.{2})/g);
-          
+
       while (i--) {
         rgb[i] = parseInt(rgb[i], 16);
       }
-      
+
       return rgb;
     },
     /**
@@ -460,7 +460,7 @@ define(function() {
       } else if ("button" in e) {
         isRight = e.button === 2;
       }
-      
+
       return isRight;
     },
     /**
@@ -546,14 +546,14 @@ define(function() {
     safeLoad: function(module, callback) {
       var interval,
           partition = module.replace('NPMap.', '').split('.');
-          
+
       interval = setInterval(function() {
         try {
           var obj = NPMap;
 
           for (var i = 0; i < partition.length; i++) {
             obj = obj[partition[i]];
-            
+
             if (typeof obj === 'undefined') {
               break;
             } else if ((i + 1) === partition.length) {
