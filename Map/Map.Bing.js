@@ -346,12 +346,12 @@ define([
 
         zoomStartReported = true;
       }
-      
+
       Event.trigger('NPMap.Map', 'zooming');
     }
 
     viewChanged = true;
-    
+
     _checkMaxMinZoom();
     Event.trigger('NPMap.Map', 'viewchanging');
   });
@@ -370,14 +370,14 @@ define([
     if (activeBaseLayer.type === 'Api') {
       _updateBingCopyright();
     }
-    
+
     Event.trigger('NPMap.Map', 'viewchangeend');
   });
   Microsoft.Maps.Events.addHandler(map, 'viewchangestart', function() {
     lastCenter = map.getCenter();
     lastZoom = map.getZoom();
     viewChanged = true;
-    
+
     _checkMaxMinZoom();
     Event.trigger('NPMap.Map', 'viewchangestart');
   });
@@ -568,7 +568,7 @@ define([
      * @return {Object}
      */
     boundsToApi: function(bounds) {
-      return Microsoft.Maps.LocationRect.fromEdges(bounds.n, bounds.w, bounds.s, bounds.e);
+      return Microsoft.Maps.LocationRect.fromString(bounds.n + ',' + bounds.w + ',' + bounds.s + ',' + bounds.e);
     },
     /**
      * Centers the map.
@@ -599,7 +599,7 @@ define([
       } else {
         var handlerId = Microsoft.Maps.Events.addThrottledHandler(map, 'viewchangeend', function() {
               Microsoft.Maps.Events.removeHandler(handlerId);
-          
+
               if (callback) {
                 callback();
               }
@@ -645,11 +645,11 @@ define([
 
         o.strokeColor = new Microsoft.Maps.Color(strokeOpacity, strokeColor[0], strokeColor[1], strokeColor[2]);
       }
-      
+
       if (options.strokeWidth) {
         o.strokeThickness = options.strokeWidth;
       }
-      
+
       return o;
     },
     /**
@@ -697,11 +697,11 @@ define([
 
         o.strokeColor = new Microsoft.Maps.Color(strokeOpacity, strokeColor[0], strokeColor[1], strokeColor[2]);
       }
-      
+
       if (options.strokeWidth) {
         o.strokeThickness = options.strokeWidth;
       }
-      
+
       return o;
     },
     /**
@@ -723,7 +723,7 @@ define([
      */
     createMarker: function(latLng, options) {
       options = options || {};
-      
+
       if (!options.anchor || !options.height || !options.width) {
         if (options.height && options.width) {
           options.anchor = new Microsoft.Maps.Point(options.width / 2, options.height / 2);
@@ -737,7 +737,7 @@ define([
               var height = image.height,
                   width = image.width,
                   anchor = options.anchor || new Microsoft.Maps.Point(width / 2, height / 2);
-              
+
               clearInterval(interval);
 
               if (!marker) {
@@ -773,7 +773,7 @@ define([
      * DEPRECATED
      */
     createTileLayer: function(constructor, options) {
-      
+
     },
     /**
      * Gets a latLng from a click event object.
@@ -1006,7 +1006,7 @@ define([
         center: map.getCenter(),
         centerOffset: new Microsoft.Maps.Point(pixels.x, pixels.y)
       });
-      
+
       if (callback) {
         var handlerId = Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function() {
           Microsoft.Maps.Events.removeHandler(handlerId);
