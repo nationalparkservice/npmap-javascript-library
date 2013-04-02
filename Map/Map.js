@@ -56,6 +56,8 @@ define([
       divZoombox = document.createElement('div'),
       // Does the map have active tile layers?
       hasTiled = false,
+      //
+      interval,
       // Is the map in fullscreen mode?
       isFullScreen = false,
       // The id of the active mousemove handler.
@@ -280,6 +282,266 @@ define([
 
     pixelMouseDown = null;
   });
+  Event.add('NPMap.Map', 'ready', function() {
+    var configModules = NPMap.config.modules,
+        elements = [],
+        htmlLogos = '';
+
+    Event.add('NPMap.Map', 'resized', function() {
+      setAttributionMaxWidthAndPosition();
+      NPMap.Map._handleResize();
+    });
+    Util.monitorResize(divMap, function() {
+      Event.trigger('NPMap.Map', 'resized');
+    });
+
+    divAttribution.id = 'npmap-attribution';
+    elements.push({
+      el: divAttribution,
+      func: function() {
+        setAttributionMaxWidthAndPosition();
+      }
+    });
+    divClickdot.id = 'npmap-clickdot';
+    elements.push({
+      el: divClickdot
+    });
+    divNotify.id = 'npmap-notify';
+    divNotify.style.zIndex = 31;
+    elements.push({
+      el: divNotify
+    });
+    divProgressBar.id = 'npmap-progressbar';
+    divProgressBar.innerHTML = '<div></div>';
+    elements.push({
+      el: divProgressBar
+    });
+    divTip.className = 'padded rounded shadowed transparent';
+    divTip.id = 'npmap-tip';
+    elements.push({
+      el: divTip
+    });
+    divZoombox.id = 'npmap-zoombox';
+    elements.push({
+      el: divZoombox,
+      stop: false
+    });
+    
+    if (apiLower !== 'leaflet' && apiLower !== 'modestmaps') {
+      htmlLogos += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + apiLower + 'logo.png" /></span>';
+    }
+    
+    if (NPMap.config.hideLogo !== true) {
+      htmlLogos += '<span style="display:block;float:left;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
+    }
+
+    if (htmlLogos.length > 0) {
+      // The logo div.
+      var logos = document.createElement('div');
+      
+      logos.id = 'npmap-logos';
+      logos.innerHTML = htmlLogos;
+      logos.style.cssText = 'bottom:3px;height:30px;left:5px;position:absolute;z-index:30;';
+      elements.push({
+        el: logos,
+        func: function() {
+          Util.monitorResize(logos, function() {
+            setAttributionMaxWidthAndPosition();
+          });
+          setAttributionMaxWidthAndPosition();
+        }
+      });
+    }
+
+    if (NPMap.config.baseLayers && NPMap.config.baseLayers.length) {
+      var activeIcon = null,
+          activeLabel = null,
+          items = [];
+
+      _.each(NPMap.config.baseLayers, function(baseLayer) {
+        var icon = baseLayer.icon,
+            label = baseLayer.name;
+
+        if (typeof baseLayer.name === 'string') {
+          if (typeof icon === 'string') {
+            baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/' + icon + '-small.png';
+          } else {
+            // TODO: Come up with a default icon.
+            baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/blank-small.png';
+          }
+
+          if (!activeIcon && (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true)) {
+            activeIcon = baseLayer.icon;
+            activeLabel = baseLayer.name;
+          }
+          
+          items.push(baseLayer);
+        }
+      });
+
+      if (items.length > 1) {
+        var divSwitcher = document.createElement('div'),
+            divSwitcherMenu = document.createElement('div');
+        
+        function setIcon(url) {
+          document.getElementById('npmap-switcher-dropdown-icon').innerHTML = '<img src="' + url + '" style="height:15px;margin-top:4.5px;" />';
+        }
+        function setLabel(text) {
+          document.getElementById('npmap-switcher-dropdown-text').innerHTML = text.toUpperCase();
+        }
+
+        items.sort(function(a, b) {
+          return a.name > b.name;
+        });
+
+        divSwitcher.className = 'npmap-switcher-dropdown';
+        divSwitcher.id = 'npmap-switcher';
+        divSwitcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
+        divSwitcherMenu.id = 'npmap-switcher-menu';
+        // TODO: Both menus should be able to expand in width up to a set number (maybe 250px?).
+        divSwitcherMenu.style.cssText = 'display:none;max-width:160px;position:absolute;right:16px;top:38px;';
+        
+        elements.push({
+          el: divSwitcher
+        }, {
+          el: divSwitcherMenu,
+          func: function() {
+            var htmlMenu = '<ul>';
+
+            if (activeIcon.length > 0) {
+              setIcon(activeIcon);
+            }
+
+            if (activeLabel.length > 0) {
+              setLabel(activeLabel);
+            }
+
+            _.each(items, function(item, i) {
+              htmlMenu += '<li class="npmap-switcher-menu-item" style="list-style-type:none;"><a href="javascript:void(0)"><div style="color:#818177;height:28px;line-height:28px;vertical-align:middle;"><div style="float:left;text-align:center;width:35px;"><img src="' + item.icon.replace('small', 'large') + '" style="height:22px;margin-top:3px;"></div><div style="float:right;margin-left:5px;width:100px;">' + item.name + '</div></div></a></li>';
+            });
+            bean.add(divSwitcher, 'click', function(e) {
+              var display = divSwitcherMenu.style.display;
+
+              if (display === '' || display === 'none') {
+                divSwitcherMenu.style.display = 'block';
+              } else {
+                divSwitcherMenu.style.display = 'none';
+              }
+            });
+
+            divSwitcherMenu.innerHTML = htmlMenu + '</ul>';
+
+            _.each(Util.getElementsByClass('npmap-switcher-menu-item'), function(el, i) {
+              bean.add(el, 'click', function(e) {
+                var clicked,
+                    me = this,
+                    currentLabel = me.firstChild.firstChild.childNodes[1].innerHTML;
+
+                if (document.getElementById('npmap-switcher-dropdown-text').innerHTML.toLowerCase() !== currentLabel.toLowerCase()) {
+                  for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+
+                    if (item.name === currentLabel) {
+                      setIcon(item.icon.replace('large', 'small'));
+                      setLabel(item.name);
+                      NPMap.Map[NPMap.config.api]._setBaseLayer(item);
+                    }
+                  }
+                }
+
+                divSwitcherMenu.style.display = 'none';
+              });
+            });
+          }
+        });
+      }
+    }
+
+    if (configModules && configModules.length) {
+      var build = [];
+
+      for (var i = 0; i < configModules.length; i++) {
+        var module = configModules[i],
+            name = module.name;
+
+        if (name) {
+          var id = name.toLowerCase();
+
+          module.id = id.split(' ').join('_');
+
+          // TODO: The built-in modules should not be manually specified here. You should load matrix.json and "query" it for information like this.
+          if (id !== 'edit' && id !== 'route') {
+            build.push(module);
+          }
+        }
+      }
+
+      if (build.length) {
+        var htmlModules = '',
+            htmlTabs = '',
+            visible = null;
+
+        for (var i = 0; i < build.length; i++) {
+          var module = build[i],
+              id = module.id;
+
+          module.html = module.html || '';
+          htmlModules += '<div id="npmap-modules-' + id + '" class="npmap-module">' + module.html + '</div>';
+          htmlTabs += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.openModule(this);return false;">';
+
+          if (typeof module.icon === 'string') {
+            // TODO: You should also support custom icons that aren't included in the library.
+            htmlTabs += '<div class="npmap-module-tab-' + module.icon + '"></div>';
+          } else {
+            // TODO: Need to replace with a generic tab icon.
+            htmlTabs += '<div class="npmap-module-tab-route"></div>';
+          }
+
+          htmlTabs += '</div>';
+
+          if (!visible && module.visible) {
+            visible = 'npmap-module-tab-' + id;
+          }
+        }
+
+        divModules.id = 'npmap-modules';
+        divModules.innerHTML = htmlModules;
+        divModulesClose.className = 'npmap-module-tab';
+        divModulesClose.id = 'npmap-modules-close';
+        divModulesClose.innerHTML = '<div class="npmap-module-tab-close" style="margin-left:-1px;margin-top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';"></div>';
+        divModuleTabs.id = 'npmap-modules-tabs';
+        divModuleTabs.innerHTML = htmlTabs;
+
+        elements.push({
+          el: divModuleTabs,
+          func: function() {
+            if (visible) {
+              NPMap.Event.add('NPMap.Map', 'ready', function() {
+                NPMap.Map.openModule(document.getElementById(visible));
+              });
+            }
+          }
+        });
+        divNpmap.insertBefore(divModules, divMap);
+        divNpmap.insertBefore(divModulesClose, divMap);
+        bean.add(document.getElementById('npmap-modules-close'), 'click', function() {
+          NPMap.Map.closeModules();
+        });
+
+        for (var i = 0; i < divModules.childNodes.length; i++) {
+          bean.add(divModules.childNodes[i], 'mousewheel', function(e) {
+            if ((this.scrollTop === 0 && e.wheelDeltaY > 0) || ((this.scrollTop === (this.scrollHeight - this.offsetHeight)) && e.wheelDeltaY < 0)) {
+              Util.eventCancelMouseWheel(e);
+            }
+          });
+        }
+      }
+    }
+
+    _.each(elements, function(element) {
+      NPMap.Map.addControl(element.el, element.func, element.stop);
+    });
+  });
   Event.add('NPMap.Map', 'zoomstart', function() {
     if (!NPMap.InfoBox.marker) {
       NPMap.InfoBox.hide();
@@ -303,7 +565,22 @@ define([
     Event.trigger('NPMap.Map', 'mouseout', el);
   });
 
+  interval = setInterval(function() {
+    if (typeof NPMap.Map === 'object') {
+      var Api = NPMap.Map[NPMap.config.api];
+
+      if (typeof Api === 'object' && Api._isReady === true) {
+        clearInterval(interval);
+        delete Api._isReady;
+        NPMap.Map._isReady = true;
+        Event.trigger('NPMap.Map', 'ready');
+      }
+    }
+  }, 0);
+
   return NPMap.Map = {
+    //
+    _attribution: [],
     /**
      * Adds a tile layer to the map.
      * @param {Object} options
@@ -390,733 +667,6 @@ define([
       }
     },
     /**
-     * Initializes the construction of the NPMap.Map class. This is called by the baseApi map object after its map is created, and should never be called manually.
-     * @return null
-     */
-    _init: function() {
-      var me = this;
-
-      Util.safeLoad('NPMap.Map.' + NPMap.config.api, function() {
-        var
-            // The config object for NPMap's modules.
-            configModules = NPMap.config.modules || null,
-            // The config object for NPMap's tools. Supports legacy config information too.
-            configTools = (function() {
-              if (NPMap.config.tools) {
-                return {
-                  fullscreen: NPMap.config.tools.fullscreen || false,
-                  navigation: NPMap.config.tools.navigation || {
-                    pan: NPMap.config.tools.pan || 'home',
-                    position: 'top left',
-                    zoom: NPMap.config.tools.zoom || 'small'
-                  },
-                  overview: NPMap.config.tools.overview || false,
-                  print: NPMap.config.tools.print || false,
-                  share: NPMap.config.tools.share || false
-                };
-              } else if (typeof NPMap.config.tools === 'undefined') {
-                return {
-                  fullscreen: false,
-                  navigation: {
-                    pan: 'home',
-                    position: 'top left',
-                    zoom: 'small'
-                  },
-                  overview: false,
-                  print: false,
-                  share: false
-                };
-              } else {
-                return {};
-              }
-            })(),
-            // An array of elements to add to the map div.
-            elements = [],
-            // HTML for the logos div.
-            htmlLogos = '',
-            //
-            interval;
-
-        /**
-         * Hooks mouseevents up to navigation controls.
-         * @param {String} id
-         * @param {Function} handler
-         * @return {Object}
-         */
-        function hookUpNavigationControl(id, handler) {
-          var el = document.getElementById(id);
-
-          bean.add(el, 'click dblclick mousedown', function(e) {
-            e.stop();
-          });
-          bean.add(el, 'mouseup', function(e) {
-            e.stop();
-            handler();
-          });
-          
-          return el;
-        }
-
-        divAttribution.id = 'npmap-attribution';
-        elements.push({
-          el: divAttribution,
-          func: function() {
-            setAttributionMaxWidthAndPosition();
-          }
-        });
-        divClickdot.id = 'npmap-clickdot';
-        elements.push({
-          el: divClickdot
-        });
-        divNotify.id = 'npmap-notify';
-        elements.push({
-          el: divNotify
-        });
-        divProgressBar.id = 'npmap-progressbar';
-        divProgressBar.innerHTML = '<div></div>';
-        elements.push({
-          el: divProgressBar
-        });
-        divTip.className = 'padded rounded shadowed transparent';
-        divTip.id = 'npmap-tip';
-        elements.push({
-          el: divTip
-        });
-        divZoombox.id = 'npmap-zoombox';
-        elements.push({
-          el: divZoombox,
-          stop: false
-        });
-        
-        if (apiLower !== 'leaflet' && apiLower !== 'modestmaps') {
-          htmlLogos += '<span style="display:block;float:left;margin-right:8px;"><img src="' + NPMap.config.server + '/resources/img/' + apiLower + 'logo.png" /></span>';
-        }
-        
-        if (!NPMap.config.hideLogo) {
-          htmlLogos += '<span style="display:block;float:left;"><a href="http://www.nps.gov/npmap" target="_blank"><img src="' + NPMap.config.server + '/resources/img/npmaplogo.png" alt="NPMap - Web Mapping for the U.S. National Park Service" /></a></span>';
-        }
-
-        if (htmlLogos.length > 0) {
-          // The logo div.
-          var logos = document.createElement('div');
-          
-          logos.id = 'npmap-logos';
-          logos.innerHTML = htmlLogos;
-          logos.style.cssText = 'bottom:3px;height:30px;left:5px;position:absolute;z-index:30;';
-          elements.push({
-            el: logos,
-            func: function() {
-              Util.monitorResize(logos, function() {
-                setAttributionMaxWidthAndPosition();
-              });
-              setAttributionMaxWidthAndPosition();
-            }
-          });
-        }
-
-        /*
-        tools: {
-          fullscreen: true||false,
-          navigation: true||false,
-          navigationOptions: {
-            pan: false||'home'||'north', // Defaults to 'home'
-            position: null||'top left'||'top center'||'top right', // Defaults to 'top left'
-            zoom: false||'small'||'large' // Defaults to 'small'
-          },
-          overview: true||false // Defaults to false
-          print: true||false // Defaults to false
-          share: true||false // Defaults to false
-        }
-        */
-
-        if (configTools.navigation) {
-          var
-              // An array of callback functions.
-              callbacksNavigation = [],
-              // The navigation controls div.
-              divNavigation = document.createElement('div'),
-              // HTML string for the navigation div.
-              navigationHtml = '',
-              // The position string for the navigation tools.
-              position = configTools.navigation.position.split(' ');
-
-          if (configTools.navigation.pan) {
-            var compass = configTools.navigation.pan;
-
-            divNavigation.style.width = '58px';
-
-            navigationHtml += '<div id="npmap-navigation-compass" class="npmap-navigation-compass-' + compass + '"><a id="npmap-navigation-compass-east" class="pointer"></a><a id="npmap-navigation-compass-north" class="pointer"></a><a id="npmap-navigation-compass-south" class="pointer"></a><a id="npmap-navigation-compass-west" class="pointer"></a>';
-            
-            if (compass === 'home') {
-              navigationHtml += '<a id="npmap-navigation-compass-center" class="pointer"></a>';
-            }
-            
-            navigationHtml += '</div>';
-
-            callbacksNavigation.push(function() {
-              var buttons = [];
-
-              buttons.push(hookUpNavigationControl('npmap-navigation-compass-east', function() {
-                NPMap.Map.panInDirection('east');
-              }));
-              buttons.push(hookUpNavigationControl('npmap-navigation-compass-north', function() {
-                NPMap.Map.panInDirection('north');
-              }));
-              buttons.push(hookUpNavigationControl('npmap-navigation-compass-south', function() {
-                NPMap.Map.panInDirection('south');
-              }));
-              buttons.push(hookUpNavigationControl('npmap-navigation-compass-west', function() {
-                NPMap.Map.panInDirection('west');
-              }));
-              
-              if (compass === 'home') {
-                hookUpNavigationControl('npmap-navigation-compass-center', function() {
-                  me.toInitialExtent();
-                });
-              }
-              
-              for (var i = 0; i < buttons.length; i++) {
-                var button = buttons[i],
-                    elCompass = document.getElementById('npmap-navigation-compass');
-                    
-                button.direction = button.id.split('-')[3];
-                
-                bean.add(button, 'mouseenter', function(e) {
-                  elCompass.className = elCompass.className.replace('npmap-navigation-compass-' + compass, ' npmap-navigation-compass-' + compass + '-' + this.direction + '-over');
-                });
-                bean.add(button, 'mouseleave', function(e) {
-                  elCompass.className = elCompass.className.replace(' npmap-navigation-compass-' + compass + '-' + this.direction + '-over', 'npmap-navigation-compass-' + compass);
-                });
-              }
-            });
-          }
-          
-          if (configTools.navigation.zoom === 'small') {
-            navigationHtml += '<div id="npmap-navigation-small-zoom" class="npmap-navigation-small-zoom"';
-            
-            if (typeof configTools.navigation.pan !== 'undefined') {
-              navigationHtml += ' style="margin-left:17px;margin-top:5px;"';
-            }
-            
-            navigationHtml += '><a id="npmap-navigation-small-zoom-in" class="pointer"></a><a id="npmap-navigation-small-zoom-out" class="pointer"></a></div>';
-
-            callbacksNavigation.push(function() {
-              var buttons = [];
-            
-              buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-in', function() {
-                NPMap.Map.zoomIn();
-              }));
-              buttons.push(hookUpNavigationControl('npmap-navigation-small-zoom-out', function() {
-                NPMap.Map.zoomOut();
-              }));
-              
-              for (var i = 0; i < buttons.length; i++) {
-                var button = buttons[i],
-                    divZoom = document.getElementById('npmap-navigation-small-zoom'); 
-                
-                button.inOrOut = button.id.split('-')[4];
-                
-                bean.add(button, 'mouseenter', function(e) {
-                  divZoom.className += '-' + this.inOrOut + '-over';
-                });
-                bean.add(button, 'mouseleave', function(e) {
-                  divZoom.className = divZoom.className.replace('-' + this.inOrOut + '-over', '');
-                });
-              }
-            });
-          }
-
-          if (position[0] === 'bottom') {
-            divNavigation.style.bottom = '15px';
-          } else {
-            divNavigation.style.top = '15px';
-          }
-
-          if (position[1]) {
-            if (position[1] === 'left') {
-              divNavigation.style.left = '15px';
-            } else {
-              divNavigation.style.right = '15px';
-            }
-          } else {
-            divNavigation.style.left = '15px';
-          }
-
-          divNavigation.id = 'npmap-navigation';
-          divNavigation.innerHTML = navigationHtml;
-          divNavigation.style.position = 'absolute';
-          divNavigation.style.zIndex = '30';
-
-          elements.push({
-            el: divNavigation,
-            func: function() {
-              for (var i = 0; i < callbacksNavigation.length; i++) {
-                callbacksNavigation[i]();
-              }
-            }
-          });
-        }
-        
-        if (configTools.fullscreen || configTools.print || configTools.share) {
-          var callbacks = [],
-              divToolbar = document.createElement('div'),
-              html = '<ul id="npmap-tools">';
-
-          if (configTools.fullscreen) {
-            html += '<li id="npmap-toolbar-fullscreen"><div class="npmap-toolbar-fullscreen"></div></li>';
-
-            callbacks.push(function() {
-              hookUpClickEvent('npmap-toolbar-fullscreen', function() {
-                NPMap.Map.toggleFullScreen();
-              });
-            });
-          }
-
-          if (configTools.print) {
-            html += '<li id="npmap-toolbar-print"><div class="npmap-toolbar-print"></div></li>';
-            
-            callbacks.push(function() {
-              function buildString(obj) {
-                var c = '',
-                    i = 0;
-
-                _.each(obj, function(value, key, list) {
-                  if (obj.hasOwnProperty(key)) {
-                    var text;
-
-                    switch (typeof value) {
-                      case 'boolean':
-                        text = key + ':' + value;
-                        break;
-                      case 'function':
-                        break;
-                      case 'number':
-                        text = key + ':' + value;
-                      case 'object':
-                        text = key + ':' + '{' + buildString(value) + '}';
-                        break;
-                      case 'string':
-                        text = key + ':\'' + value + '\'';
-                        break;
-                    }
-
-                    if (text) {
-                      if (i) {
-                        c += ',';
-                      }
-
-                      c += text;
-                    }
-
-                    i++;
-                  }
-                });
-
-                return c;
-              }
-
-              hookUpClickEvent('npmap-toolbar-print', function() {
-                /*
-                   TODO #1: Move this into its own module and lazy-load it.
-
-                   b = visible base layer, taken from NPMap.config.baseLayers
-                   ac = active center lat/lng
-                   az = active zoom
-                   l = visible layers, taken from NPMap.config.layers
-                   oc = original center lat/lng, taken from NPMap.config.center
-                   oz = original zoom, taken from NPMap.config.zoom
-                   t = title
-
-                   TODO: Add some tools: keyboard, zoombox, scalebar, overviewmap, navigation, etc.
-                         Also add some modules?
-                 */
-
-                var c = '{' + buildString(NPMap.config) + '}',
-                    ll = NPMap.Map.getCenter();
-
-                //console.log(c);
-                //console.log(eval('(' + c + ')'));
-
-                window.open('http://maps.nps.gov/print.html?c=' + Util.encodeBase64(c) + '&l=' + ll.lat + ',' + ll.lng + (typeof configTools.print.title === 'string' ? '&t=' + configTools.print.title : '') + '&z=' + NPMap.Map.getZoom());
-              });
-            });
-          }
-
-          // TODO: Implement.
-          if (configTools.share) {
-            html += '<li id="npmap-toolbar-share"><div class="npmap-toolbar-share"></div></li>';
-            
-            callbacks.push(function() {
-              hookUpClickEvent('npmap-toolbar-share', function() {
-                alert('The share tool has not yet been implemented.');
-              });
-            });
-          }
-
-          divToolbar.innerHTML = html + '</ul>';
-          divToolbar.id = 'npmap-toolbar';
-          divMap.style.top = '28px';
-
-          divNpmap.insertBefore(divToolbar, divMap);
-
-          for (var i = 0; i < callbacks.length; i++) {
-            callbacks[i]();
-          }
-
-          callbacks = [];
-        }
-
-        if (configModules && configModules.length) {
-          var build = [];
-
-          for (var i = 0; i < configModules.length; i++) {
-            var module = configModules[i],
-                name = module.name;
-
-            if (name) {
-              var id = name.toLowerCase();
-
-              module.id = id.split(' ').join('_');
-
-              // TODO: The built-in modules should not be manually specified here. You should load matrix.json and "query" it for information like this.
-              if (id !== 'edit' && id !== 'route') {
-                build.push(module);
-              }
-            }
-          }
-
-          if (build.length) {
-            var htmlModules = '',
-                htmlTabs = '',
-                visible = null;
-
-            for (var i = 0; i < build.length; i++) {
-              var module = build[i],
-                  id = module.id;
-
-              module.html = module.html || '';
-              htmlModules += '<div id="npmap-modules-' + id + '" class="npmap-module">' + module.html + '</div>';
-              htmlTabs += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.openModule(this);return false;">';
-
-              if (typeof module.icon === 'string') {
-                // TODO: You should also support custom icons that aren't included in the library.
-                htmlTabs += '<div class="npmap-module-tab-' + module.icon + '"></div>';
-              } else {
-                // TODO: Need to replace with a generic tab icon.
-                htmlTabs += '<div class="npmap-module-tab-route"></div>';
-              }
-
-              htmlTabs += '</div>';
-
-              if (!visible && module.visible) {
-                visible = 'npmap-module-tab-' + id;
-              }
-            }
-
-            divModules.id = 'npmap-modules';
-            divModules.innerHTML = htmlModules;
-            divModulesClose.className = 'npmap-module-tab';
-            divModulesClose.id = 'npmap-modules-close';
-            divModulesClose.innerHTML = '<div class="npmap-module-tab-close" style="margin-left:-1px;margin-top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';"></div>';
-            divModuleTabs.id = 'npmap-modules-tabs';
-            divModuleTabs.innerHTML = htmlTabs;
-
-            elements.push({
-              el: divModuleTabs,
-              func: function() {
-                if (visible) {
-                  NPMap.Event.add('NPMap.Map', 'ready', function() {
-                    NPMap.Map.openModule(document.getElementById(visible));
-                  });
-                }
-              }
-            });
-            divNpmap.insertBefore(divModules, divMap);
-            divNpmap.insertBefore(divModulesClose, divMap);
-            bean.add(document.getElementById('npmap-modules-close'), 'click', function() {
-              NPMap.Map.closeModules();
-            });
-
-            for (var i = 0; i < divModules.childNodes.length; i++) {
-              bean.add(divModules.childNodes[i], 'mousewheel', function(e) {
-                if ((this.scrollTop === 0 && e.wheelDeltaY > 0) || ((this.scrollTop === (this.scrollHeight - this.offsetHeight)) && e.wheelDeltaY < 0)) {
-                  Util.eventCancelMouseWheel(e);
-                }
-              });
-            }
-          }
-        }
-
-        // TODO: This is currently Bing specific.
-        // TODO: The overviewMap property is DEPRECATED. Retire it soon.
-        if (configTools.overview && NPMap.config.api.toLowerCase() === 'bing') {
-          var divOverview = document.createElement('div');
-
-          divOverview.id = 'npmap-overview';
-          divOverview.innerHTML = '<div id="npmap-overview-title" style="color:#454545;display:none;padding:8px;position:absolute;">Overview Map</div><div id="npmap-overview-map" style="bottom:0px;left:0px;position:absolute;right:0px;top:0px;"></div>';
-          divOverview.style.bottom = Util.getOuterDimensions(divAttribution).height + 'px';
-          
-          elements.push({
-            el: divOverview,
-            func: function() {
-              var divOverviewButton = document.createElement('div'),
-                  divOverviewMap = document.getElementById('npmap-overview-map'),
-                  divOverviewTitle = document.getElementById('npmap-overview-title'),
-                  mapOverview = new Microsoft.Maps.Map(divOverviewMap, {
-                    credentials: NPMap.config.credentials ? NPMap.config.credentials : 'AqZQwVLETcXEgQET2dUEQIFcN0kDsUrbY8sRKXQE6dTkhCDw9v8H_CY8XRfZddZm',
-                    disablePanning: true,
-                    disableZooming: true,
-                    fixedMapPosition: true,
-                    mapTypeId: Microsoft.Maps.MapTypeId.road,
-                    showBreadcrumb: false,
-                    showCopyright: false,
-                    showDashboard: false,
-                    showLogo: false,
-                    showMapTypeSelector: false,
-                    showScalebar: false
-                  });
-
-              function updateOverviewMap() {
-                var bounds = NPMap.bing.map.Map.getBounds(),
-                    nw = bounds.getNorthwest(),
-                    se = bounds.getSoutheast(),
-                    ne = new Microsoft.Maps.Location(se.latitude, nw.longitude),
-                    sw = new Microsoft.Maps.Location(nw.latitude, se.longitude);
-                
-                mapOverview.setView({
-                  bounds: bounds,
-                  padding: 20
-                });
-                mapOverview.entities.clear();
-
-                if (Util.hasClass(divOverviewButton, 'expanded')) {
-                  mapOverview.entities.push(new Microsoft.Maps.Polygon([
-                    nw,
-                    ne,
-                    se,
-                    sw,
-                    nw
-                  ], {
-                    fillColor: new Microsoft.Maps.Color(175, 218, 233, 228),
-                    strokeColor: new Microsoft.Maps.Color(255, 186, 197, 191),
-                    strokeThickness: 1
-                  }));
-                }
-              }
-
-              Util.stopAllPropagation(divOverview);
-
-              divOverviewButton.id = 'npmap-overviewmap-button';
-              divOverviewButton.className = 'npmap-overview-open cursor';
-              divOverviewButton.style.cssText = 'position:absolute;';
-
-              document.getElementById('npmap-overview-map').appendChild(divOverviewButton);
-
-              bean.add(divOverviewButton, 'click', function() {
-                if (Util.hasClass(this, 'expanded')) {
-                  this.style.display = 'none';
-                  divOverviewMap.style.top = '0px';
-                  // TODO: Animate this resize.
-                  divOverview.style.height = '48px';
-                  divOverview.style.width = '48px';
-                  
-                  mapOverview.setOptions({
-                    height: 48,
-                    width: 48
-                  });
-                  setAttributionMaxWidthAndPosition();
-                  updateOverviewMap();
-                  Util.removeClass(this, 'npmap-overview-close-over');
-                  Util.removeClass(this, 'expanded');
-                  Util.addClass(this, 'npmap-overview-open');
-                  mapOverview.entities.clear();
-                } else {
-                  divOverviewTitle.style.display = 'block';
-                  divOverviewMap.style.top = Util.getOuterDimensions(divOverviewTitle).height + 'px';
-                  // TODO: Animate this resize.
-                  divOverview.style.height = '173px';
-                  divOverview.style.width = '174px';
-
-                  mapOverview.setOptions({
-                    height: 173,
-                    width: 174
-                  });
-                  setAttributionMaxWidthAndPosition();
-                  updateOverviewMap();
-                  Util.removeClass(this, 'npmap-overview-open');
-                  Util.removeClass(this, 'npmap-overview-open-over');
-                  Util.addClass(this, 'npmap-overview-close');
-                  Util.addClass(this, 'expanded');
-                }
-              });
-              bean.add(divOverviewButton, 'mouseover', function() {
-                if (Util.hasClass(this, 'expanded')) {
-                  Util.removeClass(this, 'npmap-overview-close');
-                  Util.addClass(this, 'npmap-overview-close-over');
-                } else {
-                  Util.removeClass(this, 'npmap-overview-open');
-                  Util.addClass('npmap-overview-open-over');
-                }
-              });
-              bean.add(divOverviewButton, 'mouseout', function() {
-                if (Util.hasClass(this, 'expanded')) {
-                  Util.removeClass(this, 'npmap-overview-close-over');
-                  Util.addClass(this, 'npmap-overview-close');
-                } else {
-                  Util.removeClass(this, 'npmap-overview-open-over');
-                  Util.addClass(this, 'npmap-overview-open');
-                }
-              });
-              
-              /*
-              Microsoft.Maps.Events.addHandler(overviewMap, 'viewchangeend', function() {
-                NPMap.bing.map.Map.setView({
-                  center: overviewMap.getCenter()
-                });
-              });
-              */
-              
-              Event.add('NPMap.Map', 'viewchanged', function(e) {
-                updateOverviewMap();
-              });
-            }
-          });
-        }
-
-        if (NPMap.config.baseLayers && NPMap.config.baseLayers.length) {
-          var activeIcon = null,
-              activeLabel = null,
-              items = [];
-
-          _.each(NPMap.config.baseLayers, function(baseLayer) {
-            var icon = baseLayer.icon,
-                label = baseLayer.name;
-
-            if (typeof baseLayer.name === 'string') {
-              if (typeof icon === 'string') {
-                baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/' + icon + '-small.png';
-              } else {
-                // TODO: Come up with a default icon.
-                baseLayer.icon = NPMap.config.server + '/resources/img/tools/switcher/blank-small.png';
-              }
-
-              if (!activeIcon && (typeof baseLayer.visible === 'undefined' || baseLayer.visible === true)) {
-                activeIcon = baseLayer.icon;
-                activeLabel = baseLayer.name;
-              }
-              
-              items.push(baseLayer);
-            }
-          });
-
-          if (items.length > 1) {
-            var divSwitcher = document.createElement('div'),
-                divSwitcherMenu = document.createElement('div');
-            
-            function setIcon(url) {
-              document.getElementById('npmap-switcher-dropdown-icon').innerHTML = '<img src="' + url + '" style="height:15px;margin-top:4.5px;" />';
-            }
-            function setLabel(text) {
-              document.getElementById('npmap-switcher-dropdown-text').innerHTML = text.toUpperCase();
-            }
-
-            items.sort(function(a, b) {
-              return a.name > b.name;
-            });
-
-            divSwitcher.className = 'npmap-switcher-dropdown';
-            divSwitcher.id = 'npmap-switcher';
-            divSwitcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
-            divSwitcherMenu.id = 'npmap-switcher-menu';
-            // TODO: Both menus should be able to expand in width up to a set number (maybe 250px?).
-            divSwitcherMenu.style.cssText = 'display:none;max-width:160px;position:absolute;right:16px;top:38px;';
-            
-            elements.push({
-              el: divSwitcher
-            }, {
-              el: divSwitcherMenu,
-              func: function() {
-                var htmlMenu = '<ul>';
-
-                if (activeIcon.length > 0) {
-                  setIcon(activeIcon);
-                }
-
-                if (activeLabel.length > 0) {
-                  setLabel(activeLabel);
-                }
-
-                _.each(items, function(item, i) {
-                  htmlMenu += '<li class="npmap-switcher-menu-item" style="list-style-type:none;"><a href="javascript:void(0)"><div style="color:#818177;height:28px;line-height:28px;vertical-align:middle;"><div style="float:left;text-align:center;width:35px;"><img src="' + item.icon.replace('small', 'large') + '" style="height:22px;margin-top:3px;"></div><div style="float:right;margin-left:5px;width:100px;">' + item.name + '</div></div></a></li>';
-                });
-                bean.add(divSwitcher, 'click', function(e) {
-                  var display = divSwitcherMenu.style.display;
-
-                  if (display === '' || display === 'none') {
-                    divSwitcherMenu.style.display = 'block';
-                  } else {
-                    divSwitcherMenu.style.display = 'none';
-                  }
-                });
-
-                divSwitcherMenu.innerHTML = htmlMenu + '</ul>';
-
-                _.each(Util.getElementsByClass('npmap-switcher-menu-item'), function(el, i) {
-                  bean.add(el, 'click', function(e) {
-                    var clicked,
-                        me = this,
-                        currentLabel = me.firstChild.firstChild.childNodes[1].innerHTML;
-
-                    if (document.getElementById('npmap-switcher-dropdown-text').innerHTML.toLowerCase() !== currentLabel.toLowerCase()) {
-                      for (var i = 0; i < items.length; i++) {
-                        var item = items[i];
-
-                        if (item.name === currentLabel) {
-                          setIcon(item.icon.replace('large', 'small'));
-                          setLabel(item.name);
-                          NPMap.Map[NPMap.config.api]._setBaseLayer(item);
-                        }
-                      }
-                    }
-
-                    divSwitcherMenu.style.display = 'none';
-                  });
-                });
-              }
-            });
-          }
-        }
-
-        _.each(elements, function(element) {
-          me.addControl(element.el, element.func, element.stop);
-        });
-
-        interval = setInterval(function() {
-          var Api = NPMap.Map[NPMap.config.api];
-
-          if (typeof Api !== 'undefined' && Api._isReady === true) {
-            clearInterval(interval);
-
-            delete Api._isReady;
-
-            /*
-            Event.add('NPMap.Layer', 'ready', function() {
-              me._updateAttribution();
-            });
-            */
-            Event.add('NPMap.Map', 'resized', function() {
-              setAttributionMaxWidthAndPosition();
-              me._handleResize();
-            });
-            Util.monitorResize(divMap, function() {
-              Event.trigger('NPMap.Map', 'resized');
-            });
-            Event.trigger('NPMap.Map', 'ready');
-          }
-        }, 250);
-      });
-    },
-    /**
      * Iterates through baseLayers config, setting up visibility and matching baseLayers with an API's default baseLayers.
      * @param {Object} DEFAULT_BASE_LAYERS
      * @return null
@@ -1157,7 +707,7 @@ define([
       NPMap.config.baseLayers = baseLayersMatched;
     },
     /**
-     * Updates the map attribution. Looks at the NPMap.Map[NPMap.config.api]._attribution property and iterates through all of the visible baseLayers and layers and looks at their attribution property, as well.
+     * Updates the map attribution. Looks at the NPMap.Map._attribution property, the NPMap.Map[NPMap.config.api]._attribution property, and iterates through all of the visible baseLayers and layers and looks at their attribution property as well.
      * @return null
      */
     _updateAttribution: function() {
@@ -1166,9 +716,19 @@ define([
           disclaimer = '<a href="http://www.nps.gov/npmap/disclaimer.html" target="_blank">Disclaimer</a>',
           me = this;
 
+      if (typeof this._attribution !== 'undefined') {
+        _.each(this._attribution, function(v) {
+          if (_.indexOf(attrs, v) === -1) {
+            attrs.push(v);
+          }
+        });
+      }
+
       if (typeof this[NPMap.config.api] !== 'undefined' && typeof this[NPMap.config.api]._attribution !== 'undefined') {
         _.each(NPMap.Map[NPMap.config.api]._attribution, function(v) {
-          attrs.push(v);
+          if (_.indexOf(attrs, v) === -1) {
+            attrs.push(v);
+          }
         });
       }
 

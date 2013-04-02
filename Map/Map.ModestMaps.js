@@ -41,21 +41,21 @@ define([
           type: 'Api'
         },
         hybrid: {
-          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.',
+          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.',
           icon: 'aerial',
           id: 'nps.map-r3ilza09',
           name: 'Hybrid View',
           type: 'TileStream'
         },
         streets: {
-          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
+          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.',
           icon: 'street',
           id: 'nps.map-06dnxzq5',
           name: 'Street View',
           type: 'TileStream'
         },
         terrain: {
-          attribution: 'Data <a href="http://openstreetmap.org/copyright">copyright OpenStreetMap and contributors</a>, licensed <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>. <a href="http://mapbox.com/map-feedback/">Feedback</a>',
+          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.',
           icon: 'topo',
           id: 'nps.map-lj6szvbq',
           name: 'Terrain View',
@@ -255,7 +255,6 @@ define([
   map.addLayer(markerLayer);
   map.setCenterZoom(center, zoom);
   map.setZoomRange(min, max);
-  Map._init();
   
   return NPMap.Map.ModestMaps = {
     // Is the map loaded and ready to be interacted with programatically?

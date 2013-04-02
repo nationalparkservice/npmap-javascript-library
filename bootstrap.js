@@ -286,6 +286,60 @@ if (typeof bean === 'undefined') {
             });
           }
 
+          if (NPMap.config.tools) {
+            NPMap.config._tools = {
+              fullscreen: NPMap.config.tools.fullscreen || false,
+              geocoder: NPMap.config.tools.geocoder || false,
+              navigation: NPMap.config.tools.navigation || {
+                pan: NPMap.config.tools.pan || 'home',
+                position: 'top left',
+                zoom: NPMap.config.tools.zoom || 'small'
+              },
+              overview: NPMap.config.tools.overview || false,
+              print: NPMap.config.tools.print || false,
+              share: NPMap.config.tools.share || false
+            };
+          } else if (NPMap.config.tools !== false) {
+            NPMap.config._tools = {
+              fullscreen: false,
+              geocoder: false,
+              navigation: {
+                pan: 'home',
+                position: 'top left',
+                zoom: 'small'
+              },
+              overview: false,
+              print: false,
+              share: false
+            };
+          }
+
+          if (typeof NPMap.config._tools === 'object') {
+            if (NPMap.config._tools.fullscreen) {
+              scripts.push(NPMap.config.server + '/Tool/Tool.Fullscreen.js');
+            }
+
+            if (NPMap.config._tools.geocoder) {
+              scripts.push(NPMap.config.server + '/Tool/Tool.Geocoder.js');
+            }
+
+            if (NPMap.config._tools.navigation) {
+              scripts.push(NPMap.config.server + '/Tool/Tool.Navigation.js');
+            }
+
+            if (NPMap.config._tools.overview) {
+              scripts.push(NPMap.config.server + '/Tool/Tool.Overview.js');
+            }
+
+            if (NPMap.config._tools.print) {
+              scripts.push(NPMap.config.server + '/Tool/Tool.Print.js');
+            }
+
+            if (NPMap.config._tools.share) {
+              scripts.push(NPMap.config.server + '/Tool/Tool.Share.js');
+            }
+          }
+
           require(scripts, function() {
             function callback() {
               var div = document.getElementById('npmap'),

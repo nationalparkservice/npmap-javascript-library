@@ -95,7 +95,7 @@ define([
     var range = map.getZoomRange(),
         max = range.max,
         min = range.min;
-    
+
     if (map.getZoom() < min) {
       map.setView({
         animate: false,
@@ -125,7 +125,7 @@ define([
   function _updateBingCopyright() {
     map.getCopyrights(function(a) {
       var attribution = [];
-      
+
       _.each(a, function(v, i) {
         if (!_.isArray(v)) {
           attribution.push(v);
@@ -179,7 +179,7 @@ define([
     NPMap.config.baseLayers[0].visible = true;
     activeBaseLayer = NPMap.config.baseLayers[0];
   }
-  
+
   map = new Microsoft.Maps.Map(document.getElementById(NPMap.config._div), {
     center: NPMap.config.center ? new Microsoft.Maps.Location(NPMap.config.center.lat, NPMap.config.center.lng) : new Microsoft.Maps.Location(39, -96),
     credentials: NPMap.config.credentials ? NPMap.config.credentials : 'Ag4-2f0g7bcmcVgKeNYvH_byJpiPQSx4F9l0aQaz9pDYMORbeBFZ0N3C3A5LSf65',
@@ -270,14 +270,14 @@ define([
         oldTarget.setOptions({
           icon: oldIcon
         });
-        
+
         oldIcon = null;
         oldTarget = null;
       }
 
       if (e.targetType !== 'map' && e.target && !e.target.allowClickThrough) {
         Map.setCursor('pointer');
-        
+
         /*
         // TODO: Trigger hover.
         // TODO: Migrate this into e.target.npmap object.
@@ -381,7 +381,6 @@ define([
     _checkMaxMinZoom();
     Event.trigger('NPMap.Map', 'viewchangestart');
   });
-  Map._init();
 
   return NPMap.Map.Bing = {
     // The current attribution for the map {Array}.
@@ -538,7 +537,6 @@ define([
         visible: true
       });
     },
-    
     // The {Microsoft.Maps.Map} object. This reference should be used to access any of the Bing Maps v7 functionality that can't be done through the NPMap.Map methods.
     map: map,
     /**

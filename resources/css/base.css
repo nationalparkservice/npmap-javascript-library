@@ -8,6 +8,12 @@
 #npmap ol, ul {list-style:none;margin:0;padding:0;}
 #npmap ol li {background:none;}
 #npmap ul li {background:none;}
+#npmap input, select {vertical-align:middle}
+#npmap textarea {overflow:auto}
+#npmap input[type="radio"] {vertical-align:text-bottom}
+#npmap input[type="checkbox"] {vertical-align:bottom}
+#npmap label, input[type="button"], input[type="submit"], input[type="image"], button {cursor:pointer}
+#npmap button, input, select, textarea {margin:0}
 
 /* Core elements */
 #npmap {background-color:#EBF2DA;font-size:13px;line-height:16px;} /*border:solid 1px #e0e0e0;*/
@@ -170,6 +176,61 @@
 }
 #npmap button.btn-secondary.disabled {
   background-color: #7a8f52;
+}
+
+/* Inputs */
+#npmap input, textarea, select {
+     -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+          border-radius: 0;
+  background-color: #FCFCFC;
+  border: solid 1px #CBCBCB;
+}
+#npmap input, textarea {
+     -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+          box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+     -moz-transition: border linear 0.2s,box-shadow linear 0.2s;
+      -ms-transition: border linear 0.2s,box-shadow linear 0.2s;
+       -o-transition: border linear 0.2s,box-shadow linear 0.2s;
+  -webkit-transition: border linear 0.2s,box-shadow linear 0.2s;
+          transition: border linear 0.2s,box-shadow linear 0.2s;
+  padding: 7px 10px;
+}
+#npmap input {
+  height: 12px;
+}
+#npmap ::-webkit-input-placeholder { /* WebKit browsers */
+  color: #908C7D;
+  font-style: italic;
+}
+#npmap :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+  color: #908C7D;
+  font-style: italic;
+}
+#npmap ::-moz-placeholder { /* Mozilla Firefox 19+ */
+  color: #908C7D;
+  font-style: italic;
+}
+#npmap :-ms-input-placeholder { /* Internet Explorer 10+ */
+  color: #908C7D;
+  font-style: italic;
+}
+#npmap input.search {
+  padding-right: 30px;
+  width: 158px;
+}
+#npmap .icon-search {
+  background: url("../img/tools/geocoder/search.png");
+  cursor: pointer;
+  display: inline-block;
+  height: 23px;
+  line-height: 23px;
+  position: absolute;
+  right: 2px;
+  top: 3px;
+  vertical-align: text-top;
+  width: 23px;
 }
 
 /* Markup free clearing */

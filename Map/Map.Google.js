@@ -170,16 +170,6 @@
     map.setMapTypeId(mapTypeId);
   }
 
-  /*
-  interval = setInterval(function() {
-    if (NPMap.Map && NPMap.Map.Google) {
-      clearInterval(interval);
-      NPMap.Map.Google._isReady = true;
-      NPMap.Map._init();
-    }
-  }, 0);
-  */
-
   interval = setInterval(function() {
     bounds = map.getBounds();
 
@@ -397,7 +387,6 @@
       }, 250);
 
       NPMap.Map.Google._isReady = true;
-      NPMap.Map._init();
     }
   }, 250);
 
