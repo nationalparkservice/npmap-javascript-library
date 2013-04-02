@@ -8,8 +8,9 @@ define([
   'Map/Map',
   'Util/Util'
 ], function(Event, InfoBox, Layer, Map, Util) {
-  //point = null,
-  //hoverStyle = {radius:8, color:"#333", weight:3, opacity:1, fillColor: "#FFCC00", fillOpacity:1, clickable:false};
+  var _activeClicks = [],
+      _activeInteractive = [],
+      _numberVisibleInteractiveLayers = 0;
 
   /** 
    *
@@ -27,7 +28,7 @@ define([
    *
    */
   function _buildSelect(interactivity) {
-    return 'SELECT ' + interactivity.replace('geometry,', '').replace(',geometry,', '').replace(',geometry', '') + ',ST_ASGEOJSON(the_geom) as geometry '
+    return 'SELECT ' + interactivity.replace('geometry,', '').replace(',geometry,', '').replace(',geometry', '') + ',ST_ASGEOJSON(the_geom) as geometry ';
   }
   /**
    * Handles CartoDb click events.
@@ -38,6 +39,37 @@ define([
    * @return null
    */
   function _click(feature, latLng, pos, data, options) {
+    if (_numberVisibleInteractiveLayers > 1) {
+      var clicks;
+
+      _activeClicks.push({
+        data: data,
+        feature: feature,
+        options: options
+      });
+
+      clicks = _activeClicks.length;
+
+      setTimeout(function() {
+        if (clicks === _activeClicks.length) {
+          var click,
+              zIndex = -1;
+
+          _.each(_activeClicks, function(activeClick) {
+            if (activeClick.options.zIndex > zIndex) {
+              zIndex = activeClick.options.zIndex;
+              click = activeClick;
+            }
+          });
+          _handleClick(click.feature, click.data, click.options);
+          _activeClicks = [];
+        }
+      }, 250);
+    } else {
+      _handleClick(feature, data, options);
+    }
+  }
+  function _handleClick(feature, data, options) {
     _.extend(options.npmap, {
       data: data
     });
@@ -59,7 +91,7 @@ define([
   function _loadFromMeta(config, meta, options, table, user, callback) {
     var interactivity = _buildInteractivity(meta),
         query;
-    
+
     options.table_name = table;
     options.tile_style = config.style || null;
     options.user_name = user;
@@ -80,6 +112,8 @@ define([
       } else {
         options.query = select + 'FROM {{table_name}}';
       }
+
+      _numberVisibleInteractiveLayers++;
     } else {
       options.query = 'SELECT * FROM {{table_name}}';
     }
@@ -99,21 +133,23 @@ define([
    * @return null
    */
   function _out() {
-    /*
-    if (point) {
-      NPMap.Map.removeShape(point);
-      point = null;
+    var tableName = this.table_name,
+        index = _.indexOf(_activeInteractive, tableName);
+
+    if (index !== -1) {
+      _activeInteractive.splice(index, 1);
     }
-    */
 
-    NPMap.Layer.CartoDb._interactivityActive = false;
+    if (_activeInteractive.length === 0) {
+      NPMap.Layer.CartoDb._interactivityActive = false;
 
-    if (NPMap.Layer.TileStream) {
-      if (NPMap.Layer.TileStream._interactivityActive === false) {
+      if (NPMap.Layer.TileStream) {
+        if (NPMap.Layer.TileStream._interactivityActive === false) {
+          Map.setCursor('');
+        }
+      } else {
         Map.setCursor('');
       }
-    } else {
-      Map.setCursor('');
     }
   }
   /**
@@ -125,31 +161,14 @@ define([
    * @return null
    */
   function _over(feature, latLng, pos, data) {
-    NPMap.Layer.CartoDb._interactivityActive = true;
+    var tableName = this.table_name;
+
+    if (_.indexOf(_activeInteractive, tableName) === -1) {
+      _activeInteractive.push(tableName);
+    }
 
     Map.setCursor('pointer');
-
-    /*
-    if (point) {
-      NPMap.Map.removeShape(point);
-      point = null;
-    }
-    
-    if (data.geometry) {
-      var geometry = JSON.parse(data.geometry);
-
-      if (geometry.type === 'Point') {
-        var coordinates = geometry.coordinates;
-
-        point = NPMap.Map.createMarker({
-          lat: coordinates[1],
-          lng: coordinates[0]
-        });
-
-        NPMap.Map.addShape(point);
-      }
-    }
-    */
+    NPMap.Layer.CartoDb._interactivityActive = true;
   }
 
   return NPMap.Layer.CartoDb = {
@@ -234,7 +253,12 @@ define([
      * @return null
      */
     _hide: function(config, callback) {
-      if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
+      if (typeof Map[NPMap.config.api]._hideCartoDbLayer === 'function') {
+        if (typeof config._api.interaction === 'object') {
+          config._api.setInteraction(false);
+          _numberVisibleInteractiveLayers--;
+        }
+
         Map[NPMap.config.api]._hideCartoDbLayer(config._api);
       } else {
         Map[NPMap.config.api]._hideTileLayer(config._api);
@@ -252,6 +276,10 @@ define([
      */
     _remove: function(config, callback) {
       if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
+        if (typeof config._api.interaction === 'object') {
+          _numberVisibleInteractiveLayers--;
+        }
+
         Map[NPMap.config.api]._removeCartoDbLayer(config._api);
       } else {
         Map[NPMap.config.api]._removeTileLayer(config._api);
@@ -275,6 +303,11 @@ define([
      */
     _show: function(config, callback) {
       if (typeof Map[NPMap.config.api]._removeCartoDbLayer === 'function') {
+        if (typeof config._api.interaction === 'object') {
+          config._api.setInteraction(true);
+          _numberVisibleInteractiveLayers++;
+        }
+
         Map[NPMap.config.api]._showCartoDbLayer(config._api);
       } else {
         Map[NPMap.config.api]._showTileLayer(config._api);

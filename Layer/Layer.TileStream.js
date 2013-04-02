@@ -199,7 +199,7 @@ define([
           };
           config.api = tileLayer;
           config.tileJson = response;
-          
+
           if (response.grids && _WAX_SHORT[NPMap.config.api]) {
             _toggleInteraction(config, true);
           }
@@ -244,15 +244,15 @@ define([
       var baseLayer = this._getVisibleBaseLayer(),
           layers = this._getVisibleLayers(),
           visible = [];
-      
+
       if (baseLayer) {
         visible.push(baseLayer);
       }
-      
+
       if (layers.length > 0) {
         visible.push(layers);
       }
-      
+
       return _.flatten(visible);
     },
     /**
@@ -276,17 +276,17 @@ define([
      */
     _getVisibleLayers: function() {
       var visible = [];
-      
+
       if (NPMap.config.layers) {
         for (var i = 0; i < NPMap.config.layers.length; i++) {
           var layer = NPMap.config.layers[i];
-          
+
           if (_isVisibleAndTileStream(layer)) {
             visible.push(layer);
           }
         }
       }
-      
+
       return visible;
     },
     /**
@@ -297,7 +297,7 @@ define([
     _handleClick: function(e) {
       if (e.e) {
         var latLng = Map[NPMap.config.api].eventGetLatLng(e.e);
-        
+
         InfoBox.hide();
         InfoBox.latLng = latLng;
         Map[NPMap.config.api].positionClickDot(latLng);
@@ -343,7 +343,7 @@ define([
 
           delete config.interaction;
         }
-        
+
         delete config.tileJson;
       } else {
         MapApi._removeTileLayer(config.api);
@@ -363,7 +363,7 @@ define([
 
       if (typeof MapApi._showTileStreamLayer === 'function') {
         MapApi._showTileStreamLayer(config.api);
-        
+
         if (config.interaction) {
           _toggleInteraction(config, true);
         }
@@ -384,7 +384,7 @@ define([
       if (config.api) {
         Layer.remove(config, true);
       }
-      
+
       Layer.add(config, true);
     }
   };
