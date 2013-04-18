@@ -34,12 +34,6 @@ define([
       */
       // The map div.
       divMap = document.getElementById(NPMap.config._div),
-      // The modules div.
-      divModules = document.createElement('div'),
-      // The modules close div.
-      divModulesClose = document.createElement('div'),
-      // The module tabs div.
-      divModuleTabs = document.createElement('div'),
       // The notify div.
       divNotify = document.createElement('div'),
       // The npmap div.
@@ -48,6 +42,8 @@ define([
       //divNpmapControls = document.getElementById('npmap-map-controls'),
       // The parent div.
       divNpmapParent = document.getElementById('npmap').parentNode,
+      //
+      divOverlay,
       // The npmap-progressbar div.
       divProgressBar = document.createElement('div'),
       // The tip div.
@@ -457,87 +453,6 @@ define([
       }
     }
 
-    if (configModules && configModules.length) {
-      var build = [];
-
-      for (var i = 0; i < configModules.length; i++) {
-        var module = configModules[i],
-            name = module.name;
-
-        if (name) {
-          var id = name.toLowerCase();
-
-          module.id = id.split(' ').join('_');
-
-          // TODO: The built-in modules should not be manually specified here. You should load matrix.json and "query" it for information like this.
-          if (id !== 'edit' && id !== 'route') {
-            build.push(module);
-          }
-        }
-      }
-
-      if (build.length) {
-        var htmlModules = '',
-            htmlTabs = '',
-            visible = null;
-
-        for (var i = 0; i < build.length; i++) {
-          var module = build[i],
-              id = module.id;
-
-          module.html = module.html || '';
-          htmlModules += '<div id="npmap-modules-' + id + '" class="npmap-module">' + module.html + '</div>';
-          htmlTabs += '<div id="npmap-module-tab-' + id + '" class="npmap-module-tab" onclick="NPMap.Map.openModule(this);return false;">';
-
-          if (typeof module.icon === 'string') {
-            // TODO: You should also support custom icons that aren't included in the library.
-            htmlTabs += '<div class="npmap-module-tab-' + module.icon + '"></div>';
-          } else {
-            // TODO: Need to replace with a generic tab icon.
-            htmlTabs += '<div class="npmap-module-tab-route"></div>';
-          }
-
-          htmlTabs += '</div>';
-
-          if (!visible && module.visible) {
-            visible = 'npmap-module-tab-' + id;
-          }
-        }
-
-        divModules.id = 'npmap-modules';
-        divModules.innerHTML = htmlModules;
-        divModulesClose.className = 'npmap-module-tab';
-        divModulesClose.id = 'npmap-modules-close';
-        divModulesClose.innerHTML = '<div class="npmap-module-tab-close" style="margin-left:-1px;margin-top:' + (document.getElementById('npmap-toolbar') ? '45px' : '15px') + ';"></div>';
-        divModuleTabs.id = 'npmap-modules-tabs';
-        divModuleTabs.innerHTML = htmlTabs;
-
-        elements.push({
-          el: divModuleTabs,
-          func: function() {
-            if (visible) {
-              NPMap.Event.add('NPMap.Map', 'ready', function() {
-                NPMap.Map.openModule(document.getElementById(visible));
-              });
-            }
-          }
-        });
-        divNpmap.insertBefore(divModules, divMap);
-        divNpmap.insertBefore(divModulesClose, divMap);
-        bean.add(document.getElementById('npmap-modules-close'), 'click', function() {
-          NPMap.Map.closeModules();
-        });
-
-        for (var i = 0; i < divModules.childNodes.length; i++) {
-          bean.add(divModules.childNodes[i], 'mousewheel', function(e) {
-            if ((this.scrollTop === 0 && e.wheelDeltaY > 0) || ((this.scrollTop === (this.scrollHeight - this.offsetHeight)) && e.wheelDeltaY < 0)) {
-              Util.eventCancelMouseWheel(e);
-            }
-          });
-        }
-      }
-    }
-
     _.each(elements, function(element) {
       NPMap.Map.addControl(element.el, element.func, element.stop);
     });
@@ -853,16 +768,6 @@ define([
       NPMap.Map[NPMap.config.api].centerAndZoom(NPMap.Map[NPMap.config.api].latLngToApi(latLng), zoom, callback);
     },
     /**
-     * Closes the modules panel.
-     * @return null
-     */
-    closeModules: function() {
-      divModulesClose.style.display = 'none';
-      divModules.style.display = 'none';
-      divModuleTabs.style.display = 'block';
-      divMap.style.left = '0';
-    },
-    /**
      * Creates a line.
      * @param {Array} latLngs An array of the latitude/longitude objects to use to create the line.
      * @param {Object} options (Optional) Line options.
@@ -1143,6 +1048,53 @@ define([
       return z;
     },
     /**
+     * UNDOCUMENTED
+     */
+    modal: function(content, okText, cancelText, okHandler, cancelHandler) {
+      var buttonDiv,
+          cancelButton = document.createElement('button'),
+          modal = document.createElement('div'),
+          okButton = document.createElement('button');
+
+      if (divOverlay) {
+        divOverlay.style.display = 'block';
+      } else {
+        divOverlay = document.createElement('div');
+        divOverlay.className = 'npmap-modal-overlay';
+        divNpmap.appendChild(divOverlay);
+      }
+
+      bean.add(cancelButton, 'click', function(e) {
+        divOverlay.style.display = 'none';
+        modal.parentNode.removeChild(modal);
+
+        if (cancelHandler) {
+          cancelHandler();
+        }
+      });
+      bean.add(okButton, 'click', function(e) {
+        divOverlay.style.display = 'none';
+        modal.parentNode.removeChild(modal);
+
+        if (okHandler) {
+          okHandler();
+        }
+      });
+
+      cancelButton.className = 'btn-simple';
+      cancelButton.innerHTML = cancelText;
+      okButton.className = 'btn-primary';
+      okButton.innerHTML = okText;
+      modal.className = 'npmap-modal';
+      modal.innerHTML = '<div class="npmap-modal-content">' + content + '</div><div class="npmap-modal-buttons"></div>';
+      divNpmap.appendChild(modal);
+      buttonDiv = Util.getElementsByClass('npmap-modal-buttons')[0];
+      buttonDiv.appendChild(okButton);
+      buttonDiv.appendChild(cancelButton);
+      modal.style.top = ((Util.getOuterDimensions(divNpmap).height - Util.getOuterDimensions(modal).height) / 2) + 'px';
+      modal.style.display = 'block';
+    },
+    /**
      * Shows the notification.
      * @param {String} message
      * @param {String} title (Optional)
@@ -1195,31 +1147,6 @@ define([
       activeNotificationMessages.push(msg);
 
       activeNotificationMessagesHeight = activeNotificationMessagesHeight + height;
-    },
-    /**
-     * Opens the UI for a module.
-     * @param {Object} el
-     * @return null
-     */
-    openModule: function(el) {
-      var id = el.id.replace('npmap-module-tab-', ''),
-          module;
-
-      for (var i = 0; i < NPMap.config.modules.length; i++) {
-        var m = NPMap.config.modules[i];
-
-        if (m.id === id) {
-          module = m;
-          break;
-        }
-      }
-
-      if (divModules.style.display === '' || divModules.style.display === 'none') {
-        divModuleTabs.style.display = 'none';
-        divMap.style.left = '200px';
-        divModules.style.display = 'block';
-        divModulesClose.style.display = 'block';
-      }
     },
     /**
      * Pans the map horizontally and/or vertically based on the pixel object passed in.
