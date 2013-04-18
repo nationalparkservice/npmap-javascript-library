@@ -136,6 +136,13 @@ if (typeof bean === 'undefined') {
       ], function(Layer, MapApi, META) {
         NPMap.Event.add('NPMap.Map', 'ready', function() {
           var layerHandlers = [],
+              navigationPosition = (function() {
+                if (NPMap.config.modules && NPMap.config.modules.length) {
+                  return 'top right';
+                } else {
+                  return 'top left';
+                }
+              })(),
               scripts = [];
               
           if (NPMap.config.baseLayers) {
@@ -269,19 +276,13 @@ if (typeof bean === 'undefined') {
 
           if (NPMap.config.modules) {
             _.each(NPMap.config.modules, function(module) {
-              var name = module.name.toLowerCase();
-
-              if (name === 'edit' || name === 'route') {
-                switch (name) {
-                  case 'edit':
-                    name = 'Edit';
-                    break;
-                  case 'route':
-                    name = 'Route';
-                    break;
-                }
-
-                scripts.push(NPMap.config.server + '/Module/Module.' + name + '.' + NPMap.config.api + '.js');
+              switch (module.name.toLowerCase()) {
+                case 'directions':
+                  scripts.push(NPMap.config.server + '/Module/Module.Directions.js');
+                  break;
+                case 'edit':
+                  scripts.push(NPMap.config.server + '/Module/Module.Edit.' + NPMap.config.api + '.js');
+                  break;
               }
             });
           }
@@ -292,7 +293,7 @@ if (typeof bean === 'undefined') {
               geocoder: NPMap.config.tools.geocoder || false,
               navigation: NPMap.config.tools.navigation || {
                 pan: NPMap.config.tools.pan || 'home',
-                position: 'top left',
+                position: navigationPosition,
                 zoom: NPMap.config.tools.zoom || 'small'
               },
               overview: NPMap.config.tools.overview || false,
@@ -305,7 +306,7 @@ if (typeof bean === 'undefined') {
               geocoder: false,
               navigation: {
                 pan: 'home',
-                position: 'top left',
+                position: navigationPosition,
                 zoom: 'small'
               },
               overview: false,
