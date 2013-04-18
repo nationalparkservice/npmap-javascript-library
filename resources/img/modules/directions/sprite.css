@@ -1,0 +1,55 @@
+.add-disambiguate {
+  background: url(sprite.png) 0px -20px no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+}
+
+.add-disambiguate-over {
+  background: url(sprite.png) 0px 0px no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 18px;
+}
+
+.add-stop {
+  background: url(sprite.png) -21px 0px no-repeat;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+}
+
+.arrowhead {
+  background: url(sprite.png) -32px -11px no-repeat;
+  display: inline-block;
+  width: 13px;
+  height: 16px;
+}
+
+.options-collapsed {
+  background: url(sprite.png) -33px 0px no-repeat;
+  display: inline-block;
+  width: 6px;
+  height: 9px;
+}
+
+.options-expanded {
+  background: url(sprite.png) -41px 0px no-repeat;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+}
+
+.remove-stop {
+  background: url(sprite.png) -21px -24px no-repeat;
+  display: inline-block;
+  width: 9px;
+  height: 10px;
+}
+
+.remove-stop-over {
+  background: url(sprite.png) -21px -12px no-repeat;
+  display: inline-block;
+  width: 9px;
+  height: 10px;
+}

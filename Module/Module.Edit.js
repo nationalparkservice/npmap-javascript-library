@@ -1,6 +1,6 @@
 ﻿define([
   'Module/Module'
-],function(Module) {
+], function(Module) {
   // The module config object.
   var config = (function() {
     for (var i = 0; i < NPMap.config.modules.length; i++) {

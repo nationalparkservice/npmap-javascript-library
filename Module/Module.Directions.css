@@ -1,0 +1,359 @@
+/* Icons */
+#npmap-modules-directions .icon-add-disambiguate {
+  background: url(../resources/img/modules/directions/sprite.png) 0px 0px no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+}
+#npmap-modules-directions .icon-add-disambiguate-over {
+  background: url(../resources/img/modules/directions/sprite.png) 0px -21px no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+}
+#npmap-modules-directions .icon-add-stop {
+  background: url(../resources/img/modules/directions/sprite.png) -21px 0px no-repeat;
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+}
+#npmap-modules-directions .icon-close-x {
+  background: url(../resources/img/modules/directions/sprite.png) -21px -24px no-repeat;
+  display: inline-block;
+  height: 10px;
+  width: 9px;
+}
+#npmap-modules-directions .icon-close-x-over {
+  background: url(../resources/img/modules/directions/sprite.png) -21px -12px no-repeat;
+  display: inline-block;
+  height: 10px;
+  width: 9px;
+}
+#npmap-modules-directions .icon-options-collapsed {
+  background: url(../resources/img/modules/directions/sprite.png) -33px 0px no-repeat;
+  display: inline-block;
+  height: 9px;
+  width: 6px;
+}
+#npmap-modules-directions .icon-options-expanded {
+  background: url(../resources/img/modules/directions/sprite.png) -41px 0px no-repeat;
+  display: inline-block;
+  height: 7px;
+  width: 7px; 
+}
+/* End Icons */
+/* Start Buttons */
+#npmap-modules-directions .btn-remove {
+  background-color: transparent;
+  border: none;
+  height: 28px;
+  left: 200px;
+  position: absolute;
+  width: 14px;
+}
+#npmap-modules-directions .btn-remove:hover {
+  background-position: -21px -12px;
+}
+#npmap-modules-directions .btn-remove .icon-close-x, #npmap-modules-directions .btn-remove .icon-close-x-over {
+  left: 3px;
+  position: absolute;
+  top: 8px;
+}
+#npmap-modules-directions .btn-add-stop, #npmap-modules-directions .btn-options {
+  background: transparent;
+  color: #464646;
+  font-weight: normal;
+  font-size: 12px;
+  height: 24px;
+  line-height: 24px;
+  padding: 0 6px 0 5px;
+  text-decoration: none;
+}
+#npmap-modules-directions .directions-form-mods button:hover {
+  color: #5e7630;
+  text-decoration: underline;
+}
+/* End Buttons */
+#npmap-modules-directions input.disambiguate {
+  border: solid 1px #B21C00;
+}
+#npmap-modules-directions .directions-note {
+  color: #464646;
+  font-size: 13px;
+  font-style: italic;
+}
+#npmap-modules-directions .directions-warning {
+  clear: left;
+  color: #B21C00;
+  margin-bottom: 5px;
+}
+#npmap-modules-directions .identifier, #npmap-modules-directions .location .identifier {
+  background-color: #000;
+     -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+          border-radius: 3px;
+  color: #fff;
+  display: block;
+  float: left;
+  font-weight: bold;
+  line-height: 20px;
+  margin: 3px 6px 0 0;
+  text-align: center;
+  width: 20px;
+}
+#npmap-modules-directions .location-fields .sorting {
+  background-color: #636159;
+}
+#npmap-modules-directions .location-fields li {
+  margin-top: 25px;
+  position: relative;
+  zoom: 1;
+}
+#npmap-modules-directions .location-fields label:hover {
+  cursor: move;
+}
+#npmap-modules-directions .location-fields li li:hover {
+  cursor: pointer;
+}
+#npmap-modules-directions .location-fields .initial {
+  width: 215px;
+}
+#npmap-modules-directions .location-fields li:first-child {
+  margin-top: 0;
+}
+#npmap-modules-directions .location-fields input {
+  float: left;
+  width: 150px;
+}
+#npmap-modules-directions .location-fields .alert {
+  border-color: #b0170e;
+}
+#npmap-modules-directions .location-fields .initial input {
+  padding-right: 27px;
+}
+#npmap-modules-directions .location-fields li:before, #npmap-modules-directions .location-fields li:after {
+  content: "\0020";
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+#npmap-modules-directions .location-fields li:after {
+  clear: both
+}
+#npmap-modules-directions .location-fields li .clearfix {
+  zoom: 1
+}
+#npmap-modules-directions .directions-form-mods {
+  margin: 10px 0 0 26px;
+  position: relative;
+}
+#npmap-modules-directions .directions-form-mods.options-open {
+  margin-bottom: 120px;
+}
+#npmap-modules-directions .directions-form-mods > div {
+  float: left;
+  height: 24px;
+}
+#npmap-modules-directions .directions-form-mods div:first-child {
+  margin-left: 0;
+}
+#npmap-modules-directions .directions-form-mods .mods-addStop, .directions-form-mods .mods-options {
+  display: none;
+}
+#npmap-modules-directions .directions-form-mods .mods-options .mods-options-entries {
+  background-color: #f3efe5;
+  display: none;
+  padding: 17px 20px;
+  left: 0;
+  position: absolute;
+  top: 24px;
+  width: 132px;
+}
+#npmap-modules-directions .options-open .mods-options .mods-options-entries {
+  display: block;
+}
+#npmap-modules-directions .mods-options-entries li {
+  border: none;
+  display: inline-block;
+  float: none;
+  font-weight: normal;
+  height: auto;
+  margin: 6px 0 0 0;
+  width: 133px;
+}
+#npmap-modules-directions .mods-options-entries li:first-child {
+  margin-top: 0;
+}
+#npmap-modules-directions .mods-options-entries li label {
+  color: #464646;
+  font-size: 12px;
+}
+#npmap-modules-directions .mods-options-entries li input[type="checkbox"] {
+  float: left;
+  margin: 1px 10px 0 0;
+}
+#npmap-modules-directions .directions-form-controls {
+  clear: left;
+  height: 29px;
+  padding: 20px 0 0 26px;
+  overflow: hidden;
+}
+#npmap-modules-directions .directions-form-controls button {
+  float: left
+}
+#npmap-modules-directions .directions-location-options {
+  border-bottom: 1px dotted #bdbbb1;
+  margin-top: 0px;
+  padding: 20px 0 16px 0;
+}
+#npmap-modules-directions .directions-location-options li {
+  list-style-type: none;
+  margin-top: 0px;
+  margin-bottom: 1px;
+}
+#npmap-modules-directions .directions-location-options a {
+  display: block;
+  font-size: 12px;
+  padding: 12px 0 8px 32px;
+  position: relative;
+  text-decoration: none;
+}
+/*
+#npmap-modules-directions .directions-location-options .park-location {
+  background-color: #f3efe5;
+}
+*/
+#npmap-modules-directions .directions-location-options .location-option-numeric {
+  background: url(../resources/img/modules/directions/disambiguate-marker.png) 0 0 no-repeat;
+  color: #FFF;
+  display: inline-block;
+  left: 8px;
+  position: absolute;
+  text-align: center;
+  top: 12px;
+  width: 17px;
+  height: 16px;
+}
+#npmap-modules-directions .directions-location-options h3 {
+  display: block;
+  float: left;
+  font-size: 12px;
+  color: #b28000;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 0 3px 0;
+}
+/*
+#npmap-modules-directions .directions-location-options .park-location h3 {
+  background: url(../images/icons_sprite.png) no-repeat right -246px;
+  padding-right: 18px;
+}
+*/
+#npmap-modules-directions .directions-location-options a:hover h3 {
+  text-decoration: underline;
+}
+#npmap-modules-directions .directions-location-options .location-option-address {
+  clear: left;
+  color: #333;
+  display: block;
+}
+/*
+#npmap-modules-directions .directions-details {
+  border-top: 1px dotted #bdbbb1;
+  margin-top: 25px;
+  padding-top: 15px;
+}
+#npmap-modules-directions .directions-details-header, #npmap-modules-directions .directions-details-footer {
+  background-color: #f3efe5;
+  margin-bottom: 15px;
+  padding: 8px 10px;
+}
+#npmap-modules-directions .directions-details-footer {
+  margin-bottom: 0;
+}
+#npmap-modules-directions .directions-details-header h2 {
+  color: #647630;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 18px;
+  margin-bottom: 16px;
+}
+#npmap-modules-directions .directions-details-header .route-info {
+  color: #706d5f;
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+#npmap-modules-directions .directions-details .location {
+  color: #464646;
+  font-size: 12px;
+  line-height: 20px;
+  margin-bottom: 0;
+  min-height: 20px;
+}
+#npmap-modules-directions .directions-details .location span {
+
+}
+#npmap-modules-directions .directions-details .location .identifier {
+  margin-top: 0;
+}
+#npmap-modules-directions .directions-details-directions li {
+  padding: 0 60px 10px 30px;
+  position: relative;
+  font-size: 12px;
+  line-height: 16px;
+}
+#npmap-modules-directions .directions-details-directions li .numeric {
+  color: #b28000;
+  font-weight: bold;
+  left: 0;
+  position: absolute;
+}
+#npmap-modules-directions .directions-details-directions li .section-distance {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+#npmap-modules-directions .directions-details-directions li ul {
+  margin: 2px 0 0 25px
+}
+#npmap-modules-directions .directions-details-directions li li {
+  padding: 0;
+}
+#npmap-modules-directions .directions-details-footer h3 {
+  margin: 0;
+}
+*/
+#npmap-modules-directions .disclaimer p {
+  border-top: 1px solid #b1b0a7;
+  color: #706d5f;
+  font-size: 9.5px;
+  line-height: 12px;
+  margin-top: 47px;
+  padding-top: 6px;
+}
+/*
+#npmap-modules-directions .loading {
+  margin: 35px auto;
+  width: 99px;
+}
+#npmap-modules-directions .loading span {
+  background: url(../resources/img/modules/directions/loader-green.gif) no-repeat scroll left top transparent;
+  display: block;
+  float: left;
+  height: 19px;
+  margin-right: 9px;
+  width: 19px;
+}
+#npmap-modules-directions .loading p {
+  color: #647630;
+  font-size: 15px;
+  font-weight: bold;
+}
+#npmap-modules-directions .last {
+  clear: right;
+  margin-right: 0 !important;
+}
+*/
