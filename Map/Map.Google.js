@@ -4,6 +4,10 @@
   'Util/Util'
 ], function(Event, Map, Util) {
   /**
+   * Google Maps MarkerWithLabel
+   */
+  eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)r[e(c)]=k[c]||e(c);k=[function(e){return r[e]}];e=function(){return'\\w+'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('7 m(a){2.3=a;2.8=V.1E("1u");2.8.4.C="I: 1m; J: 1g;";2.k=V.1E("1u");2.k.4.C=2.8.4.C}m.l=E 6.5.22();m.l.1Y=7(){n c=2;n h=t;n f=t;n j;n b;n d,K;n i;n g=7(e){p(e.1v){e.1v()}e.2b=u;p(e.1t){e.1t()}};2.1s().24.G(2.8);2.1s().20.G(2.k);2.11=[6.5.9.w(V,"1o",7(a){p(f){a.s=j;i=u;6.5.9.r(c.3,"1n",a)}h=t;6.5.9.r(c.3,"1o",a)}),6.5.9.o(c.3.1P(),"1N",7(a){p(h&&c.3.1M()){a.s=E 6.5.1J(a.s.U()-d,a.s.T()-K);j=a.s;p(f){6.5.9.r(c.3,"1i",a)}F{d=a.s.U()-c.3.Z().U();K=a.s.T()-c.3.Z().T();6.5.9.r(c.3,"1e",a)}}}),6.5.9.w(2.k,"1d",7(e){c.k.4.1c="2i";6.5.9.r(c.3,"1d",e)}),6.5.9.w(2.k,"1D",7(e){c.k.4.1c=c.3.2g();6.5.9.r(c.3,"1D",e)}),6.5.9.w(2.k,"1C",7(e){p(i){i=t}F{g(e);6.5.9.r(c.3,"1C",e)}}),6.5.9.w(2.k,"1A",7(e){g(e);6.5.9.r(c.3,"1A",e)}),6.5.9.w(2.k,"1z",7(e){h=u;f=t;d=0;K=0;g(e);6.5.9.r(c.3,"1z",e)}),6.5.9.o(2.3,"1e",7(a){f=u;b=c.3.1b()}),6.5.9.o(2.3,"1i",7(a){c.3.O(a.s);c.3.D(2a)}),6.5.9.o(2.3,"1n",7(a){f=t;c.3.D(b)}),6.5.9.o(2.3,"29",7(){c.O()}),6.5.9.o(2.3,"28",7(){c.D()}),6.5.9.o(2.3,"27",7(){c.N()}),6.5.9.o(2.3,"26",7(){c.N()}),6.5.9.o(2.3,"25",7(){c.16()}),6.5.9.o(2.3,"23",7(){c.15()}),6.5.9.o(2.3,"21",7(){c.13()}),6.5.9.o(2.3,"1Z",7(){c.L()}),6.5.9.o(2.3,"1X",7(){c.L()})]};m.l.1W=7(){n i;2.8.1r.1q(2.8);2.k.1r.1q(2.k);1p(i=0;i<2.11.1V;i++){6.5.9.1U(2.11[i])}};m.l.1T=7(){2.15();2.16();2.L()};m.l.15=7(){n a=2.3.z("Y");p(H a.1S==="P"){2.8.W=a;2.k.W=2.8.W}F{2.8.G(a);a=a.1R(u);2.k.G(a)}};m.l.16=7(){2.k.1Q=2.3.1O()||""};m.l.L=7(){n i,q;2.8.S=2.3.z("R");2.k.S=2.8.S;2.8.4.C="";2.k.4.C="";q=2.3.z("q");1p(i 1L q){p(q.1K(i)){2.8.4[i]=q[i];2.k.4[i]=q[i]}}2.1l()};m.l.1l=7(){2.8.4.I="1m";2.8.4.J="1g";p(H 2.8.4.B!=="P"){2.8.4.1k="1j(B="+(2.8.4.B*1I)+")"}2.k.4.I=2.8.4.I;2.k.4.J=2.8.4.J;2.k.4.B=0.1H;2.k.4.1k="1j(B=1)";2.13();2.O();2.N()};m.l.13=7(){n a=2.3.z("X");2.8.4.1h=-a.x+"v";2.8.4.1f=-a.y+"v";2.k.4.1h=-a.x+"v";2.k.4.1f=-a.y+"v"};m.l.O=7(){n a=2.1G().1F(2.3.Z());2.8.4.12=a.x+"v";2.8.4.M=a.y+"v";2.k.4.12=2.8.4.12;2.k.4.M=2.8.4.M;2.D()};m.l.D=7(){n a=(2.3.z("14")?-1:+1);p(H 2.3.1b()==="P"){2.8.4.A=2h(2.8.4.M,10)+a;2.k.4.A=2.8.4.A}F{2.8.4.A=2.3.1b()+a;2.k.4.A=2.8.4.A}};m.l.N=7(){p(2.3.z("1a")){2.8.4.Q=2.3.2f()?"2e":"1B"}F{2.8.4.Q="1B"}2.k.4.Q=2.8.4.Q};7 19(a){a=a||{};a.Y=a.Y||"";a.X=a.X||E 6.5.2d(0,0);a.R=a.R||"2c";a.q=a.q||{};a.14=a.14||t;p(H a.1a==="P"){a.1a=u}2.1y=E m(2);6.5.18.1x(2,1w)}19.l=E 6.5.18();19.l.17=7(a){6.5.18.l.17.1x(2,1w);2.1y.17(a)};',62,143,'||this|marker_|style|maps|google|function|labelDiv_|event|||||||||||eventDiv_|prototype|MarkerLabel_|var|addListener|if|labelStyle|trigger|latLng|false|true|px|addDomListener|||get|zIndex|opacity|cssText|setZIndex|new|else|appendChild|typeof|position|overflow|cLngOffset|setStyles|top|setVisible|setPosition|undefined|display|labelClass|className|lng|lat|document|innerHTML|labelAnchor|labelContent|getPosition||listeners_|left|setAnchor|labelInBackground|setContent|setTitle|setMap|Marker|MarkerWithLabel|labelVisible|getZIndex|cursor|mouseover|dragstart|marginTop|hidden|marginLeft|drag|alpha|filter|setMandatoryStyles|absolute|dragend|mouseup|for|removeChild|parentNode|getPanes|stopPropagation|div|preventDefault|arguments|apply|label|mousedown|dblclick|none|click|mouseout|createElement|fromLatLngToDivPixel|getProjection|01|100|LatLng|hasOwnProperty|in|getDraggable|mousemove|getTitle|getMap|title|cloneNode|nodeType|draw|removeListener|length|onRemove|labelstyle_changed|onAdd|labelclass_changed|overlayMouseTarget|labelanchor_changed|OverlayView|labelcontent_changed|overlayImage|title_changed|labelvisible_changed|visible_changed|zindex_changed|position_changed|1000000|cancelBubble|markerLabels|Point|block|getVisible|getCursor|parseInt|pointer'.split('|'),0,{}))
+  /**
    * wax - 7.0.0dev13 - v6.0.4-142-ga157a2d
    */
   wax.g={};wax.g.bwdetect=function(a,c){c=c||{};var e=c.png||".png128",d=c.jpg||".jpg70";if(!a.mapTypes["mb-low"]){for(var b=a.mapTypes.mb,f={tiles:[],scheme:b.options.scheme,blankImage:b.options.blankImage,minzoom:b.minZoom,maxzoom:b.maxZoom,name:b.name,description:b.description},g=0;g<b.options.tiles.length;g++)f.tiles.push(b.options.tiles[g].replace(".png",e).replace(".jpg",d));m.mapTypes.set("mb-low",new wax.g.connector(f))}return wax.bwdetect(c,function(c){a.setMapTypeId(c?"mb":"mb-low")})};wax.g.interaction=function(){function a(){e=!0}var c,e=!1,d,b=null,f=null;return wax.interaction().attach(function(c){if(!arguments.length)return d;d=c;f=google.maps.event.addListener(d,"idle",a);b=google.maps.event.addListener(d,"tileloaded",a)}).detach(function(){b&&google.maps.event.removeListener(b);f&&google.maps.event.removeListener(f)}).parent(function(){return d.getDiv()}).grid(function(){if(e||!c){wax.u.offset(d.getDiv());var a=d.getZoom();c=[];var b=function(b){if(b.interactive)for(var d in b.cache)if(d.split("/")[0]==a){var e=wax.u.offset(b.cache[d]);c.push([e.top,e.left,b.cache[d]])}},f;for(f in d.mapTypes)b(d.mapTypes[f]);d.overlayMapTypes.forEach(b)}return c})};wax.g.connector=function(a){a=a||{};this.options={tiles:a.tiles,scheme:a.scheme||"xyz",blankImage:a.blankImage||"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="};this.minZoom=a.minzoom||0;this.maxZoom=a.maxzoom||22;this.name=a.name||"";this.description=a.description||"";this.interactive=!0;this.tileSize=new google.maps.Size(256,256);this.cache={}};wax.g.connector.prototype.getTile=function(a,c){var e=c+"/"+a.x+"/"+a.y;if(!this.cache[e]){var d=this.cache[e]=new Image(256,256);this.cache[e].src=this.getTileUrl(a,c);this.cache[e].setAttribute("gTileKey",e);this.cache[e].onerror=function(){d.style.display="none"}}return this.cache[e]};wax.g.connector.prototype.releaseTile=function(a){var c=a.getAttribute("gTileKey");this.cache[c]&&delete this.cache[c];a.parentNode&&a.parentNode.removeChild(a)};wax.g.connector.prototype.getTileUrl=function(a,c){var e=Math.pow(2,c),d="tms"===this.options.scheme?e-1-a.y:a.y,b=a.x%e,b=0>b?a.x%e+e:b;return 0>d?this.options.blankImage:this.options.tiles[parseInt(b+d,10)%this.options.tiles.length].replace(/\{z\}/g,c).replace(/\{x\}/g,b).replace(/\{y\}/g,d)};
@@ -151,10 +155,16 @@
     mapTypeControl: false,
     noClear: true,
     panControl: false,
-    // TODO: Make this configurable.
     scaleControl: false,
     scrollWheel: true,
     streetViewControl: false,
+    styles: [{
+      elementType: 'labels',
+      featureType: 'poi',
+      stylers: [{
+        visibility: 'off'
+      }]
+    }],
     zoomControl: false
   };
 
@@ -716,9 +726,14 @@
      * @param {Object} options
      * @return {Object}
      * Notes: Valid Google Maps options: animation, clickable, cursor, draggable, flat, icon, map, optimized, position, raiseOnDrag, shadow, shape, title, visible, zIndex
+     *        Supported options are: anchor, clickable, draggable, height, text, url, and width
      */
     convertMarkerOptions: function(options) {
       var o = {};
+
+      if (options.anchor) {
+        o.anchorPoint = new google.maps.Point(options.anchor.x, options.anchor.y);
+      }
 
       if (options.clickable === false) {
         o.clickable = false;
@@ -726,6 +741,15 @@
 
       if (options.draggable === true) {
         o.draggable = true;
+      }
+
+      if (options.text) {
+        o.labelAnchor = new google.maps.Point(11, 32);
+        o.labelContent = options.text;
+        o.labelStyle = {
+          color: 'white',
+          zIndex: 50
+        };
       }
 
       if (options.url) {
@@ -810,7 +834,11 @@
       options.clickable = typeof options.clickable === 'boolean' ? options.clickable : true;
       options.position = latLng;
 
-      marker = new google.maps.Marker(options);
+      if (options.labelContent) {
+        marker = new MarkerWithLabel(options);
+      } else {
+        marker = new google.maps.Marker(options);
+      }
 
       _hookUpShapeClickHandler(marker);
 

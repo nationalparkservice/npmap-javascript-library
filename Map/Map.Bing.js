@@ -655,12 +655,22 @@ define([
      * @param {Object} options
      * @return {Object}
      * Notes: Valid Bing Maps options: anchor, draggable, height, icon, infobox, text, textOffset, typeName, visible, width, zIndex
+     *        Supported options are: anchor, height, text, url, and width
      */
     convertMarkerOptions: function(options) {
       var o = {};
 
+      if (options.anchor) {
+        o.anchor = new Microsoft.Maps.Point(options.anchor.x, options.anchor.y);
+      }
+
       if (options.height) {
         o.height = options.height;
+      }
+
+      if (options.text) {
+        o.text = options.text;
+        o.textOffset = new Microsoft.Maps.Point(-6, 5);
       }
 
       if (options.url) {
@@ -722,39 +732,35 @@ define([
     createMarker: function(latLng, options) {
       options = options || {};
 
-      if (!options.anchor || !options.height || !options.width) {
-        if (options.height && options.width) {
+      if (!options.anchor || typeof options.height === 'undefined' || typeof options.width === 'undefined') {
+        if (typeof options.height !== 'undefined' && typeof options.width !== 'undefined') {
           options.anchor = new Microsoft.Maps.Point(options.width / 2, options.height / 2);
+          return new Microsoft.Maps.Pushpin(latLng, options);
         } else if (options.icon) {
           var image = new Image(),
-              interval;
+              interval,
+              marker;
 
+          options.visible = false;
+          marker = new Microsoft.Maps.Pushpin(latLng, options);
           image.src = options.icon;
           interval = setInterval(function() {
             if (image.height > 0 && image.width > 0) {
-              var height = image.height,
-                  width = image.width,
-                  anchor = options.anchor || new Microsoft.Maps.Point(width / 2, height / 2);
-
               clearInterval(interval);
-
-              if (!marker) {
-                options.anchor = anchor;
-                options.height = height;
-                options.width = width;
-              } else {
-                marker.setOptions({
-                  anchor: anchor,
-                  height: height,
-                  width: width
-                });
-              }
+              marker.setOptions({
+                anchor: options.anchor || new Microsoft.Maps.Point(image.width / 2, image.height / 2),
+                height: image.height,
+                visible: true,
+                width: image.width
+              });
             }
           }, 10);
-        }
-      }
 
-      return new Microsoft.Maps.Pushpin(latLng, options);
+          return marker;
+        }
+      } else {
+        return new Microsoft.Maps.Pushpin(latLng, options);
+      }
     },
     /**
      * Creates a Microsoft.Maps.Polygon object.
