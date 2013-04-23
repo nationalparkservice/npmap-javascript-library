@@ -16,11 +16,27 @@
 #npmap button, input, select, textarea {margin:0}
 
 /* Core elements */
-#npmap {background-color:#EBF2DA;font-size:13px;line-height:16px;}
-#npmap-map {z-index:0;}
-#npmap-toolbar {background-color:#908D7C;left:0;height:28px;position:absolute;right:0;top:0;z-index:2;}
-
-.ir {
+#npmap {
+  background-color: #EBF2DA;
+  font-size: 13px;
+  line-height: 16px;
+}
+#npmap-map {
+  z-index: 0;
+}
+#npmap-toolbar {
+  background-color: #908D7C;
+  left: 0;
+  height: 28px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 2;
+}
+#npmap strong {
+  font-weight: bold;
+}
+#npmap .ir {
   background-repeat: no-repeat;
   display: block;
   direction: ltr;
@@ -28,15 +44,29 @@
   text-align: left;
   text-indent: -999em;
 }
-
+#npmap .clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+#npmap .clearfix {
+  display: inline-block;
+}
+* html #npmap .clearfix {
+  height: 1%;
+}
+#npmap .clearfix {
+  display: block;
+}
+/* End Core Elements */
 /* Buttons */
-
 /* DEPRECATED */
 #npmap .sq-btn {background:transparent url(../img/textures/sq-btn.png) repeat-x left top;background-image:-moz-linear-gradient(#b28000,#9d7100);background-image:-webkit-gradient(linear,0% 0%, 0% 100%,from(#b28000),to(#9d7100));background-image:-webkit-linear-gradient(#b28000,#9d7100);background-image:-o-linear-gradient(#b28000,#9d7100);color:#FFFFFF;cursor:pointer;font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;font-size:12px;font-weight:bold;padding:8px 12px 6px;-webkit-border-radius:2px;-moz-border-radius:2px;-o-border-radius:2px;border-radius:2px;-moz-box-shadow:0 0 3px #cbcbcb;-webkit-box-shadow:0 0 3px #cbcbcb;box-shadow:0 0 3px #cbcbcb;text-align:center;}
 #npmap button.sq-btn {border: none;height: 28px;padding-top: 5px;}
 #npmap button.simple-btn {background-color: transparent;border: none;color: #b28000;font-size: 12px;font-weight: bold;padding: 7px 10px 6px 10px;}
 /* END DEPRECATED */
-
 #npmap button {
   border: none;
   color: #FFFFFF;
@@ -125,9 +155,11 @@
      -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
+          /*
      -moz-box-shadow: 0 1px 0 5px rgba(255,255,255,.16), inset 0 1px 3px rgba(0,0,0,.3);
   -webkit-box-shadow: 0 1px 0 5px rgba(255,255,255,.16), inset 0 1px 3px rgba(0,0,0,.3);
           box-shadow: 0 1px 0 5px rgba(255,255,255,.16), inset 0 1px 3px rgba(0,0,0,.3);
+          */
 }
 #npmap button.btn-primary.disabled {
   background-color: #b3852d;
@@ -226,43 +258,31 @@
 /* End Buttons */
 /* Inputs */
 #npmap input, textarea, select {
+  background-color: #FCFCFC;
+  border: solid 1px #CBCBCB;
      -moz-border-radius: 0;
   -webkit-border-radius: 0;
           border-radius: 0;
-  background-color: #FCFCFC;
-  border: solid 1px #CBCBCB;
 }
 #npmap input, textarea {
-     -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-          box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-     -moz-transition: border linear 0.2s,box-shadow linear 0.2s;
-      -ms-transition: border linear 0.2s,box-shadow linear 0.2s;
-       -o-transition: border linear 0.2s,box-shadow linear 0.2s;
-  -webkit-transition: border linear 0.2s,box-shadow linear 0.2s;
-          transition: border linear 0.2s,box-shadow linear 0.2s;
   padding: 7px 10px;
 }
 #npmap input {
   height: 12px;
 }
-#npmap input:focus, textarea:focus, select:focus {
-  border: 1px solid black;
-  outline: none;
-}
-#npmap ::-webkit-input-placeholder { /* WebKit browsers */
+#npmap ::-webkit-input-placeholder {
   color: #908C7D;
   font-style: italic;
 }
-#npmap :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+#npmap :-moz-placeholder {
   color: #908C7D;
   font-style: italic;
 }
-#npmap ::-moz-placeholder { /* Mozilla Firefox 19+ */
+#npmap ::-moz-placeholder {
   color: #908C7D;
   font-style: italic;
 }
-#npmap :-ms-input-placeholder { /* Internet Explorer 10+ */
+#npmap :-ms-input-placeholder {
   color: #908C7D;
   font-style: italic;
 }
@@ -306,13 +326,34 @@
   text-align: center;
 }
 /* End Popup */
-
-/* Markup free clearing */
-.clearfix:after {content:".";display:block;height:0;clear:both;visibility:hidden;}
-.clearfix {display:inline-block;}
-* html .clearfix {height:1%;}
-.clearfix {display:block;}
-
+/* Tooltip */
+#npmap .tooltip {
+  background: #44433b;
+  color: white;
+  opacity: 1;
+  padding: 5px;
+  position: absolute;
+  text-align: center;
+  width: 190px;
+}
+#npmap .arrow-down:after {
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 100%;
+  width: 0;
+}
+#npmap .arrow-down:after {
+  border-color: rgb(68, 67, 59);
+  border-color: rgba(68, 67, 59, 0);
+  border-top-color: #44433b;
+  border-width: 14px;
+  left: 50%;
+  margin-left: -14px;
+}
+/* End Tooltip */
 /* Styling */
 #npmap .cursor {cursor:pointer;}
 #npmap .even {background-color:#e0e0e0;}
@@ -490,6 +531,38 @@
   top: 4px;
 }
 /* End Modules */
+/* Tools */
+#npmap-geocoder-results {
+     -moz-box-shadow: 0 2px 3px rgba(0,0,0,.12);
+  -webkit-box-shadow: 0 2px 3px rgba(0,0,0,.12);
+          box-shadow: 0 2px 3px rgba(0,0,0,.12);
+  background-color: white;
+  display: none;
+  max-height: 300px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 200px;
+}
+#npmap-geocoder-results li {
+  border-bottom: 1px solid #F2F1EF;
+  border-top: 1px solid #F2F1EF;
+  cursor: pointer;
+  list-style-type: none;
+  padding: 7px 10px;
+}
+#npmap-geocoder-results li.first {
+  border-top: none;
+}
+#npmap-geocoder-results li.last {
+  border-bottom: none;
+}
+#npmap-geocoder-results li.mouseover {
+  background-color: #F1F1EF;
+}
+#npmap-geocoder-results li.selected {
+  background-color: #DDDDDD;
+}
+/* End Tools */
 
 #npmap-navigation-compass {display:block;height:59px;width:58px;}
 #npmap-navigation-compass-center {height:20px;left:18px;position:absolute;top:18px;width:20px;}
@@ -563,4 +636,8 @@
 }
 
 /* baseApi overrides */
-.leaflet-zoom-box {background-color:white !important;border:2px dashed #9F6D00 !important;opacity:0.5 !important;}
+.leaflet-zoom-box {
+  background-color: white !important;
+  border: 2px dashed #9F6D00 !important;
+  opacity: 0.5 !important;
+}

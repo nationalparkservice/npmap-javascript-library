@@ -5,6 +5,7 @@ define(function() {
      */
     var base64={PADCHAR:"=",ALPHA:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",getbyte64:function(a,f){var b=base64.ALPHA.indexOf(a.charAt(f));if(-1==b)throw"Cannot decode base64";return b},decode:function(a){a=""+a;var f=base64.getbyte64,b,c,d,e=a.length;if(0==e)return a;if(0!=e%4)throw"Cannot decode base64";b=0;a.charAt(e-1)==base64.PADCHAR&&(b=1,a.charAt(e-2)==base64.PADCHAR&&(b=2),e-=4);var g=[];for(c=0;c<e;c+=4)d=f(a,c)<<18|f(a,c+1)<<12|f(a,c+2)<<6|f(a,c+3),g.push(String.fromCharCode(d>>16,d>>8&255,d&255));switch(b){case 1:d=f(a,c)<<18|f(a,c+1)<<12|f(a,c+2)<<6;g.push(String.fromCharCode(d>>16,d>>8&255));break;case 2:d=f(a,c)<<18|f(a,c+1)<<12,g.push(String.fromCharCode(d>>16))}return g.join("")},getbyte:function(a,f){var b=a.charCodeAt(f);if(255<b)throw"INVALID_CHARACTER_ERR: DOM Exception 5";return b},encode:function(a){if(1!=arguments.length)throw"SyntaxError: Not enough arguments";var f=base64.PADCHAR,b=base64.ALPHA,c=base64.getbyte,d,e,g=[];a=""+a;var h=a.length-a.length%3;if(0==a.length)return a;for(d=0;d<h;d+=3)e=c(a,d)<<16|c(a,d+1)<<8|c(a,d+2),g.push(b.charAt(e>>18)),g.push(b.charAt(e>>12&63)),g.push(b.charAt(e>>6&63)),g.push(b.charAt(e&63));switch(a.length-h){case 1:e=c(a,d)<<16;g.push(b.charAt(e>>18)+b.charAt(e>>12&63)+f+f);break;case 2:e=c(a,d)<<16|c(a,d+1)<<8,g.push(b.charAt(e>>18)+b.charAt(e>>12&63)+b.charAt(e>>6&63)+f)}return g.join("")}};
   }
+
   if (!LazyLoader) {
     /**
      * https://github.com/LukeTheDuke/Lazyloader
@@ -97,6 +98,20 @@ define(function() {
       bindEvent(el, name, handler);
     },
     /**
+     * UNDOCUMENTED
+     */
+    captureMouseWheel: function(el) {
+      var me = this;
+
+      bean.add(el, 'mousewheel', function(e) {
+        if ((el.scrollTop === 0 && e.wheelDeltaY > 0) || ((el.scrollTop === (el.scrollHeight - el.offsetHeight)) && e.wheelDeltaY < 0)) {
+          me.eventCancelMouseWheel(e);
+        } else {
+          me.eventCancelPropagation(e);
+        }
+      });
+    },
+    /**
      * Converts a 0-255 opacity to 0-1.0.
      * @param {Number} opacity
      * @return {Number}
@@ -169,6 +184,43 @@ define(function() {
       } else if (window.event) {
         window.event.cancelBubble = true;
       }
+    },
+    /**
+     * UNDOCUMENTED: Gets the current cursor position for an input. (http://stackoverflow.com/a/7745998/27540)
+     * @param {Object} input
+     * @return {Number}
+     */
+    getCursorPosition: function(input) {
+      if ("selectionStart" in input && document.activeElement == input) {
+        return {
+          start: input.selectionStart,
+          end: input.selectionEnd
+        };
+      } else if (input.createTextRange) {
+        var sel = document.selection.createRange();
+
+        if (sel.parentElement() === input) {
+          var rng = input.createTextRange();
+
+          rng.moveToBookmark(sel.getBookmark());
+
+          for (var len = 0; rng.compareEndPoints("EndToStart", rng) > 0; rng.moveEnd("character", -1)) {
+            len++;
+          }
+
+          rng.setEndPoint("StartToStart", input.createTextRange());
+
+          for (var pos = { start: 0, end: len }; rng.compareEndPoints("EndToStart", rng) > 0; rng.moveEnd("character", -1)) {
+            pos.start++;
+            pos.end++;
+          }
+
+          return pos;
+
+        }
+      }
+
+      return -1;
     },
     /**
      * Gets elements by class name.
@@ -291,6 +343,34 @@ define(function() {
         height: height,
         width: width
       };
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    getPosition: function(el) {
+      var obj = {
+            left: 0,
+            top: 0
+          },
+          offset = this.getOffset(el),
+          offsetParent = this.getOffset(el.parentNode);
+
+      obj.left = offset.left - offsetParent.left;
+      obj.top = offset.top - offsetParent.top;
+
+      return obj;
+    },
+    /**
+     * UNDOCUMENTED: Gets the previous sibling element.
+     * @param {Object} el
+     * @return {Object}
+     */
+    getPreviousElement: function(el) {
+      do {
+        el = el.previousSibling;
+      } while (el && el.nodeType != 1);
+
+      return el;
     },
     /**
      * Gets the width of the browser's vertical scrollbar.

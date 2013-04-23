@@ -63,7 +63,7 @@ define([
                     break;
                   case 'POINT':
                     //display =
-                    break; 
+                    break;
                 }
 
                 result.results.push({
@@ -105,9 +105,17 @@ define([
         },
         jsonpCallback: 'json_callback',
         success: function(response) {
+          var obj = {};
+
           if (response) {
-            console.log(response);
+            obj.results = response;
+            obj.success = true;
+          } else {
+            obj.message = 'The response from the Nominatim service was invalid. Please try again.';
+            obj.success = false;
           }
+
+          callback(obj);
         },
         type: 'jsonp',
         url: 'http://open.mapquestapi.com/nominatim/v1/search.php?format=json&addressdetails=1&dedupe=1&q=' + value + '&key=Fmjtd%7Cluub2l01nd%2Cal%3Do5-96121w'

@@ -493,13 +493,7 @@ define([
       };
     }
 
-    bean.add(divInfoBoxContentWrapper, 'mousewheel', function(e) {
-      if ((this.scrollTop === 0 && e.wheelDeltaY > 0) || ((this.scrollTop === (this.scrollHeight - this.offsetHeight)) && e.wheelDeltaY < 0)) {
-        Util.eventCancelMouseWheel(e);
-      } else {
-        Util.eventCancelPropagation(e);
-      }
-    });
+    Util.captureMouseWheel(divInfoBoxContentWrapper);
     refreshDimensions();
     refreshOffsetsAndWidth();
     Util.iterateThroughChildNodes(divInfoBox, function(el) {

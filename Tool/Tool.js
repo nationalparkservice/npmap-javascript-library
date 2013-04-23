@@ -18,7 +18,7 @@ define([
      */
     _add: function(el, callback) {
       function add() {
-        Map.addControl(el, callback);
+        Map.addControl(el, callback, true);
       }
 
       if (Map._isReady === true) {
