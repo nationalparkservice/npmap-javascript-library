@@ -376,7 +376,8 @@ define([
       });
 
       if (items.length > 1) {
-        var divSwitcher = document.createElement('div'),
+        var cssSwitcherMenu = 'display:none;max-width:160px;position:absolute;',
+            divSwitcher = document.createElement('div'),
             divSwitcherMenu = document.createElement('div');
         
         function setIcon(url) {
@@ -392,10 +393,18 @@ define([
 
         divSwitcher.className = 'npmap-switcher-dropdown';
         divSwitcher.id = 'npmap-switcher';
+        
+        if (NPMap.config.modules && NPMap.config.modules.length) {
+          divSwitcher.style.cssText = 'right:90px;top:30px;'
+          cssSwitcherMenu += 'right:90px;top:53px;';
+        } else {
+          cssSwitcherMenu += 'right:16px;top:38px;';
+        }
+
         divSwitcher.innerHTML = '<div id="npmap-switcher-dropdown-left"></div><div id="npmap-switcher-dropdown-icon"></div><div id="npmap-switcher-dropdown-text"></div><div id="npmap-switcher-dropdown-right"></div>';
         divSwitcherMenu.id = 'npmap-switcher-menu';
         // TODO: Both menus should be able to expand in width up to a set number (maybe 250px?).
-        divSwitcherMenu.style.cssText = 'display:none;max-width:160px;position:absolute;right:16px;top:38px;';
+        divSwitcherMenu.style.cssText = cssSwitcherMenu;
         
         elements.push({
           el: divSwitcher

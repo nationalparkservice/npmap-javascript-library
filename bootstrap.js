@@ -274,7 +274,8 @@ if (typeof bean === 'undefined') {
             })();
           });
 
-          if (NPMap.config.modules) {
+          if (NPMap.config.modules && NPMap.config.modules.length) {
+            scripts.push(NPMap.config.server + '/Module/Module.js');
             _.each(NPMap.config.modules, function(module) {
               switch (module.name.toLowerCase()) {
                 case 'directions':

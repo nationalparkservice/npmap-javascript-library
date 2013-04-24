@@ -58,7 +58,13 @@ define([
 
   if (_build.length) {
     _.each(_build, function(module) {
-      NPMap.Module.add(module, true);
+      // TODO: Clean this up.
+      var interval = setInterval(function() {
+        if (NPMap && NPMap.Module && typeof NPMap.Module.add === 'function') {
+          clearInterval(interval);
+          NPMap.Module.add(module, true);
+        }
+      }, 100);
     });
   }
 
@@ -66,7 +72,10 @@ define([
     _.each(_divModules.childNodes, function(childNode) {
       var childNodes = childNode.childNodes;
 
-      childNodes[1].style.height = (Util.getOuterDimensions(_divModules).height - Util.getOuterDimensions(childNodes[0]).height - 24) + 'px';
+      // TODO: Take out this check when you've unified "dynamically-added" modules and "traditional" modules.
+      if (childNodes[1]) {
+        childNodes[1].style.height = (Util.getOuterDimensions(_divModules).height - Util.getOuterDimensions(childNodes[0]).height - 24) + 'px';
+      }
     });
   });
 
@@ -80,7 +89,8 @@ define([
     add: function(module, cancelMouseWheel) {
       var divModule = document.createElement('div'),
           divTab = document.createElement('button'),
-          htmlContent;
+          htmlContent,
+          me = this;
 
       divModule.id = 'npmap-modules-' + module.id;
 
@@ -102,10 +112,14 @@ define([
       divTab.className = 'npmap-module-tab';
       divTab.innerHTML = '<i class="icon-' + module.icon + '"></i>';
       bean.add(divTab, 'click', function(e) {
-        NPMap.Module.open(this);
+        me.open(this);
         return false;
       });
       _divModulesTabs.appendChild(divTab);
+
+      if (module.visible) {
+        me.open(divTab);
+      }
 
       if (cancelMouseWheel) {
         _cancelMouseWheel(divModule);
