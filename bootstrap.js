@@ -110,7 +110,7 @@ if (typeof bean === 'undefined') {
 
 (function() {
   var s = document.createElement('script');
-  
+
   /**
    * Called after the map API has been loaded.
    */
@@ -275,17 +275,24 @@ if (typeof bean === 'undefined') {
           });
 
           if (NPMap.config.modules && NPMap.config.modules.length) {
-            scripts.push(NPMap.config.server + '/Module/Module.js');
+            var official = 0;
+
             _.each(NPMap.config.modules, function(module) {
               switch (module.name.toLowerCase()) {
                 case 'directions':
+                  official++;
                   scripts.push(NPMap.config.server + '/Module/Module.Directions.js');
                   break;
                 case 'edit':
+                  official++;
                   scripts.push(NPMap.config.server + '/Module/Module.Edit.' + NPMap.config.api + '.js');
                   break;
               }
             });
+
+            if (official === 0) {
+              scripts.push(NPMap.config.server + '/Module/Module.js');
+            }
           }
 
           if (NPMap.config.tools) {
