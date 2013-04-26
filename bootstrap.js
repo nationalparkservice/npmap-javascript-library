@@ -137,7 +137,17 @@ if (typeof bean === 'undefined') {
         NPMap.Event.add('NPMap.Map', 'ready', function() {
           var layerHandlers = [],
               navigationPosition = (function() {
+                var moduleInterfaces = 0;
+
                 if (NPMap.config.modules && NPMap.config.modules.length) {
+                  _.each(NPMap.config.modules, function(module) {
+                    if (module.name.toLowerCase() !== 'edit') {
+                      moduleInterfaces++;
+                    }
+                  });
+                }
+
+                if (moduleInterfaces > 0) {
                   return 'top right';
                 } else {
                   return 'top left';

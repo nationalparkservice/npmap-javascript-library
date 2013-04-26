@@ -378,13 +378,22 @@ define([
       if (items.length > 1) {
         var cssSwitcherMenu = 'display:none;max-width:160px;position:absolute;',
             divSwitcher = document.createElement('div'),
-            divSwitcherMenu = document.createElement('div');
+            divSwitcherMenu = document.createElement('div'),
+            moduleInterfaces = 0;
         
         function setIcon(url) {
           document.getElementById('npmap-switcher-dropdown-icon').innerHTML = '<img src="' + url + '" style="height:15px;margin-top:4.5px;" />';
         }
         function setLabel(text) {
           document.getElementById('npmap-switcher-dropdown-text').innerHTML = text.toUpperCase();
+        }
+
+        if (NPMap.config.modules && NPMap.config.modules.length) {
+          _.each(NPMap.config.modules, function(module) {
+            if (module.name.toLowerCase() !== 'edit') {
+              moduleInterfaces++;
+            }
+          });
         }
 
         items.sort(function(a, b) {
@@ -394,7 +403,7 @@ define([
         divSwitcher.className = 'npmap-switcher-dropdown';
         divSwitcher.id = 'npmap-switcher';
         
-        if (NPMap.config.modules && NPMap.config.modules.length) {
+        if (moduleInterfaces > 0) {
           divSwitcher.style.cssText = 'right:90px;top:30px;'
           cssSwitcherMenu += 'right:90px;top:53px;';
         } else {
