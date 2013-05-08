@@ -471,8 +471,6 @@ if (typeof bean === 'undefined') {
               }
 
               apiUrl += '&channel=npmap';
-
-              console.log(apiUrl);
             }
             
             if (NPMap.config.modules) {
