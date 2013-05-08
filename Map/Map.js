@@ -14,10 +14,6 @@ define([
   'Util/Util'
 ], function(Event, InfoBox, Util) {
   var
-      // The active notification messages.
-      activeNotificationMessages = [],
-      // The combined pixel height of all the active notification messages.
-      activeNotificationMessagesHeight = 0,
       // The current API, in lowercase.
       apiLower = NPMap.config.api.toLowerCase(),
       // The attribution div.
@@ -1121,50 +1117,36 @@ define([
      * @return null
      */
     notify: function(message, title, type, interval) {
-      var height,
-          msg = createNotify(message, title, type);
+      var msg = createNotify(message, title, type);
+      
+      interval = isNaN(parseInt(interval)) ? 3000 : parseInt(interval);
 
       if (!divNotify) {
         divNotify = document.getElementById('npmap-notify');
       }
 
-      msg.style.display = 'none';
-
       divNotify.appendChild(msg);
 
-      height = Util.getOuterDimensions(msg).height;
-      interval = interval || 3000;
-      msg.style.top = -height + 'px';
-      msg.style.display = 'block';
-
-      morpheus(msg, {
-        complete: function() {
-          setTimeout(function() {
-            activeNotificationMessagesHeight = activeNotificationMessagesHeight - height;
-            msg.parentNode.removeChild(msg);
-            activeNotificationMessages.splice(activeNotificationMessages.indexOf(msg), 1);
-            _.each(activeNotificationMessages, function(el) {
-              el.style.top = (parseFloat(el.style.top.replace('px', '')) - height) + 'px';
-            });
-            /*
-            //NPMap.Util.getOuterDimensions(document.getElementById('npmap-notify').childNodes[1]);
-            morpheus(activeNotificationMessages, {
-              complete: function() {
-                activeNotificationMessages.splice(activeNotificationMessages.indexOf(msg), 1);
-                msg.parentNode.removeChild(msg);
-              },
-              duration: 100,
-              top: '-=' + height + 'px'
-            });
-            */
-          }, interval);
-        },
-        duration: 400,
-        top: activeNotificationMessagesHeight + 'px'
-      });
-      activeNotificationMessages.push(msg);
-
-      activeNotificationMessagesHeight = activeNotificationMessagesHeight + height;
+      if (Util.getOuterDimensions(divNotify).height === 0) {
+        msg.style.top = -Util.getOuterDimensions(msg).height + 'px';
+        morpheus(msg, {
+          complete: function() {
+            msg.style.position = 'relative';
+            msg.style.top = 'inherit';
+            setTimeout(function() {
+              msg.parentNode.removeChild(msg);
+            }, interval);
+          },
+          duration: 400,
+          top: '0px'
+        });
+      } else {
+        msg.style.position = 'relative';
+        msg.style.top = 'inherit';
+        setTimeout(function() {
+          msg.parentNode.removeChild(msg);
+        }, interval);
+      }
     },
     /**
      * Pans the map horizontally and/or vertically based on the pixel object passed in.
