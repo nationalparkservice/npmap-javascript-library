@@ -464,13 +464,15 @@ if (typeof bean === 'undefined') {
             } else if (window.location.protocol !== 'file:') {
               var host = window.location.host;
 
-              if (host.indexOf('.nps.doi.net') !== -1 || host.indexOf('inside.nps.gov') !== -1 || host.indexOf('insidemaps.nps.gov' !== -1)) {
+              if (host.indexOf('localhost') !== -1 || host.indexOf('.nps.doi.net') !== -1 || host.indexOf('inside.nps.gov') !== -1 || host.indexOf('insidemaps.nps.gov') !== -1) {
                 apiUrl += '&client=gme-nationalparkservice2';
               } else {
                 apiUrl += '&client=gme-nationalparkservice1';
               }
 
               apiUrl += '&channel=npmap';
+
+              console.log(apiUrl);
             }
             
             if (NPMap.config.modules) {
