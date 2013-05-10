@@ -36,14 +36,6 @@
 #npmap strong {
   font-weight: bold;
 }
-#npmap .ir {
-  background-repeat: no-repeat;
-  display: block;
-  direction: ltr;
-  overflow: hidden;
-  text-align: left;
-  text-indent: -999em;
-}
 #npmap .clearfix:after {
   content: ".";
   display: block;
@@ -59,6 +51,17 @@
 }
 #npmap .clearfix {
   display: block;
+}
+#npmap .hide {
+  display: none;
+}
+#npmap .ir {
+  background-repeat: no-repeat;
+  display: block;
+  direction: ltr;
+  overflow: hidden;
+  text-align: left;
+  text-indent: -999em;
 }
 /* End Core Elements */
 /* Buttons */
@@ -431,6 +434,37 @@
   width: 16px;
 }
 /* End Icons */
+/* Toolbar */
+#npmap-tools {
+  float: right;
+}
+#npmap-tools button {
+  background-color: transparent;
+  height: 28px;
+  width: 35px;
+}
+#npmap-tools .npmap-toolbar-fullscreen {
+  background: url(../img/tools/toolbar/sprite.png) 0px -14px no-repeat;
+  display: block;
+  height: 12px;
+  margin-left: 9px;
+  width: 13px;
+}
+#npmap-tools .npmap-toolbar-print {
+  background: url(../img/tools/toolbar/sprite.png) -15px -14px no-repeat;
+  display: block;
+  height: 12px;
+  margin-left: 9px;
+  width: 13px;
+}
+#npmap-tools .npmap-toolbar-share {
+  background: url(../img/tools/toolbar/sprite.png) -15px 0px no-repeat;
+  display: block; 
+  height: 9px;
+  margin: 10px 0 0 10.5px;
+  width: 13px;
+}
+/* End Toolbar */
 /* Modules */
 #npmap-modules {
      -moz-box-shadow: 2px 0 2px rgba(0,0,0,.2);
@@ -622,12 +656,7 @@
 #npmap-fullscreen-mask {background-color:black;height:100%;left:0;position:fixed;top:0;width:100%;z-index:99999999999;}
 #npmap-tip {display:none;max-width:200px;position:absolute;z-index:32;}
 /* DEPRECATED */
-#npmap-tools {float:right;}
 #npmap #npmap-tools li {background-color:#828171;border-left:solid 1px #ADACA2;cursor:pointer;list-style:none;float:left;height:28px;width:34px;}
-#npmap-tools .npmap-toolbar-fullscreen {background:url(../img/tools/toolbar/sprite.png) 0px -14px no-repeat;display:block;height:12px;margin:8px 0 0 10.5px;width:13px;}
-#npmap-tools .npmap-toolbar-print {background:url(../img/tools/toolbar/sprite.png) -15px -14px no-repeat;display:block;height:12px;margin:8px 0 0 10px;width:12px;}
-#npmap-tools .npmap-toolbar-share {background:url(../img/tools/toolbar/sprite.png) -15px 0px no-repeat;display:block;height:9px;margin:10px 0 0 10.5px;width:13px;}
-/*.npmap-tools-button {padding:9px 8.5px;}*/
 #npmap-zoombox {background-color:white;border:2px dashed #9F6D00;display:none;height:0;left:0;margin:0;opacity:0.5;padding:0;position:absolute;top:0;width:0;z-index:29;}
 .npmap-fullscreen-map {background-color:white;bottom:0;height:auto !important;left:0;position:fixed !important;right:0;top:0;width:auto !important;z-index:999999999999;}
 

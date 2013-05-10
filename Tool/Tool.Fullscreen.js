@@ -9,11 +9,9 @@ define([
       //
       _tool = document.createElement('li');
 
-  _tool.id = 'npmap-toolbar-fullscreen';
-
   Tool._addToToolbar(_tool, function() {
     var button = document.createElement('button');
-    button.className = 'npmap-toolbar-fullscreen';
+    button.innerHTML = '<span class="npmap-toolbar-fullscreen"><span class="hide">Enter/Exit Fullscreen Mode</span></span>';
     _tool.appendChild(button);
     bean.add(button, 'click', Map.toggleFullScreen);
   });

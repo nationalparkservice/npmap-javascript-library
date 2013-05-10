@@ -9,18 +9,16 @@ define([
       //
       _tool = document.createElement('li');
 
-  _tool.id = 'npmap-toolbar-share';
-
   Tool._addToToolbar(_tool, function() {
     var button = document.createElement('button');
-    button.className = 'npmap-toolbar-share';
+    button.innerHTML = '<span class="npmap-toolbar-share"><span class="hide">Share This Map</span></span>';
     _tool.appendChild(button);
     bean.add(button, 'click', function() {
       alert('The share tool has not yet been implemented.');
     });
   });
 
-  return NPMap.Tool.Print = {
+  return NPMap.Tool.Share = {
     /**
      *
      */

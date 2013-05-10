@@ -9,14 +9,16 @@ define([
       //
       _tool = document.createElement('li');
 
-  _tool.id = 'npmap-toolbar-print';
-
   Tool._addToToolbar(_tool, function() {
     var button = document.createElement('button');
-    button.className = 'npmap-toolbar-print';
+    button.innerHTML = '<span class="npmap-toolbar-print"><span class="hide">Print the Map</span></span>';
     _tool.appendChild(button);
     bean.add(button, 'click', function() {
-      alert('The print tool has not yet been implemented.');
+      if (typeof _config === 'function') {
+        _config();
+      } else if (typeof _config === 'string') {
+        // TODO: Implement.
+      }
     });
   });
 
