@@ -443,26 +443,23 @@
   height: 28px;
   width: 35px;
 }
-#npmap-tools .npmap-toolbar-fullscreen {
-  background: url(../img/tools/toolbar/sprite.png) 0px -14px no-repeat;
+#npmap-tools .npmap-toolbar-fullscreen, #npmap-tools .npmap-toolbar-print, #npmap-tools .npmap-toolbar-share {
+  background: url(../img/tools/toolbar/sprite.png) no-repeat;
   display: block;
-  height: 12px;
   margin-left: 9px;
   width: 13px;
+}
+#npmap-tools .npmap-toolbar-fullscreen {
+  background-position: 0 -14px;
+  height: 12px;
 }
 #npmap-tools .npmap-toolbar-print {
-  background: url(../img/tools/toolbar/sprite.png) -15px -14px no-repeat;
-  display: block;
+  background-position: -15px -14px;
   height: 12px;
-  margin-left: 9px;
-  width: 13px;
 }
 #npmap-tools .npmap-toolbar-share {
-  background: url(../img/tools/toolbar/sprite.png) -15px 0px no-repeat;
-  display: block; 
+  background-position: -15px 0;
   height: 9px;
-  margin: 10px 0 0 10.5px;
-  width: 13px;
 }
 /* End Toolbar */
 /* Modules */
