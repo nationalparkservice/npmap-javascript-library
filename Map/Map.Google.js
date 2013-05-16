@@ -147,6 +147,7 @@
     NPMap.config.baseLayers[0].visible = true;
   }
 
+  google.maps.visualRefresh = true;
   mapConfig = {
     disableDefaultUI: true,
     draggableCursor: 'url(http://maps.gstatic.com/mapfiles/openhand_8_8.cur) 8 8, default',
