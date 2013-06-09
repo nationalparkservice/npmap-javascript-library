@@ -76,6 +76,7 @@ define([
      * @return null
      */
     load: function(url, callback) {
+      /*
       if (url.indexOf('http://') !== -1 && url.indexOf(location.host) === -1) {
         // TODO: Should you try with CORS first, then fall back to proxy?
         reqwest({
@@ -90,7 +91,6 @@ define([
         });
       } else {
         reqwest({
-          method: 'get',
           success: function(response) {
             callback(parse(response.responseText));
           },
@@ -98,6 +98,18 @@ define([
           url: url
         });
       }
+      */
+
+      reqwest({
+        error: function(error) {
+          console.log(error);
+        },
+        success: function(response) {
+          callback(parse(response.d));
+        },
+        type: 'jsonp',
+        url: 'http://maps.nps.gov/proxy/xml?url=' + url + '&callback=?'
+      });
     },
     /**
      * Converts an XML object into a JXON object.
