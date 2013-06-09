@@ -65,11 +65,6 @@
 }
 /* End Core Elements */
 /* Buttons */
-/* DEPRECATED */
-#npmap .sq-btn {background:transparent url(../img/textures/sq-btn.png) repeat-x left top;background-image:-moz-linear-gradient(#b28000,#9d7100);background-image:-webkit-gradient(linear,0% 0%, 0% 100%,from(#b28000),to(#9d7100));background-image:-webkit-linear-gradient(#b28000,#9d7100);background-image:-o-linear-gradient(#b28000,#9d7100);color:#FFFFFF;cursor:pointer;font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;font-size:12px;font-weight:bold;padding:8px 12px 6px;-webkit-border-radius:2px;-moz-border-radius:2px;-o-border-radius:2px;border-radius:2px;-moz-box-shadow:0 0 3px #cbcbcb;-webkit-box-shadow:0 0 3px #cbcbcb;box-shadow:0 0 3px #cbcbcb;text-align:center;}
-#npmap button.sq-btn {border: none;height: 28px;padding-top: 5px;}
-#npmap button.simple-btn {background-color: transparent;border: none;color: #b28000;font-size: 12px;font-weight: bold;padding: 7px 10px 6px 10px;}
-/* END DEPRECATED */
 #npmap button {
   border: none;
   color: #FFFFFF;
@@ -637,11 +632,6 @@
 #npmap-notify .error {background-color:#F2DEDE;border-bottom:solid 2px #EED3D7;border-left:solid 2px #EED3D7;border-right:solid 2px #EED3D7;color:#B94A48;}
 #npmap-notify .info {background-color:#D9EDF7;border-bottom:solid 2px #BCE8F1;border-left:solid 2px #BCE8F1;border-right:solid 2px #BCE8F1;color:#3A87AD;}
 #npmap-notify .success {background-color:#DFF0D8;border-bottom:solid 2px #D6E9C6;border-left:solid 2px #D6E9C6;border-right:solid 2px #D6E9C6;color:#468847;}
-#npmap-overview {background-color:white;border-left:solid 3px black;border-top:solid 3px black;height:48px;position:absolute;right:0;width:48px;z-index:31;}
-.npmap-overview-close {background:url(../img/tools/overviewmap/sprite.png) -15px 0px no-repeat;bottom:2px;display:block;height:13px;right:2px;width:13px;}
-.npmap-overview-close-over {background:url(../img/tools/overviewmap/sprite.png) 0px 0px no-repeat;bottom:2px;display:block;height:13px;right:2px;width:13px;}
-.npmap-overview-open {background:url(../img/tools/overviewmap/sprite.png) -15px -15px no-repeat;display:block;height:13px;left:2px;top:2px;width:13px;}
-.npmap-overview-open-over {background:url(../img/tools/overviewmap/sprite.png) 0px -15px no-repeat;display:block;height:13px;left:2px;top:2px;width:13px;}
 #npmap-progressbar {background-color:black;border-radius:13px;bottom:35px;display:none;left:50%;margin-left:-100px;padding:3px;position:absolute;width:200px;z-index:30;}
 #npmap-progressbar div {background-color:#CA702D;width:0%;height:20px;border-radius:10px;}
 #npmap-switcher {background: url(../img/tools/switcher/dropdown-background.png) repeat-x left top;height:23px;line-height:23px;vertical-align:middle;}
@@ -663,13 +653,13 @@
 #npmap-zoombox {background-color:white;border:2px dashed #9F6D00;display:none;height:0;left:0;margin:0;opacity:0.5;padding:0;position:absolute;top:0;width:0;z-index:29;}
 .npmap-fullscreen-map {background-color:white;bottom:0;height:auto !important;left:0;position:fixed !important;right:0;top:0;width:auto !important;z-index:999999999999;}
 
-@media print {
-  #npmap-modules, #npmap-navigation, #npmap-overview, #npmap-toolbar {display:none;}
-}
-
 /* baseApi overrides */
 .leaflet-zoom-box {
   background-color: white !important;
   border: 2px dashed #9F6D00 !important;
   opacity: 0.5 !important;
+}
+
+@media print {
+  #npmap-modules, #npmap-navigation, #npmap-overview, #npmap-toolbar {display:none;}
 }
