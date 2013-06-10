@@ -63,6 +63,52 @@
   text-align: left;
   text-indent: -999em;
 }
+#npmap .cursor {
+  cursor:pointer;
+}
+#npmap .even {
+  background-color:#e0e0e0;
+}
+#npmap .pointer {
+  cursor: pointer;
+}
+#npmap .padded {
+  padding: 5px;
+}
+#npmap .rounded {
+     -moz-border-radius: 3px 0px 0px 3px;
+  -webkit-border-radius: 3px 0px 0px 3px;
+          border-radius: 3px 0px 0px 3px;
+}
+#npmap .shadowed {
+     -moz-box-shadow: 0 0 15px #888;
+  -webkit-box-shadow: 0 0 15px #888;
+          box-shadow:0 0 15px #888;
+}
+#npmap .transparent {
+  background-color: white;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+#npmap a {
+  color: #B28000;
+  text-decoration: none;
+}
+#npmap a.back:before {
+  content: "\00AB ";
+}
+#npmap a.more:after {
+  content: " \00BB";
+}
+#npmap a:hover {
+  color: #d39700;
+  text-decoration: underline;
+}
+#npmap small, sup {
+  font-size:85% !important;vertical-align:super !important;
+  } /* TODO: small should not be used here */
+#npmap small, sub {
+  font-size:85% !important;vertical-align:sub !important;
+}
 /* End Core Elements */
 /* Buttons */
 #npmap button {
@@ -352,23 +398,6 @@
   margin-left: -14px;
 }
 /* End Tooltip */
-/* Styling */
-#npmap .cursor {cursor:pointer;}
-#npmap .even {background-color:#e0e0e0;}
-#npmap .odd {}
-#npmap .pointer {cursor:pointer;}
-#npmap .npmap-container {background:url(../img/textures/npmap-container.jpg);padding-bottom:33px;} /* DEPRECATED? */
-#npmap .padded {padding:5px;}
-#npmap .rounded {-moz-border-radius:3px 0px 0px 3px;-webkit-border-radius:3px 0px 0px 3px;border-radius:3px 0px 0px 3px;}
-#npmap .shadowed {-moz-box-shadow:0 0 15px #888;-webkit-box-shadow:0 0 15px #888;box-shadow:0 0 15px #888;}
-#npmap .transparent {background-color:white;background-color:rgba(255, 255, 255, 0.7);}
-#npmap a {color:#B28000;text-decoration:none;}
-#npmap a.back:before {content:"\00AB ";}
-#npmap a.more:after {content:" \00BB";}
-#npmap a:hover {color:#d39700;text-decoration:underline;}
-#npmap small, sup {font-size:85% !important;vertical-align:super !important;} /* TODO: small should not be used here */
-#npmap small, sub {font-size:85% !important;vertical-align:sub !important;}
-
 /* Controls */
 #npmap-attribution {
      -moz-box-shadow: 0 0 15px #888;
@@ -653,12 +682,13 @@
 #npmap-zoombox {background-color:white;border:2px dashed #9F6D00;display:none;height:0;left:0;margin:0;opacity:0.5;padding:0;position:absolute;top:0;width:0;z-index:29;}
 .npmap-fullscreen-map {background-color:white;bottom:0;height:auto !important;left:0;position:fixed !important;right:0;top:0;width:auto !important;z-index:999999999999;}
 
-/* baseApi overrides */
+/* Base API Overrides */
 .leaflet-zoom-box {
   background-color: white !important;
   border: 2px dashed #9F6D00 !important;
   opacity: 0.5 !important;
 }
+/* End Base Api Overrides */
 
 @media print {
   #npmap-modules, #npmap-navigation, #npmap-overview, #npmap-toolbar {display:none;}
