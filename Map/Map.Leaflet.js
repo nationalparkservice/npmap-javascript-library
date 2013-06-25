@@ -796,6 +796,15 @@ define([
     _updateCartoDbQuery: function(layer, query) {
       layer.setQuery(query);
     },
+    /**
+     * Updates the style for a CartoDb layer.
+     * @param {Object} layer
+     * @param {String} style
+     * @return null
+     */
+    _updateCartoDbStyle: function(layer, style) {
+      layer.setStyle(style);
+    },
     // The {L.Map} object. This reference should be used to access any of the Leaflet functionality that can't be done through NPMap's API.
     map: _map,
     

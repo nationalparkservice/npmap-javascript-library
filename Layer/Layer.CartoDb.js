@@ -334,6 +334,24 @@ define([
       if (callback) {
         callback();
       }
+    },
+    /**
+     * UNDOCUMENTED
+     */
+    updateStyle: function(config, style, callback) {
+      style = Util.stringGlobalReplace(style, '"', '\'');
+
+      if (typeof Map[NPMap.config.api]._updateCartoDbStyle === 'function') {
+        config.style = style;
+
+        Map[NPMap.config.api]._updateCartoDbStyle(config._api, config.style);
+      } else {
+        console.info('The updateStyle method is not yet supported for this base API.');
+      }
+
+      if (callback) {
+        callback();
+      }
     }
   };
 });
