@@ -406,19 +406,19 @@ define([
               handler: function() {
                 layer.edit.handlers['delete'](editAttributes);
               },
-              text: 'Delete feature'
+              text: 'Delete'
             },{
               group: 'Edit',
               handler: function() {
                 layer.edit.handlers.updateAttributes(editAttributes);
               },
-              text: 'Update feature attributes'
+              text: 'Update attributes'
             },{
               group: 'Edit',
               handler: function() {
                 layer.edit.handlers.updateGeometry(editAttributes);
               },
-              text: 'Update feature geometry'
+              text: 'Update geometry'
             });
 
             break;
