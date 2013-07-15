@@ -75,8 +75,7 @@ define([
               npmap = {
                 data: {},
                 layerName: layerName,
-                layerType: 'Json',
-                type: 'Marker'
+                layerType: 'Json'
               },
               shape = NPMap.Map._createMarker({
                 lat: parseFloat(lat),
@@ -87,9 +86,7 @@ define([
           delete feature[lng];
 
           _.extend(npmap.data, feature);
-
           shape.npmap = npmap;
-
           shapes.push(shape);
         });
 

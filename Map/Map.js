@@ -549,13 +549,19 @@ define([
      */
     _createLine: function(latLngs, options) {
       var apiLatLngs = [],
+          line,
           me = this;
       
       _.each(latLngs, function(latLng) {
         apiLatLngs.push(me.latLngToApi(latLng));
       });
       
-      return NPMap.Map[NPMap.config.api].createLine(apiLatLngs, options);
+      line = NPMap.Map[NPMap.config.api].createLine(apiLatLngs, options);
+      line.npmap = {
+        type: 'Line'
+      };
+
+      return line;
     },
     /**
      * Creates a marker using the baseApi's marker class, if it exists.
@@ -564,7 +570,13 @@ define([
      * @return {Object}
      */
     _createMarker: function(latLng, options) {
-      return NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), options);
+      var marker = NPMap.Map[NPMap.config.api].createMarker(this.latLngToApi(latLng), options);;
+
+      marker.npmap = {
+        type: 'Marker'
+      };
+
+      return marker;
     },
     /**
      * Creates a polygon using the baseApi's marker class, if it exists.
@@ -574,13 +586,19 @@ define([
      */
     _createPolygon: function(latLngs, options) {
       var apiLatLngs = [],
-          me = this;
+          me = this,
+          polygon;
 
       for (var i = 0; i < latLngs.length; i++) {
         apiLatLngs.push(me.latLngToApi(latLngs[i]));
       }
 
-      return NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
+      polygon = NPMap.Map[NPMap.config.api].createPolygon(apiLatLngs, options);
+      polygon.npmap = {
+        type: 'Polygon'
+      };
+
+      return polygon;
     },
     /**
      * Handles any necessary sizing and positioning for the map when its parent HTML element is resized. You should not need to call this manually.

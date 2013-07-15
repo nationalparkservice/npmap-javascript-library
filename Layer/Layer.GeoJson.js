@@ -18,7 +18,7 @@ define([
           layerName: config.name,
           layerType: 'GeoJson'
         }, config.styleNpmap);
-        
+
         NPMap.Map.addShapes(config.shapes);
 
         if (callback) {
@@ -46,7 +46,6 @@ define([
           to = NPMap.Map[NPMap.config.api].latLngFromApi(NPMap.Map[NPMap.config.api].eventGetLatLng(e));
         }
 
-        // TODO: If identify.content exists, you should use it first. Next you should check for data.description and use it if it exists.
         if (data.description) {
           content = data.description;
         } else {
