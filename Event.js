@@ -112,7 +112,7 @@ define(function() {
         });
       } else {
         var me = this;
-        
+
         console.log('Event ("' + obj + ', ' + event + '") triggered, but class does not exist. Looping in 100ms...');
         setTimeout(function() {
           me.trigger(obj, event, e);
