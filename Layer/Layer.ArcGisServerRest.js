@@ -498,6 +498,16 @@ define([
       }
     },
     /**
+     * UNDOCUMENTED
+     */
+    toggleLayer: function(config, on) {
+      if (on) {
+        Layer.add(config);
+      } else {
+        Layer.remove(config);
+      }
+    },
+    /**
      * Toggles a layer's sublayer on or off.
      * @param {Object} config The layer config object.
      * @param {Integer} subLayerIndex The index of the sublayer.
