@@ -182,7 +182,7 @@ define([
       Event.trigger('NPMap.Layer', 'ready');
     }
   }, 250);
-  
+
   return NPMap.Layer = {
     // The number of layers that have been added. This property is deleted after the NPMap.Map ready event is triggered.
     _countAdded: 0,
@@ -190,28 +190,42 @@ define([
      * Adds a layer to the map.
      * @param {Object} config
      * @param {Boolean} silent (Optional)
+     * @param {Function} callback (Optional)
      * @return null
      */
-    add: function(config, silent) {
-      var func = this[config.type]._add;
+    add: function(config, silent, callback) {
+      var func;
 
-      function callback() {
+      require([
+        NPMap.config.server + '/Layer/Layer.' + config.type + '.js'
+      ], function(layerHandler) {
         if (!silent) {
-          Event.trigger('NPMap.Layer', 'added', config);
+          Event.trigger('NPMap.Layer', 'beforeadd', config);
         }
-      }
 
-      config.visible = true;
+        func = layerHandler._add;
+        config.visible = true;
 
-      if (!silent) {
-        Event.trigger('NPMap.Layer', 'beforeadd', config);
-      }
+        if (typeof func === 'function') {
+          func(config, function() {
+            if (!silent) {
+              Event.trigger('NPMap.Layer', 'added', config);
+            }
 
-      if (typeof func === 'function') {
-        func(config, callback);
-      } else {
-        callback();
-      }
+            if (callback) {
+              callback(config);
+            }
+          });
+        } else {
+          if (!silent) {
+            Event.trigger('NPMap.Layer', 'added', config);
+          }
+
+          if (callback) {
+            callback(config);
+          }
+        }
+      });
     },
     /**
      * Gets the active layer types for both the baseLayers and layers configs.
@@ -219,7 +233,7 @@ define([
      */
     getActiveLayerTypes: function() {
       var types = [];
-      
+
       this.iterateThroughAllLayers(function(l) {
         var type = l.type,
             visible = l.visible;
@@ -270,7 +284,7 @@ define([
           }
         }
       }
-      
+
       if (!found) {
         if (baseLayers && baseLayers.length) {
           for (var j = 0; j < baseLayers.length; j++) {
@@ -282,7 +296,7 @@ define([
           }
         }
       }
-      
+
       return null;
     },
     /**
@@ -329,7 +343,7 @@ define([
           layers.push(l);
         }
       });
-      
+
       return layers;
     },
     /**
@@ -347,7 +361,7 @@ define([
 
       function callback() {
         if (meta.type === 'raster') {
-        
+
         } else {
           _.each(config.shapes, function(shape) {
             Map.hideShape(shape);
@@ -494,7 +508,7 @@ define([
 
       function callback() {
         if (meta.type === 'raster') {
-          
+
         } else {
           _.each(config.shapes, function(shape) {
             Map.showShape(shape);
