@@ -868,10 +868,11 @@ define([
      * @return {Array}
      */
     getLineLatLngs: function(line) {
-      var latLngs = [];
+      var latLngs = [],
+          me = this;
 
       _.each(NPMap.Map[NPMap.config.api].getLineLatLngs(line), function(latLng) {
-        latLngs.push(this.latLngFromApi(latLng));
+        latLngs.push(me.latLngFromApi(latLng));
       });
 
       return latLngs;
@@ -923,10 +924,11 @@ define([
      * @return {Array}
      */
     getPolygonLatLngs: function(polygon) {
-      var latLngs = [];
+      var latLngs = [],
+          me = this;
 
       _.each(NPMap.Map[NPMap.config.api].getLineLatLngs(polygon), function(latLng) {
-        latLngs.push(this.latLngFromApi(latLng));
+        latLngs.push(me.latLngFromApi(latLng));
       });
 
       return latLngs;
