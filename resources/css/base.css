@@ -104,10 +104,12 @@
   text-decoration: underline;
 }
 #npmap small, sup {
-  font-size:85% !important;vertical-align:super !important;
-  } /* TODO: small should not be used here */
+  font-size: 85% !important;
+  vertical-align: super !important;
+}
 #npmap small, sub {
-  font-size:85% !important;vertical-align:sub !important;
+  font-size: 85% !important;
+  vertical-align: sub !important;
 }
 /* End Core Elements */
 /* Buttons */
@@ -124,16 +126,18 @@
 #npmap button:hover {
   text-decoration: underline;
 }
-#npmap button.disabled {
+#npmap button.disabled, #npmap button.pressed {
   cursor: default;
+}
+#npmap button.disabled {
   opacity: 0.65;
   filter: alpha(opacity=65);
 }
-#npmap button.disabled:active {
+#npmap button.disabled:active, #npmap button.pressed:active {
   /*background-image: none;*/
   text-decoration: none;
 }
-#npmap button.disabled:hover {
+#npmap button.disabled:hover, #npmap button.pressed:hover {
   /*background-image: none;*/
   text-decoration: none;
 }
