@@ -42,21 +42,21 @@ define([
           type: 'Api'
         },
         hybrid: {
-          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.',
+          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           icon: 'aerial',
           id: 'nps.map-r3ilza09',
           name: 'Hybrid View',
           type: 'TileStream'
         },
         streets: {
-          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.',
+          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           icon: 'street',
           id: 'nps.map-06dnxzq5',
           name: 'Street View',
           type: 'TileStream'
         },
         terrain: {
-          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.',
+          attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           icon: 'topo',
           id: 'nps.map-lj6szvbq',
           name: 'Terrain View',

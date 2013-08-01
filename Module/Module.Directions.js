@@ -92,6 +92,51 @@ define([
   /**
    *
    */
+  function _addToItinerary(el, stop) {
+    var bounds = stop.boundingbox,
+        letter = el.id.replace('location-', ''),
+        marker = Map.createMarker({
+          lat: stop.lat,
+          lng: stop.lon
+        }, {
+          anchor: {
+            x: 19.5,
+            y: 37
+          },
+          height: 37,
+          text: letter,
+          url: NPMap.config.server + '/resources/img/modules/directions/stop-marker.png',
+          width: 39
+        });
+
+    _stops.push({
+      bounds: {
+        e: bounds[3],
+        n: bounds[1],
+        s: bounds[0],
+        w: bounds[2]
+      },
+      display: stop.display_name,
+      //displayUser: value,
+      latLng: {
+        lat: stop.lat,
+        lng: stop.lon
+      },
+      letter: letter,
+      marker: marker,
+      source: 'mapquest'
+    });
+    Map.addShape(marker);
+
+    if (_stops.length > 1) {
+      UtilRoute.route(null, function(response) {
+        console.log(response);
+      });
+    }
+  }
+  /**
+   *
+   */
   function _clearStops() {
     var childNodes = _ulLocation.childNodes;
 
@@ -142,12 +187,11 @@ define([
    *
    */
   function _disambiguateSelect(num) {
-    var input;
+    var input,
+        value = _ulDisambiguation.childNodes[num - 1].childNodes[0].childNodes[1].innerHTML;
 
     for (var i = 0; i < _ulLocation.childNodes.length; i++) {
       var li = _ulLocation.childNodes[i];
-
-      console.log(li);
 
       if (Util.hasClass(li.childNodes[1], 'disambiguate')) {
         input = li.childNodes[1];
@@ -159,6 +203,10 @@ define([
     }
 
     Util.removeClass(input, 'disambiguate');
+    input.value = value;
+    _addToItinerary(input, _disambiguateResults[num - 1]);
+    _resetDisambiguate();
+    _addLocationLi(true);
   }
   /**
    *
@@ -196,61 +244,22 @@ define([
       el.focus();
     } else {
       UtilGeocode.geocodeNominatim(value, function(response) {
-        if (_.isArray(response)) {
+        if (response.success) {
           var good = [];
 
-          _.each(response, function(result) {
+          _.each(response.results, function(result) {
             if (result.importance > 0.49) {
               good.push(result);
             }
           });
 
-          if (good.length === 1) {
-            var result = good[0],
-                bounds = result.boundingbox,
-                letter = el.id.replace('location-', ''),
-                marker = Map.createMarker({
-                  lat: result.lat,
-                  lng: result.lon
-                }, {
-                  anchor: {
-                    x: 19.5,
-                    y: 37
-                  },
-                  height: 37,
-                  text: letter,
-                  url: NPMap.config.server + '/resources/img/modules/directions/stop-marker.png',
-                  width: 39
-                });
-
-            _stops.push({
-              bounds: {
-                e: bounds[3],
-                n: bounds[1],
-                s: bounds[0],
-                w: bounds[2]
-              },
-              display: result.display_name,
-              displayUser: value,
-              latLng: {
-                lat: result.lat,
-                lng: result.lon
-              },
-              letter: letter,
-              marker: marker,
-              source: 'mapquest'
-            });
-            Map.addShape(marker);
-
-            if (_markers.length > 1) {
-              UtilRoute.route(null, function(response) {
-                console.log(response);
-              });
-            }
+          if (good.length === 0) {
+            NPMap.Map.notify('The location could not be found.', null, 'info');
+          } else if (good.length === 1) {
+            _addToItinerary(el, good[0]);
+            _addLocationLi(true);
           } else {
-            // Disambiguate.
-            console.log(good);
-
+            _disambiguateResults = good;
             Util.addClass(el, 'disambiguate');
             _.each(good, function(result, index) {
               var li = document.createElement('li');
@@ -276,7 +285,7 @@ define([
             });
           }
         } else {
-          NPMap.Map.notify(response.message, null, response.success ? 'info' : 'error');
+          NPMap.Map.notify(response.message ? response.message : 'The geocode operation could not be performed.', null, 'error');
         }
       });
     }
@@ -420,6 +429,16 @@ define([
   /**
    *
    */
+  function _resetDisambiguate() {
+    var div = Util.getElementsByClass('directions-location-options')[0];
+
+    _disambiguateResults = [];
+    div.style.display = 'none';
+    div.childNodes[1].innerHTML = null;
+  }
+  /**
+   *
+   */
   function _setLiLetter(li, index) {
     var children = li.childNodes,
         letter = _abc[index];
@@ -444,7 +463,7 @@ define([
 
   NPMap.Util.injectCss(NPMap.config.server + '/Module/Module.Directions.css');
   // TODO: Shouldn't this attribution be stored here with the tool?
-  Map._attribution.push('&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.');
+  Map._attribution.push('&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors');
   Module.add({
     content: '' +
       '<div id="npmap-directions">' +

@@ -117,7 +117,7 @@ define([
   }
 
   // TODO: Shouldn't this attribution be stored here with the tool?
-  Map._attribution.push('&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.');
+  Map._attribution.push('&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors');
   Map._geocodeOnFocus = function() {
     reqwest({
       jsonpCallbackName: 'callback',
