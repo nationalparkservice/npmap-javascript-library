@@ -90,6 +90,7 @@ define([
           shapes.push(shape);
         });
 
+        config.loaded = true;
         config.shapes = shapes;
 
         NPMap.Map.addShapes(config.shapes);
