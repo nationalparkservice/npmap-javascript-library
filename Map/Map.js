@@ -1086,9 +1086,8 @@ define([
      */
     modal: function(content, okText, cancelText, okHandler, cancelHandler) {
       var buttonDiv,
-          cancelButton = document.createElement('button'),
-          modal = document.createElement('div'),
-          okButton = document.createElement('button');
+          html = '<div class="npmap-modal-content">' + content + '</div>',
+          modal = document.createElement('div');
 
       if (divOverlay) {
         divOverlay.style.display = 'block';
@@ -1098,33 +1097,48 @@ define([
         divNpmap.appendChild(divOverlay);
       }
 
-      bean.add(cancelButton, 'click', function(e) {
-        divOverlay.style.display = 'none';
-        modal.parentNode.removeChild(modal);
+      if (cancelText || okText) {
+        html += '<div class="npmap-modal-buttons"></div>';
+      }
 
-        if (cancelHandler) {
-          cancelHandler();
-        }
-      });
-      bean.add(okButton, 'click', function(e) {
-        divOverlay.style.display = 'none';
-        modal.parentNode.removeChild(modal);
-
-        if (okHandler) {
-          okHandler();
-        }
-      });
-
-      cancelButton.className = 'btn-simple';
-      cancelButton.innerHTML = cancelText;
-      okButton.className = 'btn-primary';
-      okButton.innerHTML = okText;
       modal.className = 'npmap-modal';
-      modal.innerHTML = '<div class="npmap-modal-content">' + content + '</div><div class="npmap-modal-buttons"></div>';
+      modal.innerHTML = html;
+
       divNpmap.appendChild(modal);
       buttonDiv = Util.getElementsByClass('npmap-modal-buttons')[0];
-      buttonDiv.appendChild(okButton);
-      buttonDiv.appendChild(cancelButton);
+
+      if (cancelText) {
+        var cancelButton = document.createElement('button');
+
+        bean.add(cancelButton, 'click', function(e) {
+          divOverlay.style.display = 'none';
+          modal.parentNode.removeChild(modal);
+
+          if (cancelHandler) {
+            cancelHandler();
+          }
+        });
+        cancelButton.className = 'btn-simple';
+        cancelButton.innerHTML = cancelText;
+        buttonDiv.appendChild(cancelButton);
+      }
+
+      if (okText) {
+        var okButton = document.createElement('button');
+
+        bean.add(okButton, 'click', function(e) {
+          divOverlay.style.display = 'none';
+          modal.parentNode.removeChild(modal);
+
+          if (okHandler) {
+            okHandler();
+          }
+        });
+        okButton.className = 'btn-primary';
+        okButton.innerHTML = okText;
+        buttonDiv.appendChild(okButton);
+      }
+
       modal.style.top = ((Util.getOuterDimensions(divNpmap).height - Util.getOuterDimensions(modal).height) / 2) + 'px';
       modal.style.display = 'block';
     },
