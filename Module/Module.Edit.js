@@ -11,7 +11,7 @@
   })();
 
   //NPMap.Map[NPMap.config.api]._initializeDrawingTools();
-  
+
   return NPMap.Module.Edit = {
     //
     _shapes: [],

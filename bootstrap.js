@@ -485,15 +485,20 @@ if (typeof bean === 'undefined') {
           
           break;
         case 'Leaflet':
-          apiUrl = NPMap.config.server + '/libs/leaflet/leaflet.js';
+          //apiUrl = NPMap.config.server + '/libs/leaflet/leaflet.js';
           callback = function() {
-            var interval = setInterval(function() {
-              if (typeof L !== 'undefined') {
-                clearInterval(interval);
-                NPMap.apiLoaded();
-              }
-            }, 5);
+            require([
+              NPMap.config.server + '/libs/leaflet/leaflet-src.js'
+            ], function() {
+              var interval = setInterval(function() {
+                if (typeof L !== 'undefined') {
+                  clearInterval(interval);
+                  NPMap.apiLoaded();
+                }
+              }, 5);
+            });
           };
+          preLoaded = true;
           break;
         case 'ModestMaps':
           apiUrl = NPMap.config.server + '/libs/modestmaps/3.3.5.min.js';

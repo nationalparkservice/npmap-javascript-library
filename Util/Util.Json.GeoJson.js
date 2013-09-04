@@ -134,7 +134,9 @@ define([
      * @return {Array}
      */
     toShapes: function(geoJson, meta, style) {
-      var features = _.isArray(geoJson) ? geoJson : geoJson.features,
+      var features = typeof geoJson.features !== 'undefined' ? geoJson.features : [
+            geoJson
+          ],
           shapes = [];
 
       for (var i = 0; i < features.length; i++) {

@@ -6,25 +6,39 @@ define([
   'Util/Util.Json',
   'Util/Util.Json.GeoJson'
 ], function(Layer, UtilJson, UtilGeoJson) {
+  /**
+   * Handles a GeoJson object, turns it into shapes, and adds shapes to map.
+   * @param {Object} config
+   * @param {Object} geoJson
+   * @param {Function} callback (Optional)
+   */
+  function handleGeoJson(config, geoJson, callback) {
+    config.shapes = UtilGeoJson.toShapes(geoJson, {
+      layerName: config.name,
+      layerType: 'GeoJson'
+    }, config.styleNpmap);
+
+    NPMap.Map.addShapes(config.shapes);
+
+    if (callback) {
+      callback();
+    }
+  }
+
   return NPMap.Layer.GeoJson = {
     /**
      * Adds a GeoJson layer.
      * @param {Object} config
-     * @param {Function} callback
+     * @param {Function} callback (Optional)
      */
     _add: function(config, callback) {
-      UtilJson.load(config.url, function(response) {
-        config.shapes = UtilGeoJson.toShapes(response, {
-          layerName: config.name,
-          layerType: 'GeoJson'
-        }, config.styleNpmap);
-
-        NPMap.Map.addShapes(config.shapes);
-
-        if (callback) {
-          callback();
-        }
-      });
+      if (config.geoJson) {
+        handleGeoJson(config, config.geoJson, callback);
+      } else {
+        UtilJson.load(config.url, function(response) {
+          handleGeoJson(config, response, callback);
+        });
+      }
     },
     /**
      * Handles the click operation for GeoJson layers.
