@@ -17,21 +17,33 @@ define([
     button.innerHTML = '<span class="npmap-toolbar-fullscreen"><span class="hide">Enter/Exit Fullscreen Mode</span></span>';
     _tool.appendChild(button);
     bean.add(button, 'click', function() {
-      var clsName = 'minimized';
+      var cancel = false,
+          clsName = 'minimized';
 
       if (button.className.indexOf('minimized') === -1) {
         if (_config.events && _config.events.beforeminimize) {
-          _config.events.beforeminimize();
+          var stop = _config.events.beforeminimize();
+
+          if (stop === false) {
+            cancel = true;
+          }
         }
       } else {
         if (_config.events && _config.events.beforemaximize) {
-          _config.events.beforemaximize();
+          var stop = _config.events.beforemaximize();
+
+          if (stop === false) {
+            cancel = true;
+          }
         }
 
         clsName = 'maximized';
       }
 
-      Map.toggleFullScreen();
+      if (!cancel) {
+        Map.toggleFullScreen();
+      }
+
       button.className = clsName;
     });
   });
