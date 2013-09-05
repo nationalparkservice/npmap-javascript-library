@@ -17,7 +17,7 @@ define([
       }),
       // The currently-selected shape.
       _selected = null;
-  
+
   /**
    * Clears the selected shape.
    * @return null
@@ -61,7 +61,7 @@ define([
         var bounds = event.overlay.getBounds(),
             ne = bounds.getNorthEast(),
             sw = bounds.getSouthWest();
-        
+
         type = 'Polygon';
 
         latLngs.push(NPMap.Map.Google.latLngFromApi(ne));

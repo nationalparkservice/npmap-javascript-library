@@ -1,0 +1,54 @@
+#npmap-overview {
+     -moz-box-shadow: -1px 0 5px rgba(0,0,0,.28);
+  -webkit-box-shadow: -1px 0 5px rgba(0,0,0,.28);
+          box-shadow: -1px 0 5px rgba(0,0,0,.28);
+  background-color: #fff;
+  border-left: solid 3px #454545;
+  border-top: solid 3px #454545;
+  height: 48px;
+  position: absolute;
+  right: 0;
+  width: 48px;
+  z-index: 31;
+}
+#npmap-overview-title {
+  color: #464646;
+  display: none;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 8px 10px;
+  position: absolute;
+}
+#npmap-overview-map {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.npmap-overview-close, .npmap-overview-close-over, .npmap-overview-open, .npmap-overview-open-over {
+  background: url(../resources/img/tools/overview/sprite.png) no-repeat;
+  display: block;
+  height: 13px;
+  width: 13px;
+}
+.npmap-overview-close {
+  background-position: -15px 0;
+  bottom: 2px;
+  right: 2px;
+}
+.npmap-overview-close-over {
+  background-position: 0 0;
+  bottom: 2px;
+  right: 2px;
+}
+.npmap-overview-open {
+  background-position: -15px -15px;
+  left: 2px;
+  top: 2px;
+}
+.npmap-overview-open-over {
+  background-position: 0 -15px;
+  left: 2px;
+  top: 2px;
+}

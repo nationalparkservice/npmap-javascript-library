@@ -126,18 +126,18 @@
 #npmap button:hover {
   text-decoration: underline;
 }
-#npmap button.disabled, #npmap button.pressed {
+#npmap button.disabled, #npmap button.unclickable {
   cursor: default;
 }
 #npmap button.disabled {
   opacity: 0.65;
   filter: alpha(opacity=65);
 }
-#npmap button.disabled:active, #npmap button.pressed:active {
+#npmap button.disabled:active, #npmap button.unclickable:active {
   /*background-image: none;*/
   text-decoration: none;
 }
-#npmap button.disabled:hover, #npmap button.pressed:hover {
+#npmap button.disabled:hover, #npmap button.unclickable:hover {
   /*background-image: none;*/
   text-decoration: none;
 }
@@ -157,16 +157,15 @@
   background-image: -webkit-linear-gradient(bottom, rgba(0,0,0,.12) 0%, rgba(255,255,255,.12) 100%);
   background-image: linear-gradient(bottom, rgba(0,0,0,.12) 0%, rgba(255,255,255,.12) 100%);
   font-size: 12px;
-  /*height: 28px;*/
   padding: 8px 12px 6px;
   padding-top: 5px;
   text-shadow: 0 1px 0 rgba(0,0,0,.2);
-     -moz-border-radius: 2px / 2px 2px 2px 2px;
-  -webkit-border-radius: 2px / 2px 2px 2px 2px;
-          border-radius: 2px / 2px 2px 2px 2px;
      -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
+     -moz-border-radius: 2px / 2px 2px 2px 2px;
+  -webkit-border-radius: 2px / 2px 2px 2px 2px;
+          border-radius: 2px / 2px 2px 2px 2px;
      -moz-box-shadow: 0 0 5px rgba(0,0,0,.16);
   -webkit-box-shadow: 0 0 5px rgba(0,0,0,.16);
           box-shadow: 0 0 5px rgba(0,0,0,.16);
@@ -179,17 +178,17 @@
   background-image: -webkit-linear-gradient(bottom, rgba(0,0,0,.15) 0%, rgba(255,255,255,.15) 100%);
   background-image: linear-gradient(bottom, rgba(0,0,0,.15) 0%, rgba(255,255,255,.15) 100%);
   text-shadow: none;
-     -moz-border-radius: 2px / 2px 2px 2px 2px;
-  -webkit-border-radius: 2px / 2px 2px 2px 2px;   
-          border-radius: 2px / 2px 2px 2px 2px;
      -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
+     -moz-border-radius: 2px / 2px 2px 2px 2px;
+  -webkit-border-radius: 2px / 2px 2px 2px 2px;   
+          border-radius: 2px / 2px 2px 2px 2px;
      -moz-box-shadow: 0 2px 1px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.1), inset 0 0 0 1px rgba(255,255,255,.15);
   -webkit-box-shadow: 0 2px 1px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.1), inset 0 0 0 1px rgba(255,255,255,.15);
           box-shadow: 0 2px 1px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.1), inset 0 0 0 1px rgba(255,255,255,.15);
 }
-#npmap button.btn-primary:active, #npmap button.btn-primary.pressed {
+#npmap button.btn-primary:active {
   background-color: #b88822;
   background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiPjxsaW5lYXJHcmFkaWVudCBpZD0iaGF0MCIgZ3JhZGllbnRVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giIHgxPSI1MCUiIHkxPSIxMDAlIiB4Mj0iNTAlIiB5Mj0iLTEuNDIxMDg1NDcxNTIwMmUtMTQlIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwLjE1Ii8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzAwMCIgc3RvcC1vcGFjaXR5PSIwLjE1Ii8+CiAgIDwvbGluZWFyR3JhZGllbnQ+Cgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0idXJsKCNoYXQwKSIgLz4KPC9zdmc+);
   background-image: -moz-linear-gradient(bottom, rgba(255,255,255,.15) 0%, rgba(0,0,0,.15) 100%);
@@ -197,17 +196,30 @@
   background-image: -webkit-linear-gradient(bottom, rgba(255,255,255,.15) 0%, rgba(0,0,0,.15) 100%);
   background-image: linear-gradient(bottom, rgba(255,255,255,.15) 0%, rgba(0,0,0,.15) 100%);
   text-shadow: none;
-     -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
-          border-radius: 2px;
      -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
-          /*
-     -moz-box-shadow: 0 1px 0 5px rgba(255,255,255,.16), inset 0 1px 3px rgba(0,0,0,.3);
-  -webkit-box-shadow: 0 1px 0 5px rgba(255,255,255,.16), inset 0 1px 3px rgba(0,0,0,.3);
-          box-shadow: 0 1px 0 5px rgba(255,255,255,.16), inset 0 1px 3px rgba(0,0,0,.3);
-          */
+     -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+          border-radius: 2px;
+}
+#npmap button.btn-primary.pressed, #npmap button.btn-primary.pressed:active, #npmap button.btn-primary.pressed:hover {
+  background-color: #b88822;
+  background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiPjxsaW5lYXJHcmFkaWVudCBpZD0iaGF0MCIgZ3JhZGllbnRVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giIHgxPSI1MCUiIHkxPSIxMDAlIiB4Mj0iNTAlIiB5Mj0iLTEuNDIxMDg1NDcxNTIwMmUtMTQlIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwLjE1Ii8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzAwMCIgc3RvcC1vcGFjaXR5PSIwLjE1Ii8+CiAgIDwvbGluZWFyR3JhZGllbnQ+Cgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0idXJsKCNoYXQwKSIgLz4KPC9zdmc+);
+  background-image: -moz-linear-gradient(bottom, rgba(255,255,255,.15) 0%, rgba(0,0,0,.15) 100%);
+  background-image: -o-linear-gradient(bottom, rgba(255,255,255,.15) 0%, rgba(0,0,0,.15) 100%);
+  background-image: -webkit-linear-gradient(bottom, rgba(255,255,255,.15) 0%, rgba(0,0,0,.15) 100%);
+  background-image: linear-gradient(bottom, rgba(255,255,255,.15) 0%, rgba(0,0,0,.15) 100%);
+  text-shadow: none;
+     -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+          background-clip: padding-box;
+     -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+          border-radius: 2px;
+     -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+          box-shadow: none;
 }
 #npmap button.btn-primary.disabled {
   background-color: #b3852d;
