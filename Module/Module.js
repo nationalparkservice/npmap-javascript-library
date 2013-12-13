@@ -61,8 +61,10 @@ define([
       // TODO: Clean this up.
       var interval = setInterval(function() {
         if (NPMap && NPMap.Module && typeof NPMap.Module.add === 'function') {
+          var cancelMouseWheel = typeof module.cancelMouseWheel === 'undefined' ? true : module.cancelMouseWheel;
+
           clearInterval(interval);
-          NPMap.Module.add(module, true);
+          NPMap.Module.add(module, cancelMouseWheel);
         }
       }, 100);
     });
