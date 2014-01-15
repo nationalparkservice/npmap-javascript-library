@@ -123,6 +123,7 @@ define([
       jsonpCallbackName: 'callback',
       success: function(response) {
         _oldValue = _input.value;
+        delete response.responseText;
         _.each(response, function(value, key) {
           _bounds[key] = {
             e: value[0],
