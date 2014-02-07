@@ -105,15 +105,6 @@ define(function() {
       "modules": [
         "Route"
       ],
-      "name": "GoogleFusion",
-      "type": "raster"
-    },{
-      "display": true,
-      "hover": true,
-      "identify": true,
-      "modules": [
-        "Route"
-      ],
       "name": "Json",
       "type": "vector"
     },{
