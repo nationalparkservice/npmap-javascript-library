@@ -29,33 +29,6 @@ define(function() {
         "ArcGisServerRest",
         "CartoDb",
         "GeoJson",
-        "GoogleFusion",
-        "Json",
-        "Kml",
-        "Tiled",
-        "TileStream",
-        "Xml"
-      ],
-      "modules": [
-        "Edit",
-        "Route"
-      ],
-      "name": "Google",
-      "tools": [
-        "BaseLayerSwitcher",
-        "Fullscreen",
-        "Keyboard",
-        "Navigation"
-      ],
-      "usage": {
-        "external": true,
-        "internal": true
-      }
-    },{
-      "layerHandlers": [
-        "ArcGisServerRest",
-        "CartoDb",
-        "GeoJson",
         "Json",
         "Kml",
         "Tiled",
